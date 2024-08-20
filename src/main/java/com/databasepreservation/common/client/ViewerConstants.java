@@ -441,8 +441,8 @@ public class ViewerConstants {
   public static final String SIARD_V20 = "2.0";
   public static final String SIARD_V21 = "2.1";
   public static final String SIARD_DK = "dk";
-  public static final String SIARD_DK_2010 = "dk-2010";
-  public static final String SIARD_DK_2020 = "dk-2020";
+  public static final String SIARD_DK_1007 = "dk-1007";
+  public static final String SIARD_DK_128 = "dk-128";
   /*
    * DBPTK Metadata
    */

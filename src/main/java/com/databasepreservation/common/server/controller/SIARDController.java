@@ -83,10 +83,10 @@ import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.modules.config.ImportConfigurationModuleFactory;
 import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
-import com.databasepreservation.modules.siard.SIARDDK2010EditFactory;
-import com.databasepreservation.modules.siard.SIARDDK2010ModuleFactory;
-import com.databasepreservation.modules.siard.SIARDDK2020EditFactory;
-import com.databasepreservation.modules.siard.SIARDDK2020ModuleFactory;
+import com.databasepreservation.modules.siard.SIARDDK1007EditFactory;
+import com.databasepreservation.modules.siard.SIARDDK1007ModuleFactory;
+import com.databasepreservation.modules.siard.SIARDDK128EditFactory;
+import com.databasepreservation.modules.siard.SIARDDK128ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDEditFactory;
 import com.databasepreservation.modules.siard.SIARDValidateFactory;
 import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
@@ -611,11 +611,11 @@ public class SIARDController {
       SIARDEdition siardEdition = SIARDEdition.newInstance();
       if (siardVersion.equals(ViewerConstants.SIARD_DK)) {
         if (Files.exists(Paths.get(siardPath + ViewerConstants.SIARDDK_RESEARCH_INDEX_PATH))) {
-          siardEdition.editModule(new SIARDDK2020EditFactory()).editModuleParameter(
-            SIARDDK2020EditFactory.PARAMETER_FOLDER, Collections.singletonList(siardPath.toAbsolutePath().toString()));
+          siardEdition.editModule(new SIARDDK128EditFactory()).editModuleParameter(
+            SIARDDK128EditFactory.PARAMETER_FOLDER, Collections.singletonList(siardPath.toAbsolutePath().toString()));
         } else {
-          siardEdition.editModule(new SIARDDK2010EditFactory()).editModuleParameter(
-            SIARDDK2010EditFactory.PARAMETER_FOLDER,
+          siardEdition.editModule(new SIARDDK1007EditFactory()).editModuleParameter(
+            SIARDDK1007EditFactory.PARAMETER_FOLDER,
             Collections.singletonList(siardPath.toAbsolutePath().toString()));
         }
       } else if (siardVersion.equals(ViewerConstants.SIARD_V21)){
@@ -724,14 +724,14 @@ public class SIARDController {
       // XXX remove this workaround after fix of NPE
       databaseMigration.filterFactories(new ArrayList<>());
 
-      if (siardVersion.equals(ViewerConstants.SIARD_DK_2020)) {
-        databaseMigration.importModule(new SIARDDK2020ModuleFactory())
-          .importModuleParameter(SIARDDK2020ModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
-          .importModuleParameter(SIARDDK2020ModuleFactory.PARAMETER_AS_SCHEMA, "public");
-      } else if (siardVersion.equals(ViewerConstants.SIARD_DK_2010)) {
-        databaseMigration.importModule(new SIARDDK2010ModuleFactory())
-          .importModuleParameter(SIARDDK2010ModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
-          .importModuleParameter(SIARDDK2010ModuleFactory.PARAMETER_AS_SCHEMA, "public");
+      if (siardVersion.equals(ViewerConstants.SIARD_DK_128)) {
+        databaseMigration.importModule(new SIARDDK128ModuleFactory())
+          .importModuleParameter(SIARDDK128ModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
+          .importModuleParameter(SIARDDK128ModuleFactory.PARAMETER_AS_SCHEMA, "public");
+      } else if (siardVersion.equals(ViewerConstants.SIARD_DK_1007)) {
+        databaseMigration.importModule(new SIARDDK1007ModuleFactory())
+          .importModuleParameter(SIARDDK1007ModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
+          .importModuleParameter(SIARDDK1007ModuleFactory.PARAMETER_AS_SCHEMA, "public");
       } else if (siardVersion.equals(ViewerConstants.SIARD_V21)) {
         databaseMigration.importModule(new SIARD2ModuleFactory())
           .importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath.toAbsolutePath().toString())

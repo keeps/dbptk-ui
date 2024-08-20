@@ -21,12 +21,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import com.databasepreservation.common.client.models.structure.ViewerCell;
-import com.databasepreservation.model.data.Cell;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.roda.core.data.exceptions.GenericException;
@@ -601,7 +598,7 @@ public class CollectionResource implements CollectionService {
       handlebarsMimeType = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
     }
 
-    if (version.equals(ViewerConstants.SIARD_DK_2010) || version.equals(ViewerConstants.SIARD_DK_2020)) {
+    if (version.equals(ViewerConstants.SIARD_DK_1007) || version.equals(ViewerConstants.SIARD_DK_128)) {
       String filePath = row.getCells().get(row.getCells().keySet().toArray()[row.getCells().size() - 1]).getValue();
       return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
         DownloadUtils.stream(new BufferedInputStream(new FileInputStream(filePath)))));
