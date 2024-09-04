@@ -95,7 +95,7 @@ public interface CollectionService extends DirectRestService {
   @Operation(summary = "Updates the internal collection configuration")
   Boolean updateCollectionConfiguration(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID,
-    @Parameter(name = "collectionStatus", required = true) CollectionStatus status);
+    @Parameter(name = "collectionStatus", required = true) @RequestBody CollectionStatus status);
 
   /*******************************************************************************
    * Collection Resource - Config Sub-resource - Denormalization Sub-resource
@@ -141,18 +141,18 @@ public interface CollectionService extends DirectRestService {
   /*******************************************************************************
    * Collection Resource - SavedSearch Sub-resource
    *******************************************************************************/
-  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/savedSearch/", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/savedSearch", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Saves a search for a specific table within a database")
-  String saveSavedSearch(@PathVariable(name = "databaseUUID") String databaseUUID,
+  StringResponse saveSavedSearch(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID, @RequestParam(name = "tableUUID") String tableUUID,
     @RequestParam(name = "name") String name, @RequestParam(name = "description") String description,
-    @Parameter(name = ViewerConstants.API_QUERY_PARAM_SEARCH) SearchInfo searchInfo);
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_SEARCH) @RequestBody SearchInfo searchInfo);
 
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/savedSearch/find", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Finds all the saved search for a specific database")
   IndexResult<SavedSearch> findSavedSearches(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID,
-    @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody FindRequest findRequest,
     @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/savedSearch/{savedSearchUUID}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
