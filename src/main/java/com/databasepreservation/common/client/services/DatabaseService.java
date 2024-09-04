@@ -88,5 +88,5 @@ public interface DatabaseService extends DirectRestService {
   @RequestMapping(path = "/{databaseUUID}/permissions", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Updates database permissions")
   Set<String> updateDatabasePermissions(@PathVariable(name = "databaseUUID") String databaseUUID,
-    @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) Set<String> permissions);
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody Set<String> permissions);
 }

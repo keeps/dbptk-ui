@@ -795,7 +795,7 @@ public class CollectionResource implements CollectionService {
    * Collection Resource - SavedSearch Sub-resource
    ******************************************************************************/
   @Override
-  public String saveSavedSearch(String databaseUUID, String collectionUUID, String tableUUID, String name,
+  public StringResponse saveSavedSearch(String databaseUUID, String collectionUUID, String tableUUID, String name,
     String description, SearchInfo searchInfo) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
@@ -815,7 +815,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       ViewerFactory.getSolrManager().addSavedSearch(savedSearch);
-      return savedSearch.getUuid();
+      return new StringResponse(savedSearch.getUuid());
     } catch (NotFoundException | GenericException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
