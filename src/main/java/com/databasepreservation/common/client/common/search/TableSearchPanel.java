@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.lists.TableRowList;
@@ -308,7 +309,7 @@ public class TableSearchPanel extends Composite {
   private void saveQuery() {
     SearchInfo searchInfo = createSearchInfo();
     CollectionService.Util
-      .call((String savedSearchUUID) -> searchPanel.querySavedHandler(true, database, savedSearchUUID),
+      .call((StringResponse savedSearchUUID) -> searchPanel.querySavedHandler(true, database, savedSearchUUID.getValue()),
         (String errorMessage) -> searchPanel.querySavedHandler(false, database, null))
       .saveSavedSearch(database.getUuid(), database.getUuid(), table.getId(), messages.searchOnTable(table.getName()),
         "", searchInfo);
