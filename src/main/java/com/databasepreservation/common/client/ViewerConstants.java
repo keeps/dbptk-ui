@@ -561,6 +561,11 @@ public class ViewerConstants {
   public static final String DEFAULT_PROPERTY_UI_HEADER_TITLE = "<img src=\"api/v1/theme?resource_id=dbptk_logo_white_vector.svg\" class=\"header-logo\"><span class=\"header-text\">DBPTK Enterprise</span>";
   public static final String PROPERTY_UI_HEADER_TITLE = "ui.header.title";
 
+  /*
+   * Show schema name in reference table
+   */
+  public static final String PROPERTY_REFERENCE_TABLE_SHOW_SCHEMA_NAME = "ui.reference.table.show.schema.name";
+
   /**
    * private constructor
    */
