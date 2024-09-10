@@ -282,7 +282,15 @@ public class RowPanel extends RightPanel {
           b.appendHtmlConstant(", ");
         }
 
-        Hyperlink hyperlink = new Hyperlink(ref.getSchemaAndTableName(),
+        String refName;
+
+        if (ClientConfigurationManager.getBoolean(true, ViewerConstants.PROPERTY_REFERENCE_TABLE_SHOW_SCHEMA_NAME)) {
+          refName = ref.getSchemaAndTableName();
+        } else {
+          refName = ref.refTable.getName();
+        }
+
+        Hyperlink hyperlink = new Hyperlink(refName,
           HistoryManager.linkToForeignKey(database.getUuid(), ref.refTable.getId(), columnNamesAndValues));
         hyperlink.addStyleName("related-records-link");
         b.appendHtmlConstant(hyperlink.toString());

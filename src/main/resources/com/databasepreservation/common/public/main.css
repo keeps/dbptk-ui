@@ -336,7 +336,7 @@ p[data-value]:after {
 }
 
 .search-field-left-panel .form-textbox-small {
-    max-width: 100px;
+    max-width: 15ch;
 }
 
 .search-field-left-panel .label {
