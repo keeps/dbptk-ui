@@ -103,7 +103,7 @@ public class FileResource {
 
     try {
       java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
-      java.nio.file.Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
+      java.nio.file.Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString(siardFilesPath.toString(),
         ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
       java.nio.file.Path siardPath = siardFilesPath.resolve(filename);
       if (java.nio.file.Files.exists(siardPath) && !java.nio.file.Files.isDirectory(siardPath)
