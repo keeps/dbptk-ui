@@ -104,6 +104,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_FILTER_ONOFF_ALLOW_ALL_IPS = "ui.filter.onOff.protectedResourcesAllowAllIPs";
   public static final String PROPERTY_FILTER_ONOFF_WHITELISTED_IPS = "ui.filter.onOff.protectedResourcesWhitelistedIP[].ip";
   public static final String PROPERTY_FILTER_ONOFF_WHITELISTED_USERNAME = "ui.filter.onOff.protectedResourcesWhitelistedIP[].username";
+  public static final String PROPERTY_FILTER_ONOFF_WHITELISTED_ROLES = "ui.filter.onOff.protectedResourcesWhitelistedIP[].roles";
 
   public static final String PROPERTY_AUTHORIZATION_FULLNAME_ATTRIBUTE = "user.attribute.fullname";
   public static final String PROPERTY_AUTHORIZATION_EMAIL_ATTRIBUTE = "user.attribute.email";
@@ -162,6 +163,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   private List<String> cachedWhitelistedIPs = null;
   private List<String> cachedWhiteListedUsername = null;
+  private List<String> cachedWhiteListedRoles = null;
   private Boolean cachedWhitelistAllIPs = null;
   private static LoadingCache<Locale, Messages> I18N_CACHE = CacheBuilder.newBuilder()
     .build(new CacheLoader<Locale, Messages>() {
@@ -336,6 +338,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     cachedWhitelistAllIPs = null;
     cachedWhitelistedIPs = null;
     cachedWhiteListedUsername = null;
+    cachedWhiteListedRoles = null;
     sharedConfigurationPropertiesCache = null;
     LOGGER.info("Reloaded dbvtk configurations after file change!");
   }
@@ -452,6 +455,14 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
         ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_USERNAME);
     }
     return cachedWhiteListedUsername;
+  }
+
+  public List<String> getWhiteListedRoles() {
+    if (cachedWhiteListedRoles == null) {
+      cachedWhiteListedRoles = getViewerConfigurationAsList(
+        ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_ROLES);
+    }
+    return cachedWhiteListedRoles;
   }
 
   public List<String> getWhitelistedIPs() {
