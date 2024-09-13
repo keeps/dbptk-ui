@@ -542,6 +542,7 @@ public class ViewerConstants {
   public static final String DEFAULT_FULL_NAME = "admin";
 
   public static final String PROPERTY_DISABLE_SIARD_DELETION = "ui.disable.siard.deletion";
+  public static final String PROPERTY_DISABLE_AUTO_DETECT_MIME_TYPE = "ui.disable.autoDetect.mimeType";
   public static final String PROPERTY_PLUGIN_LOAD_ON_ACCESS = "ui.plugin.loadOnAccess";
 
   /**

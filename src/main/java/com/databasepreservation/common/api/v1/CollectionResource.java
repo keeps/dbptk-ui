@@ -36,6 +36,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -90,6 +91,7 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.CollectionService;
+import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerConfiguration;
@@ -570,13 +572,9 @@ public class CollectionResource implements CollectionService {
       handlebarsFilename = completeLobPath.getFileName().toString();
     }
 
-    String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
+    String mimeType = handleMimeType(tableConfiguration, row, columnIndex);
 
-    if (ViewerStringUtils.isBlank(handlebarsMimeType)) {
-      handlebarsMimeType = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
-    }
-
-    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, mimeType,
       DownloadUtils.stream(Files.newInputStream(completeLobPath.toFile().toPath()))));
   }
 
@@ -588,11 +586,7 @@ public class CollectionResource implements CollectionService {
       handlebarsFilename = ViewerConstants.SIARD_RECORD_PREFIX + row.getUuid()
         + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
     }
-    String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
-
-    if (ViewerStringUtils.isBlank(handlebarsMimeType)) {
-      handlebarsMimeType = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
-    }
+    String mimeType = handleMimeType(tableConfiguration, row, columnIndex);
 
     if (LobManagerUtils.isLobEmbedded(tableConfiguration, row, columnIndex)) {
       // handle lob as embedded
@@ -600,7 +594,7 @@ public class CollectionResource implements CollectionService {
       lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
       String decodedString = new String(Base64.decodeBase64(lobCellValue.getBytes()));
 
-      return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+      return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, mimeType,
         DownloadUtils.stream(new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())))));
     } else {
       // handle lob as internal on separated folder
@@ -610,8 +604,19 @@ public class CollectionResource implements CollectionService {
         throw new GenericException("Zip archive entry is missing");
       }
 
-      return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+      return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, mimeType,
         DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
+    }
+  }
+
+  @NotNull
+  private static String handleMimeType(TableStatus tableConfiguration, ViewerRow row, int columnIndex) {
+    String configurationApplicationType = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
+    if (configurationApplicationType.equals(ViewerCelllUtils.getAutoDetectMimeTypeTemplate())) {
+      String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
+      return ViewerStringUtils.isNotBlank(handlebarsMimeType) ? handlebarsMimeType : MediaType.APPLICATION_OCTET_STREAM;
+    } else {
+      return configurationApplicationType;
     }
   }
 
@@ -739,7 +744,7 @@ public class CollectionResource implements CollectionService {
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
     return ApiUtils.okResponse(new ViewerStreamingOutput(
       new ResultsCSVOutputStream(row, configTable, filename, exportDescriptions, ',', String.join(",", fieldsToReturn)))
-        .toStreamResponse());
+      .toStreamResponse());
   }
 
   private Response handleSingleCSVExportWithLOBs(CollectionStatus configurationCollection, ViewerDatabase database,
@@ -764,7 +769,7 @@ public class CollectionResource implements CollectionService {
 
       return ApiUtils.okResponse(new ViewerStreamingOutput(
         new ResultsCSVOutputStream(rows, configTable, filename, exportDescriptions, ',', fieldsToHeader))
-          .toStreamResponse());
+        .toStreamResponse());
     }
   }
 
