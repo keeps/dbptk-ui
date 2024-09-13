@@ -12,10 +12,12 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,7 @@ import com.databasepreservation.common.client.models.activity.logs.LogEntryState
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
+import com.google.common.collect.Sets;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -51,9 +54,22 @@ public class ControllerAssistant {
           if (Arrays.equals(address.getAddress(), whitelistAddress.getAddress())) {
             final String username = ViewerConfiguration.getInstance().getWhiteListedUsername().get(index);
             User user = new User(username);
-            //user.setAdmin(true);
             user.setWhiteList(true);
             user.setIpAddress(address.toString());
+
+            final String roles = ViewerConfiguration.getInstance().getWhiteListedRoles().get(index);
+            if (StringUtils.isNotBlank(roles)) {
+              List<String> whitelistedRoles = Arrays.asList(roles.split(","));
+              user.setDirectRoles(new HashSet<>(whitelistedRoles));
+              user.setAllRoles(new HashSet<>(whitelistedRoles));
+
+              final List<String> adminRoles = ViewerConfiguration.getInstance()
+                .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
+
+              if (!Sets.intersection(user.getAllRoles(), new HashSet<>(adminRoles)).isEmpty()) {
+                user.setAdmin(true);
+              }
+            }
 
             return user;
           }
