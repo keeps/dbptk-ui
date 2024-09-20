@@ -14,8 +14,10 @@ public class SimpleFacetParameter extends FacetParameter {
   private static final long serialVersionUID = -5377147008170114649L;
 
   public static final int DEFAULT_LIMIT = 100;
+  public static final int DEFAULT_OFFSET = 0;
 
   private int limit = DEFAULT_LIMIT;
+  private int offset = DEFAULT_OFFSET;
 
   public SimpleFacetParameter() {
     super();
@@ -41,6 +43,12 @@ public class SimpleFacetParameter extends FacetParameter {
     this.setSort(sort);
   }
 
+  public SimpleFacetParameter(String name, SORT sort, int offset) {
+    super(name);
+    this.setSort(sort);
+    this.setOffset(offset);
+  }
+
   public SimpleFacetParameter(String name, List<String> values) {
     super(name, values);
   }
@@ -62,8 +70,16 @@ public class SimpleFacetParameter extends FacetParameter {
     this.limit = limit;
   }
 
+  public int getOffset() {
+    return offset;
+  }
+
+  public void setOffset(int offset) {
+    this.offset = offset;
+  }
+
   @Override
   public String toString() {
-    return "SimpleFacetParameter [ super=" + super.toString() + ", limit=" + this.limit + "]";
+    return "SimpleFacetParameter [ super=" + super.toString() + ", limit=" + this.limit + ", offset=" + this.offset + "]";
   }
 }

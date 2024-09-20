@@ -39,6 +39,8 @@ public class ViewerDatabase extends IsIndexed {
   private String validationSkipped;
   private Set<String> permissions;
 
+  private long searchHits = -1;
+
   public ViewerDatabase() {
   }
 
@@ -215,5 +217,14 @@ public class ViewerDatabase extends IsIndexed {
 
   public void setPermissions(Set<String> permissions) {
     this.permissions = permissions;
+  }
+
+
+  public long getSearchHits() {
+    return searchHits;
+  }
+
+  public void setSearchHits(long searchHits) {
+    this.searchHits = searchHits;
   }
 }

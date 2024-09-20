@@ -64,7 +64,11 @@ public class AccessibleSimplePager extends SimplePager {
     int endIndex = Math.min(dataSize, pageStart + pageSize - 1);
     endIndex = Math.max(pageStart, endIndex);
     boolean exact = display.isRowCountExact();
-    return formatter.format(pageStart) + "-" + formatter.format(endIndex) + " "
-      + (exact ? messages.of() : messages.ofOver()) + " " + formatter.format(dataSize);
+    if (dataSize == Integer.MAX_VALUE) {
+      return formatter.format(pageStart) + "-" + formatter.format(endIndex) + " " + messages.ofMany();
+    } else {
+      return formatter.format(pageStart) + "-" + formatter.format(endIndex) + " "
+        + (exact ? messages.of() : messages.ofOver()) + " " + formatter.format(dataSize);
+    }
   }
 }

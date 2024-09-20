@@ -121,6 +121,27 @@ public class Dropdown extends Composite implements HasValueChangeHandlers<String
     return popupValues.get(selectedLabel.getText());
   }
 
+  public boolean setSelectedValue(String value, boolean fire) {
+    String label = null;
+    for (Map.Entry<String, String> entry : popupValues.entrySet()) {
+      if (entry.getValue().equals(value)) {
+        label = entry.getKey();
+        break;
+      }
+    }
+
+    if (label != null) {
+      selectedLabel.setText(label);
+      if (fire) {
+        onChange();
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+
   public void setPanelWidth() {
     boolean visible = popup.isVisible();
     popup.setVisible(true);

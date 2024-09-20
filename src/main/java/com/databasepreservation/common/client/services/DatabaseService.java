@@ -69,6 +69,11 @@ public interface DatabaseService extends DirectRestService {
   IndexResult<ViewerDatabase> find(@RequestBody FindRequest findRequest,
     @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
+  @RequestMapping(path = "/findAll", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Find in all databases")
+  IndexResult<ViewerDatabase> findAll(@RequestBody FindRequest findRequest,
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+
   @RequestMapping(path = "/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Creates a database")
   StringResponse create(@Parameter(name = "path") @RequestParam(name = "path") String path);

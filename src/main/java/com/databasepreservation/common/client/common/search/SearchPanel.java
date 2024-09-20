@@ -34,6 +34,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -86,6 +87,9 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
   @UiField
   FlowPanel searchPreFilters;
+
+  @UiField
+  SimplePanel searchPanelSelectionDropdownWrapper;
 
   private Filter defaultFilter;
   private String allFilter;
@@ -171,6 +175,12 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     list.setFilter(filter);
   }
 
+
+
+  public void attachSearchPanelSelectionDropdown(Dropdown dropdown) {
+    searchPanelSelectionDropdownWrapper.setWidget(dropdown);
+  }
+
   private Filter buildSearchFilter(String basicQuery, Filter defaultFilter, String allFilter, FlowPanel fieldsPanel,
     boolean defaultFilterIncremental) {
     List<FilterParameter> parameters = new ArrayList<>();
@@ -245,6 +255,12 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     this.defaultFilter = defaultFilter;
   }
 
+  public void setDefaultFilter(Filter defaultFilter, boolean defaultFilterIncremental) {
+    this.defaultFilter = defaultFilter;
+    this.defaultFilterIncremental = defaultFilterIncremental;
+  }
+
+
   public void setAllFilter(String allFilter) {
     this.allFilter = allFilter;
   }
@@ -258,6 +274,10 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
   public void setDefaultFilterIncremental(boolean defaultFilterIncremental) {
     this.defaultFilterIncremental = defaultFilterIncremental;
+  }
+
+  public void setSearchPanelSelectionDropdownWrapperVisible(boolean value) {
+    this.searchPanelSelectionDropdownWrapper.setVisible(value);
   }
 
   public void clearAdvancedSearchInputBox() {

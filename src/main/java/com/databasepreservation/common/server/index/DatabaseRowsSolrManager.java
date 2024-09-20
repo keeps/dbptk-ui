@@ -17,14 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.UpdateResponse;
-import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
@@ -61,6 +59,7 @@ import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
+import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.IterableNestedIndexResult;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
@@ -180,6 +179,13 @@ public class DatabaseRowsSolrManager {
     Sublist sublist, Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
     return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,
       fieldsToReturn, new HashMap<>());
+  }
+
+  public <T extends IsIndexed> IndexResult<T> findHits(Class<T> classToReturn, String alias, Filter filter,
+    Sorter sorter, Sublist sublist, Facets facets)
+    throws GenericException, RequestNotValidException {
+    return SolrUtils.findHits(client, SolrDefaultCollectionRegistry.get(classToReturn), alias, filter, sorter,
+      sublist, facets);
   }
 
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,

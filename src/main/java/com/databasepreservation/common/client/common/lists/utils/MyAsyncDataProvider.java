@@ -69,7 +69,12 @@ public abstract class MyAsyncDataProvider<T extends Serializable> extends AsyncD
           rowCount = (int) result.getTotalCount();
           date = result.getDate();
           updateRowData((int) result.getOffset(), result.getResults());
-          updateRowCount(rowCount, true);
+
+          if(rowCount == -1){
+            updateRowCount(Integer.MAX_VALUE, false);
+          } else {
+            updateRowCount(rowCount, true);
+          }
           // ValueChangeEvent.fire(AsyncTableCell.this, result);
           fireChangeEvent(result);
         } else {

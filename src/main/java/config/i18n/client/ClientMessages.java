@@ -362,6 +362,8 @@ public interface ClientMessages extends Messages {
 
   String ofOver();
 
+  String ofMany();
+
   String showMore();
 
   String showLess();
@@ -511,6 +513,8 @@ public interface ClientMessages extends Messages {
   String no();
 
   String humanizedTextForViewerJobStatus(@Select String status);
+
+  String someOfAObject(@Select String objectClass);
 
   /********************************************
    * Basic Table Headers
@@ -699,6 +703,8 @@ public interface ClientMessages extends Messages {
   String managePageTableHeaderTextForDatabaseStatus();
 
   String managePageTableHeaderTextForActions();
+
+  String managePageTableHeaderTextForSearchHits();
 
   String manageDatabasePageDescription();
 

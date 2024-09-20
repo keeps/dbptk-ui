@@ -8,6 +8,7 @@
 package com.databasepreservation.common.server.index.schema.collections;
 
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_DATABASE_UUID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_ID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_UUID;
@@ -72,6 +73,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   public List<Field> getFields() {
     List<Field> fields = new ArrayList<>(super.getFields());
 
+    fields.add(new Field(SOLR_ROWS_DATABASE_UUID, Field.TYPE_STRING).setIndexed(true).setStored(true));
     fields.add(new Field(SOLR_ROWS_TABLE_ID, Field.TYPE_STRING).setIndexed(true).setStored(true));
     fields.add(new Field(SOLR_ROWS_TABLE_UUID, Field.TYPE_STRING).setIndexed(true).setStored(true));
 
@@ -88,6 +90,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
 
     SolrInputDocument doc = super.toSolrDocument(row);
 
+    doc.setField(ViewerConstants.SOLR_ROWS_DATABASE_UUID, row.getDatabaseUUID());
     doc.setField(ViewerConstants.SOLR_ROWS_TABLE_ID, row.getTableId());
     doc.setField(SOLR_ROWS_TABLE_UUID, row.getTableUUID());
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
@@ -120,6 +123,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   public ViewerRow fromSolrDocument(SolrDocument doc) throws ViewerException {
     ViewerRow viewerRow = super.fromSolrDocument(doc);
 
+    viewerRow.setDatabaseUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_DATABASE_UUID), null));
     viewerRow.setTableId(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_ID), null));
     viewerRow.setTableUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_UUID), null));
     viewerRow.setNestedUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_UUID), null));
@@ -159,6 +163,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   private ViewerRow populateNestedRow(SolrDocument doc) throws ViewerException {
     ViewerRow nestedRow = super.fromSolrDocument(doc);
 
+    nestedRow.setDatabaseUUID(SolrUtils.objectToString(doc.get(SOLR_ROWS_DATABASE_UUID), null));
     nestedRow.setTableId(SolrUtils.objectToString(doc.get(SOLR_ROWS_TABLE_ID), null));
     nestedRow.setTableUUID(SolrUtils.objectToString(doc.get(SOLR_ROWS_TABLE_UUID), null));
     nestedRow.setTableId(SolrUtils.objectToString(doc.get(SOLR_ROWS_NESTED_TABLE_ID), null));
