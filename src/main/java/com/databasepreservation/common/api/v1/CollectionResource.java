@@ -197,7 +197,9 @@ public class CollectionResource implements CollectionService {
 
     try {
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-      return new StringResponse(SIARDController.loadFromLocal(database.getPath(), databaseUUID));
+      StringResponse collection = new StringResponse(SIARDController.loadFromLocal(database.getPath(), databaseUUID));
+
+      return collection;
     } catch (GenericException | NotFoundException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);

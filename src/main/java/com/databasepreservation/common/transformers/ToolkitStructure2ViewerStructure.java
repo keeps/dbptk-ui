@@ -756,6 +756,7 @@ public class ToolkitStructure2ViewerStructure {
     ViewerRow result = new ViewerRow();
     // String rowUUID = SolrUtils.UUIDFromString(table.getUuid() + "." + rowIndex);
     String rowUUID = String.valueOf(rowIndex);
+    result.setDatabaseUUID(collectionConfiguration.getDatabaseUUID());
     result.setTableId(table.getId());
     result.setTableUUID(table.getUuid());
     result.setUuid(rowUUID);

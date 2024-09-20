@@ -7,6 +7,7 @@
     <g:FlowPanel styleName="searchPanelContainer">
         <g:FlowPanel styleName="searchPanel" ui:field="searchPanel">
             <g:FlowPanel styleName="searchPanelLeft">
+                <g:SimplePanel ui:field="searchPanelSelectionDropdownWrapper"/>
                 <g:FlowPanel ui:field="searchContextPanel" styleName="search-context" />
                 <search:Dropdown ui:field="searchInputListBox"
                                  addStyleNames="searchInputListBox" />

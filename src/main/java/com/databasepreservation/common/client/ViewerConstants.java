@@ -177,6 +177,9 @@ public class ViewerConstants {
 
   public static final String ACTIVITY_LOG_PROPERTY = "activityLogEntry";
 
+  public static final String UI_LISTS_PROPERTY = "ui.lists";
+  public static final String UI_LISTS_SEARCH_SELECTEDINFO_LABEL_DEFAULT_I18N_PROPERTY = "search.selectedInfo.label.default.i18n";
+
   public static final String LISTS_PROPERTY = "lists";
 
   public static final String LISTS_FACETS_QUERY_PROPERTY = "facets.query";
@@ -210,6 +213,7 @@ public class ViewerConstants {
   /*
    * ROW FIELDS
    */
+  public static final String SOLR_ROWS_DATABASE_UUID = "databaseUUID";
   public static final String SOLR_ROWS_TABLE_ID = "tableId";
   public static final String SOLR_ROWS_TABLE_UUID = "tableUUID";
   public static final String SOLR_ROWS_NESTED_UUID = "nestedUUID";

@@ -24,6 +24,7 @@ public class ViewerRow extends IsIndexed {
   @Serial
   private static final long serialVersionUID = 5337660979887460340L;
   private String UUID;
+  private String databaseUUID;
   private String tableUUID;
   private String tableId;
   private Map<String, ViewerCell> cells;
@@ -49,6 +50,14 @@ public class ViewerRow extends IsIndexed {
 
   public void setUuid(String UUID) {
     this.UUID = UUID;
+  }
+
+  public String getDatabaseUUID() {
+    return databaseUUID;
+  }
+
+  public void setDatabaseUUID(String databaseUUID) {
+    this.databaseUUID = databaseUUID;
   }
 
   /**

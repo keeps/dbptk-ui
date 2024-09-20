@@ -1227,6 +1227,7 @@ pre code {
     padding-right: 5px;
     content: "\f107";
     font-family: "Font Awesome 5 Free";
+    font-weight: 900
 }
 
 .open .dropdown-label:after {
