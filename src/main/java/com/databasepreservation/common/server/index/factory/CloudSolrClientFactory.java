@@ -22,6 +22,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
+import org.apache.solr.client.solrj.impl.Http2SolrClient;
 import org.apache.solr.client.solrj.impl.ZkClientClusterStateProvider;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.CollectionAdminResponse;
@@ -73,7 +74,14 @@ public class CloudSolrClientFactory extends SolrClientFactory<CloudSolrClient> {
             zkHosts = Arrays.asList(solrCloudZooKeeperUrls.split(","));
             zkChroot = Optional.empty();
         }
-
+        System.setProperty("javax.net.ssl.keyStore", "/etc/solr-ssl.keystore.p12");
+        System.setProperty("javax.net.ssl.keyStorePassword", "secret");
+        System.setProperty("javax.net.ssl.keyStoreType", "pkcs12");
+        System.setProperty("javax.net.ssl.trustStore", "/etc/solr-ssl.keystore.p12");
+        System.setProperty("javax.net.ssl.trustStorePassword", "secret");
+        System.setProperty("javax.net.ssl.trustStoreType", "pkcs12");
+        //Http2SolrClient.Builder http2ClientBuilder = new Http2SolrClient.Builder().withBasicAuthCredentials("admin-user", "admin");
+        //return new CloudSolrClient.Builder(zkHosts, zkChroot).withInternalClientBuilder(http2ClientBuilder).build();
         return new CloudSolrClient.Builder(zkHosts, zkChroot).build();
     }
 
