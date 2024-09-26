@@ -8,15 +8,20 @@
 package com.databasepreservation.common.client.common.dialogs;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.databasepreservation.common.client.common.NoAsyncCallback;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.helpers.HelperValidator;
 import com.databasepreservation.common.client.common.lists.columns.IndexedColumn;
+import com.databasepreservation.common.client.common.sidebar.SidebarItem;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -30,6 +35,7 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
@@ -49,6 +55,7 @@ public class Dialogs {
   private static final String WUI_DIALOG_LAYOUT_FOOTER = "wui-dialog-layout-footer";
   private static final String WUI_DIALOG_LAYOUT = "wui-dialog-layout";
   private static final String WUI_DIALOG_INFORMATION = "wui-dialog-information";
+  private static final String WUI_DIALOG_EDIT_PERMISSIONS = "wui-dialog-edit-permissions";
   private static final String WUI_DIALOG_MESSAGE = "wui-dialog-message";
 
   private Dialogs() {
@@ -835,4 +842,55 @@ public class Dialogs {
     dialogBox.center();
     dialogBox.show();
   }
+
+  public static void showPermissionsDialog(String title, SafeHtml description, String width, Widget helper,
+    String cancelButtonText, String confirmButtonText, final AsyncCallback<Boolean> callback) {
+    final DialogBox dialogBox = new DialogBox(false, true);
+    final Button cancelButton = new Button(cancelButtonText);
+    final Button confirmButton = new Button(confirmButtonText);
+
+    FlowPanel layout = new FlowPanel();
+    FlowPanel footer = new FlowPanel();
+
+    footer.add(cancelButton);
+    footer.add(confirmButton);
+    footer.addStyleName(WUI_DIALOG_LAYOUT_FOOTER);
+
+    HTML messageLabel = new HTML(description);
+    messageLabel.addStyleName(WUI_DIALOG_INFORMATION);
+
+    layout.add(messageLabel);
+
+    layout.add(helper);
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
+    layout.add(footer);
+
+    cancelButton.addStyleName(BTN_LINK_STYLE);
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(false);
+    });
+
+    confirmButton.addStyleName(BTN_PLAY_STYLE);
+    confirmButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(true);
+    });
+
+    dialogBox.setText(title);
+    dialogBox.setWidget(layout);
+    if (width != null && !width.isEmpty()) {
+      dialogBox.setWidth(width);
+    } else {
+      dialogBox.setWidth("360px");
+    }
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+    dialogBox.addStyleName(WUI_DIALOG_EDIT_PERMISSIONS);
+
+    dialogBox.center();
+    dialogBox.show();
+  }
+
+
 }
