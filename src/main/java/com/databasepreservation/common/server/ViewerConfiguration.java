@@ -2,17 +2,19 @@
  * The contents of this file are subject to the license and copyright
  * detailed in the LICENSE file at the root of the source
  * tree and available online at
- *
+ * <p>
  * https://github.com/keeps/dbptk-ui
  */
 package com.databasepreservation.common.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,6 +35,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import java.io.FileReader;
 
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
@@ -60,7 +64,7 @@ import com.google.common.cache.LoadingCache;
 
 /**
  * Singleton configuration instance used by the Database Visualization Toolkit
- * 
+ *
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerConfiguration extends ViewerAbstractConfiguration {
@@ -100,12 +104,13 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public static final String PROPERTY_AUTHORIZATION_FULLNAME_ATTRIBUTE = "user.attribute.fullname";
   public static final String PROPERTY_AUTHORIZATION_EMAIL_ATTRIBUTE = "user.attribute.email";
-  public static final String PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE = "user.attribute.roles";
+  public static final String PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE = "user.attribute.roles[]";
   public static final String PROPERTY_AUTHORIZATION_ADMINISTRATORS = "user.attribute.roles.administrators";
 
   public static final String PROPERTY_AUTHENTICATED_USER_ENABLE_DEFAULT_ATTRIBUTES = "authenticated.user.enable.default.attributes";
   public static final String PROPERTY_AUTHENTICATED_USER_DEFAULT_ATTRIBUTES = "authenticated.user.default.attributes[]";
 
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_READ_FROM_FILE = "collections.authorizations.read.from.file";
   public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_DEFAULT_ROLES = "collections.authorizations.default.roles[]";
   public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS = "lists.collections.authorization.groups[]";
   public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS_LABEL = "label";
@@ -173,7 +178,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
    * Shared configuration and message properties (cache). Includes properties from
    * {@code rodaConfiguration} and translations from ServerMessages, filtered by
    * the {@code ui.sharedProperties.*} properties in {@code roda-wui.properties}.
-   *
+   * <p>
    * This cache provides the complete set of properties to be shared with the
    * client browser.
    */
@@ -212,7 +217,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   /**
    * Gets (with caching) the shared configuration properties from
    * {@code rodaConfiguration}.
-   *
+   * <p>
    * The properties that should be shared with the client browser are defined by
    * the {@code ui.sharedProperties.*} properties in {@code roda-wui.properties}.
    *
@@ -482,25 +487,63 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   }
 
   public AuthorizationGroupsList getCollectionsAuthorizationGroups() {
-    List<String> authorizationsIds = getViewerConfigurationAsList(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS);
+    boolean readAuthorizationFromFile = getViewerConfigurationAsBoolean(false,
+      PROPERTY_COLLECTIONS_AUTHORIZATION_READ_FROM_FILE);
+    List<String> authorizationsIds = new ArrayList<>();
+
     AuthorizationGroupsList authorizationGroupsList = new AuthorizationGroupsList();
+    if (readAuthorizationFromFile) {
+      authorizationGroupsList = readAuthorizationsFromFile("/dbvtk/config/auth.csv");
+    } else {
+      authorizationsIds = getViewerConfigurationAsList(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS);
+      for (String authorizationId : authorizationsIds) {
+        AuthorizationGroup authorizationGroup = new AuthorizationGroup();
 
-    for (String authorizationId : authorizationsIds) {
-      AuthorizationGroup authorizationGroup = new AuthorizationGroup();
+        authorizationGroup.setId(authorizationId);
+        authorizationGroup.setLabel(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
+          authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS_LABEL));
+        authorizationGroup.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
+          PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS, authorizationId,
+          PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_NAME));
+        authorizationGroup
+          .setAttributeOperator(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
+            authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_OPERATOR));
+        authorizationGroup
+          .setAttributeValue(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
+            authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_VALUE));
+        authorizationGroup.setType(AuthorizationGroup.Type.CUSTOM);
+        authorizationGroupsList.add(authorizationGroup);
+      }
+    }
 
-      authorizationGroup.setId(authorizationId);
-      authorizationGroup.setLabel(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
-        authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS_LABEL));
-      authorizationGroup.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
-        PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS, authorizationId,
-        PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_NAME));
-      authorizationGroup
-        .setAttributeOperator(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
-          authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_OPERATOR));
-      authorizationGroup.setAttributeValue(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
-        authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_VALUE));
-      authorizationGroup.setType(AuthorizationGroup.Type.CUSTOM);
-      authorizationGroupsList.add(authorizationGroup);
+    return authorizationGroupsList;
+  }
+
+  private AuthorizationGroupsList readAuthorizationsFromFile(String filePath) {
+    AuthorizationGroupsList authorizationGroupsList = new AuthorizationGroupsList();
+    String line;
+
+    try (BufferedReader br = Files.newBufferedReader(Paths.get(filePath), StandardCharsets.UTF_8)) {
+      br.readLine();
+
+      while ((line = br.readLine()) != null) {
+        String[] values = line.split(",");
+        String authorizationId = values[0];
+        AuthorizationGroup authorizationGroup = new AuthorizationGroup();
+        authorizationGroup.setId(authorizationId);
+        authorizationGroup.setLabel(authorizationId);
+        if (values[1].contains("OU=Users")) {
+          authorizationGroup.setAttributeName("distinguishedName");
+        } else {
+          authorizationGroup.setAttributeName(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES);
+        }
+        authorizationGroup.setAttributeOperator(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL);
+        authorizationGroup.setAttributeValue(values[1]);
+        authorizationGroup.setType(AuthorizationGroup.Type.CUSTOM);
+        authorizationGroupsList.add(authorizationGroup);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
     return authorizationGroupsList;
   }
@@ -532,14 +575,14 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     AuthorizationGroupsList authorizationGroupsList = getCollectionsAuthorizationGroups();
 
     final List<String> adminRoles = ViewerConfiguration.getInstance()
-        .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
+      .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
 
     for (String adminRole : adminRoles) {
       AuthorizationGroup authorizationGroup = new AuthorizationGroup();
       authorizationGroup.setId("roles.administrators." + adminRole);
       authorizationGroup.setLabel("Administrators");
       authorizationGroup.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
-          ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
       authorizationGroup.setAttributeOperator(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL);
       authorizationGroup.setAttributeValue(adminRole);
       authorizationGroup.setType(AuthorizationGroup.Type.DEFAULT);
@@ -551,7 +594,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     authorizationGroup.setId("roles.users");
     authorizationGroup.setLabel("Users");
     authorizationGroup.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
+      ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
     authorizationGroup.setAttributeOperator(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL);
     authorizationGroup.setAttributeValue(getViewerConfigurationAsString("users", "user.attribute.roles.users"));
     authorizationGroup.setType(AuthorizationGroup.Type.DEFAULT);
@@ -775,9 +818,9 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     List<ClassLoader> classLoadersList = new LinkedList<>();
     classLoadersList.add(ClasspathHelper.contextClassLoader());
 
-    Reflections reflections = new Reflections(
-      new ConfigurationBuilder().forPackage(classpathPrefix,
-        ClasspathHelper.contextClassLoader(), ClasspathHelper.staticClassLoader()).setScanners(Scanners.Resources));
+    Reflections reflections = new Reflections(new ConfigurationBuilder()
+      .forPackage(classpathPrefix, ClasspathHelper.contextClassLoader(), ClasspathHelper.staticClassLoader())
+      .setScanners(Scanners.Resources));
 
     Set<String> resources = reflections.getResources(Pattern.compile(".*"));
     resources = resources.stream().filter(r -> !shouldExclude(r, classpathPrefix, excludePaths))
