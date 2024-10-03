@@ -128,6 +128,10 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID, ROUTE_DATABASE_SEARCH));
   }
 
+  public static void gotoDatabaseSearchWithValue(String databaseUUID, String search) {
+    newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID, ROUTE_DATABASE_SEARCH, search));
+  }
+
   public static void gotoDatabaseReport(String databaseUUID) {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID, ROUTE_DATABASE_REPORT));
   }

@@ -21,11 +21,14 @@ import com.databasepreservation.common.client.common.lists.columns.TooltipColumn
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.widgets.Alert;
+import com.databasepreservation.common.client.widgets.SwitchBtn;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -54,6 +57,7 @@ public class PermissionsNavigationPanel {
   private FlowPanel body;
   private FlowPanel bottom;
   private Button btnEdit;
+  private SwitchBtn btnSwitch;
 
   private boolean overrideMissingGroups = false;
 
@@ -84,6 +88,11 @@ public class PermissionsNavigationPanel {
     bottom = new FlowPanel();
     panel.addToInfoPanel(body);
     panel.addButton(bottom);
+
+    if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
+      btnSwitch = new SwitchBtn(messages.SIARDHomePageTitleForPermissionsSwitchButton(), database.isAvailableToSearchAll());
+      handleSwitchBottom();
+    }
 
     update(databasePermissions);
 
@@ -139,7 +148,7 @@ public class PermissionsNavigationPanel {
       btnEdit.addClickHandler(clickEvent -> {
         overrideMissingGroups = false;
         Dialogs.showCustomConfirmationDialog(messages.SIARDHomePageDialogTitleForPermissionsList(),
-          messages.SIARDHomePageDialogDescriptionForPermissionsList(), "620px", getGroupsTable(),
+          messages.SIARDHomePageDialogDescriptionForPermissionsList(), "620px", getGroupsTables(),
           messages.basicActionCancel(), messages.basicActionConfirm(), new NoAsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean confirmation) {
@@ -157,10 +166,24 @@ public class PermissionsNavigationPanel {
           });
       });
       bottom.add(CommonClientUtils.wrapOnDiv("btn-item", btnEdit));
+      if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
+        bottom.add(CommonClientUtils.wrapOnDiv("btn-item", btnSwitch));
+      }
     }
   }
 
-  private FlowPanel getGroupsTable() {
+  private void handleSwitchBottom() {
+    btnSwitch.setClickHandler(clickEvent -> {
+      btnSwitch.getButton().setValue(!btnSwitch.getButton().getValue(), true);
+      DatabaseService.Util.call((Boolean result) -> {
+        SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
+        Toast.showInfo(messages.SIARDHomePageDialogTitleForChangeAvailabilityToSearchAll(),
+          messages.SIARDHomePageDialogMessageForChangeAvailabilityToSearchAll());
+      }).updateDatabaseSearchAllAvailability(database.getUuid());
+    });
+  }
+
+  private FlowPanel getGroupsTables() {
     FlowPanel permissionListPanel = new FlowPanel();
     permissionListPanel
       .add(new Alert(Alert.MessageAlertType.INFO, messages.SIARDHomePageDialogDetailsForPermissionsList()));
@@ -234,7 +257,8 @@ public class PermissionsNavigationPanel {
         }
       });
       Alert alert = new Alert(Alert.MessageAlertType.WARNING,
-          messages.SIARDHomePageDialogDetailsForUnknownPermissions(String.join(", ", missingGroups)), checkBoxOverrideMissingGroups);
+        messages.SIARDHomePageDialogDetailsForUnknownPermissions(String.join(", ", missingGroups)),
+        checkBoxOverrideMissingGroups);
 
       permissionListPanel.add(alert);
 

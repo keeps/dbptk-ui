@@ -182,10 +182,9 @@ public class DatabaseRowsSolrManager {
   }
 
   public <T extends IsIndexed> IndexResult<T> findHits(Class<T> classToReturn, String alias, Filter filter,
-    Sorter sorter, Sublist sublist, Facets facets)
-    throws GenericException, RequestNotValidException {
-    return SolrUtils.findHits(client, SolrDefaultCollectionRegistry.get(classToReturn), alias, filter, sorter,
-      sublist, facets);
+    Sorter sorter, Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
+    return SolrUtils.findHits(client, SolrDefaultCollectionRegistry.get(classToReturn), alias, filter, sorter, sublist,
+      facets);
   }
 
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
@@ -529,6 +528,25 @@ public class DatabaseRowsSolrManager {
 
     ViewerFactory.getConfigurationManager().updateDatabasePermissions(databaseUUID, permissions);
     LOGGER.debug("Finish updating database metadata ({})", databaseUUID);
+  }
+
+  public boolean updateDatabaseSearchAllAvailability(String databaseUUID, boolean isAvailableToSearchAll)
+    throws GenericException, ViewerException {
+    LOGGER.debug("Starting to update database search all availability ({})", databaseUUID);
+    // create document to update this DB
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
+
+    try {
+      doc.addField(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, SolrUtils.asValueUpdate(isAvailableToSearchAll));
+      insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Could not update database metadata ({})", databaseUUID, e);
+    }
+
+    ViewerFactory.getConfigurationManager().updateDatabaseSearchAllAvailability(databaseUUID, isAvailableToSearchAll);
+    LOGGER.debug("Finish updating database metadata ({})", databaseUUID);
+    return true;
   }
 
   public void updateDatabaseMetadata(String databaseUUID, ViewerMetadata metadata) {
