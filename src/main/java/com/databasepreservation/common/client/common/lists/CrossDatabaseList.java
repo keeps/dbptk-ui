@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.tools.HistoryManager;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -162,6 +163,19 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
         return database != null ? String.valueOf(database.getSearchHits()) : "unknown";
       }
     };
+
+    searchHitsColumn.setFieldUpdater((index, object, value) -> {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+        @Override
+        public void onSuccess(User user) {
+          if (user.isAdmin()) {
+            HistoryManager.gotoSIARDInfo(object.getUuid());
+          } else {
+            HistoryManager.gotoDatabase(object.getUuid());
+          }
+        }
+      });
+    });
 
     if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {

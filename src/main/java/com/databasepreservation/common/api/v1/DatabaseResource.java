@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -35,6 +34,7 @@ import com.databasepreservation.common.client.index.facets.FacetValue;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.facets.SimpleFacetParameter;
 import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
@@ -82,7 +82,8 @@ public class DatabaseResource implements DatabaseService {
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
 
-        FindRequest userFindRequest = new FindRequest(findRequest.classToReturn, getDatabaseFilterForUser(user, findRequest.filter),
+        FindRequest userFindRequest = new FindRequest(findRequest.classToReturn,
+          getDatabaseFilterForUser(user, findRequest.filter, true),
           findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.exportFacets, fieldsToReturn);
         return getViewerDatabaseIndexResult(userFindRequest, fieldsToReturn, controllerAssistant, user, state);
       }
@@ -105,10 +106,11 @@ public class DatabaseResource implements DatabaseService {
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
-        FindRequest userFindRequest = new FindRequest(findRequest.classToReturn, getDatabaseFilterForUser(user, findRequest.filter),
+        FindRequest userFindRequest = new FindRequest(findRequest.classToReturn,
+          getDatabaseFilterForUser(user, findRequest.filter, true),
           findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.exportFacets, fieldsToReturn);
         return getCrossViewerDatabaseIndexResult(userFindRequest, controllerAssistant, user, state,
-          getDatabaseFilterForUser(user, findRequest.filter));
+          getDatabaseFilterForUser(user, findRequest.filter, false));
       }
     } else {
       return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
@@ -208,8 +210,26 @@ public class DatabaseResource implements DatabaseService {
       simpleFacetParameter.setLimit(findRequest.sublist.getMaximumElementCount());
       simpleFacetParameter.setOffset(findRequest.sublist.getFirstElementIndex());
 
+      Filter facetSearchFilter = findRequest.filter;
+
+      //the facet filter cannot have permissions queries, only the search query
+      if (!userFilter.getParameters().isEmpty()) {
+        for (FilterParameter filterParameter : ((AndFiltersParameters) findRequest.filter.getParameters().get(0))
+          .getValues()) {
+          if (filterParameter.getName().equals(ViewerConstants.INDEX_SEARCH)) {
+            facetSearchFilter = new Filter(filterParameter);
+          }
+        }
+      }
+
+      //if the user is not admin and there is no search query the filter should be empty
+      if (!userFilter.getParameters().isEmpty()
+        && !facetSearchFilter.getParameters().get(0).getName().equals(ViewerConstants.INDEX_SEARCH)) {
+        facetSearchFilter = new Filter();
+      }
+
       final IndexResult<ViewerDatabase> facetsSearch = ViewerFactory.getSolrManager().findHits(ViewerDatabase.class,
-        collectionAlias, findRequest.filter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter));
+        collectionAlias, facetSearchFilter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter));
       count = facetsSearch.getTotalCount();
       FacetFieldResult facetResults = facetsSearch.getFacetResults().get(0);
 
@@ -247,7 +267,7 @@ public class DatabaseResource implements DatabaseService {
     }
   }
 
-  private Filter getDatabaseFilterForUser(User user, Filter searchFilter) {
+  private Filter getDatabaseFilterForUser(User user, Filter searchFilter, boolean addSearchFilter) {
     ArrayList<FilterParameter> permissionFilterParameters = new ArrayList<>();
     // Only retrieve databases with AVAILABLE status
     SimpleFilterParameter statusFilter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
@@ -262,7 +282,7 @@ public class DatabaseResource implements DatabaseService {
 
     permissionFilterParameters.add(new OrFiltersParameters(permissionsOrFilterParameters));
 
-    if (!searchFilter.getParameters().isEmpty()) {
+    if (!searchFilter.getParameters().isEmpty() && addSearchFilter) {
       BasicSearchFilterParameter searchFilterParameter = (BasicSearchFilterParameter) searchFilter.getParameters().get(0);
       String searchValue = searchFilterParameter.getValue();
       permissionFilterParameters.add(new SimpleFilterParameter(ViewerConstants.INDEX_SEARCH, searchValue));
