@@ -101,15 +101,7 @@ public class DatabaseResource implements DatabaseService {
       if (user.isAdmin() || user.isWhiteList()) {
         return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
       } else {
-        List<String> fieldsToReturn = new ArrayList<>();
-        fieldsToReturn.add(ViewerConstants.INDEX_ID);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
-        FindRequest userFindRequest = new FindRequest(findRequest.classToReturn,
-          getDatabaseFilterForUser(user, findRequest.filter, true),
-          findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.exportFacets, fieldsToReturn);
-        return getCrossViewerDatabaseIndexResult(userFindRequest, controllerAssistant, user, state,
+        return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state,
           getDatabaseFilterForUser(user, findRequest.filter, false));
       }
     } else {
@@ -175,15 +167,26 @@ public class DatabaseResource implements DatabaseService {
 
   private IndexResult<ViewerDatabase> getCrossViewerDatabaseIndexResult(FindRequest findRequest,
     ControllerAssistant controllerAssistant, User user, LogEntryState state) {
-    return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state, new Filter());
+    return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state, null);
   }
 
   private IndexResult<ViewerDatabase> getCrossViewerDatabaseIndexResult(FindRequest findRequest,
     ControllerAssistant controllerAssistant, User user, LogEntryState state, Filter userFilter) {
     long count = 0;
     try {
-      IterableDatabaseResult<ViewerDatabase> databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class,
-        userFilter, Sorter.NONE, findRequest.fieldsToReturn);
+      IterableDatabaseResult<ViewerDatabase> databases;
+      if (userFilter != null) {
+        List<String> fieldsToReturn = new ArrayList<>();
+        fieldsToReturn.add(ViewerConstants.INDEX_ID);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
+        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class,
+          userFilter, Sorter.NONE, fieldsToReturn);
+      } else {
+        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class,
+          new Filter(), Sorter.NONE, findRequest.fieldsToReturn);
+      }
 
       if (databases.getTotalCount() == 0) {
         return new IndexResult<>();
@@ -210,26 +213,8 @@ public class DatabaseResource implements DatabaseService {
       simpleFacetParameter.setLimit(findRequest.sublist.getMaximumElementCount());
       simpleFacetParameter.setOffset(findRequest.sublist.getFirstElementIndex());
 
-      Filter facetSearchFilter = findRequest.filter;
-
-      //the facet filter cannot have permissions queries, only the search query
-      if (!userFilter.getParameters().isEmpty()) {
-        for (FilterParameter filterParameter : ((AndFiltersParameters) findRequest.filter.getParameters().get(0))
-          .getValues()) {
-          if (filterParameter.getName().equals(ViewerConstants.INDEX_SEARCH)) {
-            facetSearchFilter = new Filter(filterParameter);
-          }
-        }
-      }
-
-      //if the user is not admin and there is no search query the filter should be empty
-      if (!userFilter.getParameters().isEmpty()
-        && !facetSearchFilter.getParameters().get(0).getName().equals(ViewerConstants.INDEX_SEARCH)) {
-        facetSearchFilter = new Filter();
-      }
-
       final IndexResult<ViewerDatabase> facetsSearch = ViewerFactory.getSolrManager().findHits(ViewerDatabase.class,
-        collectionAlias, facetSearchFilter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter));
+        collectionAlias, findRequest.filter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter));
       count = facetsSearch.getTotalCount();
       FacetFieldResult facetResults = facetsSearch.getFacetResults().get(0);
 
