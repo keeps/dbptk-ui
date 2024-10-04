@@ -169,9 +169,9 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
         @Override
         public void onSuccess(User user) {
           if (user.isAdmin()) {
-            HistoryManager.gotoSIARDInfo(object.getUuid());
+            HistoryManager.gotoHome();
           } else {
-            HistoryManager.gotoDatabase(object.getUuid());
+            HistoryManager.gotoHome();
           }
         }
       });

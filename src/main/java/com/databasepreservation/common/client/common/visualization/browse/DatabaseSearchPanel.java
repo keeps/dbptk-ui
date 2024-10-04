@@ -56,8 +56,8 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
   private static Map<String, DatabaseSearchPanel> instances = new HashMap<>();
   private final CollectionStatus status;
 
-  public static DatabaseSearchPanel getInstance(ViewerDatabase database, CollectionStatus status) {
-    return instances.computeIfAbsent(database.getUuid(), k -> new DatabaseSearchPanel(database, status));
+  public static DatabaseSearchPanel getInstance(ViewerDatabase database, CollectionStatus status, String search) {
+    return instances.computeIfAbsent(database.getUuid(), k -> new DatabaseSearchPanel(database, status, search));
   }
 
   interface DatabaseSearchPanelUiBinder extends UiBinder<Widget, DatabaseSearchPanel> {
@@ -96,7 +96,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
 
   private ViewerDatabase database;
 
-  private DatabaseSearchPanel(ViewerDatabase database, CollectionStatus status) {
+  private DatabaseSearchPanel(ViewerDatabase database, CollectionStatus status, String search) {
     tableSearchPanelContainers = new ArrayList<>();
     noResults = new Alert(Alert.MessageAlertType.INFO, messages.noRecordsMatchTheSearchTerms());
     this.status = status;
@@ -148,12 +148,16 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
     this.database = database;
 
     searchInputBox.getElement().setPropertyString("placeholder", messages.searchPlaceholder());
-
+    if (!search.isEmpty()) {
+      searchInputBox.setText(search);
+      doSearch();
+    }
     searchInputBox.addKeyDownHandler(event -> {
       if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
         doSearch();
       }
     });
+
 
     searchInputButton.addClickHandler(event -> doSearch());
   }

@@ -96,7 +96,7 @@ public class UserDatabaseListPanel extends ContentPanel {
         ViewerDatabase selected = allDatabaseList.getSelectionModel().getSelectedObject();
         if (selected != null) {
           if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
-            HistoryManager.gotoDatabase(selected.getUuid());
+            HistoryManager.gotoDatabaseSearchWithValue(selected.getUuid(), search.getComponents().getSearchPanel("DatabaseList_all").getCurrentFilter());
           }
           allDatabaseList.getSelectionModel().clear();
         }

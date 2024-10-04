@@ -97,7 +97,7 @@ public class DatabaseManage extends ContentPanel {
       allDatabaseList.getSelectionModel().addSelectionChangeHandler(event -> {
         ViewerDatabase selected = allDatabaseList.getSelectionModel().getSelectedObject();
         if (selected != null) {
-          HistoryManager.gotoSIARDInfo(selected.getUuid());
+          HistoryManager.gotoDatabaseSearchWithValue(selected.getUuid(), search.getComponents().getSearchPanel("DatabaseList_all").getCurrentFilter());
           allDatabaseList.getSelectionModel().clear();
         }
       });

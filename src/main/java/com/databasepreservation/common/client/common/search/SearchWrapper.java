@@ -129,12 +129,16 @@ public class SearchWrapper extends Composite {
     }
   }
 
+  public Components getComponents() {
+    return components;
+  }
+
   /**
    * Auxiliary manager for inner components (groups of one searchWrapper and one
    * BasicAsyncTableCell, at least for now) that is used to enforce type coherence
    */
   @SuppressWarnings("unchecked")
-  private class Components {
+  public class Components {
     private final Map<String, SearchPanel> searchPanels = new LinkedHashMap<>();
     private final Map<String, AsyncTableCell<? extends IsIndexed, Void>> lists = new LinkedHashMap<>();
 
