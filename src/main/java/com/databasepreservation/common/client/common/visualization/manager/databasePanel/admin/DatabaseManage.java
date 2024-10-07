@@ -95,11 +95,7 @@ public class DatabaseManage extends ContentPanel {
     ListBuilder<ViewerDatabase> databaseSearchAll = new ListBuilder<>(() -> {
       CrossDatabaseList allDatabaseList = new CrossDatabaseList();
       allDatabaseList.getSelectionModel().addSelectionChangeHandler(event -> {
-        ViewerDatabase selected = allDatabaseList.getSelectionModel().getSelectedObject();
-        if (selected != null) {
-          HistoryManager.gotoDatabaseSearchWithValue(selected.getUuid(), search.getComponents().getSearchPanel("DatabaseList_all").getCurrentFilter());
-          allDatabaseList.getSelectionModel().clear();
-        }
+        allDatabaseList.setSearchValue(search.getComponents().getSearchPanel("DatabaseList_all").getCurrentFilter());
       });
       return allDatabaseList;
     }, new AsyncTableCellOptions<>(ViewerDatabase.class, "DatabaseList_all"));
