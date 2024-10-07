@@ -126,6 +126,7 @@ public class ViewerConstants {
    */
   public static final String SOLR_DATABASES_STATUS = "status";
   public static final String SOLR_DATABASES_BROWSE_LOAD_DATE = "browse_loaded_date";
+  public static final String SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL = "available_to_search_all";
   public static final String SOLR_DATABASES_METADATA = "metadata";
   public static final String SOLR_DATABASES_SIARD_PATH = "siard_path";
   public static final String SOLR_DATABASES_SIARD_SIZE = "siard_size";

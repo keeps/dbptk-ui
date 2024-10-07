@@ -83,8 +83,8 @@ public class DatabaseResource implements DatabaseService {
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
 
         FindRequest userFindRequest = new FindRequest(findRequest.classToReturn,
-          getDatabaseFilterForUser(user, findRequest.filter, true),
-          findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.exportFacets, fieldsToReturn);
+          getDatabaseFilterForUser(user, findRequest.filter, true), findRequest.sorter, findRequest.sublist,
+          findRequest.facets, findRequest.exportFacets, fieldsToReturn);
         return getViewerDatabaseIndexResult(userFindRequest, fieldsToReturn, controllerAssistant, user, state);
       }
     } else {
@@ -181,11 +181,11 @@ public class DatabaseResource implements DatabaseService {
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
-        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class,
-          userFilter, Sorter.NONE, fieldsToReturn);
+        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class, userFilter, Sorter.NONE,
+          fieldsToReturn);
       } else {
-        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class,
-          new Filter(), Sorter.NONE, findRequest.fieldsToReturn);
+        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class, new Filter(), Sorter.NONE,
+          findRequest.fieldsToReturn);
       }
 
       if (databases.getTotalCount() == 0) {
@@ -198,7 +198,7 @@ public class DatabaseResource implements DatabaseService {
       for (ViewerDatabase database : databases) {
         databaseMap.put(database.getUuid(), database);
         // only add the available collections
-        if(database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)){
+        if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
           String collectionName = ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid();
           collections.add(collectionName);
         }
@@ -219,7 +219,8 @@ public class DatabaseResource implements DatabaseService {
       FacetFieldResult facetResults = facetsSearch.getFacetResults().get(0);
 
       IndexResult<ViewerDatabase> searchHitsResult = new IndexResult<>();
-      if(facetResults.getValues().size() < findRequest.sublist.getMaximumElementCount() && findRequest.sublist.getFirstElementIndex() == 0) {
+      if (facetResults.getValues().size() < findRequest.sublist.getMaximumElementCount()
+        && findRequest.sublist.getFirstElementIndex() == 0) {
         searchHitsResult.setTotalCount(facetResults.getValues().size());
       } else {
         searchHitsResult.setTotalCount(-1);
@@ -259,6 +260,10 @@ public class DatabaseResource implements DatabaseService {
       ViewerDatabaseStatus.AVAILABLE.name());
     permissionFilterParameters.add(statusFilter);
 
+    if (!addSearchFilter) {
+      permissionFilterParameters.add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, "true"));
+    }
+
     // Add user permissions on filter
     ArrayList<FilterParameter> permissionsOrFilterParameters = new ArrayList<>();
     for (String role : user.getAllRoles()) {
@@ -268,7 +273,8 @@ public class DatabaseResource implements DatabaseService {
     permissionFilterParameters.add(new OrFiltersParameters(permissionsOrFilterParameters));
 
     if (!searchFilter.getParameters().isEmpty() && addSearchFilter) {
-      BasicSearchFilterParameter searchFilterParameter = (BasicSearchFilterParameter) searchFilter.getParameters().get(0);
+      BasicSearchFilterParameter searchFilterParameter = (BasicSearchFilterParameter) searchFilter.getParameters()
+        .get(0);
       String searchValue = searchFilterParameter.getValue();
       permissionFilterParameters.add(new SimpleFilterParameter(ViewerConstants.INDEX_SEARCH, searchValue));
     }
@@ -354,4 +360,25 @@ public class DatabaseResource implements DatabaseService {
         databaseUUID);
     }
   }
+
+  @Override
+  public boolean updateDatabaseSearchAllAvailability(String databaseUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
+
+    try {
+      return SIARDController.updateDatabaseSearchAllAvailability(databaseUUID);
+    } catch (GenericException | ViewerException | NotFoundException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID);
+    }
+
+  }
+
 }

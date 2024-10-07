@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.server.index.schema.collections;
 
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_BROWSE_LOAD_DATE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PERMISSIONS;
@@ -90,6 +91,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_WARNINGS, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_SKIPPED, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_BROWSE_LOAD_DATE, Field.TYPE_STRING));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, Field.TYPE_BOOLEAN));
     fields.add(new Field(SOLR_DATABASES_PERMISSIONS, Field.TYPE_STRING).setIndexed(true).setMultiValued(true));
 
     return fields;
@@ -111,6 +113,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     doc.addField(SOLR_DATABASES_SIARD_PATH, object.getPath());
     doc.addField(SOLR_DATABASES_SIARD_SIZE, object.getSize());
     doc.addField(SOLR_DATABASES_SIARD_VERSION, object.getVersion());
+    doc.addField(SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, object.isAvailableToSearchAll());
 
     doc.addField(SOLR_DATABASES_VALIDATED_AT, object.getValidatedAt());
     doc.addField(SOLR_DATABASES_VALIDATOR_REPORT_PATH, object.getValidatorReportPath());
@@ -143,6 +146,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     viewerDatabase.setPath(SolrUtils.objectToString(doc.get(SOLR_DATABASES_SIARD_PATH), ""));
     viewerDatabase.setSize(SolrUtils.objectToLong(doc.get(SOLR_DATABASES_SIARD_SIZE), 0L));
     viewerDatabase.setVersion(SolrUtils.objectToString(doc.get(SOLR_DATABASES_SIARD_VERSION), "2.1"));
+    viewerDatabase.setAvailableToSearchAll(SolrUtils.objectToBoolean(doc.get(SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL), true));
 
     viewerDatabase.setValidatedAt(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATED_AT), ""));
     viewerDatabase.setValidatorReportPath(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATOR_REPORT_PATH), ""));

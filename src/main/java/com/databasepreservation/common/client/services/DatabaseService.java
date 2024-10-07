@@ -95,4 +95,9 @@ public interface DatabaseService extends DirectRestService {
   @Operation(summary = "Updates database permissions")
   Set<String> updateDatabasePermissions(@PathVariable(name = "databaseUUID") String databaseUUID,
     @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody Set<String> permissions);
+
+  @RequestMapping(path = "/{databaseUUID}/searchable", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Updates database permissions")
+  boolean updateDatabaseSearchAllAvailability(@PathVariable(name = "databaseUUID") String databaseUUID);
+
 }

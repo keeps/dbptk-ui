@@ -23,12 +23,15 @@ import com.databasepreservation.common.client.common.lists.columns.TooltipColumn
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
+import com.databasepreservation.common.client.widgets.SwitchBtn;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -59,6 +62,7 @@ public class PermissionsNavigationPanel {
   private FlowPanel bottom;
   TextBox searchInputBox;
   private Button btnEdit;
+  private SwitchBtn btnSwitch;
 
   private boolean overrideMissingGroups = false;
 
@@ -89,6 +93,11 @@ public class PermissionsNavigationPanel {
     bottom = new FlowPanel();
     panel.addToInfoPanel(body);
     panel.addButton(bottom);
+
+    if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
+      btnSwitch = new SwitchBtn(messages.SIARDHomePageTitleForPermissionsSwitchButton(), database.isAvailableToSearchAll());
+      handleSwitchBottom();
+    }
 
     update(databasePermissions);
 
@@ -162,7 +171,21 @@ public class PermissionsNavigationPanel {
           });
       });
       bottom.add(CommonClientUtils.wrapOnDiv("btn-item", btnEdit));
+      if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
+        bottom.add(CommonClientUtils.wrapOnDiv("btn-item", btnSwitch));
+      }
     }
+  }
+
+  private void handleSwitchBottom() {
+    btnSwitch.setClickHandler(clickEvent -> {
+      btnSwitch.getButton().setValue(!btnSwitch.getButton().getValue(), true);
+      DatabaseService.Util.call((Boolean result) -> {
+        SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
+        Toast.showInfo(messages.SIARDHomePageDialogTitleForChangeAvailabilityToSearchAll(),
+          messages.SIARDHomePageDialogMessageForChangeAvailabilityToSearchAll());
+      }).updateDatabaseSearchAllAvailability(database.getUuid());
+    });
   }
 
   private FlowPanel getGroupsTables() {
@@ -223,7 +246,8 @@ public class PermissionsNavigationPanel {
         }
       });
       Alert alert = new Alert(Alert.MessageAlertType.WARNING,
-          messages.SIARDHomePageDialogDetailsForUnknownPermissions(String.join(", ", missingGroups)), checkBoxOverrideMissingGroups);
+        messages.SIARDHomePageDialogDetailsForUnknownPermissions(String.join(", ", missingGroups)),
+        checkBoxOverrideMissingGroups);
 
       permissionListPanel.add(alert);
 
@@ -231,9 +255,9 @@ public class PermissionsNavigationPanel {
     return permissionListPanel;
   }
 
-  private BasicTablePanel<AuthorizationGroup> buildGroupsTable(Set<AuthorizationGroup> groups, Column<AuthorizationGroup, Boolean> checkbox) {
-    return new BasicTablePanel<>(new FlowPanel(),
-      SafeHtmlUtils.EMPTY_SAFE_HTML, groups.iterator(),
+  private BasicTablePanel<AuthorizationGroup> buildGroupsTable(Set<AuthorizationGroup> groups,
+    Column<AuthorizationGroup, Boolean> checkbox) {
+    return new BasicTablePanel<>(new FlowPanel(), SafeHtmlUtils.EMPTY_SAFE_HTML, groups.iterator(),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>("", 3, checkbox),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>(messages.SIARDHomePageLabelForPermissionsTableGroupLabel(), 7,
         new TooltipColumn<AuthorizationGroup>() {
@@ -244,11 +268,11 @@ public class PermissionsNavigationPanel {
         }, "force_column_ellipsis"),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>(
         messages.SIARDHomePageLabelForPermissionsTableGroupAttributeName(), 7, new TooltipColumn<AuthorizationGroup>() {
-        @Override
-        public SafeHtml getValue(AuthorizationGroup group) {
-          return SafeHtmlUtils.fromString(group.getAttributeName());
-        }
-      }, "force_column_ellipsis"),
+          @Override
+          public SafeHtml getValue(AuthorizationGroup group) {
+            return SafeHtmlUtils.fromString(group.getAttributeName());
+          }
+        }, "force_column_ellipsis"),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>(
         messages.SIARDHomePageLabelForPermissionsTableGroupAttributeOperator(), 7,
         new TooltipColumn<AuthorizationGroup>() {
@@ -258,15 +282,17 @@ public class PermissionsNavigationPanel {
           }
         }, "force_column_ellipsis"),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>(
-        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeValue(), 0, new TooltipColumn<AuthorizationGroup>() {
-        @Override
-        public SafeHtml getValue(AuthorizationGroup group) {
-          return SafeHtmlUtils.fromString(group.getAttributeValue());
-        }
-      }, "force_column_ellipsis"));
+        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeValue(), 0,
+        new TooltipColumn<AuthorizationGroup>() {
+          @Override
+          public SafeHtml getValue(AuthorizationGroup group) {
+            return SafeHtmlUtils.fromString(group.getAttributeValue());
+          }
+        }, "force_column_ellipsis"));
   }
 
-  private void doSearch(String searchValue, Column<AuthorizationGroup, Boolean> checkbox, FlowPanel permissionListPanel, BasicTablePanel<AuthorizationGroup> cellTable) {
+  private void doSearch(String searchValue, Column<AuthorizationGroup, Boolean> checkbox, FlowPanel permissionListPanel,
+    BasicTablePanel<AuthorizationGroup> cellTable) {
     permissionListPanel.remove(cellTable);
 
     if (ViewerStringUtils.isBlank(searchValue)) {
@@ -283,13 +309,14 @@ public class PermissionsNavigationPanel {
     return buildGroupsTable(groups, checkBox);
   }
 
-  private BasicTablePanel<AuthorizationGroup> showMatching(final String searchValue, Column<AuthorizationGroup, Boolean> checkbox) {
+  private BasicTablePanel<AuthorizationGroup> showMatching(final String searchValue,
+    Column<AuthorizationGroup, Boolean> checkbox) {
     // Filter the groups based on the search value
     List<AuthorizationGroup> matchingGroups = groups.stream()
-      .filter(group -> group.getLabel().toLowerCase().contains(searchValue.toLowerCase()) ||
-        group.getAttributeName().toLowerCase().contains(searchValue.toLowerCase()) ||
-        group.getAttributeOperator().toLowerCase().contains(searchValue.toLowerCase()) ||
-        group.getAttributeValue().toLowerCase().contains(searchValue.toLowerCase()))
+      .filter(group -> group.getLabel().toLowerCase().contains(searchValue.toLowerCase())
+        || group.getAttributeName().toLowerCase().contains(searchValue.toLowerCase())
+        || group.getAttributeOperator().toLowerCase().contains(searchValue.toLowerCase())
+        || group.getAttributeValue().toLowerCase().contains(searchValue.toLowerCase()))
       .collect(Collectors.toList());
 
     return buildGroupsTable(new HashSet<>(matchingGroups), checkbox);

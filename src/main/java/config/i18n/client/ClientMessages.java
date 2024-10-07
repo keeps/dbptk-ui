@@ -859,17 +859,23 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageDialogTitleForPermissionsList();
 
+  String SIARDHomePageDialogTitleForChangeAvailabilityToSearchAll();
+
   SafeHtml SIARDHomePageDialogDescriptionForPermissionsList();
 
   String SIARDHomePageDialogDetailsForPermissionsList();
 
   String SIARDHomePageDialogMessageForPermissionsList();
 
+  String SIARDHomePageDialogMessageForChangeAvailabilityToSearchAll();
+
   String SIARDHomePageDialogDetailsForUnknownPermission();
 
   String SIARDHomePageDialogDetailsForUnknownPermissions(String permissions);
 
   String SIARDHomePageDialogActionForOverridePermissions();
+
+  String SIARDHomePageTitleForPermissionsSwitchButton();
 
   /********************************************
    * Edit Metadata

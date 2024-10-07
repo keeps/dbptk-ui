@@ -615,10 +615,9 @@ public class SIARDController {
             SIARDDK128EditFactory.PARAMETER_FOLDER, Collections.singletonList(siardPath.toAbsolutePath().toString()));
         } else {
           siardEdition.editModule(new SIARDDK1007EditFactory()).editModuleParameter(
-            SIARDDK1007EditFactory.PARAMETER_FOLDER,
-            Collections.singletonList(siardPath.toAbsolutePath().toString()));
+            SIARDDK1007EditFactory.PARAMETER_FOLDER, Collections.singletonList(siardPath.toAbsolutePath().toString()));
         }
-      } else if (siardVersion.equals(ViewerConstants.SIARD_V21)){
+      } else if (siardVersion.equals(ViewerConstants.SIARD_V21)) {
         siardEdition.editModule(new SIARDEditFactory()).editModuleParameter(SIARDEditFactory.PARAMETER_FILE,
           Collections.singletonList(siardPath.toAbsolutePath().toString()));
       } else {
@@ -645,6 +644,7 @@ public class SIARDController {
       }
 
       viewerDatabase.setVersion(siardEdition.getSIARDVersion());
+      viewerDatabase.setAvailableToSearchAll(true);
       viewerDatabase.setValidationStatus(ViewerDatabaseValidationStatus.NOT_VALIDATED);
 
       Set<String> authorizationDefault = ViewerConfiguration.getInstance().getCollectionsAuthorizationDefault();
@@ -877,6 +877,13 @@ public class SIARDController {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     solrManager.updateDatabasePermissions(databaseUUID, permissions);
     return permissions;
+  }
+
+  public static boolean updateDatabaseSearchAllAvailability(String databaseUUID)
+    throws GenericException, ViewerException, NotFoundException {
+    final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+    return solrManager.updateDatabaseSearchAllAvailability(databaseUUID, !database.isAvailableToSearchAll());
   }
 
   public static boolean deleteAll(String databaseUUID)

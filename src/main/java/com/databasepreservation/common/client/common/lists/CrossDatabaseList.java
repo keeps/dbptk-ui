@@ -78,25 +78,27 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
         UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
           @Override
           public void onSuccess(User user) {
-            if (columnIndex == 9 && database != null) {
+            if (database != null) {
               if (user.isAdmin()) {
-                HistoryManager.gotoDatabaseSearchWithValue(database.getUuid(), searchValue);
-                getSelectionModel().clear();
-              } else {
-                if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+                if (columnIndex == 9) {
                   HistoryManager.gotoDatabaseSearchWithValue(database.getUuid(), searchValue);
+                  getSelectionModel().clear();
+                } else {
+                  HistoryManager.gotoSIARDInfo(database.getUuid());
+                  getSelectionModel().clear();
                 }
-                getSelectionModel().clear();
-              }
-            } else if (database != null){
-              if (user.isAdmin()) {
-                HistoryManager.gotoSIARDInfo(database.getUuid());
-                getSelectionModel().clear();
               } else {
-                if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
-                  HistoryManager.gotoDatabase(database.getUuid());
+                if (columnIndex == 4) {
+                  if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+                    HistoryManager.gotoDatabaseSearchWithValue(database.getUuid(), searchValue);
+                  }
+                  getSelectionModel().clear();
+                } else {
+                  if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+                    HistoryManager.gotoDatabase(database.getUuid());
+                  }
+                  getSelectionModel().clear();
                 }
-                getSelectionModel().clear();
               }
             }
           }
