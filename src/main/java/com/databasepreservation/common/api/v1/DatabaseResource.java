@@ -83,7 +83,7 @@ public class DatabaseResource implements DatabaseService {
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
 
         FindRequest userFindRequest = new FindRequest(findRequest.classToReturn,
-          getDatabaseFilterForUser(user, findRequest.filter, true), findRequest.sorter, findRequest.sublist,
+          getDatabaseFindFilterForUser(user, findRequest.filter), findRequest.sorter, findRequest.sublist,
           findRequest.facets, findRequest.exportFacets, fieldsToReturn);
         return getViewerDatabaseIndexResult(userFindRequest, fieldsToReturn, controllerAssistant, user, state);
       }
@@ -102,7 +102,7 @@ public class DatabaseResource implements DatabaseService {
         return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
       } else {
         return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state,
-          getDatabaseFilterForUser(user, findRequest.filter, false));
+          getDatabaseFindAllFilterForUser(user));
       }
     } else {
       return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
@@ -167,7 +167,8 @@ public class DatabaseResource implements DatabaseService {
 
   private IndexResult<ViewerDatabase> getCrossViewerDatabaseIndexResult(FindRequest findRequest,
     ControllerAssistant controllerAssistant, User user, LogEntryState state) {
-    return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state, null);
+    return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state,
+      new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, "true")));
   }
 
   private IndexResult<ViewerDatabase> getCrossViewerDatabaseIndexResult(FindRequest findRequest,
@@ -253,16 +254,17 @@ public class DatabaseResource implements DatabaseService {
     }
   }
 
-  private Filter getDatabaseFilterForUser(User user, Filter searchFilter, boolean addSearchFilter) {
+  private Filter getDatabaseFindAllFilterForUser(User user) {
     ArrayList<FilterParameter> permissionFilterParameters = new ArrayList<>();
-    // Only retrieve databases with AVAILABLE status
-    SimpleFilterParameter statusFilter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
+
+    // Only retrieve databases with AVAILABLE
+    SimpleFilterParameter statusFilter;
+    statusFilter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
       ViewerDatabaseStatus.AVAILABLE.name());
     permissionFilterParameters.add(statusFilter);
 
-    if (!addSearchFilter) {
-      permissionFilterParameters.add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, "true"));
-    }
+    permissionFilterParameters
+      .add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, "true"));
 
     // Add user permissions on filter
     ArrayList<FilterParameter> permissionsOrFilterParameters = new ArrayList<>();
@@ -272,12 +274,45 @@ public class DatabaseResource implements DatabaseService {
 
     permissionFilterParameters.add(new OrFiltersParameters(permissionsOrFilterParameters));
 
-    if (!searchFilter.getParameters().isEmpty() && addSearchFilter) {
-      BasicSearchFilterParameter searchFilterParameter = (BasicSearchFilterParameter) searchFilter.getParameters()
-        .get(0);
-      String searchValue = searchFilterParameter.getValue();
-      permissionFilterParameters.add(new SimpleFilterParameter(ViewerConstants.INDEX_SEARCH, searchValue));
+    return new Filter(new AndFiltersParameters(permissionFilterParameters));
+  }
+
+  private Filter getDatabaseFindFilterForUser(User user, Filter searchFilter) {
+    ArrayList<FilterParameter> permissionFilterParameters = new ArrayList<>();
+
+    // Only retrieve databases with AVAILABLE, this filter has to be default
+    SimpleFilterParameter statusFilter;
+    statusFilter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
+      ViewerDatabaseStatus.AVAILABLE.name());
+    permissionFilterParameters.add(statusFilter);
+
+    // Controlling the search filter
+    if (!searchFilter.getParameters().isEmpty()) {
+      for (FilterParameter filterParameter : searchFilter.getParameters()) {
+        if (filterParameter instanceof SimpleFilterParameter simpleFilterParameter) {
+          // If there is a status filter, remove the default and add the new one(s).
+          if (simpleFilterParameter.getName().equals(ViewerConstants.SOLR_DATABASES_STATUS)) {
+            permissionFilterParameters.remove(statusFilter);
+            permissionFilterParameters
+              .add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS, simpleFilterParameter.getValue()));
+          } else if (simpleFilterParameter.getName().equals(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL)) {
+            permissionFilterParameters.add(new SimpleFilterParameter(
+              ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, simpleFilterParameter.getValue()));
+          }
+        } else if (filterParameter instanceof BasicSearchFilterParameter searchFilterParameter) {
+          String searchValue = searchFilterParameter.getValue();
+          permissionFilterParameters.add(new SimpleFilterParameter(ViewerConstants.INDEX_SEARCH, searchValue));
+        }
+      }
     }
+
+    // Add user permissions on filter
+    ArrayList<FilterParameter> permissionsOrFilterParameters = new ArrayList<>();
+    for (String role : user.getAllRoles()) {
+      permissionsOrFilterParameters.add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_PERMISSIONS, role));
+    }
+
+    permissionFilterParameters.add(new OrFiltersParameters(permissionsOrFilterParameters));
 
     return new Filter(new AndFiltersParameters(permissionFilterParameters));
   }

@@ -12,6 +12,8 @@
         <g:SimplePanel ui:field="description"/>
         <g:FlowPanel>
             <commonsearch:SearchWrapper ui:field="search" />
+            <g:SimplePanel ui:field="databasesNotLoadedInfo"/>
+            <g:SimplePanel ui:field="databasesNotSearchableInfo"/>
             <g:FlowPanel addStyleNames="button-group-panel">
                 <g:SimplePanel addStyleNames="button-group-panel-btn">
                     <g:Button addStyleNames="btn btn btn-primary" ui:field="open">
