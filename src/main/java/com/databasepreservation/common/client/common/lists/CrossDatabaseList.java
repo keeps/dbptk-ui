@@ -80,7 +80,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
           public void onSuccess(User user) {
             if (database != null) {
               if (user.isAdmin()) {
-                if (columnIndex == 9) {
+                if (columnIndex == 7) {
                   HistoryManager.gotoDatabaseSearchWithValue(database.getUuid(), searchValue);
                   getSelectionModel().clear();
                 } else {
@@ -166,21 +166,6 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     });
 
-    Column<ViewerDatabase, SafeHtml> sizeColumn = new TooltipColumn<ViewerDatabase>() {
-      @Override
-      public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(Humanize.readableFileSize(database.getSize()))
-          : SafeHtmlUtils.fromString("unknown");
-      }
-    };
-
-    Column<ViewerDatabase, SafeHtml> versionColumn = new TooltipColumn<ViewerDatabase>() {
-      @Override
-      public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(database.getVersion()) : SafeHtmlUtils.fromString("unknown");
-      }
-    };
-
     Column<ViewerDatabase, SafeHtml> validColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
@@ -216,8 +201,6 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
           addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
           if (user.isAdmin()) {
             addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
-            addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
-            addColumn(versionColumn, messages.managePageTableHeaderTextForSIARDVersion(), true, TextAlign.NONE, 4);
             addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE,
               5);
             addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
@@ -232,8 +215,6 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
       addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);
       addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
-      addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
-      addColumn(versionColumn, messages.managePageTableHeaderTextForSIARDVersion(), true, TextAlign.NONE, 4);
       addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE, 5);
       addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
       addColumn(searchHitsColumn, messages.managePageTableHeaderTextForSearchHits(), true, TextAlign.NONE, 5);

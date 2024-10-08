@@ -708,6 +708,16 @@ public interface ClientMessages extends Messages {
 
   String manageDatabasePageDescription();
 
+  String manageDatabaseNotLoadedDescription(long number);
+
+  String manageDatabaseNotSearchableDescription(long number);
+
+  String manageDatabaseAllLoadedDescription();
+
+  String manageDatabaseAllSearchableDescription();
+
+  String manageDatabaseContactAdministratorDescription();
+
   /********************************************
    * SIARD Home Page
    ********************************************/

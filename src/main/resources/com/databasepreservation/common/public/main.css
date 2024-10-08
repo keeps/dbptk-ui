@@ -1069,6 +1069,14 @@ p[data-value]:after {
     margin-bottom: 10px;
 }
 
+.siards-not-loaded-info {
+    margin-top: -30px;
+}
+
+.siards-contact-admin-info {
+    margin-bottom: 5px;
+}
+
 .btn-pull-right {
     padding-right: 0 !important;
 }
@@ -1444,6 +1452,7 @@ html, body {
 }
 
 .button-group-panel-btn .btn {
+    margin-top: 5px;
     width: 100%;
     padding: 8px;
     text-align: center;

@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.client.common.visualization.manager.databasePanel.user;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -21,23 +22,27 @@ import com.databasepreservation.common.client.common.lists.utils.ListBuilder;
 import com.databasepreservation.common.client.common.search.SearchWrapper;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.common.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
+import org.roda.core.data.v2.index.sublist.Sublist;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -63,6 +68,15 @@ public class UserDatabaseListPanel extends ContentPanel {
   @UiField
   SimplePanel description;
 
+  @UiField
+  SimplePanel databasesNotLoadedInfo;
+
+  @UiField
+  SimplePanel databasesNotSearchableInfo;
+
+  @UiField
+  SimplePanel adminInfo;
+
   @UiField(provided = true)
   SearchWrapper search;
 
@@ -80,6 +94,9 @@ public class UserDatabaseListPanel extends ContentPanel {
     ListBuilder<ViewerDatabase> databaseMetadataList = new ListBuilder<>(() -> {
       DatabaseList metadataDatabaseList = new DatabaseList();
       metadataDatabaseList.getSelectionModel().addSelectionChangeHandler(event -> {
+        setNotLoadedDatabases();
+        setNotSearchableDatabases();
+        setDatabasesNotSearchableInfoVisibility(false);
         ViewerDatabase selected = metadataDatabaseList.getSelectionModel().getSelectedObject();
         if (selected != null) {
           if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
@@ -93,6 +110,7 @@ public class UserDatabaseListPanel extends ContentPanel {
     ListBuilder<ViewerDatabase> databaseSearchAll = new ListBuilder<>(() -> {
       CrossDatabaseList allDatabaseList = new CrossDatabaseList();
       allDatabaseList.getSelectionModel().addSelectionChangeHandler(event -> {
+        setDatabasesNotSearchableInfoVisibility(true);
         allDatabaseList.setSearchValue(search.getComponents().getSearchPanel("DatabaseList_all").getCurrentFilter());
       });
       return allDatabaseList;
@@ -110,6 +128,54 @@ public class UserDatabaseListPanel extends ContentPanel {
 
     description.setWidget(instance);
 
+    MetadataField adminInfoInstance = MetadataField.createInstance(messages.manageDatabaseContactAdministratorDescription());
+    adminInfoInstance.setCSS("siards-contact-admin-info", "font-size-description");
+    adminInfo.setWidget(adminInfoInstance);
+
+  }
+
+  private void setNotLoadedDatabases() {
+    FindRequest notLoadedDatabasesRequest = new FindRequest(ViewerDatabase.class.getName(),
+      new Filter(
+        new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.METADATA_ONLY.name())),
+      Sorter.NONE, new Sublist(), Facets.NONE, false, Collections.singletonList(ViewerConstants.INDEX_ID));
+    DatabaseService.Util.call((IndexResult<ViewerDatabase> result) -> {
+      MetadataField notLoadedInfoInstance;
+      if (result.getTotalCount() > 0) {
+        notLoadedInfoInstance = MetadataField
+          .createInstance(messages.manageDatabaseNotLoadedDescription(result.getTotalCount()));
+      } else {
+        notLoadedInfoInstance = MetadataField.createInstance(messages.manageDatabaseAllLoadedDescription());
+      }
+      notLoadedInfoInstance.setCSS("siards-not-loaded-info", "font-size-description");
+      databasesNotLoadedInfo.setWidget(notLoadedInfoInstance);
+    }).find(notLoadedDatabasesRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+  }
+
+  private void setNotSearchableDatabases() {
+    FindRequest notSearchableDatabasesRequest = new FindRequest(ViewerDatabase.class.getName(),
+      new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, "false")),
+      Sorter.NONE, new Sublist(), Facets.NONE, false, Collections.singletonList(ViewerConstants.INDEX_ID));
+    DatabaseService.Util.call((IndexResult<ViewerDatabase> result) -> {
+      MetadataField notSearchableInfoInstance;
+      if (result.getTotalCount() > 0) {
+        notSearchableInfoInstance = MetadataField
+          .createInstance(messages.manageDatabaseNotSearchableDescription(result.getTotalCount()));
+      } else {
+        notSearchableInfoInstance = MetadataField.createInstance(messages.manageDatabaseAllSearchableDescription());
+      }
+      notSearchableInfoInstance.setCSS("font-size-description");
+      databasesNotSearchableInfo.setWidget(notSearchableInfoInstance);
+    }).find(notSearchableDatabasesRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+  }
+
+  private void setDatabasesNotSearchableInfoVisibility(boolean visible) {
+    databasesNotSearchableInfo.setVisible(visible);
+    if (!visible) {
+      databasesNotLoadedInfo.setStyleName("siards-not-loaded-info");
+    } else {
+      databasesNotLoadedInfo.removeStyleName("siards-not-loaded-info");
+    }
   }
 
   /**
