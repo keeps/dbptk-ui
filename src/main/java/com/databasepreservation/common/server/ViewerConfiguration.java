@@ -66,6 +66,13 @@ import com.google.common.cache.LoadingCache;
 public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Logger LOGGER;
 
+  public static final String CORS_ALLOW_ORIGIN = "ui.cors.allowOrigin";
+  public static final String CORS_ALLOW_HEADERS = "ui.cors.allowHeaders";
+  public static final String CORS_ALLOW_METHODS = "ui.cors.allowMethods";
+  public static final String CORS_ALLOW_CREDENTIALS = "ui.cors.allowCredentials";
+  public static final String CORS_MAX_AGE = "ui.cors.maxAge";
+  public static final String CORS_EXPOSE_HEADERS = "ui.cors.exposeHeaders";
+
   public static final String PROPERTY_SOLR_ZOOKEEPER_HOSTS = "solr.zookeeper.hosts";
   public static final String PROPERTY_SOLR_HEALTHCHECK_RETRIES = "solr.healthcheck.retries";
   public static final String PROPERTY_SOLR_HEALTHCHECK_TIMEOUT = "solr.healthcheck.timeout_ms";
