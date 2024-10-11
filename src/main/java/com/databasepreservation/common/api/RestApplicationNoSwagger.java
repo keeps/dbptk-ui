@@ -30,6 +30,7 @@ import com.databasepreservation.common.api.v1.JobResource;
 import com.databasepreservation.common.api.v1.MigrationResource;
 import com.databasepreservation.common.api.v1.SiardResource;
 import com.databasepreservation.common.api.v1.ThemeResource;
+import com.databasepreservation.common.filter.CORSFilter;
 
 import io.swagger.v3.jaxrs2.SwaggerSerializers;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
@@ -81,9 +82,8 @@ public class RestApplicationNoSwagger extends ResourceConfig {
     register(SiardResource.class);
     register(ThemeResource.class);
     register(SwaggerSerializers.class);
-
+    register(CORSFilter.class);
     // packages("com.databasepreservation.visualization.api","com.databasepreservation.common.client.services");
     // packages("io.swagger.v3.jaxrs2.integration.resources");
-    // register(CorsFilter.class);
   }
 }
