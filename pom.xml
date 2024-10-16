@@ -1,4 +1,4 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
@@ -32,7 +32,7 @@
         <version.swagger>2.2.6</version.swagger>
         <version.jackson>2.14.1</version.jackson>
         <version.cas-client>3.6.4</version.cas-client>
-        <version.solr>8.11.2</version.solr>
+        <version.solr>9.2.0</version.solr>
         <version.springboot>2.7.7</version.springboot>
 
         <desktop>com.databasepreservation.desktop.Desktop</desktop>
