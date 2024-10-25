@@ -141,8 +141,8 @@ public class DbvtkExportModule implements DatabaseFilterModule {
    */
   @Override
   public void handleDataRow(Row row) throws ModuleException {
-    solrManager.addRow(retrieved.getUuid(),
-      ToolkitStructure2ViewerStructure.getRow(collectionConfiguration, currentTable, row, rowIndex++,retrieved.getPath()));
+    solrManager.addRow(retrieved.getUuid(), ToolkitStructure2ViewerStructure.getRow(collectionConfiguration,
+      currentTable, row, rowIndex++, retrieved.getPath(), retrieved.getVersion()));
 
     rowsProcessedByTableCounter++;
     rowCounter++;
@@ -153,15 +153,14 @@ public class DbvtkExportModule implements DatabaseFilterModule {
     }
   }
 
-
   /**
    * Checks if a row process log should be done
    *
    */
   private boolean shouldLogRowProgress() {
-    return rowCounter == rowThreshold ||
-      (currentTable.getCountRows() <= rowThreshold && rowsProcessedByTableCounter == currentTable.getCountRows()) ||
-      rowsProcessedByTableCounter == currentTable.getCountRows();
+    return rowCounter == rowThreshold
+      || (currentTable.getCountRows() <= rowThreshold && rowsProcessedByTableCounter == currentTable.getCountRows())
+      || rowsProcessedByTableCounter == currentTable.getCountRows();
   }
 
   /**

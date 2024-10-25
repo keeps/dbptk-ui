@@ -13,8 +13,10 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCH
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +25,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
+import com.databasepreservation.common.api.utils.ExtraMediaType;
+import com.databasepreservation.model.exception.ModuleException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.roda.core.data.exceptions.GenericException;
@@ -600,8 +605,28 @@ public class CollectionResource implements CollectionService {
 
     if (version.equals(ViewerConstants.SIARD_DK_1007) || version.equals(ViewerConstants.SIARD_DK_128)) {
       String filePath = row.getCells().get(row.getCells().keySet().toArray()[row.getCells().size() - 1]).getValue();
-      return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
-        DownloadUtils.stream(new BufferedInputStream(new FileInputStream(filePath)))));
+      Path path = Paths.get(filePath);
+      if (path.toFile().isDirectory()) {
+        Path tempZipFile = Files.createTempFile("temp-", ExtraMediaType.ZIP_FILE_EXTENSION);
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(tempZipFile.toFile()))) {
+          Files.walk(path).filter(p -> !Files.isDirectory(p)).forEach(p -> {
+            ZipEntry zipEntry = new ZipEntry(path.relativize(p).toString());
+            try {
+              zos.putNextEntry(zipEntry);
+              Files.copy(p, zos);
+              zos.closeEntry();
+            } catch (IOException e) {
+              throw new RESTException("Error creating zip", e);
+            }
+          });
+        }
+
+        return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+          DownloadUtils.stream(new BufferedInputStream(new FileInputStream(tempZipFile.toFile())))));
+      } else {
+        return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+          DownloadUtils.stream(new BufferedInputStream(new FileInputStream(filePath)))));
+      }
     } else {
       if (LobManagerUtils.isLobEmbedded(tableConfiguration, row, columnIndex)) {
         // handle lob as embedded
