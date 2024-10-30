@@ -205,7 +205,7 @@ public class DatabaseResource implements DatabaseService {
         }
       }
 
-      String collectionAlias = SolrUtils.crateSearchAllAlias(ViewerFactory.getSolrClient(), "alias-" + user.getUUID(),
+      String collectionAlias = SolrUtils.createSearchAllAlias(ViewerFactory.getSolrClient(), "alias-" + user.getUUID(),
         collections);
 
       SimpleFacetParameter simpleFacetParameter = new SimpleFacetParameter(ViewerConstants.SOLR_ROWS_DATABASE_UUID,
@@ -216,6 +216,9 @@ public class DatabaseResource implements DatabaseService {
 
       final IndexResult<ViewerDatabase> facetsSearch = ViewerFactory.getSolrManager().findHits(ViewerDatabase.class,
         collectionAlias, findRequest.filter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter));
+
+      SolrUtils.deleteSearchAllAlias(ViewerFactory.getSolrClient(), collectionAlias);
+
       count = facetsSearch.getTotalCount();
       FacetFieldResult facetResults = facetsSearch.getFacetResults().get(0);
 
