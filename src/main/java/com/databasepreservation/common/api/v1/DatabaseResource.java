@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
@@ -205,8 +206,8 @@ public class DatabaseResource implements DatabaseService {
         }
       }
 
-      String collectionAlias = SolrUtils.createSearchAllAlias(ViewerFactory.getSolrClient(), "alias-" + user.getUUID(),
-        collections);
+      String collectionAlias = SolrUtils.createSearchAllAlias(ViewerFactory.getSolrClient(),
+        "alias-" + UUID.randomUUID(), collections);
 
       SimpleFacetParameter simpleFacetParameter = new SimpleFacetParameter(ViewerConstants.SOLR_ROWS_DATABASE_UUID,
         FacetParameter.SORT.COUNT);
