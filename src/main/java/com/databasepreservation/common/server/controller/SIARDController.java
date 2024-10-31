@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.modules.siard.SIARDDKEditFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -83,9 +84,7 @@ import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.modules.config.ImportConfigurationModuleFactory;
 import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
-import com.databasepreservation.modules.siard.SIARDDK1007EditFactory;
 import com.databasepreservation.modules.siard.SIARDDK1007ModuleFactory;
-import com.databasepreservation.modules.siard.SIARDDK128EditFactory;
 import com.databasepreservation.modules.siard.SIARDDK128ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDEditFactory;
 import com.databasepreservation.modules.siard.SIARDValidateFactory;
@@ -610,13 +609,8 @@ public class SIARDController {
       Reporter reporter = new NoOpReporter();
       SIARDEdition siardEdition = SIARDEdition.newInstance();
       if (siardVersion.equals(ViewerConstants.SIARD_DK)) {
-        if (Files.exists(Paths.get(siardPath + ViewerConstants.SIARDDK_RESEARCH_INDEX_PATH))) {
-          siardEdition.editModule(new SIARDDK128EditFactory()).editModuleParameter(
-            SIARDDK128EditFactory.PARAMETER_FOLDER, Collections.singletonList(siardPath.toAbsolutePath().toString()));
-        } else {
-          siardEdition.editModule(new SIARDDK1007EditFactory()).editModuleParameter(
-            SIARDDK1007EditFactory.PARAMETER_FOLDER, Collections.singletonList(siardPath.toAbsolutePath().toString()));
-        }
+        siardEdition.editModule(new SIARDDKEditFactory()).editModuleParameter(
+          SIARDDKEditFactory.PARAMETER_FOLDER, Collections.singletonList(siardPath.toAbsolutePath().toString()));
       } else if (siardVersion.equals(ViewerConstants.SIARD_V21)) {
         siardEdition.editModule(new SIARDEditFactory()).editModuleParameter(SIARDEditFactory.PARAMETER_FILE,
           Collections.singletonList(siardPath.toAbsolutePath().toString()));
