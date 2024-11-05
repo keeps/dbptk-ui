@@ -2,7 +2,7 @@
  * The contents of this file are subject to the license and copyright
  * detailed in the LICENSE file at the root of the source
  * tree and available online at
- *
+ * <p>
  * https://github.com/keeps/dbptk-ui
  */
 package com.databasepreservation.common.server.controller;
@@ -37,25 +37,31 @@ public class UserLoginHelper {
       AttributePrincipal attributePrincipal = (AttributePrincipal) request.getUserPrincipal();
       Map<String, Object> attributes = attributePrincipal.getAttributes();
 
-      final String rolesConfigurationValue = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-        ViewerConstants.DEFAULT_ATTRIBUTE_ROLES, ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE);
+      final List<String> rolesConfigurationValue = ViewerConfiguration.getInstance()
+        .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE);
       final String fullNameConfigurationValue = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
         ViewerConstants.DEFAULT_ATTRIBUTE_FULLNAME, ViewerConfiguration.PROPERTY_AUTHORIZATION_FULLNAME_ATTRIBUTE);
       final String emailConfigurationValue = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
         ViewerConstants.DEFAULT_ATTRIBUTE_EMAIL, ViewerConfiguration.PROPERTY_AUTHORIZATION_EMAIL_ATTRIBUTE);
 
-      if (attributes.get(rolesConfigurationValue) instanceof String) {
-        Set<String> roles = new HashSet<>();
-        mapCasAttributeString(attributes, rolesConfigurationValue, roles::addAll);
-        user.setAllRoles(roles);
-        user.setDirectRoles(roles);
-      } else if (attributes.get(rolesConfigurationValue) instanceof List) {
-        mapCasAttributeList(user, attributes, rolesConfigurationValue, RodaPrincipal::setAllRoles);
-        mapCasAttributeList(user, attributes, rolesConfigurationValue, RodaPrincipal::setDirectRoles);
+      user.setAllRoles(new HashSet<>());
+      user.setDirectRoles(new HashSet<>());
+      for (String rolesAttribute : rolesConfigurationValue) {
+        if (attributes.get(rolesAttribute) instanceof String) {
+          Set<String> roles = new HashSet<>();
+          mapCasAttributeString(attributes, rolesAttribute, roles::addAll);
+          user.getAllRoles().addAll(roles);
+          user.getDirectRoles().addAll(roles);
+        } else if (attributes.get(rolesAttribute) instanceof List) {
+          mapCasAttributeList(user, attributes, rolesAttribute,
+            (user1, allRoles) -> user1.getAllRoles().addAll(allRoles));
+          mapCasAttributeList(user, attributes, rolesAttribute,
+            (user1, directRoles) -> user1.getDirectRoles().addAll(directRoles));
+        }
       }
 
-      mapAuthorizedGroups(user,
-        ViewerConfiguration.getInstance().getCollectionsAuthorizationGroupsWithAdminAndUserRoles().getAuthorizationGroupsList());
+      mapAuthorizedGroups(user, ViewerConfiguration.getInstance()
+        .getCollectionsAuthorizationGroupsWithAdminAndUserRoles().getAuthorizationGroupsList());
 
       // Add default roles to authenticated user
       boolean addDefaultRoles = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
@@ -84,14 +90,16 @@ public class UserLoginHelper {
   private static void mapAuthorizedGroups(User user, Set<AuthorizationGroup> authorizationGroups) {
     Set<String> authorizedRoles = new HashSet<>();
     for (AuthorizationGroup group : authorizationGroups) {
-      String rolesAttribute = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-        ViewerConstants.DEFAULT_ATTRIBUTE_ROLES, ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE);
+      List<String> rolesAttribute = ViewerConfiguration.getInstance()
+        .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE);
 
       if (ViewerConfiguration.PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL
         .equals(group.getAttributeOperator())) {
-        if (rolesAttribute.equalsIgnoreCase(group.getAttributeName())) {
-          if (user.getAllRoles().stream().anyMatch(p -> p.equals(group.getAttributeValue()))) {
-            authorizedRoles.add(group.getAttributeValue());
+        for (String roleAttribute : rolesAttribute) {
+          if (roleAttribute.equalsIgnoreCase(group.getAttributeName())) {
+            if (user.getAllRoles().stream().anyMatch(p -> p.equals(group.getAttributeValue()))) {
+              authorizedRoles.add(group.getAttributeValue());
+            }
           }
         }
       }

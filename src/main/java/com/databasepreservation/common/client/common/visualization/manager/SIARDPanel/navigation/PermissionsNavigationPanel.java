@@ -259,7 +259,7 @@ public class PermissionsNavigationPanel {
     Column<AuthorizationGroup, Boolean> checkbox) {
     return new BasicTablePanel<>(new FlowPanel(), SafeHtmlUtils.EMPTY_SAFE_HTML, groups.iterator(),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>("", 3, checkbox),
-      new BasicTablePanel.ColumnInfo<AuthorizationGroup>(messages.SIARDHomePageLabelForPermissionsTableGroupLabel(), 7,
+      new BasicTablePanel.ColumnInfo<AuthorizationGroup>(messages.SIARDHomePageLabelForPermissionsTableGroupLabel(), 15,
         new TooltipColumn<AuthorizationGroup>() {
           @Override
           public SafeHtml getValue(AuthorizationGroup group) {
@@ -267,7 +267,7 @@ public class PermissionsNavigationPanel {
           }
         }, "force_column_ellipsis"),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>(
-        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeName(), 7, new TooltipColumn<AuthorizationGroup>() {
+        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeName(), 12, new TooltipColumn<AuthorizationGroup>() {
           @Override
           public SafeHtml getValue(AuthorizationGroup group) {
             return SafeHtmlUtils.fromString(group.getAttributeName());
