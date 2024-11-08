@@ -56,8 +56,13 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
   private static Map<String, DatabaseSearchPanel> instances = new HashMap<>();
   private final CollectionStatus status;
 
+  public static DatabaseSearchPanel getInstance(ViewerDatabase database, CollectionStatus status) {
+    return DatabaseSearchPanel.getInstance(database, status, "");
+  }
+
   public static DatabaseSearchPanel getInstance(ViewerDatabase database, CollectionStatus status, String search) {
-    return instances.computeIfAbsent(database.getUuid(), k -> new DatabaseSearchPanel(database, status, search));
+    String key = database.getUuid() + search;
+    return instances.computeIfAbsent(key, k -> new DatabaseSearchPanel(database, status, search));
   }
 
   interface DatabaseSearchPanelUiBinder extends UiBinder<Widget, DatabaseSearchPanel> {

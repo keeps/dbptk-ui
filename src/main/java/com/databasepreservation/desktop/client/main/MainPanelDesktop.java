@@ -154,7 +154,7 @@ public class MainPanelDesktop extends Composite {
         setContent(databaseUUID, currentHistoryPath.get(0), currentHistoryPath.get(2), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return DatabaseSearchPanel.getInstance(database, status, "");
+            return DatabaseSearchPanel.getInstance(database, status);
           }
         });
       } else if (currentHistoryPath.size() == 4
