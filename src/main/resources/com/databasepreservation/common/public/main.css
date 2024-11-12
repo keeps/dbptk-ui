@@ -3468,10 +3468,10 @@ rgba(0, 0, 0, .125);
 * Universal embedded viewer
  ************************************************/
 
-.embedded-viewer {
-    height: 1000px;
-    width: 1000px;
+.embedded-viewer{
+    height: 150vh;
+    width: 67vw;
     display: inline-block;
     vertical-align: top;
-    margin-left: -6%;
+    margin-top: 30px;
 }
