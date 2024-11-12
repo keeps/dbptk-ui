@@ -13,6 +13,7 @@ import static com.databasepreservation.common.client.ViewerConstants.API_QUERY_S
 import java.util.ArrayList;
 import java.util.List;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.UriQueryUtils;
 import com.databasepreservation.common.client.index.FindRequest;
@@ -60,6 +61,15 @@ public class RestUtils {
       + databaseUUID + "/collection/" + databaseUUID + "/data/" + schemaName + "/" + tableName + "/" + rowIndex + "/"
       + columnIndex;
   }
+
+  public static String createUVLob() {
+    return ClientConfigurationManager.getStringWithDefault("uv", ViewerConstants.UV_EXTERNAL_VIEWER_SERVICE_NAME)
+      + "/#?iiifManifestId=" + GWT.getHostPageBaseURL() + ClientConfigurationManager.getStringWithDefault(
+        "presentation", ViewerConstants.PRESENTATION_EXTERNAL_SERVICE_NAME)
+      + "/manifest?downloadLink=";
+  }
+
+
 
   public static String createExportTableUri(String databaseUUID, String schemaName, String tableName,
     FindRequest findRequest, String zipFilename, String filename, boolean descriptions, boolean lobs,

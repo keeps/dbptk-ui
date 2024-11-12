@@ -7,6 +7,10 @@
  */
 package com.databasepreservation.common.utils;
 
+import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE;
+import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE;
+import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_VIEWER_DOWNLOAD_LABEL_TEMPLATE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +35,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabaseVal
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.server.ViewerConfiguration;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -119,9 +124,17 @@ public class StatusUtils {
     if (column.getType() != null && (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)
       || column.getType().getDbType().equals(ViewerType.dbTypes.CLOB))) {
       final TemplateStatus template = getTemplateStatus();
-      template.setTemplate(ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+      final TemplateStatus detailedTemplate = getTemplateStatus();
+      if (ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
+        ViewerConfiguration.VIEWER_ENABLED)) {
+        template.setTemplate(DEFAULT_VIEWER_DOWNLOAD_LABEL_TEMPLATE);
+        detailedTemplate.setTemplate(DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE);
+      } else {
+        template.setTemplate(DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+        detailedTemplate.setTemplate(DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+      }
       status.updateSearchListTemplate(template);
-      status.updateDetailsTemplate(template);
+      status.updateDetailsTemplate(detailedTemplate);
     }
 
     return status;

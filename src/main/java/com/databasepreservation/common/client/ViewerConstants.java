@@ -522,18 +522,31 @@ public class ViewerConstants {
   /**
    * Template Engine
    */
+
   public static final String OPEN_TEMPLATE_ENGINE = "{{";
   public static final String CLOSE_TEMPLATE_ENGINE = "}}";
+  public static final String TEMPLATE_UV_LINK = "uv_link";
   public static final String TEMPLATE_LOB_DOWNLOAD_LABEL = "download_label";
   public static final String TEMPLATE_LOB_DOWNLOAD_LINK = "download_link";
   public static final String TEMPLATE_LOB_ROW_INDEX = "row_index";
   public static final String TEMPLATE_LOB_COLUMN_INDEX = "column_index";
   public static final String TEMPLATE_LOB_AUTO_DETECTED_MIME_TYPE = "auto_detected_mime_type";
   public static final String TEMPLATE_LOB_AUTO_DETECTED_EXTENSION = "auto_detected_extension";
+  public static final String DEFAULT_VIEWER_DOWNLOAD_LABEL_TEMPLATE = "<a href=\""
+    + ViewerConstants.OPEN_TEMPLATE_ENGINE
+    + ViewerConstants.TEMPLATE_UV_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + ViewerConstants.OPEN_TEMPLATE_ENGINE
+    + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">"
+    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL
+    + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</a>";
   public static final String DEFAULT_DOWNLOAD_LABEL_TEMPLATE = "<a href=\"" + ViewerConstants.OPEN_TEMPLATE_ENGINE
     + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">"
     + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL
     + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</a>";
+  public static final String DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE = "<iframe class=\"embedded-viewer\" src=\""
+    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_UV_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE
+    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK
+    + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">" + ViewerConstants.OPEN_TEMPLATE_ENGINE
+    + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</iframe>";
 
   /**
    * SIARD prefixes
@@ -569,4 +582,12 @@ public class ViewerConstants {
    */
   private ViewerConstants() {
   }
+
+  /**
+   * External viewer information
+   */
+
+  public static final String UV_EXTERNAL_VIEWER_SERVICE_NAME = "ui.viewer.universalViewer.service_name";
+  public static final String PRESENTATION_EXTERNAL_SERVICE_NAME = "ui.viewer.presentation.service_name";
+  public static final String VIEWER_ENABLED = "ui.viewer.enabled";
 }

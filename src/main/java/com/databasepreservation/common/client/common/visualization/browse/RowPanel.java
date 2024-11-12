@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
@@ -335,6 +334,7 @@ public class RowPanel extends RightPanel {
           String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
           if (template != null && !template.isEmpty()) {
             String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+              ViewerConstants.TEMPLATE_UV_LINK, RestUtils.createUVLob(),
               ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
                 table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
             safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
@@ -350,6 +350,7 @@ public class RowPanel extends RightPanel {
           String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
           if (template != null && !template.isEmpty()) {
             String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+              ViewerConstants.TEMPLATE_UV_LINK, RestUtils.createUVLob(),
               ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
                 table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
             safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
@@ -420,15 +421,12 @@ public class RowPanel extends RightPanel {
             null, false, new ArrayList<>());
           CollectionService.Util.call((IndexResult<ViewerRow> result) -> {
             if (result.getTotalCount() >= 1) {
-              GWT.log("count -> " +result.getTotalCount());
               RowField rowField;
               String json = JSOUtils.cellsToJson(result.getResults().get(0).getCells(), nestedTable);
               String s = JavascriptUtils.compileTemplate(template, json);
               if (columnStatus.getTypeName().contains("BINARY LARGE OBJECT")) {
                 String templateLob = "<a href=\"{{download_link}}\">{{download_label}}</a>";
-                GWT.log("collumn status ->" + columnStatus.toString());
                 int originalCollumnIndex = 0;
-                GWT.log("collumn status -> " + result.getResults().get(0).getCells());
 
                 //loop to find the original column index
                 for (Map.Entry<String, ViewerCell> entry : result.getResults().get(0).getCells().entrySet()) {
@@ -442,9 +440,8 @@ public class RowPanel extends RightPanel {
                   rowField = RowField.createInstance(new Label(s).getText(), new HTML(messages.rowPanelTextForLobUnavailable()));
                 } else {
                   SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
-                  GWT.log("uuid -> " + result.getResults().get(0).toString());
-                  GWT.log("id -> " + columnStatus.getId());
                   json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+                          ViewerConstants.TEMPLATE_UV_LINK, RestUtils.createUVLob(),
                           ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
                                   nestedTable.getSchemaName(), nestedTable.getName(), result.getResults().get(0).getUuid(), originalCollumnIndex));
                   safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(templateLob, json));
@@ -457,7 +454,6 @@ public class RowPanel extends RightPanel {
               }
 
               rowField.addColumnDescription(columnStatus.getCustomDescription());
-              GWT.log("rowField -> " + rowField.toString());
               panel.add(rowField);
             }
           }).findRows(database.getUuid(), database.getUuid(), nestedTable.getSchemaName(), nestedTable.getName(),

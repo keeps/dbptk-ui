@@ -137,6 +137,9 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public static final String RELOAD_DBPTK_VIEWER_PROPERTIES = "ui.reload.viewer.properties";
   public static final String RELOAD_DBPTK_VIEWER_PROPERTIES_PERIOD = "ui.reload.viewer.properties.period";
+  public static final String UV_EXTERNAL_VIEWER_SERVICE_NAME = "ui.viewer.universalViewer.service_name";
+  public static final String PRESENTATION_EXTERNAL_SERVICE_NAME = "ui.viewer.presentation.service_name";
+  public static final String VIEWER_ENABLED = "ui.viewer.enabled";
 
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.APPLICATION_ENV_SERVER;

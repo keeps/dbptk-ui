@@ -287,7 +287,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
               String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
               if (template != null && !template.isEmpty()) {
                 String json = JSOUtils.cellsToJson(cells, nestedTable);
-                GWT.log("json -> " + json);
                 String blob = getBlobKey(configColumn.getTypeName());
                 if (!blob.isEmpty() && json.contains(blob)) {
                   String tempTemplate = template.replace("{{" + blob + "}}", "");
@@ -295,8 +294,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
                   if (tempTemplate.isEmpty())
                     tempTemplate = messages.row_downloadLOB();
                   template = "<a href=\"" + com.google.gwt.core.client.GWT.getHostPageBaseURL() + "{{" + blob + "}}\">"
-                    +
-                          tempTemplate + "</a>";
+                    + tempTemplate + "</a>";
                   String s = JavascriptUtils.compileTemplate(template, json);
                   aggregationList.add(s);
                 }
@@ -320,7 +318,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           } else {
             if (!aggregationList.isEmpty()) {
               ret = SafeHtmlUtils.fromSafeConstant(aggregationList.get(0));
-              GWT.log("ret -> " + ret.asString());
             }
           }
         }
@@ -432,6 +429,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
     if (template != null && !template.isEmpty()) {
       String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+        ViewerConstants.TEMPLATE_UV_LINK, RestUtils.createUVLob(),
         ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
           table.getSchemaName(), table.getName(), row.getUuid(), columnIndex));
       return SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
