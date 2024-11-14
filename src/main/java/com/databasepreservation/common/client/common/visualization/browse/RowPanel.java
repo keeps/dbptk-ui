@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.google.gwt.http.client.URL;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
@@ -76,6 +77,9 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
+
+import static com.databasepreservation.common.client.tools.HistoryManager.HISTORY_SEP_ESCAPE;
+import static com.databasepreservation.common.client.tools.HistoryManager.HISTORY_SEP_REGEX;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -290,7 +294,7 @@ public class RowPanel extends RightPanel {
         }
 
         Hyperlink hyperlink = new Hyperlink(refName,
-          HistoryManager.linkToForeignKey(database.getUuid(), ref.refTable.getId(), columnNamesAndValues));
+          URL.decode(HistoryManager.linkToForeignKey(database.getUuid(), ref.refTable.getId(), columnNamesAndValues)));
         hyperlink.addStyleName("related-records-link");
         b.appendHtmlConstant(hyperlink.toString());
         firstRef = false;

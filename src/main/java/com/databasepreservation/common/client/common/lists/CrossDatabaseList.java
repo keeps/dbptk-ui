@@ -109,7 +109,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, SafeHtml> nameColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getName() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getName())
           : SafeHtmlUtils.fromString("unknown");
       }
@@ -118,7 +118,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, SafeHtml> description = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getDescription() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDescription())
           : SafeHtmlUtils.fromString("unknown");
       }
@@ -127,7 +127,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, SafeHtml> dbmsColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getDatabaseProduct() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDatabaseProduct())
           : SafeHtmlUtils.fromString("unknown");
       }
@@ -136,7 +136,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, SafeHtml> dataOwnerColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getDataOwner() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDataOwner())
           : SafeHtmlUtils.fromString("unknown");
       }
@@ -145,7 +145,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, SafeHtml> archivalDateColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getArchivalDate() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getArchivalDate().substring(0, 10))
           : null;
       }
