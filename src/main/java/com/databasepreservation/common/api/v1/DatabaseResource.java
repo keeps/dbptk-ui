@@ -206,6 +206,10 @@ public class DatabaseResource implements DatabaseService {
         }
       }
 
+      if (collections.isEmpty()) {
+        return new IndexResult<>();
+      }
+
       String collectionAlias = SolrUtils.createSearchAllAlias(ViewerFactory.getSolrClient(),
         "alias-" + UUID.randomUUID(), collections);
 
