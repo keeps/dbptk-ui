@@ -7,6 +7,8 @@
  */
 package com.databasepreservation.common.api.v1;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
@@ -42,13 +43,14 @@ public class JobResource implements JobService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       final IndexResult<ViewerJob> result = ViewerFactory.getSolrManager().find(ViewerJob.class, findRequest.filter,
         findRequest.sorter, findRequest.sublist, findRequest.facets);
       return I18nUtility.translate(result, ViewerJob.class, locale);
-    } catch (GenericException | RequestNotValidException e) {
+    } catch (GenericException | RequestNotValidException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

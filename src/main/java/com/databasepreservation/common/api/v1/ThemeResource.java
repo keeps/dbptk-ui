@@ -10,6 +10,7 @@ package com.databasepreservation.common.api.v1;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.v2.common.Pair;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +50,7 @@ public class ThemeResource {
     if (themeResource.getSecond() != null) {
       return ApiUtils.okResponse(Theme.getThemeResourceStreamResponse(themeResource), request);
     } else {
-      throw new NotFoundException("File not found: " + resourceId);
+      throw new RESTException(new NotFoundException("File not found: " + resourceId));
     }
   }
 }

@@ -29,11 +29,11 @@ import java.util.zip.ZipOutputStream;
 
 import com.databasepreservation.common.api.utils.ExtraMediaType;
 import com.databasepreservation.model.exception.ModuleException;
+import com.databasepreservation.common.api.exceptions.RESTException;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.exceptions.RequestNotValidException;
+import org.roda.core.data.exceptions.*;
 import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.springframework.batch.core.BatchStatus;
@@ -42,6 +42,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
@@ -74,9 +75,7 @@ import com.databasepreservation.common.api.v1.utils.ZipOutputStreamSingleRow;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchInfo;
-import com.databasepreservation.common.client.exceptions.AuthorizationException;
-import com.databasepreservation.common.client.exceptions.RESTException;
-import com.databasepreservation.common.client.exceptions.SavedSearchException;
+import com.databasepreservation.common.exceptions.SavedSearchException;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.Filter;
@@ -151,10 +150,11 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
-      java.nio.file.Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID,
+      user = controllerAssistant.checkRoles(request);
+      Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID,
         ReporterType.BROWSE);
       String filename = reportPath.getFileName().toString();
       if (!Files.exists(reportPath)) {
@@ -165,8 +165,8 @@ public class CollectionResource implements CollectionService {
       return ResponseEntity.ok()
         .header("Content-Disposition", "attachment; filename=\"" + reportPath.toFile().getName() + "\"")
         .contentLength(reportPath.toFile().length())
-        .contentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM).body(resource);
-    } catch (NotFoundException | IOException e) {
+        .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+    } catch (NotFoundException | IOException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -181,27 +181,28 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user;
+    User user = new User();
     // Checks if property ui.plugin.loadOnAccess is enable. If so, let the
     // authenticated user
     // creates a collection for that SIARD. If the user is a guest it will throw an
     // AuthorizationException
-    final boolean loadOnAccess = ViewerFactory.getViewerConfiguration().getViewerConfigurationAsBoolean(false,
-      ViewerConstants.PROPERTY_PLUGIN_LOAD_ON_ACCESS);
-    if (loadOnAccess) {
-      user = UserUtility.getUser(request);
-      if (user.isGuest()) {
-        controllerAssistant.registerAction(UserUtility.getGuest(request), LogEntryState.UNAUTHORIZED);
-        throw new AuthorizationException("The user '" + user.getId() + "' does not have all needed permissions");
-      }
-    } else {
-      user = controllerAssistant.checkRoles(request);
-    }
-
     try {
+      final boolean loadOnAccess = ViewerFactory.getViewerConfiguration().getViewerConfigurationAsBoolean(false,
+        ViewerConstants.PROPERTY_PLUGIN_LOAD_ON_ACCESS);
+      if (loadOnAccess) {
+        user = UserUtility.getUser(request);
+        if (user.isGuest()) {
+          controllerAssistant.registerAction(UserUtility.getGuest(request), LogEntryState.UNAUTHORIZED);
+          throw new AuthorizationDeniedException(
+            "The user '" + user.getId() + "' does not have all needed permissions");
+        }
+      } else {
+        user = controllerAssistant.checkRoles(request);
+      }
+
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
       return new StringResponse(SIARDController.loadFromLocal(database.getPath(), databaseUUID, siardVersion));
-    } catch (GenericException | NotFoundException e) {
+    } catch (GenericException | NotFoundException | AuthorizationException | AuthorizationDeniedException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -215,10 +216,13 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       return ProgressData.getInstance(databaseUUID);
+    } catch (AuthorizationException e) {
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
@@ -230,9 +234,10 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
       if (SolrClientFactory.get().deleteCollection(collectionName)) {
         Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
@@ -242,7 +247,7 @@ public class CollectionResource implements CollectionService {
         ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
         return true;
       }
-    } catch (GenericException | RequestNotValidException e) {
+    } catch (GenericException | RequestNotValidException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -261,13 +266,14 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
         .getConfigurationCollection(databaseUUID, collectionUUID);
       return Collections.singletonList(configurationCollection);
-    } catch (GenericException e) {
+    } catch (GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -281,11 +287,12 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, status);
-    } catch (ViewerException e) {
+    } catch (ViewerException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -305,10 +312,11 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
-      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
+      user = controllerAssistant.checkRoles(request);
+      Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
         .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
       if (Files.exists(path)) {
         return JsonTransformer.readObjectFromFile(path, DenormalizeConfiguration.class);
@@ -317,9 +325,9 @@ public class CollectionResource implements CollectionService {
         ViewerTable table = database.getMetadata().getTable(tableUUID);
         return new DenormalizeConfiguration(databaseUUID, table);
       }
-    } catch (ViewerException | NotFoundException | GenericException e) {
+    } catch (ViewerException | NotFoundException | GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
-      throw new RESTException(e.getMessage());
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
@@ -333,26 +341,25 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
-
-    // check if there is no job running on table
-    for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
-      if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
-        .equals(tableUUID)) {
-        throw new RESTException("A job is already running on this table",
-          com.google.gwt.http.client.Response.SC_CONFLICT);
-      }
-    }
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
+      // check if there is no job running on table
+      for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
+        if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
+          .equals(tableUUID)) {
+          throw new RESTException(new AlreadyExistsException("A job is already running on this table"));
+        }
+      }
       JsonTransformer.writeObjectToFile(configuration,
         ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
           .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION));
       ViewerFactory.getConfigurationManager().addDenormalization(databaseUUID,
         ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
-    } catch (GenericException | ViewerException e) {
+    } catch (GenericException | ViewerException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
-      throw new RESTException(e.getMessage());
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
@@ -366,19 +373,20 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       ViewerFactory.getConfigurationManager().removeDenormalization(databaseUUID,
         ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
-      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
+      Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
         .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
       if (Files.exists(path)) {
         Files.delete(path);
       }
-    } catch (GenericException | IOException e) {
+    } catch (GenericException | IOException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
-      throw new RESTException(e.getMessage());
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
@@ -392,26 +400,27 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
-
-    // check if there is no job running on table
-    for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
-      if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
-        .equals(tableUUID)) {
-        throw new RESTException("A job is already running on this table",
-          com.google.gwt.http.client.Response.SC_CONFLICT);
-      }
-    }
-
-    JobParametersBuilder jobBuilder = new JobParametersBuilder();
-    jobBuilder.addDate(ViewerConstants.SOLR_SEARCHES_DATE_ADDED, new Date());
-    jobBuilder.addString(ViewerConstants.INDEX_ID, SolrUtils.randomUUID());
-    jobBuilder.addString(ViewerConstants.CONTROLLER_COLLECTION_ID_PARAM, collectionUUID);
-    jobBuilder.addString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
-    jobBuilder.addString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
-    JobParameters jobParameters = jobBuilder.toJobParameters();
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
+
+      // check if there is no job running on table
+      for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
+        if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
+          .equals(tableUUID)) {
+          throw new RESTException(new AlreadyExistsException("A job is already running on this table"));
+        }
+      }
+
+      JobParametersBuilder jobBuilder = new JobParametersBuilder();
+      jobBuilder.addDate(ViewerConstants.SOLR_SEARCHES_DATE_ADDED, new Date());
+      jobBuilder.addString(ViewerConstants.INDEX_ID, SolrUtils.randomUUID());
+      jobBuilder.addString(ViewerConstants.CONTROLLER_COLLECTION_ID_PARAM, collectionUUID);
+      jobBuilder.addString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+      jobBuilder.addString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
+      JobParameters jobParameters = jobBuilder.toJobParameters();
+
       JobController.addMinimalSolrBatchJob(jobParameters);
       JobExecution jobExecution = jobLauncher.run(job, jobParameters);
       JobController.editSolrBatchJob(jobExecution);
@@ -420,9 +429,9 @@ public class CollectionResource implements CollectionService {
         JobController.setMessageToSolrBatchJob(jobExecution, "Queue is full, please try later");
       }
     } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-      | JobParametersInvalidException | NotFoundException | GenericException e) {
+      | JobParametersInvalidException | NotFoundException | GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
-      throw new RESTException(e.getMessage());
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
@@ -439,17 +448,18 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     long count = 0;
 
     try {
+      user = controllerAssistant.checkRoles(request);
       final IndexResult<ViewerRow> viewerRowIndexResult = ViewerFactory.getSolrManager().findRows(databaseUUID,
         findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn,
         findRequest.extraParameters);
       count = viewerRowIndexResult.getTotalCount();
       return viewerRowIndexResult;
-    } catch (GenericException | RequestNotValidException e) {
+    } catch (GenericException | RequestNotValidException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -467,16 +477,17 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       final ViewerRow viewerRow = ViewerFactory.getSolrManager().retrieveRows(databaseUUID, rowIndex);
       if (viewerRow.getTableId().equals(schema + "." + table)) {
         return viewerRow;
       } else {
         throw new NotFoundException("Row not found");
       }
-    } catch (NotFoundException | GenericException e) {
+    } catch (NotFoundException | GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -497,11 +508,12 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       ViewerRow row = solrManager.retrieveRows(databaseUUID, rowIndex);
       final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
@@ -523,7 +535,7 @@ public class CollectionResource implements CollectionService {
           return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex, version);
         }
       }
-    } catch (NotFoundException | GenericException | IOException e) {
+    } catch (NotFoundException | GenericException | IOException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -568,8 +580,8 @@ public class CollectionResource implements CollectionService {
   private ResponseEntity<StreamingResponseBody> handleExternalLobDownload(TableStatus tableConfiguration, ViewerRow row,
     int columnIndex) throws IOException {
     final String lobLocation = row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue();
-    final java.nio.file.Path lobPath = Paths.get(lobLocation);
-    final java.nio.file.Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath()
+    final Path lobPath = Paths.get(lobLocation);
+    final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath()
       .resolve(lobPath);
 
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
@@ -616,7 +628,7 @@ public class CollectionResource implements CollectionService {
               Files.copy(p, zos);
               zos.closeEntry();
             } catch (IOException e) {
-              throw new RESTException("Error creating zip", e);
+              throw new RESTException(e);
             }
           });
         }
@@ -666,13 +678,14 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     FindRequest findRequest = null;
 
     try {
+      user = controllerAssistant.checkRoles(request);
       final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       findRequest = JsonUtils.getObjectFromJson(findRequestJson, FindRequest.class);
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
@@ -686,7 +699,7 @@ public class CollectionResource implements CollectionService {
         return handleCSVExportWithLobs(solrManager, configurationCollection, database, databaseUUID, configTable,
           findRequest, zipFilename, filename, exportDescription, fieldsToHeader);
       }
-    } catch (GenericException | RequestNotValidException | NotFoundException e) {
+    } catch (GenericException | RequestNotValidException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -725,9 +738,10 @@ public class CollectionResource implements CollectionService {
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       final ViewerRow viewerRow = solrManager.retrieveRows(databaseUUID, rowIndex);
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
@@ -744,7 +758,7 @@ public class CollectionResource implements CollectionService {
       } else {
         throw new NotFoundException("Table not found.");
       }
-    } catch (GenericException | NotFoundException e) {
+    } catch (GenericException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -828,23 +842,25 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
-
-    String searchInfoJson = JsonUtils.getJsonFromObject(searchInfo);
-
+    User user = new User();
     SavedSearch savedSearch = new SavedSearch();
-    savedSearch.setUuid(SolrUtils.randomUUID());
-    savedSearch.setName(name);
-    savedSearch.setDescription(description);
-    savedSearch.setDatabaseUUID(databaseUUID);
-    savedSearch.setTableUUID(tableUUID);
-    savedSearch.setTableName(tableUUID);
-    savedSearch.setSearchInfoJson(searchInfoJson);
 
     try {
+      user = controllerAssistant.checkRoles(request);
+
+      String searchInfoJson = JsonUtils.getJsonFromObject(searchInfo);
+
+      savedSearch.setUuid(SolrUtils.randomUUID());
+      savedSearch.setName(name);
+      savedSearch.setDescription(description);
+      savedSearch.setDatabaseUUID(databaseUUID);
+      savedSearch.setTableUUID(tableUUID);
+      savedSearch.setTableName(tableUUID);
+      savedSearch.setSearchInfoJson(searchInfoJson);
+
       ViewerFactory.getSolrManager().addSavedSearch(savedSearch);
       return new StringResponse(savedSearch.getUuid());
-    } catch (NotFoundException | GenericException e) {
+    } catch (NotFoundException | GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -863,16 +879,17 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     long count = 0;
 
     try {
+      user = controllerAssistant.checkRoles(request);
       final IndexResult<SavedSearch> savedSearchIndexResult = ViewerFactory.getSolrManager().find(SavedSearch.class,
         findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets);
       count = savedSearchIndexResult.getTotalCount();
       return savedSearchIndexResult;
-    } catch (GenericException | RequestNotValidException e) {
+    } catch (GenericException | RequestNotValidException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -889,11 +906,12 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       return ViewerFactory.getSolrManager().retrieve(SavedSearch.class, savedSearchUUID);
-    } catch (NotFoundException | GenericException e) {
+    } catch (NotFoundException | GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -909,11 +927,12 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       ViewerFactory.getSolrManager().editSavedSearch(databaseUUID, savedSearchUUID, name, description);
-    } catch (SavedSearchException e) {
+    } catch (SavedSearchException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -930,11 +949,12 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       ViewerFactory.getSolrManager().deleteSavedSearch(savedSearchUUID);
-    } catch (SavedSearchException e) {
+    } catch (SavedSearchException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

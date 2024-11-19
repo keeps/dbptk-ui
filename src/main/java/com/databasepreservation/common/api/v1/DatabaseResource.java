@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -26,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.FacetFieldResult;
@@ -72,7 +73,13 @@ public class DatabaseResource implements DatabaseService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user;
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+    } catch (AuthorizationException e) {
+      throw new RESTException(e);
+    }
 
     if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       if (user.isAdmin() || user.isWhiteList()) {
@@ -97,7 +104,14 @@ public class DatabaseResource implements DatabaseService {
   public IndexResult<ViewerDatabase> findAll(FindRequest findRequest, String localeString) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user;
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+    } catch (AuthorizationException e) {
+      throw new RESTException(e);
+    }
+
     if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       if (user.isAdmin() || user.isWhiteList()) {
         return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
@@ -115,11 +129,12 @@ public class DatabaseResource implements DatabaseService {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       return new StringResponse(SIARDController.loadMetadataFromLocal(path, siardVersion));
-    } catch (GenericException e) {
+    } catch (GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -330,13 +345,13 @@ public class DatabaseResource implements DatabaseService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
-
-    UserUtility.checkDatabasePermission(user, databaseUUID);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
+      UserUtility.checkDatabasePermission(user, databaseUUID);
       return ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-    } catch (NotFoundException | GenericException e) {
+    } catch (NotFoundException | GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -351,11 +366,12 @@ public class DatabaseResource implements DatabaseService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       return SIARDController.deleteAll(databaseUUID);
-    } catch (RequestNotValidException | GenericException | NotFoundException e) {
+    } catch (RequestNotValidException | GenericException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -370,12 +386,13 @@ public class DatabaseResource implements DatabaseService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       DatabaseStatus databaseStatus = ViewerFactory.getConfigurationManager().getDatabaseStatus(databaseUUID);
       return databaseStatus.getPermissions();
-    } catch (GenericException e) {
+    } catch (GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -390,11 +407,12 @@ public class DatabaseResource implements DatabaseService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       return SIARDController.updateDatabasePermissions(databaseUUID, permissions);
-    } catch (GenericException | ViewerException e) {
+    } catch (GenericException | ViewerException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -409,11 +427,12 @@ public class DatabaseResource implements DatabaseService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       return SIARDController.updateDatabaseSearchAllAvailability(databaseUUID);
-    } catch (GenericException | ViewerException | NotFoundException e) {
+    } catch (GenericException | ViewerException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

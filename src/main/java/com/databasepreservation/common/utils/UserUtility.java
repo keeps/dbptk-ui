@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.client.exceptions.AuthorizationException;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
@@ -129,8 +129,7 @@ public class UserUtility {
       }
     } catch (GenericException e) {
       throw new AuthorizationException(
-        "Unable to load the configuration file needed to access database. Deny the access for that reason",
-        com.google.gwt.http.client.Response.SC_UNAUTHORIZED);
+        "Unable to load the configuration file needed to access database. Deny the access for that reason");
     }
   }
 
@@ -144,8 +143,7 @@ public class UserUtility {
     // database without any permissions cannot be accessed by non-administrative
     // users
     if (databasePermissions.isEmpty()) {
-      throw new AuthorizationException("This database does not have any associated permissions",
-        com.google.gwt.http.client.Response.SC_UNAUTHORIZED);
+      throw new AuthorizationException("This database does not have any associated permissions");
     }
 
     for (String permission : databasePermissions) {
@@ -178,8 +176,7 @@ public class UserUtility {
     }
 
     throw new AuthorizationException(
-      "The user '" + user.getId() + "' does not have the permissions needed to access database",
-      com.google.gwt.http.client.Response.SC_UNAUTHORIZED);
+      "The user '" + user.getId() + "' does not have the permissions needed to access database");
   }
 
   private static String getPasswordOrTicket(final HttpServletRequest request, User user, String databaseUUID)

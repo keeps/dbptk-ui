@@ -5,12 +5,13 @@
  *
  * https://github.com/keeps/dbptk-ui
  */
-package com.databasepreservation.common.client.exceptions;
+package com.databasepreservation.common.exceptions;
+
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class AuthorizationException extends RESTException {
+public class AuthorizationException extends Exception {
   public AuthorizationException() {
   }
 
@@ -18,10 +19,6 @@ public class AuthorizationException extends RESTException {
     super(message);
   }
 
-  public AuthorizationException(String message, int statusCode) {
-    super(message);
-    setStatus(statusCode);
-  }
   public AuthorizationException(Throwable cause) {
     super(cause);
   }

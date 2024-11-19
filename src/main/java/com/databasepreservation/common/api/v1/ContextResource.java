@@ -14,6 +14,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +69,11 @@ public class ContextResource implements ContextService {
   @Override
   public Set<AuthorizationGroup> getAuthorizationGroupsList() {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    controllerAssistant.checkRoles(request);
+    try {
+      controllerAssistant.checkRoles(request);
+    } catch (AuthorizationException e) {
+      throw new RESTException(e);
+    }
     AuthorizationGroupsList authorizationGroupsList = ViewerConfiguration.getInstance()
       .getCollectionsAuthorizationGroupsWithDefault();
 
