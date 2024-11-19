@@ -15,20 +15,20 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.exceptions.AuthorizationException;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.user.User;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.google.common.collect.Sets;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -95,7 +95,7 @@ public class ControllerAssistant {
     }
   }
 
-  public User checkRoles(HttpServletRequest request) {
+  public User checkRoles(HttpServletRequest request) throws AuthorizationException {
     if (!ViewerFactory.getViewerConfiguration().getIsAuthenticationEnabled()) {
       final User noAuthenticationUser = UserUtility.getNoAuthenticationUser();
       noAuthenticationUser.setIpAddress(request.getRemoteAddr());
@@ -121,7 +121,7 @@ public class ControllerAssistant {
     }
   }
 
-  private void checkWhitelistedUserRoles(HttpServletRequest request, User user) {
+  private void checkWhitelistedUserRoles(HttpServletRequest request, User user) throws AuthorizationException {
     if (!user.getAllRoles().isEmpty()) {
       try {
         UserUtility.checkRoles(user, this.getClass());

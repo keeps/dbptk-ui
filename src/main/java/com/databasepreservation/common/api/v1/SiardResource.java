@@ -26,8 +26,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
 import com.databasepreservation.common.client.models.progress.ValidationProgressData;
@@ -59,14 +60,15 @@ public class SiardResource implements SiardService {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     String path = "";
     try {
+      user = controllerAssistant.checkRoles(request);
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
       path = database.getPath();
       SIARDController.deleteSIARDFileFromPath(database.getPath(), databaseUUID);
-    } catch (GenericException | NotFoundException e) {
+    } catch (GenericException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -90,17 +92,18 @@ public class SiardResource implements SiardService {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     String result = null;
     String siardPath = "";
     try {
+      user = controllerAssistant.checkRoles(request);
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
       java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
       siardPath = siardFilesPath.resolve(database.getPath()).toString();
       result = getValidationReportPath(validationReportPath, database.getMetadata().getName());
       return SIARDController.validateSIARD(databaseUUID, siardPath, result, allowedTypePath, skipAdditionalChecks);
-    } catch (GenericException | NotFoundException e) {
+    } catch (GenericException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -116,10 +119,13 @@ public class SiardResource implements SiardService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       return ValidationProgressData.getInstance(databaseUUID);
+    } catch (AuthorizationException e) {
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
@@ -134,22 +140,23 @@ public class SiardResource implements SiardService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     ViewerDatabase database = null;
     try {
+      user = controllerAssistant.checkRoles(request);
       database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       File file = new File(database.getValidatorReportPath());
       if (!file.exists()) {
-        throw new RESTException(new NotFoundException("validation report file not found"));
+        throw new NotFoundException("validation report file not found");
       }
 
       InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
       return ResponseEntity.ok().header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"")
         .contentLength(file.length()).contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
-    } catch (NotFoundException | GenericException | FileNotFoundException e) {
+    } catch (NotFoundException | GenericException | FileNotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -163,11 +170,12 @@ public class SiardResource implements SiardService {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       SIARDController.deleteValidatorReportFileFromPath(path, databaseUUID);
-    } catch (GenericException e) {
+    } catch (GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -186,11 +194,12 @@ public class SiardResource implements SiardService {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       return SIARDController.updateMetadataInformation(databaseUUID, path, parameters, updateOnModel);
-    } catch (GenericException e) {
+    } catch (GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -205,12 +214,13 @@ public class SiardResource implements SiardService {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
       return database.getMetadata();
-    } catch (GenericException | NotFoundException e) {
+    } catch (GenericException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.api.utils.Theme;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -49,7 +50,7 @@ public class ThemeResource {
     if (themeResource.getSecond() != null) {
       return ApiUtils.okResponse(Theme.getThemeResourceStreamResponse(themeResource), request);
     } else {
-      throw new NotFoundException("File not found: " + resourceId);
+      throw new RESTException(new NotFoundException("File not found: " + resourceId));
     }
   }
 }

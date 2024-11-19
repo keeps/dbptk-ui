@@ -31,10 +31,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import com.databasepreservation.common.api.utils.ApiResponseMessage;
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.FileService;
@@ -60,13 +61,14 @@ public class FileResource implements FileService {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
-    final java.nio.file.Path path = ViewerConfiguration.getInstance().getSIARDFilesPath();
     try {
+      user = controllerAssistant.checkRoles(request);
+      final java.nio.file.Path path = ViewerConfiguration.getInstance().getSIARDFilesPath();
       return java.nio.file.Files.walk(path).filter(java.nio.file.Files::isRegularFile).sorted(Comparator.naturalOrder())
         .map(java.nio.file.Path::getFileName).map(java.nio.file.Path::toString).collect(Collectors.toList());
-    } catch (IOException e) {
+    } catch (IOException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -80,9 +82,10 @@ public class FileResource implements FileService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
       java.nio.file.Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString(siardFilesPath.toString(),
         ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
@@ -98,7 +101,7 @@ public class FileResource implements FileService {
       } else {
         throw new NotFoundException("SIARD file not found");
       }
-    } catch (NotFoundException | FileNotFoundException e) {
+    } catch (NotFoundException | FileNotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -112,13 +115,14 @@ public class FileResource implements FileService {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user = new User();
 
     try {
+      user = controllerAssistant.checkRoles(request);
       java.nio.file.Files.walk(ViewerConfiguration.getInstance().getSIARDFilesPath()).map(java.nio.file.Path::toFile)
         .filter(p -> p.getName().equals(filename)).forEach(File::delete);
       LOGGER.info("SIARD file removed from system ({})", filename);
-    } catch (IOException e) {
+    } catch (IOException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(new NotFoundException("Could not delete SIARD file: " + filename + " from the system"));
     } finally {
@@ -132,28 +136,30 @@ public class FileResource implements FileService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
-
-    String mediaType = ApiUtils.getMediaType(acceptFormat, request);
-    String filename = resource.getOriginalFilename();
-    String fileExtension = Files.getFileExtension(filename);
-
-    if (!fileExtension.equals(ViewerConstants.SIARD)) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Must be a SIARD file"));
-    }
-
-    java.nio.file.Path path = Paths.get(ViewerConfiguration.getInstance().getSIARDFilesPath().toString(), filename);
+    User user = new User();
+    String filename = "";
 
     // delegate action to controller
     try {
+      user = controllerAssistant.checkRoles(request);
+
+      String mediaType = ApiUtils.getMediaType(acceptFormat, request);
+      filename = resource.getOriginalFilename();
+      String fileExtension = Files.getFileExtension(filename);
+
+      if (!fileExtension.equals(ViewerConstants.SIARD)) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Must be a SIARD file"));
+      }
+
+      java.nio.file.Path path = Paths.get(ViewerConfiguration.getInstance().getSIARDFilesPath().toString(), filename);
       Browser.createFile(resource.getInputStream(), filename, path);
       return ResponseEntity.ok().body(new ApiResponseMessage(ApiResponseMessage.OK, path.toString()));
     } catch (AlreadyExistsException e) {
       state = LogEntryState.FAILURE;
       return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(new ApiResponseMessage(ApiResponseMessage.ERROR, "File already Exist"));
-    } catch (GenericException | IOException e) {
+    } catch (GenericException | IOException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
