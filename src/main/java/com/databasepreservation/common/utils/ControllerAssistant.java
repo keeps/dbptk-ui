@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.exceptions.AuthorizationException;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.server.ViewerConfiguration;
@@ -69,7 +69,7 @@ public class ControllerAssistant {
     return null;
   }
 
-  public User checkRoles(HttpServletRequest request) {
+  public User checkRoles(HttpServletRequest request) throws AuthorizationException {
     if (!ViewerFactory.getViewerConfiguration().getIsAuthenticationEnabled()) {
       final User noAuthenticationUser = UserUtility.getNoAuthenticationUser();
       noAuthenticationUser.setIpAddress(request.getRemoteAddr());

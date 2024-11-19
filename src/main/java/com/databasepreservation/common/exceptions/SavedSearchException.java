@@ -5,7 +5,7 @@
  *
  * https://github.com/keeps/dbptk-ui
  */
-package com.databasepreservation.common.client.exceptions;
+package com.databasepreservation.common.exceptions;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
