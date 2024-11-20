@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.tools.HistoryManager;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -54,9 +55,11 @@ import config.i18n.client.ClientMessages;
  */
 public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private String searchValue;
 
   public CrossDatabaseList() {
     this(new Filter(), null, null, false, false);
+    this.searchValue="";
   }
 
   public CrossDatabaseList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
@@ -67,10 +70,46 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   protected void configureDisplay(CellTable<ViewerDatabase> display) {
     display.setSelectionModel(display.getSelectionModel(), DefaultSelectionEventManager.createBlacklistManager(4, 10));
 
+    display.addCellPreviewHandler(event -> {
+      if (event.getNativeEvent().getType().equals("click")) {
+        int columnIndex = event.getColumn();
+        ViewerDatabase database = event.getValue();
+
+        UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+          @Override
+          public void onSuccess(User user) {
+            if (database != null) {
+              if (user.isAdmin()) {
+                if (columnIndex == 7) {
+                  HistoryManager.gotoDatabaseSearchWithValue(database.getUuid(), searchValue);
+                  getSelectionModel().clear();
+                } else {
+                  HistoryManager.gotoSIARDInfo(database.getUuid());
+                  getSelectionModel().clear();
+                }
+              } else {
+                if (columnIndex == 4) {
+                  if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+                    HistoryManager.gotoDatabaseSearchWithValue(database.getUuid(), searchValue);
+                  }
+                  getSelectionModel().clear();
+                } else {
+                  if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+                    HistoryManager.gotoDatabase(database.getUuid());
+                  }
+                  getSelectionModel().clear();
+                }
+              }
+            }
+          }
+        });
+      }
+    });
+
     Column<ViewerDatabase, SafeHtml> nameColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getName() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getName())
           : SafeHtmlUtils.fromString("unknown");
       }
@@ -79,7 +118,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, SafeHtml> description = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getDescription() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDescription())
           : SafeHtmlUtils.fromString("unknown");
       }
@@ -88,7 +127,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, SafeHtml> dbmsColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getDatabaseProduct() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDatabaseProduct())
           : SafeHtmlUtils.fromString("unknown");
       }
@@ -97,7 +136,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, SafeHtml> dataOwnerColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getDataOwner() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDataOwner())
           : SafeHtmlUtils.fromString("unknown");
       }
@@ -106,7 +145,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, SafeHtml> archivalDateColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getArchivalDate() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getArchivalDate().substring(0, 10))
           : null;
       }
@@ -127,21 +166,6 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     });
 
-    Column<ViewerDatabase, SafeHtml> sizeColumn = new TooltipColumn<ViewerDatabase>() {
-      @Override
-      public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(Humanize.readableFileSize(database.getSize()))
-          : SafeHtmlUtils.fromString("unknown");
-      }
-    };
-
-    Column<ViewerDatabase, SafeHtml> versionColumn = new TooltipColumn<ViewerDatabase>() {
-      @Override
-      public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(database.getVersion()) : SafeHtmlUtils.fromString("unknown");
-      }
-    };
-
     Column<ViewerDatabase, SafeHtml> validColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
@@ -159,7 +183,11 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, String> searchHitsColumn = new ButtonColumn<ViewerDatabase>() {
       @Override
       public String getValue(ViewerDatabase database) {
-        return database != null ? String.valueOf(database.getSearchHits()) : "unknown";
+        if (searchValue != null && !searchValue.isEmpty()) {
+          return database != null ? String.valueOf(database.getSearchHits()) + " results" : "unknown";
+        } else {
+          return database != null ? "" : "unknown";
+        }
       }
     };
 
@@ -173,8 +201,6 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
           addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
           if (user.isAdmin()) {
             addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
-            addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
-            addColumn(versionColumn, messages.managePageTableHeaderTextForSIARDVersion(), true, TextAlign.NONE, 4);
             addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE,
               5);
             addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
@@ -189,8 +215,6 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
       addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);
       addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
-      addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
-      addColumn(versionColumn, messages.managePageTableHeaderTextForSIARDVersion(), true, TextAlign.NONE, 4);
       addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE, 5);
       addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
       addColumn(searchHitsColumn, messages.managePageTableHeaderTextForSearchHits(), true, TextAlign.NONE, 5);
@@ -211,6 +235,14 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets());
 
     DatabaseService.Util.call(callback).findAll(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+  }
+
+  public String getSearchValue() {
+    return searchValue;
+  }
+
+  public void setSearchValue(String searchValue) {
+    this.searchValue = searchValue;
   }
 
   @Override

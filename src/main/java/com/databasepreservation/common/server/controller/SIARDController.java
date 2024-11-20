@@ -7,9 +7,6 @@
  */
 package com.databasepreservation.common.server.controller;
 
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -620,6 +617,8 @@ public class SIARDController {
       viewerDatabase.setPath(siardPath.toAbsolutePath().toString());
       viewerDatabase.setSize(siardPath.toFile().length());
       viewerDatabase.setVersion(siardEdition.getSIARDVersion());
+      viewerDatabase.setAvailableToSearchAll(ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(true,
+        ViewerConfiguration.SIARD_AVAILABLE_TO_SEARCH_ALL));
       viewerDatabase.setValidationStatus(ViewerDatabaseValidationStatus.NOT_VALIDATED);
 
       Set<String> authorizationDefault = ViewerConfiguration.getInstance().getCollectionsAuthorizationDefault();
@@ -840,6 +839,13 @@ public class SIARDController {
     return permissions;
   }
 
+  public static boolean updateDatabaseSearchAllAvailability(String databaseUUID)
+    throws GenericException, ViewerException, NotFoundException {
+    final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+    return solrManager.updateDatabaseSearchAllAvailability(databaseUUID, !database.isAvailableToSearchAll());
+  }
+
   public static boolean deleteAll(String databaseUUID)
     throws NotFoundException, GenericException, RequestNotValidException {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
@@ -865,9 +871,10 @@ public class SIARDController {
 
     if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
       || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
-      final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
+      final String collectionName = ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
       if (SolrClientFactory.get().deleteCollection(collectionName)) {
-        Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
+        Filter savedSearchFilter = new Filter(
+          new SimpleFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
         SolrUtils.delete(ViewerFactory.getSolrClient(), SolrDefaultCollectionRegistry.get(SavedSearch.class),
           savedSearchFilter);
 

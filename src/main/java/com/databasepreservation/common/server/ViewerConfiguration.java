@@ -131,6 +131,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public static final String PROPERTY_BLOB_PREFIX_NAME = "ui.blob.prefix.name";
 
+  public static final String SIARD_AVAILABLE_TO_SEARCH_ALL = "ui.siard.available.search.all";
+
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.APPLICATION_ENV_SERVER;
 

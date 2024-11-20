@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
@@ -34,6 +35,7 @@ import com.databasepreservation.common.client.index.facets.FacetValue;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.facets.SimpleFacetParameter;
 import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
@@ -81,8 +83,9 @@ public class DatabaseResource implements DatabaseService {
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
 
-        FindRequest userFindRequest = new FindRequest(findRequest.classToReturn, getDatabaseFilterForUser(user),
-          findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.exportFacets, fieldsToReturn);
+        FindRequest userFindRequest = new FindRequest(findRequest.classToReturn,
+          getDatabaseFindFilterForUser(user, findRequest.filter), findRequest.sorter, findRequest.sublist,
+          findRequest.facets, findRequest.exportFacets, fieldsToReturn);
         return getViewerDatabaseIndexResult(userFindRequest, fieldsToReturn, controllerAssistant, user, state);
       }
     } else {
@@ -93,25 +96,14 @@ public class DatabaseResource implements DatabaseService {
   @Override
   public IndexResult<ViewerDatabase> findAll(FindRequest findRequest, String localeString) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-
     LogEntryState state = LogEntryState.SUCCESS;
     User user = controllerAssistant.checkRoles(request);
-
     if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       if (user.isAdmin() || user.isWhiteList()) {
-
         return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
       } else {
-        List<String> fieldsToReturn = new ArrayList<>();
-        fieldsToReturn.add(ViewerConstants.INDEX_ID);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
-
-        FindRequest userFindRequest = new FindRequest(findRequest.classToReturn, getDatabaseFilterForUser(user),
-          findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.exportFacets, fieldsToReturn);
-        return getCrossViewerDatabaseIndexResult(userFindRequest, controllerAssistant, user, state,
-          getDatabaseFilterForUser(user));
+        return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state,
+          getDatabaseFindAllFilterForUser(user));
       }
     } else {
       return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
@@ -176,15 +168,27 @@ public class DatabaseResource implements DatabaseService {
 
   private IndexResult<ViewerDatabase> getCrossViewerDatabaseIndexResult(FindRequest findRequest,
     ControllerAssistant controllerAssistant, User user, LogEntryState state) {
-    return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state, new Filter());
+    return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state,
+      new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, "true")));
   }
 
   private IndexResult<ViewerDatabase> getCrossViewerDatabaseIndexResult(FindRequest findRequest,
     ControllerAssistant controllerAssistant, User user, LogEntryState state, Filter userFilter) {
     long count = 0;
     try {
-      IterableDatabaseResult<ViewerDatabase> databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class,
-        userFilter, Sorter.NONE, findRequest.fieldsToReturn);
+      IterableDatabaseResult<ViewerDatabase> databases;
+      if (userFilter != null) {
+        List<String> fieldsToReturn = new ArrayList<>();
+        fieldsToReturn.add(ViewerConstants.INDEX_ID);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
+        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class, userFilter, Sorter.NONE,
+          fieldsToReturn);
+      } else {
+        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class, new Filter(), Sorter.NONE,
+          findRequest.fieldsToReturn);
+      }
 
       if (databases.getTotalCount() == 0) {
         return new IndexResult<>();
@@ -196,14 +200,18 @@ public class DatabaseResource implements DatabaseService {
       for (ViewerDatabase database : databases) {
         databaseMap.put(database.getUuid(), database);
         // only add the available collections
-        if(database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)){
+        if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
           String collectionName = ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid();
           collections.add(collectionName);
         }
       }
 
-      String collectionAlias = SolrUtils.crateSearchAllAlias(ViewerFactory.getSolrClient(), "alias-" + user.getUUID(),
-        collections);
+      if (collections.isEmpty()) {
+        return new IndexResult<>();
+      }
+
+      String collectionAlias = SolrUtils.createSearchAllAlias(ViewerFactory.getSolrClient(),
+        ViewerConstants.ALIAS_PREFIX + UUID.randomUUID(), collections);
 
       SimpleFacetParameter simpleFacetParameter = new SimpleFacetParameter(ViewerConstants.SOLR_ROWS_DATABASE_UUID,
         FacetParameter.SORT.COUNT);
@@ -213,11 +221,15 @@ public class DatabaseResource implements DatabaseService {
 
       final IndexResult<ViewerDatabase> facetsSearch = ViewerFactory.getSolrManager().findHits(ViewerDatabase.class,
         collectionAlias, findRequest.filter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter));
+
+      SolrUtils.deleteSearchAllAlias(ViewerFactory.getSolrClient(), collectionAlias);
+
       count = facetsSearch.getTotalCount();
       FacetFieldResult facetResults = facetsSearch.getFacetResults().get(0);
 
       IndexResult<ViewerDatabase> searchHitsResult = new IndexResult<>();
-      if(facetResults.getValues().size() < findRequest.sublist.getMaximumElementCount() && findRequest.sublist.getFirstElementIndex() == 0) {
+      if (facetResults.getValues().size() < findRequest.sublist.getMaximumElementCount()
+        && findRequest.sublist.getFirstElementIndex() == 0) {
         searchHitsResult.setTotalCount(facetResults.getValues().size());
       } else {
         searchHitsResult.setTotalCount(-1);
@@ -250,18 +262,64 @@ public class DatabaseResource implements DatabaseService {
     }
   }
 
-  private Filter getDatabaseFilterForUser(User user) {
+  private Filter getDatabaseFindAllFilterForUser(User user) {
     ArrayList<FilterParameter> permissionFilterParameters = new ArrayList<>();
-    // Only retrieve databases with AVAILABLE status
-    SimpleFilterParameter statusFilter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
+
+    // Only retrieve databases with AVAILABLE
+    SimpleFilterParameter statusFilter;
+    statusFilter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
       ViewerDatabaseStatus.AVAILABLE.name());
     permissionFilterParameters.add(statusFilter);
+
+    permissionFilterParameters
+      .add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, "true"));
 
     // Add user permissions on filter
     ArrayList<FilterParameter> permissionsOrFilterParameters = new ArrayList<>();
     for (String role : user.getAllRoles()) {
       permissionsOrFilterParameters.add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_PERMISSIONS, role));
     }
+
+    permissionFilterParameters.add(new OrFiltersParameters(permissionsOrFilterParameters));
+
+    return new Filter(new AndFiltersParameters(permissionFilterParameters));
+  }
+
+  private Filter getDatabaseFindFilterForUser(User user, Filter searchFilter) {
+    ArrayList<FilterParameter> permissionFilterParameters = new ArrayList<>();
+
+    // Only retrieve databases with AVAILABLE, this filter has to be default
+    SimpleFilterParameter statusFilter;
+    statusFilter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
+      ViewerDatabaseStatus.AVAILABLE.name());
+    permissionFilterParameters.add(statusFilter);
+
+    // Controlling the search filter
+    if (!searchFilter.getParameters().isEmpty()) {
+      for (FilterParameter filterParameter : searchFilter.getParameters()) {
+        if (filterParameter instanceof SimpleFilterParameter simpleFilterParameter) {
+          // If there is a status filter, remove the default and add the new one(s).
+          if (simpleFilterParameter.getName().equals(ViewerConstants.SOLR_DATABASES_STATUS)) {
+            permissionFilterParameters.remove(statusFilter);
+            permissionFilterParameters
+              .add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS, simpleFilterParameter.getValue()));
+          } else if (simpleFilterParameter.getName().equals(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL)) {
+            permissionFilterParameters.add(new SimpleFilterParameter(
+              ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, simpleFilterParameter.getValue()));
+          }
+        } else if (filterParameter instanceof BasicSearchFilterParameter searchFilterParameter) {
+          String searchValue = searchFilterParameter.getValue();
+          permissionFilterParameters.add(new SimpleFilterParameter(ViewerConstants.INDEX_SEARCH, searchValue));
+        }
+      }
+    }
+
+    // Add user permissions on filter
+    ArrayList<FilterParameter> permissionsOrFilterParameters = new ArrayList<>();
+    for (String role : user.getAllRoles()) {
+      permissionsOrFilterParameters.add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_PERMISSIONS, role));
+    }
+
     permissionFilterParameters.add(new OrFiltersParameters(permissionsOrFilterParameters));
 
     return new Filter(new AndFiltersParameters(permissionFilterParameters));
@@ -345,4 +403,25 @@ public class DatabaseResource implements DatabaseService {
         databaseUUID);
     }
   }
+
+  @Override
+  public boolean updateDatabaseSearchAllAvailability(String databaseUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
+
+    try {
+      return SIARDController.updateDatabaseSearchAllAvailability(databaseUUID);
+    } catch (GenericException | ViewerException | NotFoundException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID);
+    }
+
+  }
+
 }

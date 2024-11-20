@@ -38,6 +38,7 @@ public class ViewerDatabase extends IsIndexed {
   private String validationWarnings;
   private String validationSkipped;
   private Set<String> permissions;
+  private boolean isAvailableToSearchAll;
 
   private long searchHits = -1;
 
@@ -133,6 +134,14 @@ public class ViewerDatabase extends IsIndexed {
 
   public String getValidatedAt() {
     return validatedAt;
+  }
+
+  public boolean isAvailableToSearchAll() {
+    return isAvailableToSearchAll;
+  }
+
+  public void setAvailableToSearchAll(boolean availableToSearchAll) {
+    isAvailableToSearchAll = availableToSearchAll;
   }
 
   public void setValidatedAt(String validatedAt) {
