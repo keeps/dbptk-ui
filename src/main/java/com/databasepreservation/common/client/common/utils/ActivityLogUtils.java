@@ -95,6 +95,9 @@ public class ActivityLogUtils {
         handleSublistInfo(panel, wrapper);
         return panel;
       case "retrieve":
+      case "findAll":
+        handleFilterInfo(panel, wrapper);
+        return panel;
       case "deleteDatabase":
         handleDatabaseInfo(panel, wrapper);
         break;
