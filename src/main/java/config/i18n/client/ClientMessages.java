@@ -708,6 +708,16 @@ public interface ClientMessages extends Messages {
 
   String manageDatabasePageDescription();
 
+  String manageDatabaseNotLoadedDescription(long number);
+
+  String manageDatabaseNotSearchableDescription(long number);
+
+  String manageDatabaseAllLoadedDescription();
+
+  String manageDatabaseAllSearchableDescription();
+
+  String manageDatabaseContactAdministratorDescription();
+
   /********************************************
    * SIARD Home Page
    ********************************************/
@@ -859,17 +869,23 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageDialogTitleForPermissionsList();
 
+  String SIARDHomePageDialogTitleForChangeAvailabilityToSearchAll();
+
   SafeHtml SIARDHomePageDialogDescriptionForPermissionsList();
 
   String SIARDHomePageDialogDetailsForPermissionsList();
 
   String SIARDHomePageDialogMessageForPermissionsList();
 
+  String SIARDHomePageDialogMessageForChangeAvailabilityToSearchAll();
+
   String SIARDHomePageDialogDetailsForUnknownPermission();
 
   String SIARDHomePageDialogDetailsForUnknownPermissions(String permissions);
 
   String SIARDHomePageDialogActionForOverridePermissions();
+
+  String SIARDHomePageTitleForPermissionsSwitchButton();
 
   /********************************************
    * Edit Metadata

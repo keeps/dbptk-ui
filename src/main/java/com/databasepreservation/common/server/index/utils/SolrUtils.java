@@ -1301,7 +1301,7 @@ public class SolrUtils {
     return ret;
   }
 
-  public static String crateSearchAllAlias(SolrClient index, String aliasName, List<String> collections)
+  public static String createSearchAllAlias(SolrClient index, String aliasName, List<String> collections)
     throws SolrServerException, IOException {
     if (!collections.isEmpty()) {
       CollectionAdminRequest.CreateAlias request = CollectionAdminRequest.createAlias(aliasName,
@@ -1310,5 +1310,11 @@ public class SolrUtils {
       index.request(request);
     }
     return aliasName;
+  }
+
+  public static void deleteSearchAllAlias(SolrClient index, String aliasName) throws SolrServerException, IOException {
+    CollectionAdminRequest.DeleteAlias request = CollectionAdminRequest.deleteAlias(aliasName);
+    request.setMethod(SolrRequest.METHOD.POST);
+    index.request(request);
   }
 }

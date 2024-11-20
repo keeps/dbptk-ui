@@ -15,6 +15,7 @@ import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +35,8 @@ public class IndexResult<T extends Serializable> implements Serializable {
 
   public IndexResult() {
     super();
+    this.results = new ArrayList<>();
+    this.facetResults = new ArrayList<>();
     date = new Date();
   }
 
