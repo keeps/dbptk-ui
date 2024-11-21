@@ -3333,6 +3333,18 @@ td.datePickerMonth, td.datePickerYear {
     background-color: #eee;
 }
 
+.searchBox-permissions {
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 4rem;
+    line-height: 4rem;
+    font-size: 2rem;
+    border: none;
+    padding: 0 1rem;
+    background-color: #eee;
+}
+
 .searchBox::-webkit-input-placeholder,
 .searchBox:placeholder-shown {
     color: rgba(0, 0, 0, 0.5);
@@ -3574,6 +3586,10 @@ td.datePickerMonth, td.datePickerYear {
 
 .wui-dialog-confirm, .wui-dialog-information {
 
+}
+
+.wui-dialog-edit-permissions {
+    top: 15% !important
 }
 
 .wui-dialog-layout {
