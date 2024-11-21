@@ -2281,6 +2281,10 @@ html, body {
 /***********************************************
 				    CHECKBOX
 ************************************************/
+.scrollable-panel {
+    max-height: 500px;
+    overflow-y: auto;
+}
 /*
 .my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"] {
     padding-left: 5px;

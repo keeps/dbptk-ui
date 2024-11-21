@@ -49,6 +49,7 @@ public class Dialogs {
   private static final String WUI_DIALOG_LAYOUT_FOOTER = "wui-dialog-layout-footer";
   private static final String WUI_DIALOG_LAYOUT = "wui-dialog-layout";
   private static final String WUI_DIALOG_INFORMATION = "wui-dialog-information";
+  private static final String WUI_DIALOG_EDIT_PERMISSIONS = "wui-dialog-edit-permissions";
   private static final String WUI_DIALOG_MESSAGE = "wui-dialog-message";
 
   private Dialogs() {
@@ -835,4 +836,55 @@ public class Dialogs {
     dialogBox.center();
     dialogBox.show();
   }
+
+  public static void showPermissionsDialog(String title, SafeHtml description, String width, Widget helper,
+    String cancelButtonText, String confirmButtonText, final AsyncCallback<Boolean> callback) {
+    final DialogBox dialogBox = new DialogBox(false, true);
+    final Button cancelButton = new Button(cancelButtonText);
+    final Button confirmButton = new Button(confirmButtonText);
+
+    FlowPanel layout = new FlowPanel();
+    FlowPanel footer = new FlowPanel();
+
+    footer.add(cancelButton);
+    footer.add(confirmButton);
+    footer.addStyleName(WUI_DIALOG_LAYOUT_FOOTER);
+
+    HTML messageLabel = new HTML(description);
+    messageLabel.addStyleName(WUI_DIALOG_INFORMATION);
+
+    layout.add(messageLabel);
+
+    layout.add(helper);
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
+    layout.add(footer);
+
+    cancelButton.addStyleName(BTN_LINK_STYLE);
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(false);
+    });
+
+    confirmButton.addStyleName(BTN_PLAY_STYLE);
+    confirmButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(true);
+    });
+
+    dialogBox.setText(title);
+    dialogBox.setWidget(layout);
+    if (width != null && !width.isEmpty()) {
+      dialogBox.setWidth(width);
+    } else {
+      dialogBox.setWidth("360px");
+    }
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+    dialogBox.addStyleName(WUI_DIALOG_EDIT_PERMISSIONS);
+
+    dialogBox.center();
+    dialogBox.show();
+  }
+
+
 }
