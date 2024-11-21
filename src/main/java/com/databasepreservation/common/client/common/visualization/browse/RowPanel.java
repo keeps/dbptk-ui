@@ -74,6 +74,7 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.http.client.URL;
 
 import config.i18n.client.ClientMessages;
 
@@ -290,7 +291,7 @@ public class RowPanel extends RightPanel {
         }
 
         Hyperlink hyperlink = new Hyperlink(refName,
-          HistoryManager.linkToForeignKey(database.getUuid(), ref.refTable.getId(), columnNamesAndValues));
+          URL.decode(HistoryManager.linkToForeignKey(database.getUuid(), ref.refTable.getId(), columnNamesAndValues)));
         hyperlink.addStyleName("related-records-link");
         b.appendHtmlConstant(hyperlink.toString());
         firstRef = false;
