@@ -34,6 +34,8 @@ import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.request.QueryRequest;
+import org.apache.solr.client.solrj.request.QueryingApi;
+import org.apache.solr.client.solrj.request.json.JsonQueryRequest;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -48,6 +50,7 @@ import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
+import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,15 +192,40 @@ public class SolrUtils {
     query.setStart(sublist.getFirstElementIndex());
     query.setRows(0);
 
-    parseAndConfigureFacets(facets, query);
+    //parseAndConfigureFacets(facets, query);
 
     try {
       QueryRequest request = new QueryRequest(query);
-      request.setMethod(SolrRequest.METHOD.POST);
+      JsonQueryRequest jsonQueryRequest = new JsonQueryRequest();
+      jsonQueryRequest.setQuery(parseFilter(filter));
+      // todo sorter
+      jsonQueryRequest.setOffset(sublist.getFirstElementIndex());
+      jsonQueryRequest.setLimit(0);
+        for (Map.Entry<String, FacetParameter> entry : facets.getParameters().entrySet()) {
+            String k = entry.getKey();
+            FacetParameter v = entry.getValue();
+            if (v instanceof SimpleFacetParameter) {
+                SimpleFacetParameter facetParm = (SimpleFacetParameter) v;
 
-      NamedList<Object> namedList = index.request(request, alias);
+                // create facet object
+                HashMap<String, Object> facetMap = new HashMap<>();
+                facetMap.put("type", "terms");
+                facetMap.put("field", facetParm.getName());
+                facetMap.put("limit", facetParm.getLimit());
+                facetMap.put("offset", facetParm.getOffset());
+                facetMap.put("sort", "count asc");
+
+                jsonQueryRequest.withFacet(facetParm.getName(), facetMap);
+            }
+        }
+
+        request.setMethod(SolrRequest.METHOD.POST);
+
+      NamedList<Object> namedList = index.request(jsonQueryRequest, alias);
       QueryResponse response = new QueryResponse();
+      QueryingApi.JsonQueryResponse jsonresponse = new QueryingApi.JsonQueryResponse();
       response.setResponse(namedList);
+      jsonresponse.setResponse(namedList);
 
       ret = queryResponseToIndexResult(response, collection, facets);
     } catch (SolrException e) {
@@ -486,6 +514,7 @@ public class SolrUtils {
     return new IndexResult<>(offset, limit, totalCount, docs, facetResults);
   }
 
+
   private static List<FacetFieldResult> processFacetFields(Facets facets, List<FacetField> facetFields) {
     List<FacetFieldResult> ret = new ArrayList<FacetFieldResult>();
     FacetFieldResult facetResult;
@@ -499,6 +528,7 @@ public class SolrUtils {
           facetResult.addFacetValue(count.getName(), count.getName(), count.getCount());
         }
         ret.add(facetResult);
+
       }
     }
     return ret;
