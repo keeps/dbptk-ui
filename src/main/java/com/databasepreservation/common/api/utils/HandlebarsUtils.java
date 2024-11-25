@@ -7,7 +7,6 @@
  */
 package com.databasepreservation.common.api.utils;
 
-import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -18,8 +17,9 @@ import java.util.Map;
 import com.databasepreservation.common.utils.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
+import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;

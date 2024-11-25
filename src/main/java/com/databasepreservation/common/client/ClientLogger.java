@@ -14,8 +14,8 @@ import com.google.gwt.http.client.Response;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.services.ClientLoggerService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;

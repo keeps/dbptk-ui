@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.client.exceptions.SavedSearchException;
+import com.databasepreservation.common.exceptions.SavedSearchException;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.facets.Facets;

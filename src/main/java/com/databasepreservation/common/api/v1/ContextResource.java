@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
@@ -67,7 +69,11 @@ public class ContextResource implements ContextService {
   @Override
   public Set<AuthorizationGroup> getAuthorizationGroupsList() {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    controllerAssistant.checkRoles(request);
+    try {
+      controllerAssistant.checkRoles(request);
+    } catch (AuthorizationException e) {
+      throw new RESTException(e);
+    }
     AuthorizationGroupsList authorizationGroupsList = ViewerConfiguration.getInstance()
       .getCollectionsAuthorizationGroupsWithDefault();
 
