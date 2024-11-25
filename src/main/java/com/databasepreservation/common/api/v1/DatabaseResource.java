@@ -324,7 +324,7 @@ public class DatabaseResource implements DatabaseService {
           }
         } else if (filterParameter instanceof BasicSearchFilterParameter searchFilterParameter) {
           String searchValue = searchFilterParameter.getValue();
-          permissionFilterParameters.add(new SimpleFilterParameter(ViewerConstants.INDEX_SEARCH, searchValue));
+          permissionFilterParameters.add(new BasicSearchFilterParameter(ViewerConstants.INDEX_SEARCH, searchValue));
         }
       }
     }
@@ -337,7 +337,7 @@ public class DatabaseResource implements DatabaseService {
 
     permissionFilterParameters.add(new OrFiltersParameters(permissionsOrFilterParameters));
 
-    return new Filter(new AndFiltersParameters(permissionFilterParameters));
+    return new Filter(permissionFilterParameters);
   }
 
   @Override
