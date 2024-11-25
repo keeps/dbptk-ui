@@ -9,10 +9,13 @@ package com.databasepreservation.common.api.v1;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +80,8 @@ public class ContextResource implements ContextService {
     AuthorizationGroupsList authorizationGroupsList = ViewerConfiguration.getInstance()
       .getCollectionsAuthorizationGroupsWithDefault();
 
-    return authorizationGroupsList.getAuthorizationGroupsList();
+    return authorizationGroupsList.getAuthorizationGroupsList().stream()
+      .sorted(Comparator.comparing(AuthorizationGroup::getLabel, String.CASE_INSENSITIVE_ORDER))
+      .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 }
