@@ -8,6 +8,7 @@
 package com.databasepreservation.common.client.common.lists.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,6 +110,8 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   private Column<T, Boolean> selectColumn;
   private Set<T> selected = new HashSet<T>();
+  private boolean persistSelections = false;
+  private Set<String> persistedSelectedUUIDs = new HashSet<>();
   private final List<CheckboxSelectionListener<T>> listeners = new ArrayList<AsyncTableCell.CheckboxSelectionListener<T>>();
 
   private Filter filter;
@@ -312,15 +315,25 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
       selectColumn = new Column<T, Boolean>(new CheckboxCell(true, false)) {
         @Override
         public Boolean getValue(T object) {
-          return selected.contains(object);
+          if (persistSelections) {
+            if (object == null) {
+              return false;
+            } else {
+              return persistedSelectedUUIDs.contains(object.getUuid());
+            }
+          } else {
+            return selected.contains(object);
+          }
         }
       };
 
       selectColumn.setFieldUpdater((index, object, isSelected) -> {
         if (isSelected) {
           selected.add(object);
+          persistedSelectedUUIDs.add(object.getUuid());
         } else {
           selected.remove(object);
+          persistedSelectedUUIDs.remove(object.getUuid());
         }
 
         // update header
@@ -334,15 +347,34 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
         public Boolean getValue() {
           Boolean ret;
 
-          if (selected.isEmpty()) {
-            ret = false;
-          } else if (selected.containsAll(getVisibleItems())) {
-            ret = true;
-            showSelectAllPanel();
+          if (!persistSelections) {
+            if (selected.isEmpty()) {
+              ret = false;
+            } else if (selected.containsAll(getVisibleItems())) {
+              ret = true;
+              showSelectAllPanel();
+            } else {
+              // some are selected
+              ret = false;
+              hideSelectAllPanel();
+            }
           } else {
-            // some are selected
-            ret = false;
-            hideSelectAllPanel();
+            Collection<String> visibleUUIDs = new ArrayList<>();
+            for (T item : getVisibleItems()) {
+              if (item != null) {
+                visibleUUIDs.add(item.getUuid());
+              }
+            }
+            if (persistedSelectedUUIDs.isEmpty()) {
+              ret = false;
+            } else if (persistedSelectedUUIDs.containsAll(visibleUUIDs)) {
+              ret = true;
+              showSelectAllPanel();
+            } else {
+              // some are selected
+              ret = false;
+              hideSelectAllPanel();
+            }
           }
 
           return ret;
@@ -351,9 +383,15 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
       selectHeader.setUpdater(value -> {
         if (value) {
+          for (T item : getVisibleItems()) {
+            persistedSelectedUUIDs.add(item.getUuid());
+          }
           selected.addAll(getVisibleItems());
           showSelectAllPanel();
         } else {
+          for (T item : getVisibleItems()) {
+            persistedSelectedUUIDs.remove(item.getUuid());
+          }
           selected.clear();
           hideSelectAllPanel();
         }
@@ -628,8 +666,12 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     } else {
       List<String> ids = new ArrayList<>();
 
-      for (T item : selected) {
-        ids.add(item.getUuid());
+      if (!persistSelections) {
+        for (T item : selected) {
+          ids.add(item.getUuid());
+        }
+      } else {
+        ids.addAll(persistedSelectedUUIDs);
       }
 
       ret = new SelectedItemsList<T>(ids, selectedClass.getName());
@@ -641,12 +683,34 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   public void setSelected(Set<T> newSelected) {
     selected.clear();
     selected.addAll(newSelected);
+    persistedSelectedUUIDs.clear();
+    for (T selectedObject : newSelected) {
+      persistedSelectedUUIDs.add(selectedObject.getUuid());
+    }
+    redraw();
+    fireOnCheckboxSelectionChanged();
+  }
+
+  public void setSelectedByUUIDs(Collection<String> databaseUUIDs) {
+    this.selected.clear();
+    HashMap<String, T> resultsMap = new HashMap<>();
+    for (T resultsObject : this.result.getResults()) {
+      resultsMap.put(resultsObject.getUuid(), resultsObject);
+    }
+    for (String databaseUUID : databaseUUIDs) {
+      if (resultsMap.containsKey(databaseUUID)) {
+        this.selected.add(resultsMap.get(databaseUUID));
+      }
+    }
+    this.persistedSelectedUUIDs.clear();
+    this.persistedSelectedUUIDs.addAll(databaseUUIDs);
     redraw();
     fireOnCheckboxSelectionChanged();
   }
 
   public void clearSelected() {
     selected.clear();
+    persistedSelectedUUIDs.clear();
     redraw();
     fireOnCheckboxSelectionChanged();
   }
@@ -963,5 +1027,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   public void setResult(IndexResult<T> result) {
     this.result = result;
+  }
+
+  public void setPersistSelections(boolean persistSelections) {
+    this.persistSelections = persistSelections;
   }
 }

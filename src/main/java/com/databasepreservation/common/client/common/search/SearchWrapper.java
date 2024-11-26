@@ -10,9 +10,13 @@ import com.databasepreservation.common.client.common.lists.utils.ListBuilder;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 
 import config.i18n.client.ClientMessages;
 
@@ -33,7 +37,11 @@ public class SearchWrapper extends Composite {
 
   private Dropdown searchPanelSelectionDropdown;
 
+  private HandlerRegistration searchAllButtonValueChangeHandler;
+
   private final Components components;
+
+  private String currentClassSimpleName;
 
   public SearchWrapper(boolean hasMultipleSearchPanels, String preselectedDropdownValue) {
     this.searchPanelSelectionDropdown = null;
@@ -49,14 +57,14 @@ public class SearchWrapper extends Composite {
     this(hasMultipleSearchPanels, null);
   }
 
-  public <T extends IsIndexed> SearchWrapper createListAndSearchPanel(ListBuilder<T> listBuilder) {
+  public <T extends IsIndexed> SearchWrapper createListAndSearchPanel(ListBuilder<T> listBuilder, boolean isSearchAll) {
     AsyncTableCell<T, Void> list = listBuilder.build();
 
-    SearchPanel searchPanel;
+    SearchPanelAbstract searchPanel;
 
     Filter filter = list.getFilter();
     String allFilter = SearchFilters.searchField();
-    boolean incremental = SearchFilters.shouldBeIncremental(filter);
+    boolean incremental = SearchFilters.shouldBeIncremental(filter) || isSearchAll;
 
     // get configuration
 
@@ -72,13 +80,21 @@ public class SearchWrapper extends Composite {
     String dropdownValue = listBuilder.getOptions().getListId();
 
     // create
-    searchPanel = new SearchPanel(filter, allFilter, messages.searchPlaceholder(), true, false);
+    if (isSearchAll) {
+      searchPanel = new SearchPanelWithSearchAll(filter, allFilter, messages.searchPlaceholder(),
+        hasMultipleSearchPanels, false);
+    } else {
+      searchPanel = new SearchPanel(filter, allFilter, messages.searchPlaceholder(), hasMultipleSearchPanels, false);
+    }
     searchPanel.setList(list);
     searchPanel.setDefaultFilterIncremental(incremental);
-    searchPanel.setSearchPanelSelectionDropdownWrapperVisible(true);
+    searchPanel.setSearchPanelSelectionDropdownWrapperVisible(hasMultipleSearchPanels);
     if (hasMultipleSearchPanels) {
       initSearchPanelSelectionDropdown();
       searchPanelSelectionDropdown.addItem(defaultLabelText, dropdownValue);
+    }
+    if (isSearchAll) {
+      ((SearchPanelWithSearchAll) searchPanel).initSearchAll();
     }
     searchPanel.setVisible(searchEnabled);
 
@@ -109,28 +125,75 @@ public class SearchWrapper extends Composite {
     }
   }
 
+  private void addSearchAllSelectionChangeHandler(SearchPanelWithSearchAll panel) {
+    this.searchAllButtonValueChangeHandler = panel.getSearchAllButtonWrapper()
+      .addValueChangeHandler(event -> onSearchAllSelectionChanged(event.getValue()));
+  }
+
+  private void dettachSearchAllSelectionChangeHandler() {
+    if (searchAllButtonValueChangeHandler != null) {
+      this.searchAllButtonValueChangeHandler.removeHandler();
+      this.searchAllButtonValueChangeHandler = null;
+    }
+  }
+
   private <T extends IsIndexed> void attachComponents(String objectClassSimpleName) {
-    SearchPanel searchPanel = components.getSearchPanel(objectClassSimpleName);
+    SearchPanelAbstract searchPanel = components.getSearchPanel(objectClassSimpleName);
     AsyncTableCell<T, Void> list = components.getList(objectClassSimpleName);
+
+    this.currentClassSimpleName = objectClassSimpleName;
 
     rootPanel.clear();
     rootPanel.add(searchPanel);
-    if (scrollPanelCssClasses != null) {
-      ScrollPanel scrollPanel = new ScrollPanel(list);
-      scrollPanel.addStyleName(scrollPanelCssClasses);
-      rootPanel.add(scrollPanel);
+
+    if (!(searchPanel instanceof SearchPanelWithSearchAll)
+      || !((SearchPanelWithSearchAll) searchPanel).getTotalSelected().equals("0")) {
+      if (scrollPanelCssClasses != null) {
+        ScrollPanel scrollPanel = new ScrollPanel(list);
+        scrollPanel.addStyleName(scrollPanelCssClasses);
+        rootPanel.add(scrollPanel);
+      } else {
+        rootPanel.add(list);
+      }
     } else {
-      rootPanel.add(list);
+      SimplePanel messagePanel = new SimplePanel(
+        new HTML(SafeHtmlUtils.fromSafeConstant(messages.manageDatabaseSearchAllNoneSelected())));
+      messagePanel.addStyleName("searchall-warning");
+      rootPanel.add(messagePanel);
     }
 
     if (hasMultipleSearchPanels) {
       searchPanelSelectionDropdown.setSelectedValue(objectClassSimpleName, false);
       searchPanel.attachSearchPanelSelectionDropdown(searchPanelSelectionDropdown);
     }
+
+    dettachSearchAllSelectionChangeHandler();
+    if (searchPanel instanceof SearchPanelWithSearchAll) {
+      addSearchAllSelectionChangeHandler((SearchPanelWithSearchAll) searchPanel);
+    }
+  }
+
+  private <T extends IsIndexed> void reattachComponentsWithErrorMessage(HTML message) {
+    SearchPanelAbstract searchPanel = components.getSearchPanel(this.currentClassSimpleName);
+
+    rootPanel.clear();
+    rootPanel.add(searchPanel);
+    SimplePanel messagePanel = new SimplePanel(message);
+    messagePanel.addStyleName("searchall-warning");
+    rootPanel.add(messagePanel);
   }
 
   public Components getComponents() {
     return components;
+  }
+
+  public void onSearchAllSelectionChanged(String totalSelected) {
+    if (totalSelected.equals("0")) {
+      reattachComponentsWithErrorMessage(
+        new HTML(SafeHtmlUtils.fromSafeConstant(messages.manageDatabaseSearchAllNoneSelected())));
+    } else {
+      attachComponents(currentClassSimpleName);
+    }
   }
 
   /**
@@ -139,7 +202,7 @@ public class SearchWrapper extends Composite {
    */
   @SuppressWarnings("unchecked")
   public class Components {
-    private final Map<String, SearchPanel> searchPanels = new LinkedHashMap<>();
+    private final Map<String, SearchPanelAbstract> searchPanels = new LinkedHashMap<>();
     private final Map<String, AsyncTableCell<? extends IsIndexed, Void>> lists = new LinkedHashMap<>();
 
     /**
@@ -154,16 +217,17 @@ public class SearchWrapper extends Composite {
      * @param <T>
      *          extends IsIndexed, type parameter shared by this set of components
      */
-    public <T extends IsIndexed> void put(String listId, SearchPanel searchPanel, AsyncTableCell<T, Void> list) {
+    public <T extends IsIndexed> void put(String listId, SearchPanelAbstract searchPanel,
+      AsyncTableCell<T, Void> list) {
       searchPanels.put(listId, searchPanel);
       lists.put(listId, list);
     }
 
-    public SearchPanel getSearchPanel(String listId) {
+    public SearchPanelAbstract getSearchPanel(String listId) {
       return searchPanels.get(listId);
     }
 
-    <T extends IsIndexed> AsyncTableCell<T, Void> getList(String listId) {
+    public <T extends IsIndexed> AsyncTableCell<T, Void> getList(String listId) {
       return (AsyncTableCell<T, Void>) lists.get(listId);
     }
   }

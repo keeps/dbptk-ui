@@ -179,7 +179,8 @@ public class SolrUtils {
   }
 
   public static <T extends IsIndexed> IndexResult<T> findHits(SolrClient index, SolrCollection<T> collection,
-    String alias, Filter filter, Sorter sorter, Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
+    String alias, Filter filter, Sorter sorter, Sublist sublist, Facets facets)
+    throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
@@ -811,13 +812,9 @@ public class SolrUtils {
   }
 
   private static void appendValuesUsingOROperator(StringBuilder ret, String key, List<String> values,
-    boolean prependWithOrIfNeeded) {
+    boolean prefixWithANDOperatorIfBuilderNotEmpty) {
     if (!values.isEmpty()) {
-      if (prependWithOrIfNeeded) {
-        appendOROperator(ret, true);
-      } else {
-        appendANDOperator(ret, true);
-      }
+      appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
 
       ret.append("(");
       for (int i = 0; i < values.size(); i++) {

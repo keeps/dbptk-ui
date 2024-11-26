@@ -11,8 +11,6 @@
         <g:FlowPanel>
             <commonsearch:SearchWrapper ui:field="search"/>
         </g:FlowPanel>
-        <g:SimplePanel ui:field="databasesNotLoadedInfo"/>
-        <g:SimplePanel ui:field="databasesNotSearchableInfo"/>
         <g:SimplePanel ui:field="adminInfo"/>
     </g:FlowPanel>
 </ui:UiBinder>

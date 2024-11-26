@@ -1416,6 +1416,16 @@ html, body {
     text-decoration: none;
 }
 
+.btn-searchall-dialog {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-searchall-dialog i {
+    font-size: 20px
+}
+
 .label-field {
     display: inline-block;
     text-align: left;
@@ -3444,6 +3454,31 @@ rgba(0, 0, 0, .125);
     position: sticky;
     top: 0;
     z-index: 1;
+}
+
+.searchall-button-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.searchall-button-row-left {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+}
+
+.searchall-button-row-right {
+    display: flex;
+    flex-direction: row;
+}
+
+.searchall-button-row-left .btn, .searchall-button-row-right .btn {
+    padding: 10px 20px 10px 20px;
+}
+
+.searchall-warning {
+    padding: 20px 0px 20px 0px;
+    font-weight: bold;
 }
 
 /************************************************

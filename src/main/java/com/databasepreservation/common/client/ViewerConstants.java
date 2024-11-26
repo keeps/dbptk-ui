@@ -573,6 +573,14 @@ public class ViewerConstants {
   public static final String EMPTY_SEARCH = "";
 
   /**
+   * Search all
+   */
+  public static final String LOCAL_STORAGE_SEARCHALL_SELECTION = "searchAllSelection";
+  public static final String SEARCHALL_SELECTEDALL = "all";
+  public static final String SEARCHALL_SELECTEDNONE = "none";
+  public static final String PROPERTY_SEARCHALL_DEFAULTSELECTION = "ui.searchAll.defaultSelection";
+
+  /**
    * Header
    */
   public static final String DEFAULT_PROPERTY_UI_HEADER_TITLE = "<img src=\"api/v1/theme?resource_id=dbptk_logo_white_vector.svg\" class=\"header-logo\"><span class=\"header-text\">DBPTK Enterprise</span>";
