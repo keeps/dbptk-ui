@@ -833,8 +833,6 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageDialogTitleForDelete();
 
-  String SIARDHomePageDialogTextForDeleteNotAvailable(String version);
-
   String SIARDHomePageDialogTitleForDeleteBrowseContent();
 
   String SIARDHomePageDialogTitleForDeleteValidationReport();

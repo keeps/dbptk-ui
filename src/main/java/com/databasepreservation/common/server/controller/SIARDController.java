@@ -889,17 +889,20 @@ public class SIARDController {
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
 
-    if (ViewerFactory.getViewerConfiguration().getApplicationEnvironment()
-      .equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
-      String siardPath = database.getPath();
-      final boolean deleteSiard = !ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
-        ViewerConfiguration.PROPERTY_DISABLE_SIARD_DELETION);
-      if (StringUtils.isNotBlank(siardPath) && Paths.get(siardPath).toFile().exists() && deleteSiard) {
-        deleteSIARDFileFromPath(siardPath, databaseUUID);
+    if (!database.getVersion().equals(ViewerConstants.SIARD_DK_1007)
+      && !database.getVersion().equals(ViewerConstants.SIARD_DK_128)) {
+      if (ViewerFactory.getViewerConfiguration().getApplicationEnvironment()
+        .equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+        String siardPath = database.getPath();
+        final boolean deleteSiard = !ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
+          ViewerConfiguration.PROPERTY_DISABLE_SIARD_DELETION);
+        if (StringUtils.isNotBlank(siardPath) && Paths.get(siardPath).toFile().exists() && deleteSiard) {
+          deleteSIARDFileFromPath(siardPath, databaseUUID);
+        }
       }
-    }
 
-    ViewerFactory.getConfigurationManager().deleteDatabaseFolder(databaseUUID);
+      ViewerFactory.getConfigurationManager().deleteDatabaseFolder(databaseUUID);
+    }
 
     String reportPath = database.getValidatorReportPath();
     if (StringUtils.isNotBlank(reportPath) && Paths.get(reportPath).toFile().exists()) {
