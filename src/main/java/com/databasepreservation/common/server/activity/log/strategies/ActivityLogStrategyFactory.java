@@ -52,6 +52,7 @@ public class ActivityLogStrategyFactory {
           composeLogStrategy.getOperationList().add(new FacetsOperation());
           composeLogStrategy.getOperationList().add(new SublistOperation());
           return composeLogStrategy;
+        case "find":
         case "findAll":
           composeLogStrategy.clearOperationList();
           composeLogStrategy.getOperationList().add(new FilterOperation());
