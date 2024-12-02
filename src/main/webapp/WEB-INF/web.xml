@@ -83,7 +83,7 @@
         <filter-class>com.databasepreservation.common.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
-            <param-value>org.jasig.cas.client.session.SingleSignOutFilter</param-value>
+            <param-value>org.apereo.cas.client.session.SingleSignOutFilter</param-value>
         </init-param>
         <init-param>
             <param-name>config-prefix</param-name>
@@ -100,7 +100,7 @@
     </filter-mapping>
     <listener>
         <!-- Listener to clean sessions -->
-        <listener-class>org.jasig.cas.client.session.SingleSignOutHttpSessionListener</listener-class>
+        <listener-class>org.apereo.cas.client.session.SingleSignOutHttpSessionListener</listener-class>
     </listener>
 
     <!-- validation filter must appear before the authentication filter -->
@@ -109,7 +109,7 @@
         <filter-class>com.databasepreservation.common.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
-            <param-value>org.jasig.cas.client.validation.Cas30ProxyReceivingTicketValidationFilter</param-value>
+            <param-value>org.apereo.cas.client.validation.Cas30ProxyReceivingTicketValidationFilter</param-value>
         </init-param>
         <init-param>
             <param-name>config-prefix</param-name>
@@ -150,7 +150,7 @@
         <filter-class>com.databasepreservation.common.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
-            <param-value>org.jasig.cas.client.authentication.AuthenticationFilter</param-value>
+            <param-value>org.apereo.cas.client.authentication.AuthenticationFilter</param-value>
         </init-param>
         <init-param>
             <param-name>config-prefix</param-name>
@@ -175,7 +175,7 @@
         <filter-class>com.databasepreservation.common.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
-            <param-value>org.jasig.cas.client.util.HttpServletRequestWrapperFilter</param-value>
+            <param-value>org.apereo.cas.client.util.HttpServletRequestWrapperFilter</param-value>
         </init-param>
         <init-param>
             <param-name>config-prefix</param-name>

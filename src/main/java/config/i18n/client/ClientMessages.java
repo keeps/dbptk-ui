@@ -729,6 +729,10 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageButtonTextEditMetadata();
 
+  String SIARDHomePageButtonTitleEditMetadataNotAvailable();
+
+  String SIARDHomePageButtonTextEditMetadataNotAvailable(String version);
+
   String SIARDHomePageButtonTextMigrateToSIARD();
 
   String SIARDHomePageButtonTextSendToLiveDBMS();
@@ -829,6 +833,8 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageDialogTitleForDelete();
 
+  String SIARDHomePageDialogTextForDeleteNotAvailable(String version);
+
   String SIARDHomePageDialogTitleForDeleteBrowseContent();
 
   String SIARDHomePageDialogTitleForDeleteValidationReport();
@@ -840,6 +846,10 @@ public interface ClientMessages extends Messages {
   SafeHtml SIARDHomePageTextForDeleteFromSolr();
 
   SafeHtml SIARDHomePageTextForDeleteSIARD();
+
+  String SIARDHomePageTitleForDeleteSIARDNotAvailable();
+
+  String SIARDHomePageTextForDeleteSIARDNotAvailable(String version);
 
   SafeHtml SIARDHomePageTextForDeleteSIARDReportValidation();
 

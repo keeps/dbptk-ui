@@ -7,8 +7,17 @@
  */
 package com.databasepreservation.common.utils;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
+import com.databasepreservation.common.api.utils.ExtraMediaType;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
@@ -48,6 +57,52 @@ public class LobManagerUtils {
     String siardLobFolder = ViewerConstants.SIARD_LOB_FOLDER_PREFIX + (columnIndex + 1);
 
     return "content" + "/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/" + recordValue;
+
+  }
+
+  public static Path zipDirectory(Path dirPath) throws IOException {
+    return zipDirectory(dirPath, null, null);
+  }
+
+  public static Path zipDirectory(Path dirPath, String databasePath, String handlebarsFilename) throws IOException {
+    Path zipFilePath;
+
+    if (databasePath == null) {
+      zipFilePath = dirPath.resolveSibling(dirPath.getFileName().toString() + ExtraMediaType.ZIP_FILE_EXTENSION);
+    } else {
+      if (handlebarsFilename != null) {
+        zipFilePath = buildSIARDKZipLobPath(databasePath, handlebarsFilename);
+      } else {
+        zipFilePath = Files.createTempFile(ViewerConstants.TEMP_PREFIX, ExtraMediaType.ZIP_FILE_EXTENSION);
+      }
+    }
+
+    try (FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
+      ZipOutputStream zos = new ZipOutputStream(fos)) {
+
+      Files.walk(dirPath).filter(path -> !Files.isDirectory(path)).forEach(path -> {
+        ZipEntry zipEntry = new ZipEntry(dirPath.relativize(path).toString());
+        try {
+          zos.putNextEntry(zipEntry);
+          Files.copy(path, zos);
+          zos.closeEntry();
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
+        }
+      });
+    } catch (UncheckedIOException e) {
+      // Throwing the exception that occurred inside the lambda
+      throw e.getCause();
+    }
+
+    return zipFilePath;
+  }
+
+  public static final Path buildSIARDKZipLobPath(String databasePath, String handlebarsFilename) {
+    Path dbPath = Paths.get(databasePath);
+    String dbName = dbPath.getFileName().toString();
+    return dbPath.getParent().getParent().resolve(ViewerConstants.VIEWER_LOBS_FOLDER)
+      .resolve(dbName + "-" + handlebarsFilename);
   }
 
   public static Path getConsolidatedPath(ViewerAbstractConfiguration configuration, String databaseUUID,
