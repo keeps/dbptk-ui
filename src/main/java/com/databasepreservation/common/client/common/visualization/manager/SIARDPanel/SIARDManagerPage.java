@@ -143,7 +143,8 @@ public class SIARDManagerPage extends ContentPanel {
     if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       DatabaseService.Util.call((Set<String> databasePermissions) -> {
         ContextService.Util.call((Set<AuthorizationGroup> authorizationGroups) -> {
-          permissionsNavigationPanel = PermissionsNavigationPanel.getInstance(database, databasePermissions, authorizationGroups);
+          permissionsNavigationPanel = PermissionsNavigationPanel.getInstance(database, databasePermissions,
+            authorizationGroups);
           if (permissionsNavigationPanel.hasPermissionsOrGroups()) {
             navigationPanels.add(permissionsNavigationPanel.build());
           }
@@ -207,16 +208,23 @@ public class SIARDManagerPage extends ContentPanel {
         if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
           message = messages.SIARDHomePageTextForDeleteAllFromDesktop();
         }
-        CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(), message,
-          messages.basicActionCancel(), messages.basicActionConfirm(), CommonDialogs.Level.DANGER, "500px",
-          new DefaultAsyncCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-              if (result) {
-                deleteAll();
+        if (database.getVersion().equals(ViewerConstants.SIARD_DK_1007)
+          || database.getVersion().equals(ViewerConstants.SIARD_DK_128)) {
+          Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForDelete(),
+            messages.SIARDHomePageDialogTextForDeleteNotAvailable(ViewerConstants.SIARD_V21),
+            messages.basicActionUnderstood(), "btn btn-link");
+        } else {
+          CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(), message,
+            messages.basicActionCancel(), messages.basicActionConfirm(), CommonDialogs.Level.DANGER, "500px",
+            new DefaultAsyncCallback<Boolean>() {
+              @Override
+              public void onSuccess(Boolean result) {
+                if (result) {
+                  deleteAll();
+                }
               }
-            }
-          });
+            });
+        }
       } else if (ViewerDatabaseStatus.INGESTING.equals(database.getStatus())) {
         Dialogs.showInformationDialog(messages.SIARDManagerPageInformationDialogTitle(),
           messages.SIARDManagerPageTextForWaitForFinishing(), messages.basicActionClose(), "btn btn-link");

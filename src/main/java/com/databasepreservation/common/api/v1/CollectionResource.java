@@ -13,6 +13,7 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCH
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,9 +25,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import com.databasepreservation.common.api.exceptions.RESTException;
 import com.databasepreservation.common.exceptions.AuthorizationException;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.model.data.Cell;
+import com.databasepreservation.common.api.utils.ExtraMediaType;
+import com.databasepreservation.model.exception.ModuleException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.roda.core.data.exceptions.*;
@@ -197,9 +203,9 @@ public class CollectionResource implements CollectionService {
       }
 
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-      StringResponse collection = new StringResponse(SIARDController.loadFromLocal(database.getPath(), databaseUUID));
 
-      return collection;
+      return new StringResponse(SIARDController.loadFromLocal(database.getPath(), databaseUUID, database.getVersion()));
+      
     } catch (GenericException | AuthorizationDeniedException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
@@ -529,7 +535,8 @@ public class CollectionResource implements CollectionService {
           .equals(row.getCells().get(configTable.getColumnByIndex(columnIndex).getId()).getStoreType())) {
           return handleExternalLobDownload(configTable, row, columnIndex);
         } else {
-          return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex);
+          String version = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID).getVersion();
+          return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex, version);
         }
       }
     } catch (NotFoundException | GenericException | IOException | AuthorizationException e) {
@@ -598,37 +605,53 @@ public class CollectionResource implements CollectionService {
   }
 
   private ResponseEntity<StreamingResponseBody> handleInternalLobDownload(String databasePath,
-    TableStatus tableConfiguration, ViewerRow row, int columnIndex) throws IOException, GenericException {
+    TableStatus tableConfiguration, ViewerRow row, int columnIndex, String version)
+    throws IOException, GenericException {
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
       handlebarsFilename = ViewerConstants.SIARD_RECORD_PREFIX + row.getUuid()
         + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
     }
-    String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
 
+    String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
     if (ViewerStringUtils.isBlank(handlebarsMimeType)) {
       handlebarsMimeType = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
     }
 
-    if (LobManagerUtils.isLobEmbedded(tableConfiguration, row, columnIndex)) {
-      // handle lob as embedded
-      String lobCellValue = LobManagerUtils.getLobCellValue(tableConfiguration, row, columnIndex);
-      lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
-      String decodedString = new String(Base64.decodeBase64(lobCellValue.getBytes()));
+    if (version.equals(ViewerConstants.SIARD_DK_1007) || version.equals(ViewerConstants.SIARD_DK_128)) {
+      String filePath = row.getCells().get(row.getCells().keySet().toArray()[row.getCells().size() - 1]).getValue();
+      Path path = Paths.get(filePath);
+      // if the lob is a directory zip it
+      if (path.toFile().isDirectory()) {
+        Path zipFile = LobManagerUtils.zipDirectory(path, databasePath, handlebarsFilename);
 
-      return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
-        DownloadUtils.stream(new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())))));
-    } else {
-      // handle lob as internal on separated folder
-      ZipFile zipFile = new ZipFile(databasePath);
-      final ZipEntry entry = zipFile.getEntry(LobManagerUtils.getZipFilePath(tableConfiguration, columnIndex, row));
-      if (entry == null) {
-        throw new GenericException("Zip archive entry is missing");
+        return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+          DownloadUtils.stream(new BufferedInputStream(new FileInputStream(zipFile.toFile())))));
+      } else {
+        return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+          DownloadUtils.stream(new BufferedInputStream(new FileInputStream(filePath)))));
       }
+    } else {
+      if (LobManagerUtils.isLobEmbedded(tableConfiguration, row, columnIndex)) {
+        // handle lob as embedded
+        String lobCellValue = LobManagerUtils.getLobCellValue(tableConfiguration, row, columnIndex);
+        lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
+        String decodedString = new String(Base64.decodeBase64(lobCellValue.getBytes()));
 
-      return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
-        DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
+        return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+          DownloadUtils.stream(new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())))));
+      } else {
+        // handle lob as internal on separated folder
+        ZipFile zipFile = new ZipFile(databasePath);
+        final ZipEntry entry = zipFile.getEntry(LobManagerUtils.getZipFilePath(tableConfiguration, columnIndex, row));
+        if (entry == null) {
+          throw new GenericException("Zip archive entry is missing");
+        }
+
+        return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+          DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
+      }
     }
   }
 

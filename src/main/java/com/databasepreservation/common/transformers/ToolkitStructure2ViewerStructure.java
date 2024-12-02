@@ -7,10 +7,13 @@
  */
 package com.databasepreservation.common.transformers;
 
+import com.databasepreservation.common.api.utils.ExtraMediaType;
 import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -365,7 +368,10 @@ public class ToolkitStructure2ViewerStructure {
     ArrayList<ViewerView> result = new ArrayList<>();
     if (views != null) {
       for (ViewStructure view : views) {
-        result.add(getView(vdb, view));
+        if (view.getColumns() != null) {
+          ViewerView viewerView = getView(vdb, view);
+          result.add(viewerView);
+        }
       }
     }
     return result;
@@ -749,7 +755,7 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   public static ViewerRow getRow(CollectionStatus collectionConfiguration, ViewerTable table, Row row, long rowIndex,
-    String databasePath) {
+    String databasePath, String siardVersion) {
     setCurrentTable(table);
 
     ViewerRow result = new ViewerRow();
@@ -759,7 +765,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setTableId(table.getId());
     result.setTableUUID(table.getUuid());
     result.setUuid(rowUUID);
-    result.setCells(getCells(collectionConfiguration, table, row, databasePath, result));
+    result.setCells(getCells(collectionConfiguration, table, row, databasePath, result, siardVersion));
     return result;
   }
 
@@ -770,7 +776,7 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   private static Map<String, ViewerCell> getCells(CollectionStatus collectionConfiguration, ViewerTable table, Row row,
-    String databasePath, ViewerRow actualViewerRow) {
+    String databasePath, ViewerRow actualViewerRow, String siardVersion) {
     Map<String, ViewerCell> result = new LinkedHashMap<>();
 
     int colIndex = 0;
@@ -779,7 +785,7 @@ public class ToolkitStructure2ViewerStructure {
       String solrColumnName = viewerColumn.getSolrName();
       try {
         result.put(solrColumnName, getCell(collectionConfiguration, table, toolkitCells.get(colIndex), colIndex++,
-          databasePath, actualViewerRow));
+          databasePath, actualViewerRow, siardVersion));
       } catch (ViewerException e) {
         LOGGER.error("Problem converting cell, omitted it (as if it were NULL)", e);
       }
@@ -789,7 +795,7 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   private static ViewerCell getCell(CollectionStatus collectionConfiguration, ViewerTable table, Cell cell,
-    int colIndex, String databasePath, ViewerRow actualViewerRow) throws ViewerException {
+    int colIndex, String databasePath, ViewerRow actualViewerRow, String siardVersion) throws ViewerException {
     ViewerCell result = new ViewerCell();
 
     ViewerType columnType = table.getColumns().get(colIndex).getType();
@@ -810,8 +816,8 @@ public class ToolkitStructure2ViewerStructure {
           String index = getRowIndex(cell.getId());
           String lobName = ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
           actualViewerRow.addLobType(
-              collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
-              ViewerLobStoreType.EXTERNALLY);
+            collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
+            ViewerLobStoreType.EXTERNALLY);
 
           detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
             true);
@@ -832,22 +838,31 @@ public class ToolkitStructure2ViewerStructure {
         result.setValue(siardFilesPath.relativize(lobPath).normalize().toString());
         collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(true);
         actualViewerRow.addLobType(
-            collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
-            ViewerLobStoreType.EXTERNALLY);
+          collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
+          ViewerLobStoreType.EXTERNALLY);
 
         detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, false);
 
       } else {
         // BLOB is internal to the SIARD but is stored outside the table.xml (Normal)
-        
-        String lobName = Paths.get(binaryCell.getFile()).getFileName().toString();
-        result.setValue(lobName);
+        String lobName;
+
         collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(false);
         actualViewerRow.addLobType(
           collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
           ViewerLobStoreType.INTERNALLY);
 
-        detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, true);
+        if (siardVersion.equals(ViewerConstants.SIARD_DK_128) || siardVersion.equals(ViewerConstants.SIARD_DK_1007)) {
+          lobName = binaryCell.getFile();
+          result.setValue(lobName);
+          detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, true,
+            true);
+        } else {
+          lobName = Paths.get(binaryCell.getFile()).getFileName().toString();
+          result.setValue(lobName);
+          detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, true);
+        }
+
       }
     } else if (cell instanceof ComposedCell) {
       ComposedCell composedCell = (ComposedCell) cell;
@@ -881,69 +896,93 @@ public class ToolkitStructure2ViewerStructure {
   private static void detectMimeType(ViewerRow row, ViewerCell cell, String databasePath,
     CollectionStatus collectionConfiguration, ViewerTable table, int colIndex, String lobName,
     boolean blobIsInsideSiard) {
+    detectMimeType(row, cell, databasePath, collectionConfiguration, table, colIndex, lobName, blobIsInsideSiard,
+      false);
+  }
+
+  private static void detectMimeType(ViewerRow row, ViewerCell cell, String databasePath,
+    CollectionStatus collectionConfiguration, ViewerTable table, int colIndex, String lobName,
+    boolean blobIsInsideSiard, boolean isSiardDK) {
     try {
       String mimeType;
       String fileExtension;
       InputStream inputStream;
 
       TableStatus tableStatus = collectionConfiguration.getTableStatusByTableId(table.getId());
-      String siardLobPath = LobManagerUtils.getZipFilePath(tableStatus, colIndex, lobName);
 
-      ZipFile zipFile = new ZipFile(databasePath);
-      ZipEntry entry = zipFile.getEntry(siardLobPath);
+      ZipFile zipFile = null;
+      ZipEntry entry = null;
+      String siardLobPath;
 
-      String lobCellValue = cell.getValue();
-
-      if (entry != null && blobIsInsideSiard) {
-        inputStream = zipFile.getInputStream(entry);
-      } else if (blobIsInsideSiard) {
-        lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
-        inputStream = new ByteArrayInputStream(Base64.decodeBase64(lobCellValue.getBytes()));
+      File lobFile = new File(lobName);
+      if (lobFile.isDirectory()) {
+        mimeType = ExtraMediaType.APPLICATION_ZIP;
+        fileExtension = ExtraMediaType.ZIP_FILE_EXTENSION;
       } else {
-        lobCellValue = cell.getValue();
-        final Path lobPath = Paths.get(lobCellValue);
-        final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
-        inputStream = Files.newInputStream(completeLobPath);
-      }
+        String lobCellValue = cell.getValue();
 
-      mimeType = tika.detect(inputStream);
-      fileExtension = MimeTypes.getDefaultMimeTypes().forName(mimeType).getExtension();
+        if (!isSiardDK) {
+          siardLobPath = LobManagerUtils.getZipFilePath(tableStatus, colIndex, lobName);
+          zipFile = new ZipFile(databasePath);
+          entry = zipFile.getEntry(siardLobPath);
 
-      if (StringUtils.isAllBlank(fileExtension)) {
-        try {
-          if (blobIsInsideSiard) {
-            if (entry != null) {
-              inputStream = zipFile.getInputStream(entry);
-            } else {
-              inputStream = new ByteArrayInputStream(lobCellValue.getBytes());
-            }
+          if (entry != null && blobIsInsideSiard) {
+            inputStream = zipFile.getInputStream(entry);
+          } else if (blobIsInsideSiard) {
+            lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
+            inputStream = new ByteArrayInputStream(Base64.decodeBase64(lobCellValue.getBytes()));
           } else {
+            lobCellValue = cell.getValue();
             final Path lobPath = Paths.get(lobCellValue);
             final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
             inputStream = Files.newInputStream(completeLobPath);
           }
+        } else {
+          inputStream = Files.newInputStream(Paths.get(lobName));
+        }
 
-          AutoDetectParser parser = new AutoDetectParser();
-          Metadata metadata = new Metadata();
+        mimeType = tika.detect(inputStream);
+        fileExtension = MimeTypes.getDefaultMimeTypes().forName(mimeType).getExtension();
 
-          Boolean autoDetectParserNoLimit = ViewerFactory.getEnvBoolean("AUTO_DETECT_PARSER_NO_LIMIT", false);
+        if (StringUtils.isAllBlank(fileExtension)) {
+          try {
+            if (blobIsInsideSiard) {
+              if (entry != null) {
+                inputStream = zipFile.getInputStream(entry);
+              } else {
+                inputStream = new ByteArrayInputStream(lobCellValue.getBytes());
+              }
+            } else {
+              final Path lobPath = Paths.get(lobCellValue);
+              final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
+              inputStream = Files.newInputStream(completeLobPath);
+            }
 
-          if (autoDetectParserNoLimit) {
-            parser.parse(inputStream, new BodyContentHandler(-1), metadata, new ParseContext());
-          } else {
-            parser.parse(inputStream, new BodyContentHandler(), metadata, new ParseContext());
+            AutoDetectParser parser = new AutoDetectParser();
+            Metadata metadata = new Metadata();
+
+            Boolean autoDetectParserNoLimit = ViewerFactory.getEnvBoolean("AUTO_DETECT_PARSER_NO_LIMIT", false);
+
+            if (autoDetectParserNoLimit) {
+              parser.parse(inputStream, new BodyContentHandler(-1), metadata, new ParseContext());
+            } else {
+              parser.parse(inputStream, new BodyContentHandler(), metadata, new ParseContext());
+            }
+
+            mimeType = metadata.get("Content-Type");
+            fileExtension = MimeTypes.getDefaultMimeTypes().forName(mimeType).getExtension();
+
+          } catch (SAXException | TikaException e) {
+            LOGGER.error("Could not calculate mimeType for special extensions in the cell: [{}]", cell.getValue(), e);
           }
+        }
 
-          mimeType = metadata.get("Content-Type");
-          fileExtension = MimeTypes.getDefaultMimeTypes().forName(mimeType).getExtension();
+        inputStream.close();
 
-        } catch (SAXException | TikaException e) {
-          LOGGER.error("Could not calculate mimeType for special extensions in the cell: [{}]", cell.getValue(), e);
+        if (zipFile != null) {
+          zipFile.close();
         }
       }
-
-      inputStream.close();
-      zipFile.close();
 
       cell.setMimeType(mimeType);
       cell.setFileExtension(fileExtension);
