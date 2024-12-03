@@ -63,6 +63,7 @@ import com.databasepreservation.common.client.index.facets.RangeFacetParameter;
 import com.databasepreservation.common.client.index.facets.SimpleFacetParameter;
 import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.BlockJoinAnyParentExpiryFilterParameter;
 import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateIntervalFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
@@ -76,9 +77,6 @@ import com.databasepreservation.common.client.index.filter.NotSimpleFilterParame
 import com.databasepreservation.common.client.index.filter.OneOfManyFilterParameter;
 import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-import com.databasepreservation.common.client.index.parser.DefaultQueryParser;
-import com.databasepreservation.common.client.index.parser.QueryChildrenParser;
-import com.databasepreservation.common.client.index.parser.QueryParser;
 import com.databasepreservation.common.client.index.sort.SortParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
@@ -615,12 +613,6 @@ public class SolrUtils {
   }
 
   public static String parseFilter(Filter filter) throws RequestNotValidException {
-    StringBuilder qParser = new StringBuilder();
-
-    if (filter.getQueryParser() != null) {
-      parseQueryParser(qParser, filter.getQueryParser());
-    }
-
     StringBuilder ret = new StringBuilder();
 
     if (filter == null || filter.getParameters().isEmpty()) {
@@ -636,23 +628,7 @@ public class SolrUtils {
     }
 
     LOGGER.trace("Converting filter {} to query {}", filter, ret);
-    return qParser.toString() + ret.toString();
-  }
-
-  public static void parseQueryParser(StringBuilder ret, QueryParser queryParser) throws RequestNotValidException {
-    if (queryParser instanceof QueryChildrenParser) {
-      QueryChildrenParser queryChildrenParser = (QueryChildrenParser) queryParser;
-      appendQueryChildrenParser(ret, queryChildrenParser);
-    } else if (queryParser instanceof DefaultQueryParser) {
-      // do nothing
-    } else {
-      LOGGER.error("Unsupported query parser class: {}", queryParser.getClass().getName());
-      throw new RequestNotValidException("Unsupported query parser class: " + queryParser.getClass().getName());
-    }
-  }
-
-  public static void appendQueryChildrenParser(StringBuilder ret, QueryChildrenParser queryChildrenParser) {
-    ret.append("{!parent which=\"*:* -_nest_path_:*\"}");
+    return ret.toString();
   }
 
   private static void parseFilterParameter(StringBuilder ret, FilterParameter parameter,
@@ -670,6 +646,9 @@ public class SolrUtils {
       EmptyKeyFilterParameter param = (EmptyKeyFilterParameter) parameter;
       appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
       ret.append("(*:* NOT " + param.getName() + ":*)");
+    } else if (parameter instanceof BlockJoinAnyParentExpiryFilterParameter) {
+      BlockJoinAnyParentExpiryFilterParameter param = (BlockJoinAnyParentExpiryFilterParameter) parameter;
+      appendExpiryParameter(ret, param);
     } else if (parameter instanceof DateRangeFilterParameter) {
       DateRangeFilterParameter param = (DateRangeFilterParameter) parameter;
       appendRange(ret, param.getName(), Date.class, param.getFromValue(), String.class,
@@ -733,6 +712,26 @@ public class SolrUtils {
 
       ret.append(")");
     }
+  }
+
+  private static void appendExpiryParameter(StringBuilder ret, BlockJoinAnyParentExpiryFilterParameter param) {
+    ret.append("{!parent which='*:* -_nest_path_:*'}(");
+    if (param.getGroups().isEmpty()) {
+      // impossible query if no groups are provided
+      ret.append("-*:*");
+    } else {
+      for (int i = 0; i < param.getGroups().size(); i++) {
+        if (i > 0) {
+          ret.append(" OR ");
+        }
+        ret.append("(");
+        ret.append("group_value:(" + param.getGroups().get(i) + ")");
+        ret.append(" AND ");
+        appendRange(ret, "expiry_date", Date.class, param.getFromValue(), Date.class, param.getToValue(), false);
+        ret.append(")");
+      }
+    }
+    ret.append(")");
   }
 
   private static String processFromDate(Date fromValue) {
@@ -880,7 +879,7 @@ public class SolrUtils {
   private static void appendExactMatch(StringBuilder ret, String key, String value, boolean appendDoubleQuotes,
     boolean prefixWithANDOperatorIfBuilderNotEmpty) {
     appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
-    ret.append("(").append(key).append(": ");
+    ret.append("(").append(key).append(":");
     if (appendDoubleQuotes) {
       ret.append("\"");
     }

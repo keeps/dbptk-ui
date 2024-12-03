@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.solr.client.solrj.SolrServerException;
-import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -38,12 +37,10 @@ import com.databasepreservation.common.client.index.facets.FacetParameter;
 import com.databasepreservation.common.client.index.facets.FacetValue;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.facets.SimpleFacetParameter;
-import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
+import com.databasepreservation.common.client.index.filter.BlockJoinAnyParentExpiryFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
-import com.databasepreservation.common.client.index.filter.OneOfManyFilterParameter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-import com.databasepreservation.common.client.index.parser.QueryChildrenParser;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
@@ -323,15 +320,15 @@ public class DatabaseResource implements DatabaseService {
 
   public static List<Filter> getDatabaseFindUserPermissionsFilterQueries(User user) {
     Filter filter = new Filter();
-    filter.setQueryParser(new QueryChildrenParser());
-    filter.add(new OneOfManyFilterParameter(ViewerConstants.SOLR_DATABASES_PERMISSIONS_GROUP,
-      user.getAllRoles().stream().toList()));
+
     // Convert today's date to midnight, start of the day
     LocalDateTime now = LocalDateTime.ofInstant(new Date().toInstant(), ZoneId.systemDefault());
     LocalDateTime today = now.with(LocalTime.MIN);
     Date todayDate = Date.from(today.atZone(ZoneId.systemDefault()).toInstant());
-    filter.add(new DateRangeFilterParameter(ViewerConstants.SOLR_DATABASES_PERMISSIONS_EXPIRY, todayDate, null,
-      RodaConstants.DateGranularity.DAY));
+
+    BlockJoinAnyParentExpiryFilterParameter param = new BlockJoinAnyParentExpiryFilterParameter(user.getAllRoles(),
+      todayDate, null);
+    filter.add(param);
     return new ArrayList<>(List.of(filter));
   }
 
