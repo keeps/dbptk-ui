@@ -8,8 +8,10 @@
 package com.databasepreservation.common.api.v1.utils;
 
 import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.zip.ZipFile;
 
 import com.databasepreservation.common.api.utils.ExtraMediaType;
@@ -37,7 +40,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
-import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -120,22 +122,31 @@ public abstract class ZipOutputStream extends CSVOutputStream {
 
   protected void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row,
     List<ColumnStatus> binaryColumns) throws IOException {
+    writeToZipFile(siardArchive, out, row, binaryColumns, false);
+  }
+
+  protected void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row,
+    List<ColumnStatus> binaryColumns, boolean isSiardDK) throws IOException {
 
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
       final ColumnStatus binaryColumn = findLobColumn(binaryColumns, cellEntry.getKey());
 
       if (binaryColumn != null) {
-        if (ViewerType.dbTypes.CLOB.equals(binaryColumn.getType())) {
-          handleWriteClob(out, binaryColumn, row);
-        } else if (configurationCollection.getConsolidateProperty()
-          .equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
-          handleWriteConsolidateLobs(out, binaryColumn, row);
+        if (isSiardDK) {
+          handleWriteSIARDDKLobs(out, cellEntry.getValue());
         } else {
-          if (ViewerLobStoreType.EXTERNALLY.equals(
-            row.getCells().get(configTable.getColumnByIndex(binaryColumn.getColumnIndex()).getId()).getStoreType())) {
-            handleWriteExternalLobs(out, binaryColumn, row, cellEntry.getValue());
+          if (ViewerType.dbTypes.CLOB.equals(binaryColumn.getType())) {
+            handleWriteClob(out, binaryColumn, row);
+          } else if (configurationCollection.getConsolidateProperty()
+            .equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
+            handleWriteConsolidateLobs(out, binaryColumn, row);
           } else {
-            handleWriteInternalLobs(out, siardArchive, binaryColumn, row);
+            if (ViewerLobStoreType.EXTERNALLY.equals(
+              row.getCells().get(configTable.getColumnByIndex(binaryColumn.getColumnIndex()).getId()).getStoreType())) {
+              handleWriteExternalLobs(out, binaryColumn, row, cellEntry.getValue());
+            } else {
+              handleWriteInternalLobs(out, siardArchive, binaryColumn, row);
+            }
           }
         }
       }
@@ -180,6 +191,21 @@ public abstract class ZipOutputStream extends CSVOutputStream {
       completeLobPath.getFileName().toString());
     InputStream inputStream = Files.newInputStream(completeLobPath);
     addEntryToZip(out, inputStream, templateFilename);
+  }
+
+  private void handleWriteSIARDDKLobs(ZipArchiveOutputStream out, ViewerCell cell) throws IOException {
+    final String lobLocation = cell.getValue();
+    final Path lobPath = Paths.get(lobLocation);
+
+    if (lobPath.toFile().isDirectory()) {
+      for (File file : Objects.requireNonNull(lobPath.toFile().listFiles())) {
+        InputStream inputStream = Files.newInputStream(file.toPath());
+        addEntryToZip(out, inputStream, file.getName());
+      }
+    } else {
+      InputStream inputStream = Files.newInputStream(lobPath);
+      addEntryToZip(out, inputStream, lobPath.getFileName().toString());
+    }
   }
 
   private void handleWriteClob(ZipArchiveOutputStream out, ColumnStatus binaryColumn, ViewerRow row)

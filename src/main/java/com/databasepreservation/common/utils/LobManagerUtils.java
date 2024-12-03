@@ -71,7 +71,7 @@ public class LobManagerUtils {
       zipFilePath = dirPath.resolveSibling(dirPath.getFileName().toString() + ExtraMediaType.ZIP_FILE_EXTENSION);
     } else {
       if (handlebarsFilename != null) {
-        zipFilePath = buildSIARDKZipLobPath(databasePath, handlebarsFilename);
+        zipFilePath = buildSiardDKZipLobPath(databasePath, handlebarsFilename);
       } else {
         zipFilePath = Files.createTempFile(ViewerConstants.TEMP_PREFIX, ExtraMediaType.ZIP_FILE_EXTENSION);
       }
@@ -98,7 +98,7 @@ public class LobManagerUtils {
     return zipFilePath;
   }
 
-  public static final Path buildSIARDKZipLobPath(String databasePath, String handlebarsFilename) {
+  public static final Path buildSiardDKZipLobPath(String databasePath, String handlebarsFilename) {
     Path dbPath = Paths.get(databasePath);
     String dbName = dbPath.getFileName().toString();
     return dbPath.getParent().getParent().resolve(ViewerConstants.VIEWER_LOBS_FOLDER)
