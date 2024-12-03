@@ -172,6 +172,8 @@ public interface ClientMessages extends Messages {
 
   String row_downloadLOB();
 
+  String row_openLOBViewer();
+
   String references_isRelatedTo();
 
   String references_isReferencedBy();

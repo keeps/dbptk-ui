@@ -3463,3 +3463,15 @@ rgba(0, 0, 0, .125);
     overflow: hidden;
     white-space: nowrap;
 }
+
+/************************************************
+* Universal embedded viewer
+ ************************************************/
+
+.embedded-iiif-viewer{
+    height: 150vh;
+    width: 70vw;
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 30px;
+}

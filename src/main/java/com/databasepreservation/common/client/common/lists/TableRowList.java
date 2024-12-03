@@ -11,7 +11,6 @@ import static com.databasepreservation.common.client.models.structure.ViewerType
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.CLOB;
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.NESTED;
 
-import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,7 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.status.formatters.NoFormatter;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -44,6 +42,7 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.status.formatters.NoFormatter;
 import com.databasepreservation.common.client.models.status.formatters.NumberFormatter;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -56,6 +55,7 @@ import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.NumberFormatUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
+import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.cell.client.Cell;
@@ -186,11 +186,17 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         // this is the table of nested document
         ViewerTable nestedTable = database.getMetadata()
           .getTableById(configColumn.getNestedColumns().getOriginalTable());
-
-        Column<ViewerRow, SafeHtml> templateColumn = buildTemplateColumn(configColumn, nestedTable);
-        templateColumn.setSortable(false);
-        addColumn(configColumn, templateColumn);
-        configColumns.put(configColumn, templateColumn);
+        if (configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
+          Column<ViewerRow, SafeHtml> binaryColumn = buildNestedRowDownloadColumn(configColumn, nestedTable);
+          binaryColumn.setSortable(true); // add to configuration file sortable options
+          addColumn(configColumn, binaryColumn);
+          configColumns.put(configColumn, binaryColumn);
+        } else {
+          Column<ViewerRow, SafeHtml> templateColumn = buildTemplateColumn(configColumn, nestedTable);
+          templateColumn.setSortable(false);
+          addColumn(configColumn, templateColumn);
+          configColumns.put(configColumn, templateColumn);
+        }
       }
     }
 
@@ -254,6 +260,71 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     };
   }
 
+  private Column<ViewerRow, SafeHtml> buildNestedRowDownloadColumn(ColumnStatus configColumn, ViewerTable nestedTable) {
+    return new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+        SafeHtml value = getValue(object);
+        String title = messages.row_downloadLOB();
+        if (value != null) {
+          sb.appendHtmlConstant("<div title=\"" + title + "\">");
+          sb.append(value);
+          sb.appendHtmlConstant("</div");
+        }
+      }
+
+      @Override
+      public SafeHtml getValue(ViewerRow row) {
+        List<String> aggregationList = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        String url;
+        SafeHtml ret = null;
+        if (row.getNestedRowList() != null) {
+          for (ViewerRow nestedRow : row.getNestedRowList()) {
+            if (nestedRow != null && nestedRow.getCells() != null && !nestedRow.getCells().isEmpty()
+              && nestedRow.getUuid().equals(configColumn.getId())) {
+              Map<String, ViewerCell> cells = nestedRow.getCells();
+              String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
+              if (template != null && !template.isEmpty()) {
+                String json = JSOUtils.cellsToJson(cells, nestedTable);
+                String blob = getBlobKey(configColumn.getTypeName());
+                if (!blob.isEmpty() && json.contains(blob)) {
+                  String tempTemplate = template.replace("{{" + blob + "}}", "");
+                  tempTemplate = tempTemplate.replace("}{", "} {");
+                  if (tempTemplate.isEmpty())
+                    tempTemplate = messages.row_downloadLOB();
+                  template = "<a href=\"" + com.google.gwt.core.client.GWT.getHostPageBaseURL() + "{{" + blob + "}}\">"
+                    + tempTemplate + "</a>";
+                  String s = JavascriptUtils.compileTemplate(template, json);
+                  aggregationList.add(s);
+                } else {
+                  String tempTemplate = template.replace("}{", "} {");
+                  String s = JavascriptUtils.compileTemplate(tempTemplate, json);
+                  aggregationList.add(s);
+                }
+              }
+            }
+          }
+          String separatorText = configColumn.getSearchStatus().getList().getTemplate().getSeparator();
+          if (separatorText != null) {
+            String separator = "";
+            for (String s : aggregationList) {
+              sb.append(separator);
+              sb.append(s);
+              separator = separatorText;
+            }
+            ret = SafeHtmlUtils.fromSafeConstant(sb.toString());
+          } else {
+            if (!aggregationList.isEmpty()) {
+              ret = SafeHtmlUtils.fromSafeConstant(aggregationList.get(0));
+            }
+          }
+        }
+        return ret;
+      }
+    };
+  }
+
   private Column<ViewerRow, SafeHtml> buildSimpleColumn(ColumnStatus configColumn) {
     return new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
       @Override
@@ -289,11 +360,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
               break;
             case NUMERIC_FLOATING_POINT:
               if (configColumn.getFormatter() instanceof NoFormatter) {
-                ret = SafeHtmlUtils
-                    .fromString(NumberFormatUtils.getFormattedValue(new NumberFormatter(), value));
+                ret = SafeHtmlUtils.fromString(NumberFormatUtils.getFormattedValue(new NumberFormatter(), value));
               } else {
-              ret = SafeHtmlUtils
-                .fromString(NumberFormatUtils.getFormattedValue((NumberFormatter) configColumn.getFormatter(), value));
+                ret = SafeHtmlUtils.fromString(
+                  NumberFormatUtils.getFormattedValue((NumberFormatter) configColumn.getFormatter(), value));
               }
               break;
             case BOOLEAN:
@@ -357,9 +427,17 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     int columnIndex) {
     String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
     if (template != null && !template.isEmpty()) {
-      String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
-        ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
-          table.getSchemaName(), table.getName(), row.getUuid(), columnIndex));
+      String json = "";
+      if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+        json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
+          ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(), ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
+          RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
+            columnIndex));
+      } else {
+        json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+          ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+            table.getSchemaName(), table.getName(), row.getUuid(), columnIndex));
+      }
       return SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
     }
 
@@ -557,5 +635,29 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
   private String getExportURL(String filename, boolean exportAll, boolean description) {
     return getExportURL(null, filename, exportAll, description, false);
+  }
+
+  private String getBlobKey(String input) {
+    String result = "";
+
+    // Split the input string by commas to get individual key-value pairs
+    String[] pairs = input.split(",\\s*");
+
+    for (String pair : pairs) {
+      // Split each pair by the colon to separate the key and value
+      String[] keyValue = pair.split(":\\s*");
+
+      if (keyValue.length == 2) {
+        String key = keyValue[0];
+        String value = keyValue[1];
+
+        // Check if the value contains "BINARY LARGE OBJECT"
+        if (value.contains("BINARY LARGE OBJECT")) {
+          result = key;
+        }
+      }
+    }
+
+    return result;
   }
 }

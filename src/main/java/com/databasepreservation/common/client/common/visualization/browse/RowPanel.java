@@ -59,6 +59,7 @@ import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -74,7 +75,6 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.http.client.URL;
 
 import config.i18n.client.ClientMessages;
 
@@ -333,10 +333,19 @@ public class RowPanel extends RightPanel {
         } else {
           SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
           String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
+          String json = "";
           if (template != null && !template.isEmpty()) {
-            String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
-              ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
-                table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
+            if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+              json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
+                ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
+                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
+                RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
+                  columnStatus.getColumnIndex()));
+            } else {
+              json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+                  table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
+            }
             safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
           }
 
@@ -349,9 +358,18 @@ public class RowPanel extends RightPanel {
           SafeHtml safeHtml;
           String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
           if (template != null && !template.isEmpty()) {
-            String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
-              ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
-                table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
+            String json = "";
+            if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+              json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
+                ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
+                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
+                RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
+                  columnStatus.getColumnIndex()));
+            } else {
+              json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+                  table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
+            }
             safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
             rowField = RowField.createInstance(label, new HTML(safeHtml));
           } else {
@@ -394,7 +412,6 @@ public class RowPanel extends RightPanel {
 
   private void getNestedHTML(ColumnStatus columnStatus) {
     NestedColumnStatus nestedColumns = columnStatus.getNestedColumns();
-
     if (nestedColumns != null) {
       ViewerTable nestedTable = database.getMetadata().getTableById(nestedColumns.getOriginalTable());
 
@@ -421,11 +438,50 @@ public class RowPanel extends RightPanel {
             null, false, new ArrayList<>());
           CollectionService.Util.call((IndexResult<ViewerRow> result) -> {
             if (result.getTotalCount() >= 1) {
+              RowField rowField;
               String json = JSOUtils.cellsToJson(result.getResults().get(0).getCells(), nestedTable);
               String s = JavascriptUtils.compileTemplate(template, json);
-              RowField rowField = RowField.createInstance(columnStatus.getCustomName(), new Label(s));
-              rowField.addColumnDescription(columnStatus.getCustomDescription());
+              if (columnStatus.getTypeName().contains("BINARY LARGE OBJECT")) {
+                String templateLob = "<a href=\"{{" + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + "}}\">{{"
+                  + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL + "}}</a>";
+                int originalCollumnIndex = 0;
 
+                // loop to find the original column index
+                for (Map.Entry<String, ViewerCell> entry : result.getResults().get(0).getCells().entrySet()) {
+                  ViewerCell v = entry.getValue();
+                  if (v.getStoreType() != null)
+                    break;
+                  originalCollumnIndex++;
+                }
+
+                if ((database.getPath() == null || database.getPath().isEmpty())
+                  && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
+                  rowField = RowField.createInstance(new Label(s).getText(),
+                    new HTML(messages.rowPanelTextForLobUnavailable()));
+                } else {
+                  SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
+                  if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+                    json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
+                      ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
+                      ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
+                      RestUtils.createExportLobUri(database.getUuid(), nestedTable.getSchemaName(),
+                        nestedTable.getName(), result.getResults().get(0).getUuid(), originalCollumnIndex));
+                  } else {
+                    json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+                      ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
+                      RestUtils.createExportLobUri(database.getUuid(), nestedTable.getSchemaName(),
+                        nestedTable.getName(), result.getResults().get(0).getUuid(), originalCollumnIndex));
+                  }
+
+                  safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(templateLob, json));
+
+                  rowField = RowField.createInstance(columnStatus.getCustomName(), new HTML(safeHtml));
+                }
+              } else {
+                rowField = RowField.createInstance(columnStatus.getCustomName(), new Label(s));
+              }
+
+              rowField.addColumnDescription(columnStatus.getCustomDescription());
               panel.add(rowField);
             }
           }).findRows(database.getUuid(), database.getUuid(), nestedTable.getSchemaName(), nestedTable.getName(),

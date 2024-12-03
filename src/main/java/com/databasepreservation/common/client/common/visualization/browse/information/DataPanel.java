@@ -133,7 +133,9 @@ public class DataPanel extends Composite implements ICollectionStatusObserver {
       new BasicTablePanel.ColumnInfo<>(messages.schema_tableName(), false, 17, new TextColumn<ViewerTable>() {
         @Override
         public String getValue(ViewerTable table) {
-          if (ViewerStringUtils.isNotBlank(status.getTableStatusByTableId(table.getId()).getCustomName())) {
+          if (status.getTableStatusByTableId(table.getId()) == null) {
+            return "";
+          } else if (ViewerStringUtils.isNotBlank(status.getTableStatusByTableId(table.getId()).getCustomName())) {
             return status.getTableStatusByTableId(table.getId()).getCustomName();
           } else {
             return status.getTableStatusByTableId(table.getId()).getName();
@@ -144,7 +146,10 @@ public class DataPanel extends Composite implements ICollectionStatusObserver {
       new BasicTablePanel.ColumnInfo<>(messages.description(), false, 35, new TextColumn<ViewerTable>() {
         @Override
         public String getValue(ViewerTable table) {
-          if (ViewerStringUtils.isNotBlank(status.getTableStatusByTableId(table.getId()).getCustomDescription())) {
+          if (status.getTableStatusByTableId(table.getId()) == null) {
+            return "";
+          } else if (ViewerStringUtils
+            .isNotBlank(status.getTableStatusByTableId(table.getId()).getCustomDescription())) {
             return status.getTableStatusByTableId(table.getId()).getCustomDescription();
           } else {
             return "";

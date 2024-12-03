@@ -7,8 +7,8 @@
  */
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers;
 
-import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -119,7 +119,7 @@ public class ClobColumnOptionsPanel extends ColumnOptionsPanel {
 
   private void buildDetailedViewTemplatePanel(ColumnStatus columnConfiguration) {
     templateToDetailedView = new ColumnTemplateOptions(messages.columnManagementLabelForTemplateDetail(),
-      ColumnOptionUtils.getDefaultTextOrValue(columnConfiguration.getSearchStatus().getList().getTemplate()), true);
+      ColumnOptionUtils.getDefaultTextOrValue(columnConfiguration.getDetailsStatus().getTemplateStatus()), true);
 
     templateToDetailedView.addStyleNameToLabel("form-label");
     templateToDetailedView.addStyleNameToTextBox("form-textbox");
@@ -165,7 +165,11 @@ public class ClobColumnOptionsPanel extends ColumnOptionsPanel {
 
     String str = options.getText();
     if (ViewerStringUtils.isBlank(str)) {
-      templateStatus.setTemplate(DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+      if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+        templateStatus.setTemplate(ViewerConstants.DEFAULT_VIEWER_DOWNLOAD_LABEL_TEMPLATE);
+      } else {
+        templateStatus.setTemplate(ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+      }
     } else {
       templateStatus.setTemplate(str);
     }
