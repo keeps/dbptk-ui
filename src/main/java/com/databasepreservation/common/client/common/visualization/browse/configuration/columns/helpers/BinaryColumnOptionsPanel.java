@@ -7,8 +7,11 @@
  */
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers;
 
+import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE;
 import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE;
+import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_VIEWER_DOWNLOAD_LABEL_TEMPLATE;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.ApplicationTypeActions;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
@@ -19,7 +22,12 @@ import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
@@ -87,7 +95,11 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
   public TemplateStatus getSearchTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
     if (ViewerStringUtils.isBlank(this.displayList.getText())) {
-      templateStatus.setTemplate(DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+      if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+        templateStatus.setTemplate(DEFAULT_VIEWER_DOWNLOAD_LABEL_TEMPLATE);
+      } else {
+        templateStatus.setTemplate(DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+      }
     } else {
       templateStatus.setTemplate(this.displayList.getText());
     }
@@ -99,7 +111,11 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
   public TemplateStatus getDetailsTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
     if (ViewerStringUtils.isBlank(this.detailsList.getText())) {
-      templateStatus.setTemplate(DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+      if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+        templateStatus.setTemplate(DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE);
+      } else {
+        templateStatus.setTemplate(DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+      }
     } else {
       templateStatus.setTemplate(this.detailsList.getText());
     }
