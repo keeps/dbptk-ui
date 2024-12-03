@@ -7,10 +7,11 @@
  */
 package com.databasepreservation.common.server.index.utils;
 
-import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.index.sort.Sorter;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.params.CursorMarkParams;
 import org.roda.core.data.exceptions.GenericException;
@@ -18,10 +19,10 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.sort.Sorter;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -37,6 +38,7 @@ public class DatabaseResultIterator<T extends IsIndexed> implements Iterator<T> 
   private final Filter filter;
   private final Sorter sorter;
   private final List<String> fieldsToReturn;
+  private final List<Filter> filterQueries;
   private int pageSize = DEFAULT_PAGE_SIZE;
   private int retries = DEFAULT_RETRIES;
   private int sleepBetweenRetries = DEFAULT_SLEEP_BETWEEN_RETRIES;
@@ -47,9 +49,10 @@ public class DatabaseResultIterator<T extends IsIndexed> implements Iterator<T> 
   private T next = null;
 
   public DatabaseResultIterator(SolrClient index, Class<T> classToRetrieve, Filter filter, Sorter sorter,
-    List<String> fieldsToReturn) {
+    List<String> fieldsToReturn, List<Filter> filterQueries) {
     this.index = index;
     this.filter = filter;
+    this.filterQueries = filterQueries;
     this.classToRetrieve = classToRetrieve;
     this.sorter = sorter;
     this.fieldsToReturn = fieldsToReturn;
@@ -72,7 +75,7 @@ public class DatabaseResultIterator<T extends IsIndexed> implements Iterator<T> 
       do {
         try {
           Pair<IndexResult<T>, String> page = SolrUtils.find(index, classToRetrieve, filter, sorter, pageSize,
-            cursorMark, fieldsToReturn, new HashMap<>());
+            cursorMark, fieldsToReturn, new HashMap<>(), filterQueries);
           result = page.getFirst();
           nextCursorMark = page.getSecond();
 

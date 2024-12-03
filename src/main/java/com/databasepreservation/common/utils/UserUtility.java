@@ -11,13 +11,45 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.lang3.StringUtils;
+import org.apereo.cas.client.util.AbstractCasFilter;
+import org.apereo.cas.client.validation.Assertion;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.roda.core.data.exceptions.AuthorizationDeniedException;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.utils.JsonUtils;
+import org.roda.core.data.v2.ip.DIP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
+import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.user.User;
+import com.databasepreservation.common.exceptions.AuthorizationException;
+import com.databasepreservation.common.server.ViewerConfiguration;
+import com.databasepreservation.common.server.ViewerFactory;
+import com.google.common.collect.Sets;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -32,34 +64,6 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
-
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.lang3.StringUtils;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.apereo.cas.client.util.AbstractCasFilter;
-import org.apereo.cas.client.validation.Assertion;
-import org.roda.core.data.exceptions.AuthorizationDeniedException;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.utils.JsonUtils;
-import org.roda.core.data.v2.ip.DIP;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.exceptions.AuthorizationException;
-import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
-import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
-import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.user.User;
-import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.server.ViewerFactory;
-import com.google.common.collect.Sets;
 
 public class UserUtility {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserUtility.class);
@@ -119,11 +123,11 @@ public class UserUtility {
   public static void checkDatabasePermission(final User user, String databaseUUID) throws AuthorizationException {
     LOGGER.debug("Checking if user {} has permissions to access database {}", user.getId(), databaseUUID);
     try {
-      // Admin always have access to all databases
-      if (!userIsAdmin(user)) {
+      // Admin and whitelist always have access to all databases
+      if (!userIsAdmin(user) && !user.isWhiteList()) {
         DatabaseStatus databaseStatus = ViewerFactory.getConfigurationManager().getDatabaseStatus(databaseUUID);
 
-        Set<String> permissions = databaseStatus.getPermissions();
+        Map<String, AuthorizationDetails> permissions = databaseStatus.getPermissions();
 
         checkAuthorizationGroups(user, permissions);
       }
@@ -133,7 +137,7 @@ public class UserUtility {
     }
   }
 
-  private static void checkAuthorizationGroups(final User user, Set<String> databasePermissions)
+  private static void checkAuthorizationGroups(final User user, Map<String, AuthorizationDetails> databasePermissions)
     throws AuthorizationException {
     AuthorizationGroupsList allAuthorizationGroups = ViewerConfiguration.getInstance()
       .getCollectionsAuthorizationGroupsWithDefault();
@@ -146,7 +150,7 @@ public class UserUtility {
       throw new AuthorizationException("This database does not have any associated permissions");
     }
 
-    for (String permission : databasePermissions) {
+    for (String permission : databasePermissions.keySet()) {
       AuthorizationGroup authorizationGroup = allAuthorizationGroups.get(permission);
       if (authorizationGroup != null) {
         // store permissions with associated groups.
@@ -160,7 +164,13 @@ public class UserUtility {
     for (AuthorizationGroup authorizationGroup : authorizationGroupsToCheck.getAuthorizationGroupsList()) {
       if (authorizationGroup.getAttributeOperator()
         .equals(ViewerConfiguration.PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL)) {
-        if (user.getAllRoles().contains(authorizationGroup.getAttributeValue())) {
+        Instant expiry = databasePermissions.get(authorizationGroup.getAttributeValue()).getExpiry().toInstant();
+        if (expiry != null) {
+          // The expiry ends at the end of the stored day
+          expiry = expiry.plus(24, ChronoUnit.HOURS);
+        }
+        if (user.getAllRoles().contains(authorizationGroup.getAttributeValue())
+          && (expiry == null || expiry.isAfter(new Date().toInstant()))) {
           // User has permissions to access this database
           return;
         }
@@ -170,7 +180,12 @@ public class UserUtility {
     // If there is a permission on database that doesn't match witch any group, do a
     // simple verification with user roles
     for (String permission : permissionWithoutGroup) {
-      if (user.getAllRoles().contains(permission)) {
+      Instant expiry = databasePermissions.get(permission).getExpiry().toInstant();
+      if (expiry != null) {
+        // The expiry ends at the end of the stored day
+        expiry = expiry.plus(24, ChronoUnit.HOURS);
+      }
+      if (user.getAllRoles().contains(permission) && (expiry == null || expiry.isAfter(new Date().toInstant()))) {
         return;
       }
     }

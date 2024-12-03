@@ -8,6 +8,7 @@
 package com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,12 +20,14 @@ import com.databasepreservation.common.client.common.NavigationPanel;
 import com.databasepreservation.common.client.common.NoAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
+import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
 import com.databasepreservation.common.client.common.lists.columns.TooltipColumn;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -34,16 +37,21 @@ import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.SwitchBtn;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.CompositeCell;
+import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
-
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
+
 import config.i18n.client.ClientMessages;
 
 /**
@@ -55,30 +63,38 @@ public class PermissionsNavigationPanel {
   private static Map<String, PermissionsNavigationPanel> instances = new HashMap<>();
 
   private ViewerDatabase database;
-  private Set<String> databasePermissions;
+  private Set<String> databasePermissionGroups;
   private Set<AuthorizationGroup> groups;
+  private HashMap<String, AuthorizationDetails> groupDetails;
   private boolean hasPermissionsOrGroups = true;
   private FlowPanel body;
   private FlowPanel bottom;
   private Button btnEdit;
   private SwitchBtn btnSwitch;
   private Column<AuthorizationGroup, Boolean> checkbox;
+  private Column<AuthorizationGroup, AuthorizationGroup> expiry;
   private BasicTablePanel<AuthorizationGroup> cellTable;
+
+  private AuthorizationGroup currentGroup;
+  private Date lastDate;
 
   private boolean overrideMissingGroups = false;
 
-  public static PermissionsNavigationPanel getInstance(ViewerDatabase database, Set<String> databasePermissions,
-    Set<AuthorizationGroup> authorizationGroups) {
+  public static PermissionsNavigationPanel getInstance(ViewerDatabase database,
+    Map<String, AuthorizationDetails> databasePermissions, Set<AuthorizationGroup> authorizationGroups) {
     return instances.computeIfAbsent(database.getUuid(),
       k -> new PermissionsNavigationPanel(database, databasePermissions, authorizationGroups));
   }
 
-  public PermissionsNavigationPanel(ViewerDatabase database, Set<String> databasePermissions,
+  public PermissionsNavigationPanel(ViewerDatabase database, Map<String, AuthorizationDetails> databasePermissionGroups,
     Set<AuthorizationGroup> authorizationGroups) {
     this.database = database;
     this.groups = authorizationGroups;
-    this.databasePermissions = databasePermissions;
-    if (databasePermissions.isEmpty() && groups.isEmpty()) {
+    this.groupDetails = new HashMap<>();
+    this.groupDetails.putAll(databasePermissionGroups);
+    this.databasePermissionGroups = new HashSet<>();
+    this.databasePermissionGroups.addAll(databasePermissionGroups.keySet());
+    if (databasePermissionGroups.isEmpty() && groups.isEmpty()) {
       this.hasPermissionsOrGroups = false;
     }
   }
@@ -101,26 +117,34 @@ public class PermissionsNavigationPanel {
       handleSwitchBottom();
     }
 
-    update(databasePermissions);
+    update();
 
     return panel;
   }
 
-  public void update(Set<String> databasePermissions) {
-    this.databasePermissions = databasePermissions;
+  public void update() {
+    updateBody();
+    updateBottom();
+  }
+
+  public void update(Map<String, AuthorizationDetails> newPermissions) {
+    this.groupDetails.clear();
+    this.groupDetails.putAll(newPermissions);
+    this.databasePermissionGroups.clear();
+    this.databasePermissionGroups.addAll(newPermissions.keySet());
     updateBody();
     updateBottom();
   }
 
   private void updateBody() {
     body.clear();
-    if (databasePermissions.isEmpty()) {
+    if (databasePermissionGroups.isEmpty()) {
       body.add(new Alert(Alert.MessageAlertType.WARNING, messages.SIARDHomePageTextForMissingDatabasePermissions()));
     } else {
       ArrayList<String> permissionOrGroupsList = new ArrayList<>();
       // Add the corresponding label to the permission
       for (AuthorizationGroup authorizationGroup : groups) {
-        if (databasePermissions.contains(authorizationGroup.getAttributeValue())) {
+        if (databasePermissionGroups.contains(authorizationGroup.getAttributeValue())) {
           permissionOrGroupsList.add(authorizationGroup.getLabel());
         }
       }
@@ -155,19 +179,19 @@ public class PermissionsNavigationPanel {
       btnEdit.addClickHandler(clickEvent -> {
         overrideMissingGroups = false;
         Dialogs.showPermissionsDialog(messages.SIARDHomePageDialogTitleForPermissionsList(),
-          messages.SIARDHomePageDialogDescriptionForPermissionsList(), "900px", getGroupsTables(),
+          messages.SIARDHomePageDialogDescriptionForPermissionsList(), "1000px", getGroupsTables(),
           messages.basicActionCancel(), messages.basicActionConfirm(), new NoAsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean confirmation) {
               if (confirmation) {
                 if (overrideMissingGroups) {
-                  databasePermissions.removeAll(retrieveMissingGroups());
+                  databasePermissionGroups.removeAll(retrieveMissingGroups());
                 }
-                DatabaseService.Util.call((Set<String> result) -> {
+                DatabaseService.Util.call((Map<String, AuthorizationDetails> result) -> {
                   SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
                   Toast.showInfo(messages.SIARDHomePageDialogTitleForPermissionsList(),
                     messages.SIARDHomePageDialogMessageForPermissionsList());
-                }).updateDatabasePermissions(database.getUuid(), databasePermissions);
+                }).updateDatabasePermissions(database.getUuid(), createDatabasePermissionsMap());
               }
             }
           });
@@ -202,29 +226,61 @@ public class PermissionsNavigationPanel {
     permissionListPanel
       .add(new Alert(Alert.MessageAlertType.INFO, messages.SIARDHomePageDialogDetailsForPermissionsList()));
 
-    checkbox = new Column<AuthorizationGroup, Boolean>(
-      new CheckboxCell(true, true)) {
+    checkbox = new Column<AuthorizationGroup, Boolean>(new CheckboxCell(true, true)) {
       @Override
       public Boolean getValue(AuthorizationGroup group) {
-        return databasePermissions.contains(group.getAttributeValue());
+        return databasePermissionGroups.contains(group.getAttributeValue());
       }
     };
 
     checkbox.setFieldUpdater((index, group, value) -> {
       if (value) {
         // Add
-        if (!databasePermissions.contains(group.getAttributeValue())) {
-          databasePermissions.add(group.getAttributeValue());
+        if (!databasePermissionGroups.contains(group.getAttributeValue())) {
+          databasePermissionGroups.add(group.getAttributeValue());
         }
       } else {
         // Remove
-        if (databasePermissions.contains(group.getAttributeValue())) {
-          databasePermissions.remove(group.getAttributeValue());
-        }
+        databasePermissionGroups.remove(group.getAttributeValue());
       }
     });
 
-    buildGroupsTable(groups, checkbox);
+    List<HasCell<AuthorizationGroup, ?>> cells = new ArrayList<>();
+    TextColumn<AuthorizationGroup> dateLabel = new TextColumn<>() {
+      @Override
+      public String getValue(AuthorizationGroup object) {
+        Date expiry = groupDetails.getOrDefault(object.getAttributeValue(), new AuthorizationDetails()).getExpiry();
+        if (expiry == null) {
+          return "";
+        } else {
+          return DateTimeFormat.getFormat("dd-MM-yyyy").format(expiry);
+        }
+      }
+    };
+    cells.add(dateLabel);
+
+    cells.add(new ActionsCell<>(messages.edit(), "edit", group -> {
+      currentGroup = group;
+      showDatePicker();
+    }));
+    cells.add(new ActionsCell<>(messages.delete(), "trash", group -> {
+      AuthorizationDetails authorizationDetails = groupDetails.getOrDefault(group.getAttributeValue(),
+        new AuthorizationDetails());
+      authorizationDetails.setExpiry(null);
+      groupDetails.put(group.getAttributeValue(), authorizationDetails);
+      cellTable.refresh();
+    }));
+
+    CompositeCell<AuthorizationGroup> compositeCell = new CompositeCell<>(cells);
+    expiry = new Column<>(compositeCell) {
+      @Override
+      public AuthorizationGroup getValue(AuthorizationGroup object) {
+        return object;
+      }
+    };
+
+    buildGroupsTable(groups, checkbox, expiry);
+
     permissionListPanel.add(cellTable);
 
     searchBox.addChangeHandler(event -> {
@@ -257,8 +313,40 @@ public class PermissionsNavigationPanel {
     return permissionListPanel;
   }
 
-  private void buildGroupsTable(Set<AuthorizationGroup> groups,
-    Column<AuthorizationGroup, Boolean> checkbox) {
+  private void showDatePicker() {
+    String today = DateTimeFormat.getFormat("yyyy-MM-dd").format(new Date());
+    HTML htmlDatePicker = new HTML(
+      SafeHtmlUtils.fromSafeConstant("<input type=date id=\"expiryDatePicker\" min=" + today + "></input>")) {
+      @Override
+      protected void onDetach() {
+        super.onDetach();
+        String datePickerValue = JavascriptUtils.getInputValue("expiryDatePicker");
+        if (datePickerValue != null && !datePickerValue.isEmpty()) {
+          lastDate = DateTimeFormat.getFormat("yyyy-MM-dd").parse(datePickerValue);
+        } else {
+          lastDate = null;
+        }
+      }
+    };
+
+    Dialogs.showCustomConfirmationDialog(messages.SIARDHomePageTitleForDateEdit(), SafeHtmlUtils.EMPTY_SAFE_HTML,
+      "300px", htmlDatePicker, messages.basicActionCancel(), messages.basicActionConfirm(),
+      new NoAsyncCallback<Boolean>() {
+        @Override
+        public void onSuccess(Boolean confirmation) {
+          if (confirmation) {
+            AuthorizationDetails authorizationDetails = groupDetails.getOrDefault(currentGroup.getAttributeValue(),
+              new AuthorizationDetails());
+            authorizationDetails.setExpiry(lastDate);
+            groupDetails.put(currentGroup.getAttributeValue(), authorizationDetails);
+            cellTable.refresh();
+          }
+        }
+      });
+  }
+
+  private void buildGroupsTable(Set<AuthorizationGroup> groups, Column<AuthorizationGroup, Boolean> checkbox,
+    Column<AuthorizationGroup, AuthorizationGroup> expiry) {
     cellTable = new BasicTablePanel<>(new FlowPanel(), SafeHtmlUtils.EMPTY_SAFE_HTML, groups.iterator(),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>("", 3, checkbox),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>(messages.SIARDHomePageLabelForPermissionsTableGroupLabel(), 15,
@@ -277,7 +365,7 @@ public class PermissionsNavigationPanel {
           }
         }, "force_column_ellipsis"),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>(
-        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeOperator(), 12,
+        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeOperator(), 7,
         new TooltipColumn<AuthorizationGroup>() {
           @Override
           public SafeHtml getValue(AuthorizationGroup group) {
@@ -291,7 +379,10 @@ public class PermissionsNavigationPanel {
           public SafeHtml getValue(AuthorizationGroup group) {
             return SafeHtmlUtils.fromString(group.getAttributeValue());
           }
-        }, "force_column_ellipsis"));
+        }, "force_column_ellipsis"),
+      new BasicTablePanel.ColumnInfo<AuthorizationGroup>(
+        messages.SIARDHomePageLabelForPermissionsTableGroupExpiryDate(), 12, expiry,
+        "force_column_ellipsis expiry_column"));
   }
 
   private void doSearch(String searchValue, FlowPanel permissionListPanel) {
@@ -308,7 +399,7 @@ public class PermissionsNavigationPanel {
 
   private void showAll() {
     // Show all the groups
-    buildGroupsTable(groups, checkbox);
+    buildGroupsTable(groups, checkbox, expiry);
   }
 
   private void showMatching(final String searchValue) {
@@ -320,13 +411,13 @@ public class PermissionsNavigationPanel {
         || group.getAttributeValue().toLowerCase().contains(searchValue.toLowerCase()))
       .collect(Collectors.toList());
 
-    buildGroupsTable(new HashSet<>(matchingGroups), checkbox);
+    buildGroupsTable(new HashSet<>(matchingGroups), checkbox, expiry);
   }
 
   private Set<String> retrieveMissingGroups() {
     // Checking for database permissions that doesn't have any registered groups
     Set<String> missingGroups = new HashSet<>();
-    for (String permission : databasePermissions) {
+    for (String permission : databasePermissionGroups) {
       boolean foundGroup = false;
       for (AuthorizationGroup group : groups) {
         if (group.getAttributeValue().equals(permission)) {
@@ -339,5 +430,13 @@ public class PermissionsNavigationPanel {
       }
     }
     return missingGroups;
+  }
+
+  private Map<String, AuthorizationDetails> createDatabasePermissionsMap() {
+    Map<String, AuthorizationDetails> permissions = new HashMap<>();
+    for (String permission : databasePermissionGroups) {
+      permissions.put(permission, groupDetails.getOrDefault(permission, new AuthorizationDetails()));
+    }
+    return permissions;
   }
 }

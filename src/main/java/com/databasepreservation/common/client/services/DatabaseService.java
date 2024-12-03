@@ -7,9 +7,12 @@
  */
 package com.databasepreservation.common.client.services;
 
+import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -89,12 +92,12 @@ public interface DatabaseService extends DirectRestService {
 
   @RequestMapping(path = "/{databaseUUID}/permissions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Gets the internal database configuration")
-  Set<String> getDatabasePermissions(@PathVariable(name = "databaseUUID") String databaseUUID);
+  Map<String, AuthorizationDetails> getDatabasePermissions(@PathVariable(name = "databaseUUID") String databaseUUID);
 
   @RequestMapping(path = "/{databaseUUID}/permissions", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Updates database permissions")
-  Set<String> updateDatabasePermissions(@PathVariable(name = "databaseUUID") String databaseUUID,
-    @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody Set<String> permissions);
+  Map<String, AuthorizationDetails> updateDatabasePermissions(@PathVariable(name = "databaseUUID") String databaseUUID,
+                                                              @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody Map<String, AuthorizationDetails> permissions);
 
   @RequestMapping(path = "/{databaseUUID}/searchable", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Updates database permissions")

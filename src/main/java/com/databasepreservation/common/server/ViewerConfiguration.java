@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
 import com.databasepreservation.common.server.controller.ReporterType;
@@ -508,8 +508,12 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return cachedWhitelistAllIPs;
   }
 
-  public Set<String> getCollectionsAuthorizationDefault() {
-    return new HashSet<>(getViewerConfigurationAsList(PROPERTY_COLLECTIONS_AUTHORIZATION_DEFAULT_ROLES));
+  public Map<String, AuthorizationDetails> getCollectionsAuthorizationDefault() {
+    Map<String, AuthorizationDetails> ret = new HashMap<>();
+    for (String defaultRole : getViewerConfigurationAsList(PROPERTY_COLLECTIONS_AUTHORIZATION_DEFAULT_ROLES)) {
+      ret.put(defaultRole, new AuthorizationDetails());
+    }
+    return ret;
   }
 
   public AuthorizationGroupsList getCollectionsAuthorizationGroups() {
@@ -539,9 +543,9 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public AuthorizationGroupsList getCollectionsAuthorizationGroupsWithDefault() {
     AuthorizationGroupsList authorizationGroupsList = getCollectionsAuthorizationGroups();
 
-    Set<String> authorizationDefault = getCollectionsAuthorizationDefault();
+    Map<String, AuthorizationDetails> authorizationDefault = getCollectionsAuthorizationDefault();
     if (!authorizationDefault.isEmpty()) {
-      for (String defaultPermission : authorizationDefault) {
+      for (String defaultPermission : authorizationDefault.keySet()) {
         if (authorizationGroupsList.get(defaultPermission) == null) {
           AuthorizationGroup authorizationGroup = new AuthorizationGroup();
           authorizationGroup.setId(defaultPermission);
@@ -821,9 +825,9 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     List<ClassLoader> classLoadersList = new LinkedList<>();
     classLoadersList.add(ClasspathHelper.contextClassLoader());
 
-    Reflections reflections = new Reflections(
-      new ConfigurationBuilder().forPackage(classpathPrefix,
-        ClasspathHelper.contextClassLoader(), ClasspathHelper.staticClassLoader()).setScanners(Scanners.Resources));
+    Reflections reflections = new Reflections(new ConfigurationBuilder()
+      .forPackage(classpathPrefix, ClasspathHelper.contextClassLoader(), ClasspathHelper.staticClassLoader())
+      .setScanners(Scanners.Resources));
 
     Set<String> resources = reflections.getResources(Pattern.compile(".*"));
     resources = resources.stream().filter(r -> !shouldExclude(r, classpathPrefix, excludePaths))

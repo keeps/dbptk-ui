@@ -123,6 +123,11 @@ public class ViewerConstants {
   public static final String INDEX_WILDCARD = "*";
 
   /*
+   * COMMON FIELDS
+   */
+  public static final String SOLR_CONTENT_TYPE = "content_type";
+
+  /*
    * DATABASE FIELDS
    */
   public static final String SOLR_DATABASES_STATUS = "status";
@@ -142,6 +147,10 @@ public class ViewerConstants {
   public static final String SOLR_DATABASES_VALIDATION_WARNINGS = "siard_validation_warnings";
   public static final String SOLR_DATABASES_VALIDATION_SKIPPED = "siard_validation_skipped";
   public static final String SOLR_DATABASES_PERMISSIONS = "database_permissions";
+  public static final String SOLR_DATABASES_PERMISSIONS_GROUP = "group_value";
+  public static final String SOLR_DATABASES_PERMISSIONS_EXPIRY = "expiry_date";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_ROOT = "database";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_PERMISSION = "permission";
 
   /*
    * ACTIVITY LOG FIELDS

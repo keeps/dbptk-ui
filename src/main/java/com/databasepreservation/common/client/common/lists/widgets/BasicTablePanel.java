@@ -224,4 +224,8 @@ public class BasicTablePanel<C> extends Composite {
   public ListDataProvider<C> getDataProvider() {
     return dataProvider;
   }
+
+  public void refresh() {
+    dataProvider.refresh();
+  }
 }

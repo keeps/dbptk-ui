@@ -52,6 +52,7 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.IsIndexed;
@@ -75,8 +76,12 @@ import com.databasepreservation.common.client.index.filter.NotSimpleFilterParame
 import com.databasepreservation.common.client.index.filter.OneOfManyFilterParameter;
 import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.parser.DefaultQueryParser;
+import com.databasepreservation.common.client.index.parser.QueryChildrenParser;
+import com.databasepreservation.common.client.index.parser.QueryParser;
 import com.databasepreservation.common.client.index.sort.SortParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.exceptions.ViewerException;
@@ -131,9 +136,20 @@ public class SolrUtils {
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
     Sorter sorter, Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters)
     throws GenericException, RequestNotValidException {
+    return find(index, collection, filter, sorter, sublist, facets, fieldsToReturn, extraParameters, new ArrayList<>());
+  }
+
+  public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
+    Sorter sorter, Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters,
+    List<Filter> filterQueries) throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
+    List<String> parsedFilterQueries = new ArrayList<>();
+    for (Filter filterQuery : filterQueries) {
+      parsedFilterQueries.add(parseFilter(filterQuery));
+    }
+    query.setFilterQueries(parsedFilterQueries.toArray(new String[0]));
     final List<SolrQuery.SortClause> sortClauses = parseSorter(sorter);
     sortClauses.add(SolrQuery.SortClause.asc(RodaConstants.INDEX_UUID));
     query.setSorts(sortClauses);
@@ -251,10 +267,22 @@ public class SolrUtils {
   public static <T extends IsIndexed> Pair<IndexResult<T>, String> find(SolrClient index, Class<T> classToRetrieve,
     Filter filter, Sorter sorter, int pageSize, String cursorMark, List<String> fieldsToReturn,
     Map<String, String> extraParameters) throws RequestNotValidException, GenericException {
+    return find(index, classToRetrieve, filter, sorter, pageSize, cursorMark, fieldsToReturn, extraParameters,
+      new ArrayList<>());
+  }
+
+  public static <T extends IsIndexed> Pair<IndexResult<T>, String> find(SolrClient index, Class<T> classToRetrieve,
+    Filter filter, Sorter sorter, int pageSize, String cursorMark, List<String> fieldsToReturn,
+    Map<String, String> extraParameters, List<Filter> filterQueries) throws RequestNotValidException, GenericException {
     Pair<IndexResult<T>, String> ret;
     SolrQuery query = new SolrQuery();
     query.setParam("q.op", DEFAULT_QUERY_PARSER_OPERATOR);
     query.setQuery(parseFilter(filter));
+    List<String> parsedFilterQueries = new ArrayList<>();
+    for (Filter filterQuery : filterQueries) {
+      parsedFilterQueries.add(parseFilter(filterQuery));
+    }
+    query.setFilterQueries(parsedFilterQueries.toArray(new String[0]));
 
     query.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
     query.setRows(pageSize);
@@ -587,6 +615,12 @@ public class SolrUtils {
   }
 
   public static String parseFilter(Filter filter) throws RequestNotValidException {
+    StringBuilder qParser = new StringBuilder();
+
+    if (filter.getQueryParser() != null) {
+      parseQueryParser(qParser, filter.getQueryParser());
+    }
+
     StringBuilder ret = new StringBuilder();
 
     if (filter == null || filter.getParameters().isEmpty()) {
@@ -602,7 +636,23 @@ public class SolrUtils {
     }
 
     LOGGER.trace("Converting filter {} to query {}", filter, ret);
-    return ret.toString();
+    return qParser.toString() + ret.toString();
+  }
+
+  public static void parseQueryParser(StringBuilder ret, QueryParser queryParser) throws RequestNotValidException {
+    if (queryParser instanceof QueryChildrenParser) {
+      QueryChildrenParser queryChildrenParser = (QueryChildrenParser) queryParser;
+      appendQueryChildrenParser(ret, queryChildrenParser);
+    } else if (queryParser instanceof DefaultQueryParser) {
+      // do nothing
+    } else {
+      LOGGER.error("Unsupported query parser class: {}", queryParser.getClass().getName());
+      throw new RequestNotValidException("Unsupported query parser class: " + queryParser.getClass().getName());
+    }
+  }
+
+  public static void appendQueryChildrenParser(StringBuilder ret, QueryChildrenParser queryChildrenParser) {
+    ret.append("{!parent which=\"*:* -_nest_path_:*\"}");
   }
 
   private static void parseFilterParameter(StringBuilder ret, FilterParameter parameter,
@@ -1295,6 +1345,33 @@ public class SolrUtils {
           object.getClass().getName());
       }
     }
+    return ret;
+  }
+
+  public static Map<String, AuthorizationDetails> objectToDatabasePermissions(Object object) {
+    Map<String, AuthorizationDetails> ret = new HashMap<>();
+
+    if (object != null) {
+      if (object instanceof SolrDocument doc) {
+        String group = objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PERMISSIONS_GROUP), null);
+        if (group != null) {
+          AuthorizationDetails authorizationDetails = new AuthorizationDetails();
+          authorizationDetails.setExpiry(objectToDate(doc.get(ViewerConstants.SOLR_DATABASES_PERMISSIONS_EXPIRY)));
+          ret.put(group, authorizationDetails);
+        }
+      } else {
+        List<SolrDocument> documents = (List<SolrDocument>) object;
+        documents.forEach(doc -> {
+          String group = objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PERMISSIONS_GROUP), null);
+          if (group != null) {
+            AuthorizationDetails authorizationDetails = new AuthorizationDetails();
+            authorizationDetails.setExpiry(objectToDate(doc.get(ViewerConstants.SOLR_DATABASES_PERMISSIONS_EXPIRY)));
+            ret.put(group, authorizationDetails);
+          }
+        });
+      }
+    }
+
     return ret;
   }
 

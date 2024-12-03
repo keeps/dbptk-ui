@@ -339,4 +339,9 @@ public class JavascriptUtils {
                                                                                     var template = $wnd.Handlebars.compile(templateString);
                                                                                     return  template(JSON.parse(object));
                                                                                     }-*/;
+
+  public static native String getInputValue(String inputId) /*-{
+                                                           var input = $wnd.jQuery("#" + inputId);
+                                                           return input.val()
+                                                           }-*/;
 }

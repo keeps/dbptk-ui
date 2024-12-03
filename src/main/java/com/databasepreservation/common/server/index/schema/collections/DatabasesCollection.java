@@ -7,10 +7,13 @@
  */
 package com.databasepreservation.common.server.index.schema.collections;
 
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_CONTENT_TYPE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_BROWSE_LOAD_DATE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PERMISSIONS;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PERMISSIONS_EXPIRY;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PERMISSIONS_GROUP;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_PATH;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_SIZE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_VERSION;
@@ -27,9 +30,7 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABA
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
@@ -78,7 +80,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(new Field(SOLR_DATABASES_STATUS, Field.TYPE_STRING).setIndexed(true).setRequired(true));
     fields.add(new Field(SOLR_DATABASES_METADATA, Field.TYPE_STRING).setIndexed(false).setStored(true)
       .setRequired(false).setDocValues(false));
-    fields.add(new Field(SOLR_DATABASES_VALIDATION_STATUS, Field.TYPE_STRING).setIndexed(true).setRequired(true));
+    fields.add(new Field(SOLR_DATABASES_VALIDATION_STATUS, Field.TYPE_STRING).setIndexed(true));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SIARD_PATH, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SIARD_SIZE, Field.TYPE_LONG));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SIARD_VERSION, Field.TYPE_STRING));
@@ -92,7 +94,9 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_SKIPPED, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_BROWSE_LOAD_DATE, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, Field.TYPE_BOOLEAN));
-    fields.add(new Field(SOLR_DATABASES_PERMISSIONS, Field.TYPE_STRING).setIndexed(true).setMultiValued(true));
+    fields.add(new Field(SOLR_CONTENT_TYPE, Field.TYPE_STRING));
+    fields.add(new Field(SOLR_DATABASES_PERMISSIONS_GROUP, Field.TYPE_STRING));
+    fields.add(new Field(SOLR_DATABASES_PERMISSIONS_EXPIRY, Field.TYPE_DATE));
 
     return fields;
   }
@@ -124,9 +128,25 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     doc.addField(SOLR_DATABASES_VALIDATION_ERRORS, object.getValidationErrors());
     doc.addField(SOLR_DATABASES_VALIDATION_WARNINGS, object.getValidationWarnings());
     doc.addField(SOLR_DATABASES_VALIDATION_SKIPPED, object.getValidationSkipped());
-    if (object.getPermissions() != null && !object.getPermissions().isEmpty()) {
-      doc.addField(SOLR_DATABASES_PERMISSIONS, object.getPermissions());
+
+    List<SolrInputDocument> permissionsDocs = new ArrayList<>();
+    if (object.getPermissions() != null) {
+      for (String groupValue : object.getPermissions().keySet()) {
+        SolrInputDocument childPermissionsDoc = new SolrInputDocument();
+        AuthorizationDetails authorizationDetails = object.getPermissions().get(groupValue);
+        childPermissionsDoc.addField(SOLR_DATABASES_PERMISSIONS_GROUP, groupValue);
+        childPermissionsDoc.addField(SOLR_DATABASES_PERMISSIONS_EXPIRY, authorizationDetails.getExpiry());
+        childPermissionsDoc.addField(SOLR_CONTENT_TYPE, ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PERMISSION);
+        // Dummy field because the schema requires it
+        childPermissionsDoc.addField(SOLR_DATABASES_STATUS, SOLR_DATABASES_STATUS);
+
+        permissionsDocs.add(childPermissionsDoc);
+      }
     }
+    // Added to distinguish parent documents from nested documents
+    doc.addField(SOLR_CONTENT_TYPE, ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_ROOT);
+    doc.setField(SOLR_DATABASES_PERMISSIONS, permissionsDocs);
+
     doc.addField(SOLR_DATABASES_BROWSE_LOAD_DATE, object.getLoadedAt());
 
     return doc;
@@ -146,7 +166,8 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     viewerDatabase.setPath(SolrUtils.objectToString(doc.get(SOLR_DATABASES_SIARD_PATH), ""));
     viewerDatabase.setSize(SolrUtils.objectToLong(doc.get(SOLR_DATABASES_SIARD_SIZE), 0L));
     viewerDatabase.setVersion(SolrUtils.objectToString(doc.get(SOLR_DATABASES_SIARD_VERSION), "2.1"));
-    viewerDatabase.setAvailableToSearchAll(SolrUtils.objectToBoolean(doc.get(SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL), true));
+    viewerDatabase
+      .setAvailableToSearchAll(SolrUtils.objectToBoolean(doc.get(SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL), true));
 
     viewerDatabase.setValidatedAt(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATED_AT), ""));
     viewerDatabase.setValidatorReportPath(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATOR_REPORT_PATH), ""));
@@ -159,9 +180,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     viewerDatabase.setValidationWarnings(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_WARNINGS), ""));
     viewerDatabase.setValidationSkipped(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_SKIPPED), ""));
     viewerDatabase.setLoadedAt(SolrUtils.objectToString(doc.get(SOLR_DATABASES_BROWSE_LOAD_DATE), ""));
-    Set<String> permissions = new HashSet<>();
-    permissions.addAll(SolrUtils.objectToListString(doc.get(SOLR_DATABASES_PERMISSIONS)));
-    viewerDatabase.setPermissions(permissions);
+    viewerDatabase.setPermissions(SolrUtils.objectToDatabasePermissions(doc.get(SOLR_DATABASES_PERMISSIONS)));
 
     return viewerDatabase;
   }

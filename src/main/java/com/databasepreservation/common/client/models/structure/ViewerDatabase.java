@@ -8,9 +8,10 @@
 package com.databasepreservation.common.client.models.structure;
 
 import java.io.Serial;
-import java.util.Set;
+import java.util.Map;
 
 import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -37,7 +38,7 @@ public class ViewerDatabase extends IsIndexed {
   private String validationErrors;
   private String validationWarnings;
   private String validationSkipped;
-  private Set<String> permissions;
+  private Map<String, AuthorizationDetails> permissions;
   private boolean isAvailableToSearchAll;
 
   private long searchHits = -1;
@@ -220,14 +221,13 @@ public class ViewerDatabase extends IsIndexed {
     return loadedAt;
   }
 
-  public Set<String> getPermissions() {
+  public Map<String, AuthorizationDetails> getPermissions() {
     return permissions;
   }
 
-  public void setPermissions(Set<String> permissions) {
+  public void setPermissions(Map<String, AuthorizationDetails> permissions) {
     this.permissions = permissions;
   }
-
 
   public long getSearchHits() {
     return searchHits;

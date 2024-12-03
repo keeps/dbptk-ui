@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.modules.siard.SIARDDKEditFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +37,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
@@ -83,6 +83,7 @@ import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDDK1007ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDDK128ModuleFactory;
+import com.databasepreservation.modules.siard.SIARDDKEditFactory;
 import com.databasepreservation.modules.siard.SIARDEditFactory;
 import com.databasepreservation.modules.siard.SIARDValidateFactory;
 import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
@@ -642,7 +643,8 @@ public class SIARDController {
         ViewerConfiguration.SIARD_AVAILABLE_TO_SEARCH_ALL));
       viewerDatabase.setValidationStatus(ViewerDatabaseValidationStatus.NOT_VALIDATED);
 
-      Set<String> authorizationDefault = ViewerConfiguration.getInstance().getCollectionsAuthorizationDefault();
+      Map<String, AuthorizationDetails> authorizationDefault = ViewerConfiguration.getInstance()
+        .getCollectionsAuthorizationDefault();
       if (!authorizationDefault.isEmpty()) {
         viewerDatabase.setPermissions(authorizationDefault);
       }
@@ -869,8 +871,8 @@ public class SIARDController {
     solrManager.updateSIARDValidationInformation(databaseUUID, status, null, null, new DateTime().toString());
   }
 
-  public static Set<String> updateDatabasePermissions(String databaseUUID, Set<String> permissions)
-    throws GenericException, ViewerException {
+  public static Map<String, AuthorizationDetails> updateDatabasePermissions(String databaseUUID,
+    Map<String, AuthorizationDetails> permissions) throws GenericException, ViewerException {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     solrManager.updateDatabasePermissions(databaseUUID, permissions);
     return permissions;

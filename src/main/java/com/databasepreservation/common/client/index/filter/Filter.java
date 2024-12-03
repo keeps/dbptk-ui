@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.databasepreservation.common.client.index.parser.QueryParser;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
@@ -27,6 +28,7 @@ public class Filter implements Serializable {
   public static final Filter ALL = new Filter();
   public static final Filter NULL = null;
 
+  private QueryParser queryParser = null;
   private List<FilterParameter> parameters = new ArrayList<>();
 
   /**
@@ -77,14 +79,15 @@ public class Filter implements Serializable {
    */
   @Override
   public String toString() {
-    return "Filter [parameters=" + parameters + "]";
+    return "Filter [parameters=" + parameters + "; queryParser=" + queryParser + "]";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
+    result = prime * result + ((parameters == null) ? 0 : parameters.hashCode())
+      + ((queryParser == null) ? 0 : queryParser.hashCode());
     return result;
   }
 
@@ -105,6 +108,13 @@ public class Filter implements Serializable {
         return false;
       }
     } else if (!parameters.equals(other.parameters)) {
+      return false;
+    }
+    if (queryParser == null) {
+      if (other.queryParser != null) {
+        return false;
+      }
+    } else if (!queryParser.equals(other.queryParser)) {
       return false;
     }
     return true;
@@ -128,6 +138,26 @@ public class Filter implements Serializable {
   public void setParameters(List<FilterParameter> parameters) {
     this.parameters.clear();
     this.parameters.addAll(parameters);
+  }
+
+  /**
+   * Gets the {@link QueryParser} for this filter.
+   * 
+   * @return an instance of {@link QueryParser} or <code>null</code> if none was
+   *         set.
+   */
+  public QueryParser getQueryParser() {
+    return queryParser;
+  }
+
+  /**
+   * Sets the {@link QueryParser} for this filter.
+   * 
+   * @param queryParser
+   *          an instance of {@link QueryParser} to set.
+   */
+  public void setQueryParser(QueryParser queryParser) {
+    this.queryParser = queryParser;
   }
 
   /**

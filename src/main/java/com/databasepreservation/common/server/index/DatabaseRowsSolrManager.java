@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -37,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.exceptions.SavedSearchException;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.facets.Facets;
@@ -45,6 +43,7 @@ import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -53,6 +52,7 @@ import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.exceptions.SavedSearchException;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
@@ -181,6 +181,13 @@ public class DatabaseRowsSolrManager {
       fieldsToReturn, new HashMap<>());
   }
 
+  public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
+    Sublist sublist, Facets facets, List<String> fieldsToReturn, List<Filter> filterQueries)
+    throws GenericException, RequestNotValidException {
+    return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,
+      fieldsToReturn, new HashMap<>(), filterQueries);
+  }
+
   public <T extends IsIndexed> IndexResult<T> findHits(Class<T> classToReturn, String alias, Filter filter,
     Sorter sorter, Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
     return SolrUtils.findHits(client, SolrDefaultCollectionRegistry.get(classToReturn), alias, filter, sorter, sublist,
@@ -234,7 +241,12 @@ public class DatabaseRowsSolrManager {
 
   public <T extends IsIndexed> IterableDatabaseResult<T> findAll(Class<T> classToReturn, Filter filter, Sorter sorter,
     List<String> fieldsToReturn) {
-    return new IterableDatabaseResult<>(client, classToReturn, filter, sorter, fieldsToReturn);
+    return new IterableDatabaseResult<>(client, classToReturn, filter, sorter, fieldsToReturn, new ArrayList<>());
+  }
+
+  public <T extends IsIndexed> IterableDatabaseResult<T> findAll(Class<T> classToReturn, Filter filter, Sorter sorter,
+    List<String> fieldsToReturn, List<Filter> filterQueries) {
+    return new IterableDatabaseResult<>(client, classToReturn, filter, sorter, fieldsToReturn, filterQueries);
   }
 
   public IndexResult<ViewerRow> findRows(String databaseUUID, List<SolrQuery> queryList)
@@ -512,7 +524,7 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void updateDatabasePermissions(String databaseUUID, Set<String> permissions)
+  public void updateDatabasePermissions(String databaseUUID, Map<String, AuthorizationDetails> permissions)
     throws GenericException, ViewerException {
     LOGGER.debug("Starting to update database permissions ({})", databaseUUID);
     // create document to update this DB
@@ -520,7 +532,20 @@ public class DatabaseRowsSolrManager {
     doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
 
     try {
-      doc.addField(ViewerConstants.SOLR_DATABASES_PERMISSIONS, SolrUtils.asValueUpdate(permissions));
+      List<SolrInputDocument> permissionsDocs = new ArrayList<>();
+      for (Map.Entry<String, AuthorizationDetails> permissionEntry : permissions.entrySet()) {
+        SolrInputDocument childPermissionsDoc = new SolrInputDocument();
+        AuthorizationDetails authorizationDetails = permissionEntry.getValue();
+        childPermissionsDoc.addField(ViewerConstants.SOLR_DATABASES_PERMISSIONS_GROUP, permissionEntry.getKey());
+        childPermissionsDoc.addField(ViewerConstants.SOLR_DATABASES_PERMISSIONS_EXPIRY,
+          authorizationDetails.getExpiry());
+        childPermissionsDoc.addField(ViewerConstants.SOLR_CONTENT_TYPE,
+          ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PERMISSION);
+        childPermissionsDoc.addField(ViewerConstants.SOLR_DATABASES_STATUS, ViewerConstants.SOLR_DATABASES_STATUS);
+
+        permissionsDocs.add(childPermissionsDoc);
+      }
+      doc.addField(ViewerConstants.SOLR_DATABASES_PERMISSIONS, SolrUtils.asValueUpdate(permissionsDocs));
       insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
     } catch (ViewerException e) {
       LOGGER.error("Could not update database metadata ({})", databaseUUID, e);
@@ -538,7 +563,8 @@ public class DatabaseRowsSolrManager {
     doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
 
     try {
-      doc.addField(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, SolrUtils.asValueUpdate(isAvailableToSearchAll));
+      doc.addField(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL,
+        SolrUtils.asValueUpdate(isAvailableToSearchAll));
       insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
     } catch (ViewerException e) {
       LOGGER.error("Could not update database metadata ({})", databaseUUID, e);

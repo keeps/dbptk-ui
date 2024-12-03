@@ -8,14 +8,18 @@
 package com.databasepreservation.common.api.v1;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.solr.client.solrj.SolrServerException;
+import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -34,14 +38,15 @@ import com.databasepreservation.common.client.index.facets.FacetParameter;
 import com.databasepreservation.common.client.index.facets.FacetValue;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.facets.SimpleFacetParameter;
-import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
-import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
+import com.databasepreservation.common.client.index.filter.OneOfManyFilterParameter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.parser.QueryChildrenParser;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -90,9 +95,8 @@ public class DatabaseResource implements DatabaseService {
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
 
-        FindRequest userFindRequest = new FindRequest(findRequest.classToReturn,
-          getDatabaseFindFilterForUser(user, findRequest.filter), findRequest.sorter, findRequest.sublist,
-          findRequest.facets, findRequest.exportFacets, fieldsToReturn);
+        FindRequest userFindRequest = new FindRequest(findRequest.classToReturn, findRequest.filter, findRequest.sorter,
+          findRequest.sublist, findRequest.facets, findRequest.exportFacets, fieldsToReturn);
         return getViewerDatabaseIndexResult(userFindRequest, fieldsToReturn, controllerAssistant, user, state);
       }
     } else {
@@ -112,16 +116,7 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     }
 
-    if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
-      if (user.isAdmin() || user.isWhiteList()) {
-        return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
-      } else {
-        return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state,
-          getDatabaseFindAllFilterForUser(user));
-      }
-    } else {
-      return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
-    }
+    return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
   }
 
   @Override
@@ -147,8 +142,15 @@ public class DatabaseResource implements DatabaseService {
     ControllerAssistant controllerAssistant, User user, LogEntryState state) {
     long count = 0;
     try {
+      ArrayList<Filter> filterQueries = new ArrayList<>();
+      filterQueries.addAll(getDatabaseFindContentTypeFilterQueries());
+      if (!user.isAdmin() && !user.isWhiteList()) {
+        filterQueries.addAll(getDatabaseFindStatusFilterQueries(findRequest.filter));
+        filterQueries.addAll(getDatabaseFindUserPermissionsFilterQueries(user));
+      }
       final IndexResult<ViewerDatabase> result = ViewerFactory.getSolrManager().find(ViewerDatabase.class,
-        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn);
+        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn,
+        filterQueries);
       count = result.getTotalCount();
       return result;
     } catch (GenericException | RequestNotValidException e) {
@@ -166,8 +168,14 @@ public class DatabaseResource implements DatabaseService {
     ControllerAssistant controllerAssistant, User user, LogEntryState state) {
     long count = 0;
     try {
+      ArrayList<Filter> filterQueries = new ArrayList<>();
+      filterQueries.addAll(getDatabaseFindContentTypeFilterQueries());
+      if (!user.isAdmin() && !user.isWhiteList()) {
+        filterQueries.addAll(getDatabaseFindStatusFilterQueries(findRequest.filter));
+        filterQueries.addAll(getDatabaseFindUserPermissionsFilterQueries(user));
+      }
       final IndexResult<ViewerDatabase> result = ViewerFactory.getSolrManager().find(ViewerDatabase.class,
-        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, fieldsToReturn);
+        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, fieldsToReturn, filterQueries);
       count = result.getTotalCount();
       return result;
     } catch (GenericException | RequestNotValidException e) {
@@ -183,26 +191,27 @@ public class DatabaseResource implements DatabaseService {
 
   private IndexResult<ViewerDatabase> getCrossViewerDatabaseIndexResult(FindRequest findRequest,
     ControllerAssistant controllerAssistant, User user, LogEntryState state) {
-    return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state,
-      new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, "true")));
-  }
-
-  private IndexResult<ViewerDatabase> getCrossViewerDatabaseIndexResult(FindRequest findRequest,
-    ControllerAssistant controllerAssistant, User user, LogEntryState state, Filter userFilter) {
     long count = 0;
     try {
       IterableDatabaseResult<ViewerDatabase> databases;
-      if (userFilter != null) {
+      ArrayList<Filter> filterQueries = new ArrayList<>();
+      filterQueries.addAll(getDatabaseFindContentTypeFilterQueries());
+      filterQueries.addAll(getDatabaseFindAllFilterQueries());
+      if (!user.isAdmin() && !user.isWhiteList()) {
+        filterQueries.addAll(getDatabaseFindStatusFilterQueries(findRequest.filter));
+        filterQueries.addAll(getDatabaseFindUserPermissionsFilterQueries(user));
+      }
+      if (findRequest.filter != null) {
         List<String> fieldsToReturn = new ArrayList<>();
         fieldsToReturn.add(ViewerConstants.INDEX_ID);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
-        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class, userFilter, Sorter.NONE,
-          fieldsToReturn);
+        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class, findRequest.filter, Sorter.NONE,
+          fieldsToReturn, filterQueries);
       } else {
         databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class, new Filter(), Sorter.NONE,
-          findRequest.fieldsToReturn);
+          findRequest.fieldsToReturn, filterQueries);
       }
 
       if (databases.getTotalCount() == 0) {
@@ -264,6 +273,9 @@ public class DatabaseResource implements DatabaseService {
       }
 
       searchHitsResult.setResults(resultsFromFacet);
+
+      databases.close();
+
       return searchHitsResult;
 
     } catch (GenericException | RequestNotValidException | SolrServerException | IOException e) {
@@ -277,67 +289,50 @@ public class DatabaseResource implements DatabaseService {
     }
   }
 
-  private Filter getDatabaseFindAllFilterForUser(User user) {
-    ArrayList<FilterParameter> permissionFilterParameters = new ArrayList<>();
-
-    // Only retrieve databases with AVAILABLE
-    SimpleFilterParameter statusFilter;
-    statusFilter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
+  private List<Filter> getDatabaseFindStatusFilterQueries(Filter searchFilter) {
+    // Only retrieve databases with AVAILABLE status, unless the searchFilter
+    // already has this filter
+    Filter statusFilter = new Filter();
+    SimpleFilterParameter statusFilterParameter;
+    statusFilterParameter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
       ViewerDatabaseStatus.AVAILABLE.name());
-    permissionFilterParameters.add(statusFilter);
-
-    permissionFilterParameters
-      .add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, "true"));
-
-    // Add user permissions on filter
-    ArrayList<FilterParameter> permissionsOrFilterParameters = new ArrayList<>();
-    for (String role : user.getAllRoles()) {
-      permissionsOrFilterParameters.add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_PERMISSIONS, role));
-    }
-
-    permissionFilterParameters.add(new OrFiltersParameters(permissionsOrFilterParameters));
-
-    return new Filter(new AndFiltersParameters(permissionFilterParameters));
-  }
-
-  private Filter getDatabaseFindFilterForUser(User user, Filter searchFilter) {
-    ArrayList<FilterParameter> permissionFilterParameters = new ArrayList<>();
-
-    // Only retrieve databases with AVAILABLE, this filter has to be default
-    SimpleFilterParameter statusFilter;
-    statusFilter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
-      ViewerDatabaseStatus.AVAILABLE.name());
-    permissionFilterParameters.add(statusFilter);
-
-    // Controlling the search filter
-    if (!searchFilter.getParameters().isEmpty()) {
+    if (searchFilter != null) {
       for (FilterParameter filterParameter : searchFilter.getParameters()) {
-        if (filterParameter instanceof SimpleFilterParameter simpleFilterParameter) {
-          // If there is a status filter, remove the default and add the new one(s).
-          if (simpleFilterParameter.getName().equals(ViewerConstants.SOLR_DATABASES_STATUS)) {
-            permissionFilterParameters.remove(statusFilter);
-            permissionFilterParameters
-              .add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS, simpleFilterParameter.getValue()));
-          } else if (simpleFilterParameter.getName().equals(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL)) {
-            permissionFilterParameters.add(new SimpleFilterParameter(
-              ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, simpleFilterParameter.getValue()));
-          }
-        } else if (filterParameter instanceof BasicSearchFilterParameter searchFilterParameter) {
-          String searchValue = searchFilterParameter.getValue();
-          permissionFilterParameters.add(new BasicSearchFilterParameter(ViewerConstants.INDEX_SEARCH, searchValue));
+        if (filterParameter instanceof SimpleFilterParameter simpleFilterParameter
+          && simpleFilterParameter.getName().equals(ViewerConstants.SOLR_DATABASES_STATUS)) {
+          statusFilterParameter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
+            simpleFilterParameter.getValue());
         }
       }
     }
+    statusFilter.add(statusFilterParameter);
+    return new ArrayList<>(List.of(statusFilter));
+  }
 
-    // Add user permissions on filter
-    ArrayList<FilterParameter> permissionsOrFilterParameters = new ArrayList<>();
-    for (String role : user.getAllRoles()) {
-      permissionsOrFilterParameters.add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_PERMISSIONS, role));
-    }
+  private List<Filter> getDatabaseFindAllFilterQueries() {
+    return new ArrayList<>(
+      List.of(new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL, "true"))));
+  }
 
-    permissionFilterParameters.add(new OrFiltersParameters(permissionsOrFilterParameters));
+  public static List<Filter> getDatabaseFindContentTypeFilterQueries() {
+    Filter filter = new Filter();
+    filter.add(
+      new SimpleFilterParameter(ViewerConstants.SOLR_CONTENT_TYPE, ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_ROOT));
+    return new ArrayList<>(List.of(filter));
+  }
 
-    return new Filter(permissionFilterParameters);
+  public static List<Filter> getDatabaseFindUserPermissionsFilterQueries(User user) {
+    Filter filter = new Filter();
+    filter.setQueryParser(new QueryChildrenParser());
+    filter.add(new OneOfManyFilterParameter(ViewerConstants.SOLR_DATABASES_PERMISSIONS_GROUP,
+      user.getAllRoles().stream().toList()));
+    // Convert today's date to midnight, start of the day
+    LocalDateTime now = LocalDateTime.ofInstant(new Date().toInstant(), ZoneId.systemDefault());
+    LocalDateTime today = now.with(LocalTime.MIN);
+    Date todayDate = Date.from(today.atZone(ZoneId.systemDefault()).toInstant());
+    filter.add(new DateRangeFilterParameter(ViewerConstants.SOLR_DATABASES_PERMISSIONS_EXPIRY, todayDate, null,
+      RodaConstants.DateGranularity.DAY));
+    return new ArrayList<>(List.of(filter));
   }
 
   @Override
@@ -370,6 +365,7 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      UserUtility.checkDatabasePermission(user, databaseUUID);
       return SIARDController.deleteAll(databaseUUID);
     } catch (RequestNotValidException | GenericException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
@@ -382,7 +378,7 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public Set<String> getDatabasePermissions(String databaseUUID) {
+  public Map<String, AuthorizationDetails> getDatabasePermissions(String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -390,6 +386,7 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      UserUtility.checkDatabasePermission(user, databaseUUID);
       DatabaseStatus databaseStatus = ViewerFactory.getConfigurationManager().getDatabaseStatus(databaseUUID);
       return databaseStatus.getPermissions();
     } catch (GenericException | AuthorizationException e) {
@@ -403,7 +400,8 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public Set<String> updateDatabasePermissions(String databaseUUID, Set<String> permissions) {
+  public Map<String, AuthorizationDetails> updateDatabasePermissions(String databaseUUID,
+    Map<String, AuthorizationDetails> permissions) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -411,6 +409,7 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      UserUtility.checkDatabasePermission(user, databaseUUID);
       return SIARDController.updateDatabasePermissions(databaseUUID, permissions);
     } catch (GenericException | ViewerException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
@@ -431,6 +430,7 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      UserUtility.checkDatabasePermission(user, databaseUUID);
       return SIARDController.updateDatabaseSearchAllAvailability(databaseUUID);
     } catch (GenericException | ViewerException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
