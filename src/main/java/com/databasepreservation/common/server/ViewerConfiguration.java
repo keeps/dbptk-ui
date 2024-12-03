@@ -31,9 +31,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.configuration.CombinedConfiguration;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -60,7 +64,7 @@ import com.google.common.cache.LoadingCache;
 
 /**
  * Singleton configuration instance used by the Database Visualization Toolkit
- * 
+ *
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerConfiguration extends ViewerAbstractConfiguration {
@@ -108,7 +112,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public static final String PROPERTY_AUTHORIZATION_FULLNAME_ATTRIBUTE = "user.attribute.fullname";
   public static final String PROPERTY_AUTHORIZATION_EMAIL_ATTRIBUTE = "user.attribute.email";
-  public static final String PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE = "user.attribute.roles";
+  public static final String PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE = "user.attribute.roles[]";
   public static final String PROPERTY_AUTHORIZATION_ADMINISTRATORS = "user.attribute.roles.administrators";
 
   public static final String PROPERTY_AUTHENTICATED_USER_ENABLE_DEFAULT_ATTRIBUTES = "authenticated.user.enable.default.attributes";
@@ -140,6 +144,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_BLOB_PREFIX_NAME = "ui.blob.prefix.name";
 
   public static final String SIARD_AVAILABLE_TO_SEARCH_ALL = "ui.siard.available.search.all";
+  public static final String RELOAD_DBPTK_VIEWER_PROPERTIES = "ui.reload.viewer.properties";
+  public static final String RELOAD_DBPTK_VIEWER_PROPERTIES_PERIOD = "ui.reload.viewer.properties.period";
 
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.APPLICATION_ENV_SERVER;
@@ -161,7 +167,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   // Configuration related objects
   private static CompositeConfiguration viewerConfiguration = null;
+  private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+  private static CombinedConfiguration combinedConfiguration = new CombinedConfiguration();
   private static List<String> configurationFiles = null;
+  private static List<String> commonConfigurationFiles = null;
 
   private List<String> cachedWhitelistedIPs = null;
   private List<String> cachedWhiteListedUsername = null;
@@ -290,14 +299,31 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
       // load core configurations
       configurationFiles = new ArrayList<>();
-      addConfiguration("dbvtk-viewer.properties");
-      LOGGER.debug("Finished loading dbvtk-viewer.properties");
+      commonConfigurationFiles = new ArrayList<>();
+
+      commonConfigurationFiles.add("dbvtk-viewer.properties");
+      commonConfigurationFiles.add("users-groups.properties");
+      addCommonConfiguration();
+      LOGGER.debug("Finished loading " + String.join(" , ", commonConfigurationFiles));
 
       addConfiguration("dbvtk-roles.properties");
       LOGGER.debug("Finished loading dbvtk-roles.properties");
 
       applicationEnvironment = System.getProperty(ViewerConstants.APPLICATION_ENV_KEY,
         ViewerConstants.APPLICATION_ENV_SERVER);
+
+      boolean reloadViewerConfiguration = getViewerConfigurationAsBoolean(false, RELOAD_DBPTK_VIEWER_PROPERTIES);
+
+      if (reloadViewerConfiguration) {
+        long reloadPeriod = getViewerConfigurationAsInt(86400000, RELOAD_DBPTK_VIEWER_PROPERTIES_PERIOD);
+        scheduler.scheduleAtFixedRate(() -> {
+          try {
+            reloadCombinedConfiguration();
+          } catch (ConfigurationException e) {
+            LOGGER.error("Error reloading combined configuration", e);
+          }
+        }, 0, reloadPeriod, TimeUnit.MILLISECONDS);
+      }
 
     } catch (ConfigurationException e) {
       LOGGER.error("Error loading dbvtk properties", e);
@@ -552,14 +578,14 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     AuthorizationGroupsList authorizationGroupsList = getCollectionsAuthorizationGroups();
 
     final List<String> adminRoles = ViewerConfiguration.getInstance()
-        .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
+      .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
 
     for (String adminRole : adminRoles) {
       AuthorizationGroup authorizationGroup = new AuthorizationGroup();
       authorizationGroup.setId("roles.administrators." + adminRole);
       authorizationGroup.setLabel("Administrators");
       authorizationGroup.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
-          ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
       authorizationGroup.setAttributeOperator(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL);
       authorizationGroup.setAttributeValue(adminRole);
       authorizationGroup.setType(AuthorizationGroup.Type.DEFAULT);
@@ -571,7 +597,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     authorizationGroup.setId("roles.users");
     authorizationGroup.setLabel("Users");
     authorizationGroup.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
+      ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
     authorizationGroup.setAttributeOperator(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL);
     authorizationGroup.setAttributeValue(getViewerConfigurationAsString("users", "user.attribute.roles.users"));
     authorizationGroup.setType(AuthorizationGroup.Type.DEFAULT);
@@ -698,6 +724,21 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
     viewerConfiguration.addConfiguration(configuration);
     configurationFiles.add(configurationFile);
+  }
+
+  private static void addCommonConfiguration() throws ConfigurationException {
+    for (String configurationFile : commonConfigurationFiles) {
+      Configuration configuration = getConfiguration(configurationFile);
+      combinedConfiguration.addConfiguration((PropertiesConfiguration) configuration);
+    }
+    viewerConfiguration.addConfiguration(combinedConfiguration);
+  }
+
+  private void reloadCombinedConfiguration() throws ConfigurationException {
+    viewerConfiguration.removeConfiguration(combinedConfiguration);
+    combinedConfiguration.clear();
+    addCommonConfiguration();
+    clearViewerCachableObjectsAfterConfigurationChange();
   }
 
   private static Configuration getConfiguration(String configurationFile) throws ConfigurationException {
