@@ -13,7 +13,6 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCH
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,17 +24,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
-import com.databasepreservation.common.api.exceptions.RESTException;
-import com.databasepreservation.common.exceptions.AuthorizationException;
-import com.databasepreservation.common.client.models.structure.ViewerCell;
-import com.databasepreservation.model.data.Cell;
-import com.databasepreservation.common.api.utils.ExtraMediaType;
-import com.databasepreservation.model.exception.ModuleException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import org.roda.core.data.exceptions.*;
+import org.roda.core.data.exceptions.AlreadyExistsException;
+import org.roda.core.data.exceptions.AuthorizationDeniedException;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.springframework.batch.core.BatchStatus;
@@ -44,7 +40,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
@@ -55,15 +50,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import com.databasepreservation.common.api.exceptions.RESTException;
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.api.utils.DownloadUtils;
 import com.databasepreservation.common.api.utils.HandlebarsUtils;
@@ -77,7 +75,6 @@ import com.databasepreservation.common.api.v1.utils.ZipOutputStreamSingleRow;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchInfo;
-import com.databasepreservation.common.exceptions.SavedSearchException;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.Filter;
@@ -97,6 +94,8 @@ import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.exceptions.AuthorizationException;
+import com.databasepreservation.common.exceptions.SavedSearchException;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
@@ -109,6 +108,7 @@ import com.databasepreservation.common.server.index.schema.SolrDefaultCollection
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
+import com.databasepreservation.common.server.storage.BinaryConsumesOutputStream;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.LobManagerUtils;
 import com.databasepreservation.common.utils.UserUtility;
@@ -166,8 +166,7 @@ public class CollectionResource implements CollectionService {
       InputStreamResource resource = new InputStreamResource(new FileInputStream(reportPath.toFile()));
       return ResponseEntity.ok()
         .header("Content-Disposition", "attachment; filename=\"" + reportPath.toFile().getName() + "\"")
-        .contentLength(reportPath.toFile().length())
-        .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+        .contentLength(reportPath.toFile().length()).contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
     } catch (NotFoundException | IOException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
@@ -205,7 +204,7 @@ public class CollectionResource implements CollectionService {
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
 
       return new StringResponse(SIARDController.loadFromLocal(database.getPath(), databaseUUID, database.getVersion()));
-      
+
     } catch (GenericException | AuthorizationDeniedException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
@@ -507,7 +506,8 @@ public class CollectionResource implements CollectionService {
     @PathVariable(name = ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
     @PathVariable(name = ViewerConstants.API_PATH_PARAM_COLLECTION_UUID) String collectionUUID,
     @PathVariable(name = "schema") String schema, @PathVariable(name = "table") String table,
-    @PathVariable(name = "rowIndex") String rowIndex, @PathVariable(name = "columnIndex") Integer columnIndex) {
+    @PathVariable(name = "rowIndex") String rowIndex, @PathVariable(name = "columnIndex") Integer columnIndex,
+    @RequestHeader HttpHeaders headers) {
 
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
@@ -536,7 +536,7 @@ public class CollectionResource implements CollectionService {
           return handleExternalLobDownload(configTable, row, columnIndex);
         } else {
           String version = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID).getVersion();
-          return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex, version);
+          return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex, version, headers);
         }
       }
     } catch (NotFoundException | GenericException | IOException | AuthorizationException e) {
@@ -605,7 +605,7 @@ public class CollectionResource implements CollectionService {
   }
 
   private ResponseEntity<StreamingResponseBody> handleInternalLobDownload(String databasePath,
-    TableStatus tableConfiguration, ViewerRow row, int columnIndex, String version)
+    TableStatus tableConfiguration, ViewerRow row, int columnIndex, String version, HttpHeaders headers)
     throws IOException, GenericException {
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
@@ -629,6 +629,13 @@ public class CollectionResource implements CollectionService {
         return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
           DownloadUtils.stream(new BufferedInputStream(new FileInputStream(zipFile.toFile())))));
       } else {
+
+        if (!headers.getRange().isEmpty()) {
+          return ApiUtils.rangeResponse(headers,
+            new BinaryConsumesOutputStream(Path.of(filePath), Path.of(filePath).toFile().length(), handlebarsFilename,
+              handlebarsMimeType));
+        }
+
         return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
           DownloadUtils.stream(new BufferedInputStream(new FileInputStream(filePath)))));
       }
