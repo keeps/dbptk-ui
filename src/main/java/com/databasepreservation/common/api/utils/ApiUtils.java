@@ -9,6 +9,7 @@ package com.databasepreservation.common.api.utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -16,10 +17,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.common.RodaConstants;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRange;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import com.databasepreservation.common.server.storage.BinaryConsumesOutputStream;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.StreamingOutput;
@@ -85,6 +90,36 @@ public class ApiUtils {
     return mediaType;
   }
 
+  public static ResponseEntity<StreamingResponseBody> rangeResponse(HttpHeaders headers, BinaryConsumesOutputStream streamResponse) {
+
+    final HttpHeaders responseHeaders = new HttpHeaders();
+
+    HttpRange range = headers.getRange().get(0);
+    long start = range.getRangeStart(streamResponse.getSize());
+    long end = range.getRangeEnd(streamResponse.getSize());
+
+    String contentLength = String.valueOf((end - start) + 1);
+    responseHeaders.add(HttpHeaders.CONTENT_TYPE, streamResponse.getMediaType());
+    responseHeaders.add(HttpHeaders.CONTENT_LENGTH, contentLength);
+    responseHeaders.add(HttpHeaders.CONTENT_DISPOSITION,
+      "inline; filename=\"" + streamResponse.getFileName() + "\"");
+    responseHeaders.add(HttpHeaders.ACCEPT_RANGES, "bytes");
+    responseHeaders.add(HttpHeaders.CONTENT_RANGE,
+      "bytes" + " " + start + "-" + end + "/" + streamResponse.getSize());
+
+    StreamingResponseBody responseStream = os -> streamResponse.consumeOutputStream(os, start, end);
+
+    Date lastModifiedDate = streamResponse.getLastModified();
+    if (lastModifiedDate != null) {
+      CacheControl cacheControl = CacheControl.empty().cachePrivate().sMaxAge(Duration.ofSeconds(60));
+      responseHeaders.add(HttpHeaders.CACHE_CONTROL, cacheControl.getHeaderValue());
+      responseHeaders.setETag(Long.toString(lastModifiedDate.getTime()));
+      responseHeaders.add(HttpHeaders.LAST_MODIFIED, streamResponse.getLastModified().toString());
+    }
+
+    return new ResponseEntity<>(responseStream, responseHeaders, HttpStatus.PARTIAL_CONTENT);
+  }
+
   public static ResponseEntity<StreamingResponseBody> okResponse(StreamResponse streamResponse) {
     return okResponse(streamResponse, false);
   }
@@ -131,7 +166,8 @@ public class ApiUtils {
     responseHeaders.add("Content-Type", streamResponse.getStream().getMediaType());
     responseHeaders.add(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
       "attachment; filename=\"" + streamResponse.getStream().getFileName() + "\"");
-    responseHeaders.add("Content-Length", String.valueOf(streamResponse.getStream().getSize()));
+       responseHeaders.add("Content-Length",
+       String.valueOf(streamResponse.getStream().getSize()));
 
     Date lastModifiedDate = streamResponse.getStream().getLastModified();
 

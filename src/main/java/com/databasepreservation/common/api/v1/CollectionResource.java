@@ -51,9 +51,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -108,6 +110,7 @@ import com.databasepreservation.common.server.index.schema.SolrDefaultCollection
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
+import com.databasepreservation.common.server.storage.BinaryConsumesOutputStream;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.LobManagerUtils;
 import com.databasepreservation.common.utils.UserUtility;
@@ -504,7 +507,8 @@ public class CollectionResource implements CollectionService {
     @PathVariable(name = ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
     @PathVariable(name = ViewerConstants.API_PATH_PARAM_COLLECTION_UUID) String collectionUUID,
     @PathVariable(name = "schema") String schema, @PathVariable(name = "table") String table,
-    @PathVariable(name = "rowIndex") String rowIndex, @PathVariable(name = "columnIndex") Integer columnIndex) {
+    @PathVariable(name = "rowIndex") String rowIndex, @PathVariable(name = "columnIndex") Integer columnIndex,
+    @RequestHeader HttpHeaders headers) {
 
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
@@ -533,7 +537,7 @@ public class CollectionResource implements CollectionService {
           return handleExternalLobDownload(configTable, row, columnIndex);
         } else {
           String version = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID).getVersion();
-          return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex, version);
+          return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex, version, headers);
         }
       }
     } catch (NotFoundException | GenericException | IOException | AuthorizationException e) {
@@ -597,7 +601,7 @@ public class CollectionResource implements CollectionService {
   }
 
   private ResponseEntity<StreamingResponseBody> handleInternalLobDownload(String databasePath,
-    TableStatus tableConfiguration, ViewerRow row, int columnIndex, String version)
+    TableStatus tableConfiguration, ViewerRow row, int columnIndex, String version, HttpHeaders headers)
     throws IOException, GenericException {
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
@@ -618,6 +622,12 @@ public class CollectionResource implements CollectionService {
         return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, mimeType,
           DownloadUtils.stream(new BufferedInputStream(new FileInputStream(zipFile.toFile())))));
       } else {
+
+        if (!headers.getRange().isEmpty()) {
+          return ApiUtils.rangeResponse(headers, new BinaryConsumesOutputStream(Path.of(filePath),
+            Path.of(filePath).toFile().length(), handlebarsFilename, mimeType));
+        }
+
         return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, mimeType,
           DownloadUtils.stream(new BufferedInputStream(new FileInputStream(filePath)))));
       }
