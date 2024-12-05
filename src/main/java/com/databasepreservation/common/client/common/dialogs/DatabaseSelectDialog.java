@@ -70,7 +70,7 @@ public class DatabaseSelectDialog extends DialogBox {
     SearchPanelWithSearchAll parentSearchPanel) {
     setAutoHideEnabled(true);
     setModal(true);
-    setText("Select databases to search");
+    setText(messages.manageDatabaseSearchAllSelectDatabases());
 
     FlowPanel layout = new FlowPanel();
 
@@ -166,10 +166,11 @@ public class DatabaseSelectDialog extends DialogBox {
     if (localStorage != null) {
       SelectedItems<ViewerDatabase> selectedItems = this.list.getSelected();
       if (selectedItems instanceof SelectedItemsList<?>) {
-        localStorage.setItem(ViewerConstants.LOCAL_STORAGE_SEARCHALL_SELECTION,
+        localStorage.setItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION,
           String.join(",", ((SelectedItemsList<ViewerDatabase>) selectedItems).getIds()));
       } else if (selectedItems instanceof SelectedItemsFilter<?>) {
-        localStorage.setItem(ViewerConstants.LOCAL_STORAGE_SEARCHALL_SELECTION, ViewerConstants.SEARCHALL_SELECTEDALL);
+        localStorage.setItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION,
+          ViewerConstants.SEARCH_ALL_SELECTED_ALL);
       }
     }
   }
@@ -193,9 +194,9 @@ public class DatabaseSelectDialog extends DialogBox {
     List<String> selectedUUIDs = null;
     boolean selectedAll = false;
     if (localStorage != null) {
-      String uuidsString = localStorage.getItem(ViewerConstants.LOCAL_STORAGE_SEARCHALL_SELECTION);
+      String uuidsString = localStorage.getItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION);
       if (uuidsString != null) {
-        if (uuidsString.equals(ViewerConstants.SEARCHALL_SELECTEDALL)) {
+        if (uuidsString.equals(ViewerConstants.SEARCH_ALL_SELECTED_ALL)) {
           selectedAll = true;
         } else {
           selectedUUIDs = new ArrayList<>();
@@ -211,9 +212,8 @@ public class DatabaseSelectDialog extends DialogBox {
       this.parentSearchPanel.setSearchAllTotalDatabases(String.valueOf(selectedUUIDs.size()));
       this.parentSearchPanel.setDefaultFilter(newFilter);
       this.parentSearchPanel.doSearch();
-    } else if (selectedAll || ClientConfigurationManager
-      .getStringWithDefault(ViewerConstants.SEARCHALL_SELECTEDALL, ViewerConstants.PROPERTY_SEARCHALL_DEFAULTSELECTION)
-      .equals(ViewerConstants.SEARCHALL_SELECTEDALL)) {
+    } else if (selectedAll || ClientConfigurationManager.getStringWithDefault(ViewerConstants.SEARCH_ALL_SELECTED_ALL,
+      ViewerConstants.PROPERTY_SEARCH_ALL_DEFAULT_SELECTION).equals(ViewerConstants.SEARCH_ALL_SELECTED_ALL)) {
       this.parentSearchPanel.setSearchAllTotalDatabases("all");
       this.parentSearchPanel.setDefaultFilter(defaultFilter);
       this.parentSearchPanel.doSearch();

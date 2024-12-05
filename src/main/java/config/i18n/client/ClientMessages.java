@@ -712,6 +712,8 @@ public interface ClientMessages extends Messages {
 
   String manageDatabasePageDescription();
 
+  String manageDatabaseSearchAllSelectDatabases();
+
   String manageDatabaseSearchAllSearchingOn(String total);
 
   String manageDatabaseSearchAllNoneSelected();

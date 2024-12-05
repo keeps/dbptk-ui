@@ -43,14 +43,11 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import config.i18n.client.ClientMessages;
 
 /**
- * @author Bruno Ferreira <bferreira@keep.pt>
+ * @author Alexandre Flores <aflores@keep.pt>
  */
 public class DatabaseSelectList extends BasicAsyncTableCell<ViewerDatabase> {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private final ClientLogger logger = new ClientLogger(getClass().getName());
-
-  private static final String OPEN_VALIDATED_SPAN = "<span>&#10004;</span>";
-  private static final String OPEN_NOT_VALIDATED_SPAN = "<span>&#10006;</span>";
 
   public DatabaseSelectList() {
     this(new Filter(), null, null, false, false);

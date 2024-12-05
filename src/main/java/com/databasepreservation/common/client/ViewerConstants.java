@@ -575,10 +575,10 @@ public class ViewerConstants {
   /**
    * Search all
    */
-  public static final String LOCAL_STORAGE_SEARCHALL_SELECTION = "searchAllSelection";
-  public static final String SEARCHALL_SELECTEDALL = "all";
-  public static final String SEARCHALL_SELECTEDNONE = "none";
-  public static final String PROPERTY_SEARCHALL_DEFAULTSELECTION = "ui.searchAll.defaultSelection";
+  public static final String LOCAL_STORAGE_SEARCH_ALL_SELECTION = "searchAllSelection";
+  public static final String SEARCH_ALL_SELECTED_ALL = "all";
+  public static final String SEARCH_ALL_SELECTED_NONE = "none";
+  public static final String PROPERTY_SEARCH_ALL_DEFAULT_SELECTION = "ui.searchAll.defaultSelection";
 
   /**
    * Header

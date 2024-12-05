@@ -235,7 +235,6 @@ public class DatabaseResource implements DatabaseService {
       simpleFacetParameter.setMinCount(1);
       simpleFacetParameter.setLimit(findRequest.sublist.getMaximumElementCount());
       simpleFacetParameter.setOffset(findRequest.sublist.getFirstElementIndex());
-      simpleFacetParameter.setOffset(findRequest.sublist.getFirstElementIndex());
 
       final IndexResult<ViewerDatabase> facetsSearch = ViewerFactory.getSolrManager().findHits(ViewerDatabase.class,
         collectionAlias, findRequest.filter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter));
