@@ -427,7 +427,7 @@ public class SolrUtils {
 
   private static void parseAndConfigureFacets(Facets facets, SolrQuery query) {
     if (facets != null) {
-      query.setFacetSort(FacetParams.FACET_SORT_INDEX);
+      query.setFacetSort(FacetParams.FACET_SORT_COUNT);
       if (!"".equals(facets.getQuery())) {
         query.addFacetQuery(facets.getQuery());
       }
