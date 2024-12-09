@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.databasepreservation.common.api.exceptions.RESTException;
 import com.databasepreservation.common.api.v1.utils.StringResponse;
-import com.databasepreservation.common.api.exceptions.RESTException;
-import com.databasepreservation.common.exceptions.AuthorizationException;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
