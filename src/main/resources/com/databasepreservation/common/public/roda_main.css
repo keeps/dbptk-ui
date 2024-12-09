@@ -3306,6 +3306,21 @@ td.datePickerMonth, td.datePickerYear {
     vertical-align: top;
 }
 
+.searchPanelLeftInputRow {
+    display: flex;
+    flex-direction: row;
+}
+
+.selectedDatabasesLink {
+    flex-shrink: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
 .searchPanelRight {
     float: right;
     width: 40px;

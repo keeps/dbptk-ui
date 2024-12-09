@@ -552,6 +552,8 @@ public interface ClientMessages extends Messages {
 
   String basicActionSkip();
 
+  String basicActionSelect();
+
   String basicActionSelectAll();
 
   String basicActionSelectNone();
@@ -709,6 +711,20 @@ public interface ClientMessages extends Messages {
   String managePageTableHeaderTextForSearchHits();
 
   String manageDatabasePageDescription();
+
+  String manageDatabaseSearchAllSelectDatabases();
+
+  String manageDatabaseSearchAllSearchingOn(String total);
+
+  String manageDatabaseSearchAllNoneSelected();
+
+  String manageDatabaseSearchAllAllowedInfo();
+
+  String manageDatabaseSearchAllExcludedLoaded(long totalUnloaded);
+
+  String manageDatabaseSearchAllExcludedPrivacy(long totalPrivate);
+
+  String manageDatabaseSearchAllContactInfo();
 
   String manageDatabaseNotLoadedDescription(long number);
 
