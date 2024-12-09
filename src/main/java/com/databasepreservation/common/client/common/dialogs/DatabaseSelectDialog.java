@@ -62,14 +62,12 @@ public class DatabaseSelectDialog extends DialogBox {
 
   public <T extends IsIndexed> DatabaseSelectDialog(Filter defaultFilter, String allFilter, ClientMessages messages,
     SearchPanelWithSearchAll parentSearchPanel) {
-    super(true, true);
+    super(false, true);
     init(defaultFilter, allFilter, messages, parentSearchPanel);
   }
 
   public void init(Filter defaultFilter, String allFilter, ClientMessages messages,
     SearchPanelWithSearchAll parentSearchPanel) {
-    setAutoHideEnabled(true);
-    setModal(true);
     setText(messages.manageDatabaseSearchAllSelectDatabases());
 
     FlowPanel layout = new FlowPanel();
@@ -182,6 +180,19 @@ public class DatabaseSelectDialog extends DialogBox {
   }
 
   private void cancelHandler() {
+    Storage localStorage = Storage.getLocalStorageIfSupported();
+    if (localStorage != null) {
+      String uuidsString = localStorage.getItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION);
+      if (uuidsString != null && !uuidsString.equals(ViewerConstants.SEARCH_ALL_SELECTED_ALL)) {
+        List<String> selectedUUIDs = new ArrayList<>();
+        if (!uuidsString.isEmpty()) {
+          Collections.addAll(selectedUUIDs, uuidsString.split(","));
+        }
+        this.list.setSelectedByUUIDs(selectedUUIDs);
+      } else {
+        this.list.setSelectedByUUIDs(new ArrayList<>());
+      }
+    }
     this.hide();
   }
 

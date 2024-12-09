@@ -7,46 +7,28 @@
  */
 package com.databasepreservation.common.client.common.lists;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.fusesource.restygwt.client.MethodCallback;
-import org.roda.core.data.v2.index.sublist.Sublist;
-
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.lists.columns.TooltipColumn;
-import com.databasepreservation.common.client.common.lists.utils.BasicAsyncTableCell;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
-import com.databasepreservation.common.client.index.FindRequest;
-import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.user.User;
-import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.widgets.Alert;
-import com.google.gwt.core.shared.GWT;
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
-
-import config.i18n.client.ClientMessages;
 
 /**
  * @author Alexandre Flores <aflores@keep.pt>
  */
-public class DatabaseSelectList extends BasicAsyncTableCell<ViewerDatabase> {
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+public class DatabaseSelectList extends DatabaseList {
   private final ClientLogger logger = new ClientLogger(getClass().getName());
 
   public DatabaseSelectList() {
@@ -54,7 +36,7 @@ public class DatabaseSelectList extends BasicAsyncTableCell<ViewerDatabase> {
   }
 
   public DatabaseSelectList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
-    super(filter, facets, summary, selectable, exportable, 15, 15);
+    super(filter, facets, summary, selectable, exportable);
     setPersistSelections(true);
   }
 
@@ -150,23 +132,5 @@ public class DatabaseSelectList extends BasicAsyncTableCell<ViewerDatabase> {
 
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(alert);
-  }
-
-  @Override
-  protected void getData(Sublist sublist, ColumnSortList columnSortList,
-    MethodCallback<IndexResult<ViewerDatabase>> callback) {
-    Filter filter = getFilter();
-
-    Map<Column<ViewerDatabase, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
-    Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);
-
-    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets());
-
-    DatabaseService.Util.call(callback).find(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
-  }
-
-  @Override
-  public void exportClickHandler() {
-    // do nothing
   }
 }
