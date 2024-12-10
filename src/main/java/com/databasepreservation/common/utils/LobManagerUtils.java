@@ -101,8 +101,9 @@ public class LobManagerUtils {
   public static final Path buildSiardDKZipLobPath(String databasePath, String handlebarsFilename) {
     Path dbPath = Paths.get(databasePath);
     String dbName = dbPath.getFileName().toString();
-    return dbPath.getParent().getParent().resolve(ViewerConstants.VIEWER_LOBS_FOLDER)
-      .resolve(dbName + "-" + handlebarsFilename);
+    String lobFolder = databasePath.split(ViewerConstants.VIEWER_SIARD_FILES_FOLDER)[0]
+      + ViewerConstants.VIEWER_LOBS_FOLDER;
+    return Paths.get(lobFolder).resolve(dbName + "-" + handlebarsFilename);
   }
 
   public static Path getConsolidatedPath(ViewerAbstractConfiguration configuration, String databaseUUID,
