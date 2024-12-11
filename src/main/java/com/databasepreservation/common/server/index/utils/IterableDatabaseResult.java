@@ -7,15 +7,16 @@
  */
 package com.databasepreservation.common.server.index.utils;
 
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.solr.client.solrj.SolrClient;
+
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.utils.CloseableIterable;
-import org.apache.solr.client.solrj.SolrClient;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -29,8 +30,8 @@ public class IterableDatabaseResult<T extends IsIndexed> implements CloseableIte
   private final DatabaseResultIterator<T> iterator;
 
   public IterableDatabaseResult(final SolrClient solrClient, final Class<T> returnClass, final Filter filter,
-    final Sorter sorter, final List<String> fieldsToReturn) {
-    iterator = new DatabaseResultIterator<>(solrClient, returnClass, filter, sorter, fieldsToReturn);
+    final Sorter sorter, final List<String> fieldsToReturn, final List<Filter> filterQueries) {
+    iterator = new DatabaseResultIterator<>(solrClient, returnClass, filter, sorter, fieldsToReturn, filterQueries);
 
     if (PAGE_SIZE > 0) {
       iterator.setPageSize(PAGE_SIZE);

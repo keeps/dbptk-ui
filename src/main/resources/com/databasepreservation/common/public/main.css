@@ -3499,6 +3499,25 @@ rgba(0, 0, 0, .125);
     white-space: nowrap;
 }
 
+.permissions_date_picker {
+    z-index: 5000;
+}
+
+.expiry_column div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}
+
+.expiry_column button {
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /************************************************
 * Universal embedded viewer
  ************************************************/

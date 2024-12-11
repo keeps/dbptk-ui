@@ -893,6 +893,8 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageLabelForPermissionsTableGroupAttributeValue();
 
+  String SIARDHomePageLabelForPermissionsTableGroupExpiryDate();
+
   String SIARDHomePageDialogTitleForPermissionsList();
 
   String SIARDHomePageDialogTitleForChangeAvailabilityToSearchAll();
@@ -912,6 +914,8 @@ public interface ClientMessages extends Messages {
   String SIARDHomePageDialogActionForOverridePermissions();
 
   String SIARDHomePageTitleForPermissionsSwitchButton();
+
+  String SIARDHomePageTitleForDateEdit();
 
   /********************************************
    * Edit Metadata

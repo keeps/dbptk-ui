@@ -29,6 +29,7 @@ import com.databasepreservation.common.client.common.visualization.manager.SIARD
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.SIARDNavigationPanel;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.ValidationNavigationPanel;
 import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -141,7 +142,7 @@ public class SIARDManagerPage extends ContentPanel {
     navigationPanels.add(browseNavigationPanel.build());
 
     if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
-      DatabaseService.Util.call((Set<String> databasePermissions) -> {
+      DatabaseService.Util.call((Map<String, AuthorizationDetails> databasePermissions) -> {
         ContextService.Util.call((Set<AuthorizationGroup> authorizationGroups) -> {
           permissionsNavigationPanel = PermissionsNavigationPanel.getInstance(database, databasePermissions,
             authorizationGroups);
@@ -178,7 +179,7 @@ public class SIARDManagerPage extends ContentPanel {
 
       if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
         if (permissionsNavigationPanel.hasPermissionsOrGroups()) {
-          DatabaseService.Util.call((Set<String> databasePermissions) -> {
+          DatabaseService.Util.call((Map<String, AuthorizationDetails> databasePermissions) -> {
             permissionsNavigationPanel.update(databasePermissions);
           }).getDatabasePermissions(database.getUuid());
         }

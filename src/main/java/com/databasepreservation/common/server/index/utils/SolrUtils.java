@@ -52,6 +52,7 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.IsIndexed;
@@ -62,6 +63,7 @@ import com.databasepreservation.common.client.index.facets.RangeFacetParameter;
 import com.databasepreservation.common.client.index.facets.SimpleFacetParameter;
 import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.BlockJoinAnyParentExpiryFilterParameter;
 import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateIntervalFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
@@ -77,6 +79,7 @@ import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.index.sort.SortParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.exceptions.ViewerException;
@@ -131,9 +134,20 @@ public class SolrUtils {
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
     Sorter sorter, Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters)
     throws GenericException, RequestNotValidException {
+    return find(index, collection, filter, sorter, sublist, facets, fieldsToReturn, extraParameters, new ArrayList<>());
+  }
+
+  public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
+    Sorter sorter, Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters,
+    List<Filter> filterQueries) throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
+    List<String> parsedFilterQueries = new ArrayList<>();
+    for (Filter filterQuery : filterQueries) {
+      parsedFilterQueries.add(parseFilter(filterQuery));
+    }
+    query.setFilterQueries(parsedFilterQueries.toArray(new String[0]));
     final List<SolrQuery.SortClause> sortClauses = parseSorter(sorter);
     sortClauses.add(SolrQuery.SortClause.asc(RodaConstants.INDEX_UUID));
     query.setSorts(sortClauses);
@@ -251,10 +265,22 @@ public class SolrUtils {
   public static <T extends IsIndexed> Pair<IndexResult<T>, String> find(SolrClient index, Class<T> classToRetrieve,
     Filter filter, Sorter sorter, int pageSize, String cursorMark, List<String> fieldsToReturn,
     Map<String, String> extraParameters) throws RequestNotValidException, GenericException {
+    return find(index, classToRetrieve, filter, sorter, pageSize, cursorMark, fieldsToReturn, extraParameters,
+      new ArrayList<>());
+  }
+
+  public static <T extends IsIndexed> Pair<IndexResult<T>, String> find(SolrClient index, Class<T> classToRetrieve,
+    Filter filter, Sorter sorter, int pageSize, String cursorMark, List<String> fieldsToReturn,
+    Map<String, String> extraParameters, List<Filter> filterQueries) throws RequestNotValidException, GenericException {
     Pair<IndexResult<T>, String> ret;
     SolrQuery query = new SolrQuery();
     query.setParam("q.op", DEFAULT_QUERY_PARSER_OPERATOR);
     query.setQuery(parseFilter(filter));
+    List<String> parsedFilterQueries = new ArrayList<>();
+    for (Filter filterQuery : filterQueries) {
+      parsedFilterQueries.add(parseFilter(filterQuery));
+    }
+    query.setFilterQueries(parsedFilterQueries.toArray(new String[0]));
 
     query.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
     query.setRows(pageSize);
@@ -620,6 +646,9 @@ public class SolrUtils {
       EmptyKeyFilterParameter param = (EmptyKeyFilterParameter) parameter;
       appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
       ret.append("(*:* NOT " + param.getName() + ":*)");
+    } else if (parameter instanceof BlockJoinAnyParentExpiryFilterParameter) {
+      BlockJoinAnyParentExpiryFilterParameter param = (BlockJoinAnyParentExpiryFilterParameter) parameter;
+      appendExpiryParameter(ret, param);
     } else if (parameter instanceof DateRangeFilterParameter) {
       DateRangeFilterParameter param = (DateRangeFilterParameter) parameter;
       appendRange(ret, param.getName(), Date.class, param.getFromValue(), String.class,
@@ -683,6 +712,26 @@ public class SolrUtils {
 
       ret.append(")");
     }
+  }
+
+  private static void appendExpiryParameter(StringBuilder ret, BlockJoinAnyParentExpiryFilterParameter param) {
+    ret.append("{!parent which='*:* -_nest_path_:*'}(");
+    if (param.getGroups().isEmpty()) {
+      // impossible query if no groups are provided
+      ret.append("-*:*");
+    } else {
+      for (int i = 0; i < param.getGroups().size(); i++) {
+        if (i > 0) {
+          ret.append(" OR ");
+        }
+        ret.append("(");
+        ret.append("group_value:(" + param.getGroups().get(i) + ")");
+        ret.append(" AND ");
+        appendRange(ret, "expiry_date", Date.class, param.getFromValue(), Date.class, param.getToValue(), false);
+        ret.append(")");
+      }
+    }
+    ret.append(")");
   }
 
   private static String processFromDate(Date fromValue) {
@@ -830,7 +879,7 @@ public class SolrUtils {
   private static void appendExactMatch(StringBuilder ret, String key, String value, boolean appendDoubleQuotes,
     boolean prefixWithANDOperatorIfBuilderNotEmpty) {
     appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
-    ret.append("(").append(key).append(": ");
+    ret.append("(").append(key).append(":");
     if (appendDoubleQuotes) {
       ret.append("\"");
     }
@@ -1295,6 +1344,33 @@ public class SolrUtils {
           object.getClass().getName());
       }
     }
+    return ret;
+  }
+
+  public static Map<String, AuthorizationDetails> objectToDatabasePermissions(Object object) {
+    Map<String, AuthorizationDetails> ret = new HashMap<>();
+
+    if (object != null) {
+      if (object instanceof SolrDocument doc) {
+        String group = objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PERMISSIONS_GROUP), null);
+        if (group != null) {
+          AuthorizationDetails authorizationDetails = new AuthorizationDetails();
+          authorizationDetails.setExpiry(objectToDate(doc.get(ViewerConstants.SOLR_DATABASES_PERMISSIONS_EXPIRY)));
+          ret.put(group, authorizationDetails);
+        }
+      } else {
+        List<SolrDocument> documents = (List<SolrDocument>) object;
+        documents.forEach(doc -> {
+          String group = objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PERMISSIONS_GROUP), null);
+          if (group != null) {
+            AuthorizationDetails authorizationDetails = new AuthorizationDetails();
+            authorizationDetails.setExpiry(objectToDate(doc.get(ViewerConstants.SOLR_DATABASES_PERMISSIONS_EXPIRY)));
+            ret.put(group, authorizationDetails);
+          }
+        });
+      }
+    }
+
     return ret;
   }
 

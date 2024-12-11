@@ -7,9 +7,27 @@
  */
 package com.databasepreservation.common.server;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.utils.JsonUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
@@ -24,22 +42,6 @@ import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
 import com.databasepreservation.common.utils.StatusUtils;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.utils.JsonUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -278,7 +280,7 @@ public class ConfigurationManager {
     }
   }
 
-  public void updateDatabasePermissions(String databaseId, Set<String> permissions)
+  public void updateDatabasePermissions(String databaseId, Map<String, AuthorizationDetails> permissions)
     throws GenericException, ViewerException {
     synchronized (databaseStatusFileLock) {
       try {
