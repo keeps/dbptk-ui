@@ -728,7 +728,7 @@ public class SolrUtils {
         ret.append("group_value:(" + param.getGroups().get(i) + ")");
         ret.append(" AND ");
         appendRange(ret, "expiry_date", Date.class, param.getFromValue(), Date.class, param.getToValue(), false);
-        ret.append(")");
+        ret.append(") OR (group_value:(" + param.getGroups().get(i) + ") AND -expiry_date:*)");
       }
     }
     ret.append(")");
