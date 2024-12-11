@@ -854,21 +854,26 @@ public class ToolkitStructure2ViewerStructure {
       } else {
         // BLOB is internal to the SIARD but is stored outside the table.xml (Normal)
         String lobName;
-        if (siardVersion.equals(ViewerConstants.SIARD_DK_128) || siardVersion.equals(ViewerConstants.SIARD_DK_1007)) {
-          lobName = binaryCell.getFile();
-        } else {
-          lobName = Paths.get(binaryCell.getFile()).getFileName().toString();
-        }
 
-        result.setValue(lobName);
         collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(false);
         actualViewerRow.addLobType(
           collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
           ViewerLobStoreType.INTERNALLY);
 
-        if (!mimeTypeAutoDetectDisable) {
-          detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
-            true);
+        if (siardVersion.equals(ViewerConstants.SIARD_DK_128) || siardVersion.equals(ViewerConstants.SIARD_DK_1007)) {
+          lobName = binaryCell.getFile();
+          result.setValue(lobName);
+          if (!mimeTypeAutoDetectDisable) {
+            detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
+              true, true);
+          }
+        } else {
+          lobName = Paths.get(binaryCell.getFile()).getFileName().toString();
+          result.setValue(lobName);
+          if (!mimeTypeAutoDetectDisable) {
+            detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
+              true);
+          }
         }
       }
     } else if (cell instanceof ComposedCell) {
