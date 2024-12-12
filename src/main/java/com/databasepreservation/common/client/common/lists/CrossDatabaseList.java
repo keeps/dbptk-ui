@@ -59,7 +59,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
   public CrossDatabaseList() {
     this(new Filter(), null, null, false, false);
-    this.searchValue="";
+    this.searchValue = "";
   }
 
   public CrossDatabaseList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
@@ -184,7 +184,9 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       @Override
       public String getValue(ViewerDatabase database) {
         if (searchValue != null && !searchValue.isEmpty()) {
-          return database != null ? String.valueOf(database.getSearchHits()) + " results" : "unknown";
+          return database != null
+            ? String.valueOf(database.getSearchHits()) + " " + messages.manageDatabaseSearchAllResults()
+            : "unknown";
         } else {
           return database != null ? "" : "unknown";
         }
