@@ -164,9 +164,8 @@ public class UserUtility {
     for (AuthorizationGroup authorizationGroup : authorizationGroupsToCheck.getAuthorizationGroupsList()) {
       if (authorizationGroup.getAttributeOperator()
         .equals(ViewerConfiguration.PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL)) {
-        Instant expiry = null;
-        if (databasePermissions.get(authorizationGroup.getAttributeValue()).hasExpiryDate()) {
-          expiry = databasePermissions.get(authorizationGroup.getAttributeValue()).getExpiry().toInstant();
+        Instant expiry = databasePermissions.get(authorizationGroup.getAttributeValue()).getExpiry().toInstant();
+        if (expiry != null) {
           // The expiry ends at the end of the stored day
           expiry = expiry.plus(24, ChronoUnit.HOURS);
         }
@@ -181,9 +180,8 @@ public class UserUtility {
     // If there is a permission on database that doesn't match witch any group, do a
     // simple verification with user roles
     for (String permission : permissionWithoutGroup) {
-      Instant expiry = null;
-      if (databasePermissions.get(permission).hasExpiryDate()) {
-        expiry = databasePermissions.get(permission).getExpiry().toInstant();
+      Instant expiry = databasePermissions.get(permission).getExpiry().toInstant();
+      if (expiry != null) {
         // The expiry ends at the end of the stored day
         expiry = expiry.plus(24, ChronoUnit.HOURS);
       }
