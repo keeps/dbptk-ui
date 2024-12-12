@@ -48,6 +48,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 
 import config.i18n.client.ClientMessages;
@@ -335,16 +336,44 @@ public class PermissionsNavigationPanel {
       }
     };
     htmlDatePicker.addStyleName("datepicker_dialog");
+    RadioButton pickDateButton = new RadioButton("expiryDatePickerGroup",
+      messages.SIARDHomePageLabelForPermissionsRadioButtonPickDate());
+    pickDateButton.addValueChangeHandler(event -> {
+      if (event.getValue()) {
+        JavascriptUtils.removeAttribute("expiryDatePicker", "disabled");
+      }
+    });
+    pickDateButton.setValue(true);
+    FlowPanel pickDateButtonContainer = new FlowPanel();
+    pickDateButtonContainer.addStyleName("datepicker_dialog_row");
+    pickDateButtonContainer.add(pickDateButton);
+    pickDateButtonContainer.add(htmlDatePicker);
+
+    RadioButton neverButton = new RadioButton("expiryDatePickerGroup",
+      messages.SIARDHomePageLabelForPermissionsRadioButtonNever());
+    neverButton.addValueChangeHandler(event -> {
+      if (event.getValue()) {
+        JavascriptUtils.setAttribute("expiryDatePicker", "disabled", "true");
+      }
+    });
+
+    FlowPanel confirmDialogHelper = new FlowPanel();
+    confirmDialogHelper.add(pickDateButtonContainer);
+    confirmDialogHelper.add(neverButton);
 
     Dialogs.showCustomConfirmationDialog(messages.SIARDHomePageTitleForDateEdit(), SafeHtmlUtils.EMPTY_SAFE_HTML,
-      "360px", htmlDatePicker, messages.basicActionCancel(), messages.basicActionConfirm(),
+      "360px", confirmDialogHelper, messages.basicActionCancel(), messages.basicActionConfirm(),
       new NoAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean confirmation) {
           if (confirmation) {
             AuthorizationDetails authorizationDetails = groupDetails.getOrDefault(currentGroup.getAttributeValue(),
               new AuthorizationDetails());
-            authorizationDetails.setExpiry(lastDate);
+            if (pickDateButton.getValue()) {
+              authorizationDetails.setExpiry(lastDate);
+            } else if (neverButton.getValue()) {
+              authorizationDetails.setExpiry(null);
+            }
             groupDetails.put(currentGroup.getAttributeValue(), authorizationDetails);
             cellTable.refresh();
           }

@@ -897,6 +897,10 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageLabelForPermissionsTableButtonNoExpiryDate();
 
+  String SIARDHomePageLabelForPermissionsRadioButtonPickDate();
+
+  String SIARDHomePageLabelForPermissionsRadioButtonNever();
+
   String SIARDHomePageDialogTitleForPermissionsList();
 
   String SIARDHomePageDialogTitleForChangeAvailabilityToSearchAll();

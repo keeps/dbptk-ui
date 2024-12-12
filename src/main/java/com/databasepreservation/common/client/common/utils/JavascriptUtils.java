@@ -344,4 +344,14 @@ public class JavascriptUtils {
                                                            var input = $wnd.jQuery("#" + inputId);
                                                            return input.val()
                                                            }-*/;
+
+  public static native void setAttribute(String elementId, String attribute, String value) /*-{
+                                                                                           var element = $wnd.jQuery("#" + elementId);
+                                                                                           element.attr(attribute, value);
+                                                                                           }-*/;
+
+  public static native void removeAttribute(String elementId, String attribute) /*-{
+                                                                                var element = $wnd.jQuery("#" + elementId);
+                                                                                element.removeAttr(attribute);
+                                                                                }-*/;
 }

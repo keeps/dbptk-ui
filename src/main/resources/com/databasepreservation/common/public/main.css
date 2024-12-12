@@ -3526,6 +3526,11 @@ rgba(0, 0, 0, .125);
     padding: 10px;
 }
 
+.datepicker_dialog_row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
 /************************************************
 * Universal embedded viewer
  ************************************************/
