@@ -3511,11 +3511,19 @@ rgba(0, 0, 0, .125);
 }
 
 .expiry_column button {
-    width: 25px;
-    height: 25px;
+    flex: 1;
+    padding: 3px 0px;
+    font-size: 1.3rem;
+}
+
+.expiry_column button:disabled {
+    flex: 0;
+}
+
+.datepicker_dialog {
     display: flex;
-    align-items: center;
     justify-content: center;
+    padding: 10px;
 }
 
 /************************************************

@@ -20,7 +20,7 @@ import com.databasepreservation.common.client.common.NavigationPanel;
 import com.databasepreservation.common.client.common.NoAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
-import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
+import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
 import com.databasepreservation.common.client.common.lists.columns.TooltipColumn;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
@@ -36,16 +36,14 @@ import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.SwitchBtn;
 import com.databasepreservation.common.client.widgets.Toast;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
-import com.google.gwt.cell.client.CompositeCell;
-import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -72,10 +70,12 @@ public class PermissionsNavigationPanel {
   private Button btnEdit;
   private SwitchBtn btnSwitch;
   private Column<AuthorizationGroup, Boolean> checkbox;
-  private Column<AuthorizationGroup, AuthorizationGroup> expiry;
+  private Column<AuthorizationGroup, String> expiry;
   private BasicTablePanel<AuthorizationGroup> cellTable;
 
   private AuthorizationGroup currentGroup;
+  private DateTimeFormat htmlInputPresentedDateFormat = DateTimeFormat.getFormat("MM/dd/yyyy");
+  private DateTimeFormat htmlInputDateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
   private Date lastDate;
 
   private boolean overrideMissingGroups = false;
@@ -243,41 +243,42 @@ public class PermissionsNavigationPanel {
         // Remove
         databasePermissionGroups.remove(group.getAttributeValue());
       }
+      cellTable.refresh();
     });
 
-    List<HasCell<AuthorizationGroup, ?>> cells = new ArrayList<>();
-    TextColumn<AuthorizationGroup> dateLabel = new TextColumn<>() {
+    expiry = new ButtonColumn<AuthorizationGroup>() {
       @Override
-      public String getValue(AuthorizationGroup object) {
-        Date expiry = groupDetails.getOrDefault(object.getAttributeValue(), new AuthorizationDetails()).getExpiry();
-        if (expiry == null) {
-          return "";
-        } else {
-          return DateTimeFormat.getFormat("dd-MM-yyyy").format(expiry);
+      public String getValue(AuthorizationGroup database) {
+        String ret = "";
+        if (databasePermissionGroups.contains(database.getAttributeValue())) {
+          AuthorizationDetails authorizationDetails = groupDetails.getOrDefault(database.getAttributeValue(),
+            new AuthorizationDetails());
+          return authorizationDetails.hasExpiryDate()
+            ? htmlInputPresentedDateFormat.format(authorizationDetails.getExpiry())
+            : messages.SIARDHomePageLabelForPermissionsTableButtonNoExpiryDate();
         }
+        return ret;
       }
-    };
-    cells.add(dateLabel);
 
-    cells.add(new ActionsCell<>(messages.edit(), "edit", group -> {
-      currentGroup = group;
-      showDatePicker();
-    }));
-    cells.add(new ActionsCell<>(messages.delete(), "trash", group -> {
-      AuthorizationDetails authorizationDetails = groupDetails.getOrDefault(group.getAttributeValue(),
-        new AuthorizationDetails());
-      authorizationDetails.setExpiry(null);
-      groupDetails.put(group.getAttributeValue(), authorizationDetails);
-      cellTable.refresh();
-    }));
-
-    CompositeCell<AuthorizationGroup> compositeCell = new CompositeCell<>(cells);
-    expiry = new Column<>(compositeCell) {
       @Override
-      public AuthorizationGroup getValue(AuthorizationGroup object) {
-        return object;
+      public void render(Cell.Context context, AuthorizationGroup object, SafeHtmlBuilder sb) {
+        String value = getValue(object);
+        if (databasePermissionGroups.contains(object.getAttributeValue())) {
+          sb.appendHtmlConstant("<button class=\"btn btn-link-info\" type=\"button\" tabindex=\"-1\">");
+        } else {
+          sb.appendHtmlConstant("<button class=\"btn btn-link-info\" type=\"button\" tabindex=\"-1\" disabled>");
+        }
+        if (value != null) {
+          sb.append(SafeHtmlUtils.fromString(value));
+        }
+        sb.appendHtmlConstant("</button>");
       }
     };
+
+    expiry.setFieldUpdater((index, authorizationGroup, value) -> {
+      currentGroup = authorizationGroup;
+      showDatePicker();
+    });
 
     buildGroupsTable(groups, checkbox, expiry);
 
@@ -314,23 +315,29 @@ public class PermissionsNavigationPanel {
   }
 
   private void showDatePicker() {
-    String today = DateTimeFormat.getFormat("yyyy-MM-dd").format(new Date());
-    HTML htmlDatePicker = new HTML(
-      SafeHtmlUtils.fromSafeConstant("<input type=date id=\"expiryDatePicker\" min=" + today + "></input>")) {
+    String today = htmlInputDateFormat.format(new Date());
+    String currentDateValueAttribute = "";
+    if (groupDetails.getOrDefault(currentGroup.getAttributeValue(), new AuthorizationDetails()).hasExpiryDate()) {
+      currentDateValueAttribute = "value=\""
+        + htmlInputDateFormat.format(groupDetails.get(currentGroup.getAttributeValue()).getExpiry()) + "\"";
+    }
+    HTML htmlDatePicker = new HTML(SafeHtmlUtils.fromSafeConstant(
+      "<input type=date id=\"expiryDatePicker\" min=" + today + " " + currentDateValueAttribute + "></input>")) {
       @Override
       protected void onDetach() {
         super.onDetach();
         String datePickerValue = JavascriptUtils.getInputValue("expiryDatePicker");
         if (datePickerValue != null && !datePickerValue.isEmpty()) {
-          lastDate = DateTimeFormat.getFormat("yyyy-MM-dd").parse(datePickerValue);
+          lastDate = htmlInputDateFormat.parse(datePickerValue);
         } else {
           lastDate = null;
         }
       }
     };
+    htmlDatePicker.addStyleName("datepicker_dialog");
 
     Dialogs.showCustomConfirmationDialog(messages.SIARDHomePageTitleForDateEdit(), SafeHtmlUtils.EMPTY_SAFE_HTML,
-      "300px", htmlDatePicker, messages.basicActionCancel(), messages.basicActionConfirm(),
+      "360px", htmlDatePicker, messages.basicActionCancel(), messages.basicActionConfirm(),
       new NoAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean confirmation) {
@@ -346,7 +353,7 @@ public class PermissionsNavigationPanel {
   }
 
   private void buildGroupsTable(Set<AuthorizationGroup> groups, Column<AuthorizationGroup, Boolean> checkbox,
-    Column<AuthorizationGroup, AuthorizationGroup> expiry) {
+    Column<AuthorizationGroup, String> expiry) {
     cellTable = new BasicTablePanel<>(new FlowPanel(), SafeHtmlUtils.EMPTY_SAFE_HTML, groups.iterator(),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>("", 3, checkbox),
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>(messages.SIARDHomePageLabelForPermissionsTableGroupLabel(), 15,
