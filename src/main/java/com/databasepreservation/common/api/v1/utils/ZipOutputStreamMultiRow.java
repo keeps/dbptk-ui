@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -53,7 +54,6 @@ public class ZipOutputStreamMultiRow extends ZipOutputStream {
 
   @Override
   public void consumeOutputStream(OutputStream out) throws IOException {
-    ZipFile siardArchive = new ZipFile(getDatabase().getPath());
 
     boolean all = false;
     if (sublist == null) {
@@ -76,7 +76,13 @@ public class ZipOutputStreamMultiRow extends ZipOutputStream {
           nIndex++;
           continue;
         } else {
-          writeToZipFile(siardArchive, zipArchiveOutputStream, row, lobColumns);
+          if (getDatabase().getVersion().equals(ViewerConstants.SIARD_DK_1007)
+            || getDatabase().getVersion().equals(ViewerConstants.SIARD_DK_128)) {
+            writeToZipFile(null, zipArchiveOutputStream, row, lobColumns, true);
+          } else {
+            ZipFile siardArchive = new ZipFile(getDatabase().getPath());
+            writeToZipFile(siardArchive, zipArchiveOutputStream, row, lobColumns);
+          }
         }
         nIndex++;
       }
