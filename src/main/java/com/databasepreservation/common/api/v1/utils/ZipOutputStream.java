@@ -133,7 +133,7 @@ public abstract class ZipOutputStream extends CSVOutputStream {
 
       if (binaryColumn != null) {
         if (isSiardDK) {
-          handleWriteSIARDDKLobs(out, cellEntry.getValue());
+          handleWriteSIARDDKLobs(out, cellEntry.getValue(), binaryColumn, row);
         } else {
           if (ViewerType.dbTypes.CLOB.equals(binaryColumn.getType())) {
             handleWriteClob(out, binaryColumn, row);
@@ -193,18 +193,27 @@ public abstract class ZipOutputStream extends CSVOutputStream {
     addEntryToZip(out, inputStream, templateFilename);
   }
 
-  private void handleWriteSIARDDKLobs(ZipArchiveOutputStream out, ViewerCell cell) throws IOException {
+  private void handleWriteSIARDDKLobs(ZipArchiveOutputStream out, ViewerCell cell, ColumnStatus binaryColumn,
+    ViewerRow row) throws IOException {
     final String lobLocation = cell.getValue();
     final Path lobPath = Paths.get(lobLocation);
 
     if (lobPath.toFile().isDirectory()) {
+      int index = 0;
       for (File file : Objects.requireNonNull(lobPath.toFile().listFiles())) {
         InputStream inputStream = Files.newInputStream(file.toPath());
-        addEntryToZip(out, inputStream, file.getName());
+        String extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+        String templateFilename = index + "_" + FilenameUtils.getTemplateFilename(row, configTable, binaryColumn,
+          lobPath.getFileName().toString());
+        String templateFilenameWithActualExtension = templateFilename.replace(ExtraMediaType.ZIP_FILE_EXTENSION, "." + extension);
+        addEntryToZip(out, inputStream, templateFilenameWithActualExtension);
+        index++;
       }
     } else {
       InputStream inputStream = Files.newInputStream(lobPath);
-      addEntryToZip(out, inputStream, lobPath.getFileName().toString());
+      final String templateFilename = FilenameUtils.getTemplateFilename(row, configTable, binaryColumn,
+        lobPath.getFileName().toString());
+      addEntryToZip(out, inputStream, templateFilename);
     }
   }
 
