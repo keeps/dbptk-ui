@@ -591,6 +591,11 @@ public class ViewerConstants {
   public static final String PROPERTY_SEARCH_ALL_DEFAULT_SELECTION = "ui.searchAll.defaultSelection";
 
   /**
+   * Permissions
+   */
+  public static final String PROPERTY_EXPIRY_ZONE_ID_OVERRIDE = "permissions.expiry.zoneId.override";
+
+  /**
    * Header
    */
   public static final String DEFAULT_PROPERTY_UI_HEADER_TITLE = "<img src=\"api/v1/theme?resource_id=dbptk_logo_white_vector.svg\" class=\"header-logo\"><span class=\"header-text\">DBPTK Enterprise</span>";

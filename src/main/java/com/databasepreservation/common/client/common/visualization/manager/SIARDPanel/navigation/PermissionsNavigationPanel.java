@@ -76,7 +76,8 @@ public class PermissionsNavigationPanel {
 
   private AuthorizationGroup currentGroup;
   private DateTimeFormat htmlInputPresentedDateFormat = DateTimeFormat.getFormat("MM/dd/yyyy");
-  private DateTimeFormat htmlInputDateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
+  private DateTimeFormat htmlMinDateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
+  private DateTimeFormat htmlInputDateFormat = DateTimeFormat.getFormat("yyyy-MM-ddTHH:mm:ssZ");
   private Date lastDate;
 
   private boolean overrideMissingGroups = false;
@@ -316,7 +317,7 @@ public class PermissionsNavigationPanel {
   }
 
   private void showDatePicker() {
-    String today = htmlInputDateFormat.format(new Date());
+    String today = htmlMinDateFormat.format(new Date());
     String currentDateValueAttribute = "";
     if (groupDetails.getOrDefault(currentGroup.getAttributeValue(), new AuthorizationDetails()).hasExpiryDate()) {
       currentDateValueAttribute = "value=\""
@@ -329,7 +330,7 @@ public class PermissionsNavigationPanel {
         super.onDetach();
         String datePickerValue = JavascriptUtils.getInputValue("expiryDatePicker");
         if (datePickerValue != null && !datePickerValue.isEmpty()) {
-          lastDate = htmlInputDateFormat.parse(datePickerValue);
+          lastDate = htmlInputDateFormat.parse(datePickerValue + "T23:59:59-0000");
         } else {
           lastDate = null;
         }
