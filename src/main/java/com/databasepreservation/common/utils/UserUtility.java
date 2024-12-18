@@ -11,8 +11,10 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -164,14 +166,24 @@ public class UserUtility {
     for (AuthorizationGroup authorizationGroup : authorizationGroupsToCheck.getAuthorizationGroupsList()) {
       if (authorizationGroup.getAttributeOperator()
         .equals(ViewerConfiguration.PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL)) {
-        Instant expiry = null;
+        LocalDateTime expiry = null;
+        LocalDateTime now = null;
         if (databasePermissions.get(authorizationGroup.getAttributeValue()).hasExpiryDate()) {
-          expiry = databasePermissions.get(authorizationGroup.getAttributeValue()).getExpiry().toInstant();
-          // The expiry ends at the end of the stored day
-          expiry = expiry.plus(24, ChronoUnit.HOURS);
+          expiry = LocalDateTime.ofInstant(
+            databasePermissions.get(authorizationGroup.getAttributeValue()).getExpiry().toInstant(), ZoneOffset.UTC);
+          String zoneIdString = ViewerConfiguration.getInstance().getViewerConfigurationAsString("UTC",
+            ViewerConstants.PROPERTY_EXPIRY_ZONE_ID_OVERRIDE);
+          ZoneId zoneId = null;
+          try {
+            zoneId = ZoneId.of(zoneIdString);
+          } catch (DateTimeException e) {
+            zoneId = ZoneOffset.UTC;
+          }
+          now = LocalDateTime.ofInstant(new Date().toInstant(), zoneId);
         }
+
         if (user.getAllRoles().contains(authorizationGroup.getAttributeValue())
-          && (expiry == null || expiry.isAfter(new Date().toInstant()))) {
+          && (expiry == null || expiry.isAfter(now))) {
           // User has permissions to access this database
           return;
         }
@@ -181,13 +193,22 @@ public class UserUtility {
     // If there is a permission on database that doesn't match witch any group, do a
     // simple verification with user roles
     for (String permission : permissionWithoutGroup) {
-      Instant expiry = null;
+      LocalDateTime expiry = null;
+      LocalDateTime now = null;
       if (databasePermissions.get(permission).hasExpiryDate()) {
-        expiry = databasePermissions.get(permission).getExpiry().toInstant();
-        // The expiry ends at the end of the stored day
-        expiry = expiry.plus(24, ChronoUnit.HOURS);
+        expiry = LocalDateTime.ofInstant(databasePermissions.get(permission).getExpiry().toInstant(), ZoneOffset.UTC);
+        String zoneIdString = ViewerConfiguration.getInstance().getViewerConfigurationAsString("UTC",
+          ViewerConstants.PROPERTY_EXPIRY_ZONE_ID_OVERRIDE);
+        ZoneId zoneId = null;
+        try {
+          zoneId = ZoneId.of(zoneIdString);
+        } catch (DateTimeException e) {
+          zoneId = ZoneOffset.UTC;
+        }
+        now = LocalDateTime.ofInstant(new Date().toInstant(), zoneId);
       }
-      if (user.getAllRoles().contains(permission) && (expiry == null || expiry.isAfter(new Date().toInstant()))) {
+
+      if (user.getAllRoles().contains(permission) && (expiry == null || expiry.isAfter(now))) {
         return;
       }
     }

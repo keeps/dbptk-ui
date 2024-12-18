@@ -8,9 +8,10 @@
 package com.databasepreservation.common.api.v1;
 
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -321,13 +322,19 @@ public class DatabaseResource implements DatabaseService {
   public static List<Filter> getDatabaseFindUserPermissionsFilterQueries(User user) {
     Filter filter = new Filter();
 
-    // Convert today's date to midnight, start of the day
-    LocalDateTime now = LocalDateTime.ofInstant(new Date().toInstant(), ZoneId.systemDefault());
-    LocalDateTime today = now.with(LocalTime.MIN);
-    Date todayDate = Date.from(today.atZone(ZoneId.systemDefault()).toInstant());
+    String zoneIdString = ViewerConfiguration.getInstance().getViewerConfigurationAsString("UTC",
+      ViewerConstants.PROPERTY_EXPIRY_ZONE_ID_OVERRIDE);
+    ZoneId zoneId;
+    try {
+      zoneId = ZoneId.of(zoneIdString);
+    } catch (DateTimeException e) {
+      zoneId = ZoneOffset.UTC;
+    }
+    LocalDateTime nowDateTime = LocalDateTime.ofInstant(new Date().toInstant(), zoneId);
+    Date now = Date.from(nowDateTime.atZone(zoneId).toInstant());
 
-    BlockJoinAnyParentExpiryFilterParameter param = new BlockJoinAnyParentExpiryFilterParameter(user.getAllRoles(),
-      todayDate, null);
+    BlockJoinAnyParentExpiryFilterParameter param = new BlockJoinAnyParentExpiryFilterParameter(user.getAllRoles(), now,
+      null);
     filter.add(param);
     return new ArrayList<>(List.of(filter));
   }
