@@ -330,8 +330,10 @@ public class DatabaseResource implements DatabaseService {
     } catch (DateTimeException e) {
       zoneId = ZoneOffset.UTC;
     }
+    // LocalDateTime gets the current time in the configured timezone...
     LocalDateTime nowDateTime = LocalDateTime.ofInstant(new Date().toInstant(), zoneId);
-    Date now = Date.from(nowDateTime.atZone(zoneId).toInstant());
+    // ... and then we convert to Date using UTC so that it is sent to the query with the timezone's offset
+    Date now = Date.from(nowDateTime.atZone(ZoneOffset.UTC).toInstant());
 
     BlockJoinAnyParentExpiryFilterParameter param = new BlockJoinAnyParentExpiryFilterParameter(user.getAllRoles(), now,
       null);

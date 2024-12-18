@@ -593,7 +593,7 @@ public class ViewerConstants {
   /**
    * Permissions
    */
-  public static final String PROPERTY_EXPIRY_ZONE_ID_OVERRIDE = "ui.permissions.expiry.zoneId.override";
+  public static final String PROPERTY_EXPIRY_ZONE_ID_OVERRIDE = "permissions.expiry.zoneId.override";
 
   /**
    * Header
