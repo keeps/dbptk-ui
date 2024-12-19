@@ -40,6 +40,7 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -76,7 +77,7 @@ public class PermissionsNavigationPanel {
 
   private AuthorizationGroup currentGroup;
   private DateTimeFormat htmlInputPresentedDateFormat = DateTimeFormat.getFormat("MM/dd/yyyy");
-  private DateTimeFormat htmlMinDateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
+  private DateTimeFormat htmlAttributesDateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
   private DateTimeFormat htmlInputDateFormat = DateTimeFormat.getFormat("yyyy-MM-ddTHH:mm:ssZ");
   private Date lastDate;
 
@@ -256,7 +257,7 @@ public class PermissionsNavigationPanel {
           AuthorizationDetails authorizationDetails = groupDetails.getOrDefault(database.getAttributeValue(),
             new AuthorizationDetails());
           return authorizationDetails.hasExpiryDate()
-            ? htmlInputPresentedDateFormat.format(authorizationDetails.getExpiry())
+            ? htmlInputPresentedDateFormat.format(authorizationDetails.getExpiry(), TimeZone.createTimeZone(0))
             : messages.SIARDHomePageLabelForPermissionsTableButtonNoExpiryDate();
         }
         return ret;
@@ -317,11 +318,11 @@ public class PermissionsNavigationPanel {
   }
 
   private void showDatePicker() {
-    String today = htmlMinDateFormat.format(new Date());
+    String today = htmlAttributesDateFormat.format(new Date());
     String currentDateValueAttribute = "";
     if (groupDetails.getOrDefault(currentGroup.getAttributeValue(), new AuthorizationDetails()).hasExpiryDate()) {
       currentDateValueAttribute = "value=\""
-        + htmlInputDateFormat.format(groupDetails.get(currentGroup.getAttributeValue()).getExpiry()) + "\"";
+        + htmlAttributesDateFormat.format(groupDetails.get(currentGroup.getAttributeValue()).getExpiry()) + "\"";
     }
     HTML htmlDatePicker = new HTML(SafeHtmlUtils.fromSafeConstant(
       "<input type=date id=\"expiryDatePicker\" min=" + today + " " + currentDateValueAttribute + "></input>")) {
