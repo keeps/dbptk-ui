@@ -159,30 +159,30 @@ public class DatabaseSelectDialog extends DialogBox {
         + " " + messages.manageDatabaseSearchAllExcludedPrivacy(this.notSearchable))));
   }
 
-  public void writeSelectedObjectsToLocalStorage() {
-    Storage localStorage = Storage.getLocalStorageIfSupported();
-    if (localStorage != null) {
+  public void writeSelectedObjectsToSessionStorage() {
+    Storage sessionStorage = Storage.getSessionStorageIfSupported();
+    if (sessionStorage != null) {
       SelectedItems<ViewerDatabase> selectedItems = this.list.getSelected();
       if (selectedItems instanceof SelectedItemsList<?>) {
-        localStorage.setItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION,
+        sessionStorage.setItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION,
           String.join(",", ((SelectedItemsList<ViewerDatabase>) selectedItems).getIds()));
       } else if (selectedItems instanceof SelectedItemsFilter<?>) {
-        localStorage.setItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION,
+        sessionStorage.setItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION,
           ViewerConstants.SEARCH_ALL_SELECTED_ALL);
       }
     }
   }
 
   private void confirmHandler() {
-    this.writeSelectedObjectsToLocalStorage();
+    this.writeSelectedObjectsToSessionStorage();
     this.doParentSearch();
     this.hide();
   }
 
   private void cancelHandler() {
-    Storage localStorage = Storage.getLocalStorageIfSupported();
-    if (localStorage != null) {
-      String uuidsString = localStorage.getItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION);
+    Storage sessionStorage = Storage.getSessionStorageIfSupported();
+    if (sessionStorage != null) {
+      String uuidsString = sessionStorage.getItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION);
       if (uuidsString != null && !uuidsString.equals(ViewerConstants.SEARCH_ALL_SELECTED_ALL)) {
         List<String> selectedUUIDs = new ArrayList<>();
         if (!uuidsString.isEmpty()) {
@@ -201,11 +201,11 @@ public class DatabaseSelectDialog extends DialogBox {
   }
 
   private void doParentSearch() {
-    Storage localStorage = Storage.getLocalStorageIfSupported();
+    Storage sessionStorage = Storage.getSessionStorageIfSupported();
     List<String> selectedUUIDs = null;
     boolean selectedAll = false;
-    if (localStorage != null) {
-      String uuidsString = localStorage.getItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION);
+    if (sessionStorage != null) {
+      String uuidsString = sessionStorage.getItem(ViewerConstants.LOCAL_STORAGE_SEARCH_ALL_SELECTION);
       if (uuidsString != null) {
         if (uuidsString.equals(ViewerConstants.SEARCH_ALL_SELECTED_ALL)) {
           selectedAll = true;
