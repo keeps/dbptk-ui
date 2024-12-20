@@ -245,6 +245,7 @@ public class ViewerConstants {
   public static final String SOLR_DYN_LOCATION_RPT = "_srpt";
   public static final String SOLR_DYN_LONG = "_l";
   public static final String SOLR_DYN_STRING = "_s";
+  public static final String SOLR_DYN_STRING_MULTI = "_ss";
   public static final String SOLR_DYN_TEXT_GENERAL = "_t";
   public static final String SOLR_DYN_TEXT_MULTI = "_txt";
   public static final String SOLR_DYN_NEST_MULTI = "_nst";
