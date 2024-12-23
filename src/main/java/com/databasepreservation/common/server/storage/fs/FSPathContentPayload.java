@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.server.storage.fs;
 
+import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.storage.ContentPayload;
 
 import java.io.IOException;
@@ -31,11 +32,17 @@ public class FSPathContentPayload implements ContentPayload {
         return Files.newInputStream(path);
     }
 
-    @Override
-    public void writeToPath(Path outPath) throws IOException {
-//        Files.copy(path, outPath, StandardCopyOption.REPLACE_EXISTING);
-        Files.copy(path, outPath);
+  @Override
+  public void writeToPath(Path outPath) throws IOException {
+    boolean allowOverwrite = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
+      ViewerConfiguration.OVERWRITE_EXISTING_FILE);
+
+    if (allowOverwrite) {
+      Files.copy(path, outPath, StandardCopyOption.REPLACE_EXISTING);
+    } else {
+      Files.copy(path, outPath);
     }
+  }
 
     @Override
     public URI getURI() throws IOException, UnsupportedOperationException {

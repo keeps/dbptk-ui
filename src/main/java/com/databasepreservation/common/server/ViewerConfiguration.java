@@ -150,6 +150,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PRESENTATION_EXTERNAL_SERVICE_NAME = "ui.iiif_viewer.presentation.service_name";
   public static final String VIEWER_ENABLED = "ui.iiif_viewer.enabled";
 
+  public static final String OVERWRITE_EXISTING_FILE = "overwrite.existing.file";
+
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.APPLICATION_ENV_SERVER;
 
