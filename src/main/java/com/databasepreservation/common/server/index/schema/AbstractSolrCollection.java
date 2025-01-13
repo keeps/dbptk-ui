@@ -20,9 +20,10 @@ import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 
-import com.databasepreservation.common.server.index.utils.SolrUtils;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.index.utils.SolrUtils;
 
 public abstract class AbstractSolrCollection<M extends IsIndexed> implements SolrCollection<M> {
 
@@ -40,8 +41,10 @@ public abstract class AbstractSolrCollection<M extends IsIndexed> implements Sol
   public List<DynamicField> getDynamicFields() {
     List<DynamicField> ret = new ArrayList<>();
 
-    ret.add(new DynamicField("*_txt", Field.TYPE_TEXT).setIndexed(true).setStored(true).setMultiValued(true));
-    ret.add(new DynamicField("*_nst", Field.TYPE_TEXT).setIndexed(false).setStored(false).setMultiValued(true));
+    ret.add(new DynamicField("*" + ViewerConstants.SOLR_DYN_TEXT_MULTI, Field.TYPE_TEXT).setIndexed(true)
+      .setStored(true).setMultiValued(true));
+    ret.add(new DynamicField("*" + ViewerConstants.SOLR_DYN_NEST_MULTI, Field.TYPE_TEXT).setIndexed(false)
+      .setStored(false).setMultiValued(true));
 
     return ret;
   }
