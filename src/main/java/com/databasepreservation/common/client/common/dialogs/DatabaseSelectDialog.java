@@ -202,6 +202,7 @@ public class DatabaseSelectDialog extends DialogBox {
 
   private void clearHandler() {
     this.searchPanel.clearSearchInputBox();
+    this.list.setSelectingAll(false);
     this.list.setSelected(new HashSet<>());
   }
 

@@ -48,6 +48,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -103,16 +104,13 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   private FlowPanel mainPanel;
   private FlowPanel sidePanel;
-  private FlowPanel selectAllPanel;
-  private FlowPanel selectAllPanelBody;
-  private Label selectAllLabel;
-  private CheckBox selectAllCheckBox;
 
   private Column<T, Boolean> selectColumn;
   private Set<T> selected = new HashSet<T>();
   private boolean persistSelections = false;
   private Set<String> persistedSelectedUUIDs = new HashSet<>();
   private final List<CheckboxSelectionListener<T>> listeners = new ArrayList<AsyncTableCell.CheckboxSelectionListener<T>>();
+  private boolean selectingAll = false;
 
   private Filter filter;
   private boolean justActive;
@@ -204,8 +202,6 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     pageSizePager = new RodaPageSizePager(getInitialPageSize(), getPageSizePagerIncrement());
     pageSizePager.setDisplay(display);
 
-    createSelectAllPanel();
-
     displayScroll = new ScrollPanel(display);
     displayScroll.addStyleName("ms-scroll-fix");
     displayScrollWrapper = new SimplePanel(displayScroll);
@@ -243,7 +239,6 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
     addValueChangeHandler(event -> {
       selected = new HashSet<>();
-      hideSelectAllPanel();
     });
 
     sidePanel = new FlowPanel();
@@ -254,7 +249,6 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     mainPanel.addStyleName("my-asyncdatagrid-main-panel");
     add(mainPanel);
 
-    mainPanel.add(selectAllPanel);
     mainPanel.add(displayScrollWrapper);
     mainPanel.add(resultsPager);
     if (exportButtons != null) {
@@ -312,17 +306,49 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   private void configure(final CellTable<T> display) {
     if (selectable) {
-      selectColumn = new Column<T, Boolean>(new CheckboxCell(true, false)) {
+      selectColumn = new Column<T, Boolean>(new CheckboxCell(true, false) {
+        private final SafeHtml INPUT_CHECKED = SafeHtmlUtils
+          .fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" checked/>");
+        private final SafeHtml INPUT_CHECKED_DISABLED = SafeHtmlUtils
+          .fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" checked disabled/>");
+        private final SafeHtml INPUT_UNCHECKED = SafeHtmlUtils
+          .fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\"/>");
+
+        @Override
+        public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
+          // Get the view data.
+          Object key = context.getKey();
+          Boolean viewData = getViewData(key);
+          if (viewData != null && viewData.equals(value)) {
+            clearViewData(key);
+            viewData = null;
+          }
+
+          if (selectingAll) {
+            sb.append(INPUT_CHECKED_DISABLED);
+          } else {
+            if (value != null && ((viewData != null) ? viewData : value)) {
+              sb.append(INPUT_CHECKED);
+            } else {
+              sb.append(INPUT_UNCHECKED);
+            }
+          }
+        }
+      }) {
         @Override
         public Boolean getValue(T object) {
-          if (persistSelections) {
-            if (object == null) {
-              return false;
-            } else {
-              return persistedSelectedUUIDs.contains(object.getUuid());
-            }
+          if (selectingAll) {
+            return true;
           } else {
-            return selected.contains(object);
+            if (persistSelections) {
+              if (object == null) {
+                return false;
+              } else {
+                return persistedSelectedUUIDs.contains(object.getUuid());
+              }
+            } else {
+              return selected.contains(object);
+            }
           }
         }
       };
@@ -341,60 +367,47 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
         fireOnCheckboxSelectionChanged();
       });
 
-      Header<Boolean> selectHeader = new Header<Boolean>(new CheckboxCell(true, true)) {
+      Header<Boolean> selectHeader = new Header<Boolean>(new CheckboxCell(true, true) {
+        private final SafeHtml INPUT_OPEN = SafeHtmlUtils.fromSafeConstant("<");
+        private final SafeHtml INPUT_CLOSE = SafeHtmlUtils.fromSafeConstant("/>");
+        private final SafeHtml INPUT_CHECKED = SafeHtmlUtils
+          .fromSafeConstant("input type=\"checkbox\" tabindex=\"-1\" checked");
+        private final SafeHtml INPUT_UNCHECKED = SafeHtmlUtils
+          .fromSafeConstant("input type=\"checkbox\" tabindex=\"-1\"");
+
+        private SafeHtml makeTooltip() {
+          return SafeHtmlUtils.fromSafeConstant(" title=\"Select all " + dataProvider.getRowCount() + " items\" ");
+        }
+
+        @Override
+        public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
+          // Get the view data.
+          Object key = context.getKey();
+          Boolean viewData = getViewData(key);
+          if (viewData != null && viewData.equals(value)) {
+            clearViewData(key);
+            viewData = null;
+          }
+
+          sb.append(INPUT_OPEN);
+          if (value != null && ((viewData != null) ? viewData : value)) {
+            sb.append(INPUT_CHECKED);
+          } else {
+            sb.append(INPUT_UNCHECKED);
+          }
+          sb.append(makeTooltip());
+          sb.append(INPUT_CLOSE);
+        }
+      }) {
 
         @Override
         public Boolean getValue() {
-          Boolean ret;
-
-          if (!persistSelections) {
-            if (selected.isEmpty()) {
-              ret = false;
-            } else if (selected.containsAll(getVisibleItems())) {
-              ret = true;
-              showSelectAllPanel();
-            } else {
-              // some are selected
-              ret = false;
-              hideSelectAllPanel();
-            }
-          } else {
-            Collection<String> visibleUUIDs = new ArrayList<>();
-            for (T item : getVisibleItems()) {
-              if (item != null) {
-                visibleUUIDs.add(item.getUuid());
-              }
-            }
-            if (persistedSelectedUUIDs.isEmpty()) {
-              ret = false;
-            } else if (persistedSelectedUUIDs.containsAll(visibleUUIDs)) {
-              ret = true;
-              showSelectAllPanel();
-            } else {
-              // some are selected
-              ret = false;
-              hideSelectAllPanel();
-            }
-          }
-
-          return ret;
+          return selectingAll;
         }
       };
 
       selectHeader.setUpdater(value -> {
-        if (value) {
-          for (T item : getVisibleItems()) {
-            persistedSelectedUUIDs.add(item.getUuid());
-          }
-          selected.addAll(getVisibleItems());
-          showSelectAllPanel();
-        } else {
-          for (T item : getVisibleItems()) {
-            persistedSelectedUUIDs.remove(item.getUuid());
-          }
-          selected.clear();
-          hideSelectAllPanel();
-        }
+        selectingAll = value;
         redraw();
         fireOnCheckboxSelectionChanged();
       });
@@ -436,7 +449,6 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   public void refresh() {
     selected = new HashSet<T>();
-    hideSelectAllPanel();
     display.setVisibleRangeAndClearData(new Range(0, getInitialPageSize()), true);
     getSelectionModel().clear();
   }
@@ -661,7 +673,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   public SelectedItems<T> getSelected() {
     SelectedItems<T> ret;
-    if (isAllSelected()) {
+    if (getSelectingAll()) {
       ret = new SelectedItemsFilter<T>(getFilter(), selectedClass.getName(), getJustActive());
     } else {
       List<String> ids = new ArrayList<>();
@@ -735,48 +747,12 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     }
   }
 
-  // SELECT ALL PANEL
-
-  public void createSelectAllPanel() {
-    selectAllPanel = new FlowPanel();
-    selectAllPanelBody = new FlowPanel();
-    selectAllCheckBox = new CheckBox();
-    selectAllLabel = new Label("Select all");
-
-    selectAllPanelBody.add(selectAllCheckBox);
-    selectAllPanelBody.add(selectAllLabel);
-    selectAllPanel.add(selectAllPanelBody);
-    selectAllPanel.setVisible(false);
-
-    selectAllPanel.addStyleName("panel");
-    selectAllPanelBody.addStyleName("panel-body");
-
-    selectAllCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-      @Override
-      public void onValueChange(ValueChangeEvent<Boolean> event) {
-        fireOnCheckboxSelectionChanged();
-      }
-    });
-
+  public Boolean getSelectingAll() {
+    return selectingAll;
   }
 
-  public void showSelectAllPanel() {
-    if (!selectAllPanel.isVisible() && resultsPager.hasNextPage() || resultsPager.hasPreviousPage()) {
-      // selectAllLabel.setText(messages.listSelectAllMessage(dataProvider.getRowCount()));
-      selectAllLabel.setText("Select all " + dataProvider.getRowCount() + " items");
-      selectAllCheckBox.setValue(false);
-      selectAllPanel.setVisible(true);
-    }
-  }
-
-  public void hideSelectAllPanel() {
-    selectAllCheckBox.setValue(false);
-    selectAllPanel.setVisible(false);
-  }
-
-  public Boolean isAllSelected() {
-    return selectAllCheckBox.getValue();
+  public void setSelectingAll(boolean value) {
+    this.selectingAll = value;
   }
 
   public O getObject() {
