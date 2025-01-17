@@ -12,6 +12,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.lists.DatabaseSelectList;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCellOptions;
 import com.databasepreservation.common.client.common.lists.utils.ListBuilder;
+import com.databasepreservation.common.client.common.search.SearchPanelAbstract;
 import com.databasepreservation.common.client.common.search.SearchPanelWithSearchAll;
 import com.databasepreservation.common.client.common.search.SearchWrapper;
 import com.databasepreservation.common.client.index.FindRequest;
@@ -54,6 +55,7 @@ public class DatabaseSelectDialog extends DialogBox {
   private long notSearchable;
   private SimplePanel exludedInfo;
 
+  private SearchPanelAbstract searchPanel;
   private DatabaseSelectList list;
 
   public DatabaseSelectDialog() {
@@ -99,6 +101,8 @@ public class DatabaseSelectDialog extends DialogBox {
     this.defaultFilter = defaultFilter;
     this.messages = messages;
     this.databasesSearchWrapper = new SearchWrapper(false).createListAndSearchPanel(databaseMetadataList, false);
+    this.searchPanel = this.databasesSearchWrapper.getComponents()
+      .getSearchPanel(databaseMetadataList.getOptions().getListId());
     Button clearButton = new Button(messages.clear());
     clearButton.addStyleName("btn btn-danger");
     clearButton.addClickHandler(event -> clearHandler());
@@ -197,6 +201,7 @@ public class DatabaseSelectDialog extends DialogBox {
   }
 
   private void clearHandler() {
+    this.searchPanel.clearSearchInputBox();
     this.list.setSelected(new HashSet<>());
   }
 
