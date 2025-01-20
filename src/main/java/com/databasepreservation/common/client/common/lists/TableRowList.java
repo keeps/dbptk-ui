@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -199,7 +200,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         }
       }
     }
-
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(alert);
 
@@ -234,9 +234,14 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
             if (nestedRow != null && nestedRow.getCells() != null && !nestedRow.getCells().isEmpty()
               && nestedRow.getUuid().equals(configColumn.getId())) {
               Map<String, ViewerCell> cells = nestedRow.getCells();
+
+              // removes the nested prefix of the nested collumn
+              Map<String, ViewerCell> cells_no_nested_prefix = cells.entrySet().stream().collect(Collectors
+                .toMap(entry -> entry.getKey().replace(ViewerConstants.SOLR_ROWS_NESTED_COL, ""), Map.Entry::getValue));
+
               String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
               if (template != null && !template.isEmpty()) {
-                String json = JSOUtils.cellsToJson(cells, nestedTable);
+                String json = JSOUtils.cellsToJson(cells_no_nested_prefix, nestedTable);
                 String s = JavascriptUtils.compileTemplate(template, json);
                 aggregationList.add(s);
               }

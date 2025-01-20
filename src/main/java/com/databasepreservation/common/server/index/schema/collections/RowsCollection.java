@@ -13,12 +13,16 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_N
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_ID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_UUID;
 
-import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
-import com.databasepreservation.common.client.tools.ViewerCelllUtils;
-import java.util.*;
-
-import com.databasepreservation.common.client.models.structure.ViewerMimeType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
@@ -30,7 +34,10 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
+import com.databasepreservation.common.client.models.structure.ViewerMimeType;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.AbstractSolrCollection;
@@ -193,7 +200,8 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   private Optional<ViewerCell> cellFromEntry(String columnName, Object value, SolrDocument doc) {
     Optional<ViewerCell> viewerCell = Optional.empty();
 
-    if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
+    if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)
+      || columnName.startsWith(ViewerConstants.SOLR_ROWS_NESTED_COL)) {
       if (value instanceof Date) {
         // DateTime date = new DateTime(value, JodaUtils.DEFAULT_CHRONOLOGY);
         final String dateTimeString = ((Date) value).toInstant().toString();
