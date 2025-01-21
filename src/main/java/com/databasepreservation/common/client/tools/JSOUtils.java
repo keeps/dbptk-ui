@@ -10,9 +10,6 @@ package com.databasepreservation.common.client.tools;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.databasepreservation.common.client.models.JSO.ExtensionFilter;
 import com.databasepreservation.common.client.models.JSO.FilterJSO;
 import com.databasepreservation.common.client.models.JSO.OpenFileDialogOptions;

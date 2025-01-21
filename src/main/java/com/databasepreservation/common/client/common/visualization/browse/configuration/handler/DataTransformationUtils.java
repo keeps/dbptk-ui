@@ -175,7 +175,9 @@ public class DataTransformationUtils {
         String key = ViewerConstants.SOLR_ROWS_NESTED + "." + nestedCount;
         keys = keys + separator + key;
         separator = ",";
+        addDefaultNestedFieldsToReturn(fieldsToReturn);
         fieldsToReturn.add(key + ":[subquery]");
+        addNestedDefaultFieldList(extraParameters, key);
         extraParameters.put(key + ".q", "+nestedUUID:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
         Integer quantity = column.getNestedColumns().getQuantityInList();
         if(quantity <= column.getNestedColumns().getMaxQuantityInList()){
@@ -188,4 +190,16 @@ public class DataTransformationUtils {
     }
     fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED + ":" + "\"" + keys + "\"");
   }
+
+  public static void addNestedDefaultFieldList(Map<String, String> extraParameters, String key) {
+    extraParameters.put(key + ".fl", ViewerConstants.SOLR_ROWS_NESTED + "*," + ViewerConstants.INDEX_ID + ","
+      + ViewerConstants.SOLR_ROWS_NESTED_COL + "*," + "originalRowUUID_t");
+  }
+
+  public static void addDefaultNestedFieldsToReturn(List<String> fieldsToReturn) {
+    fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED + "*");
+    fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED_COL + "*");
+    fieldsToReturn.add("originalRowUUID_t");
+  }
+
 }
