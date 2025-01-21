@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import com.databasepreservation.model.data.ArrayCell;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -79,6 +79,7 @@ import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.utils.LobManagerUtils;
 import com.databasepreservation.common.utils.ViewerUtils;
+import com.databasepreservation.model.data.ArrayCell;
 import com.databasepreservation.model.data.BinaryCell;
 import com.databasepreservation.model.data.Cell;
 import com.databasepreservation.model.data.ComposedCell;
@@ -382,7 +383,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setName(view.getName());
     result.setUuid(SolrUtils.randomUUID());
     try {
-      result.setColumns(getColumns(view.getColumns()));
+      result.setColumns(getColumns(view.getColumns(), null, new ArrayList<>()));
     } catch (ViewerException e) {
       LOGGER.error("Could not convert the columns for view {}", view, e);
       result.setColumns(new ArrayList<>());
@@ -466,7 +467,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setCountRows(table.getRows());
     result.setSchemaName(table.getSchema());
     result.setSchemaUUID(vdb.getSchema(result.getSchemaName()).getUuid());
-    result.setColumns(getColumns(table.getColumns()));
+    result.setColumns(getColumns(table.getColumns(), table.getPrimaryKey(), table.getForeignKeys()));
     if (!simpleMetadata) {
       result.setTriggers(getTriggers(table.getTriggers()));
       result.setPrimaryKey(getPrimaryKey(table, references));
@@ -611,23 +612,30 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static List<ViewerColumn> getColumns(List<ColumnStructure> columns) throws ViewerException {
+  private static List<ViewerColumn> getColumns(List<ColumnStructure> columns, PrimaryKey primaryKey,
+    List<ForeignKey> foreignKeys) throws ViewerException {
     List<ViewerColumn> result = new ArrayList<>();
     int index = 0;
     for (ColumnStructure column : columns) {
-      result.add(getColumn(column, index++));
+      result.add(getColumn(column, index++, primaryKey, foreignKeys));
     }
     return result;
   }
 
-  private static ViewerColumn getColumn(ColumnStructure column, int index) throws ViewerException {
+  private static ViewerColumn getColumn(ColumnStructure column, int index, PrimaryKey primaryKey,
+    List<ForeignKey> foreignKeys) throws ViewerException {
     ViewerColumn result = new ViewerColumn();
     Type columnType = column.getType();
+
+    boolean isPrimaryKey = primaryKey != null && primaryKey.getColumnNames().contains(column.getName());
+    boolean isForeignKey = !foreignKeys.isEmpty() && foreignKeys.stream().map(
+      m -> m.getReferences().stream().map(Reference::getColumn).collect(Collectors.toSet()).contains(column.getName()))
+      .findFirst().orElse(false);
 
     ViewerType columnViewerType = getType(columnType);
     result.setType(columnViewerType);
     if (!simpleMetadata) {
-      result.setSolrName(getColumnSolrName(index, columnType, columnViewerType));
+      result.setSolrName(getColumnSolrName(index, columnType, columnViewerType, isPrimaryKey, isForeignKey));
       result.setColumnIndexInEnclosingTable(index);
     }
     result.setDisplayName(column.getName());
@@ -649,7 +657,8 @@ public class ToolkitStructure2ViewerStructure {
    * @return the column name
    * @throws ViewerException
    */
-  private static String getColumnSolrName(int index, Type type, ViewerType viewerType) throws ViewerException {
+  private static String getColumnSolrName(int index, Type type, ViewerType viewerType, boolean isPrimaryKey,
+    boolean isForeignKey) throws ViewerException {
     // suffix must always be set before being used
     String suffix;
     String prefix = ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX;
@@ -694,7 +703,7 @@ public class ToolkitStructure2ViewerStructure {
       throw new ViewerException("Unknown type: " + type.toString());
     }
 
-    return prefix + index + suffix;
+    return prefix + index + (isPrimaryKey || isForeignKey ? ViewerConstants.SOLR_DYN_STRING : suffix);
   }
 
   private static ViewerType getType(Type type) throws ViewerException {
