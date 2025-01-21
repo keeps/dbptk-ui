@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.databasepreservation.model.data.ArrayCell;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -67,7 +68,6 @@ import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerTrigger;
 import com.databasepreservation.common.client.models.structure.ViewerType;
-import com.databasepreservation.common.client.models.structure.ViewerTypeArray;
 import com.databasepreservation.common.client.models.structure.ViewerTypeStructure;
 import com.databasepreservation.common.client.models.structure.ViewerUserStructure;
 import com.databasepreservation.common.client.models.structure.ViewerView;
@@ -687,7 +687,7 @@ public class ToolkitStructure2ViewerStructure {
     } else if (type instanceof SimpleTypeString) {
       suffix = ViewerConstants.SOLR_DYN_TEXT_GENERAL;
     } else if (type instanceof ComposedTypeArray) {
-      throw new ViewerException("Arrays are not yet supported.");
+      suffix = ViewerConstants.SOLR_DYN_STRING_MULTI;
     } else if (type instanceof ComposedTypeStructure) {
       throw new ViewerException("Composed types are not yet supported.");
     } else {
@@ -735,10 +735,11 @@ public class ToolkitStructure2ViewerStructure {
           result.setDbType(ViewerType.dbTypes.STRING);
         }
       } else if (type instanceof ComposedTypeArray) {
-        result = new ViewerTypeArray();
+        // result = new ViewerTypeArray();
         result.setDbType(ViewerType.dbTypes.COMPOSED_ARRAY);
         // set type of elements in the array
-        ((ViewerTypeArray) result).setElementType(getType(((ComposedTypeArray) type).getElementType()));
+        // ((ViewerTypeArray) result).setElementType(getType(((ComposedTypeArray)
+        // type).getElementType()));
       } else if (type instanceof ComposedTypeStructure) {
         result = new ViewerTypeStructure();
         result.setDbType(ViewerType.dbTypes.COMPOSED_STRUCTURE);
@@ -897,6 +898,13 @@ public class ToolkitStructure2ViewerStructure {
         default:
           result.setValue(removeUnicode(simpleCell.getSimpleData()));
       }
+    } else if (cell instanceof ArrayCell) {
+      ArrayCell arrayCell = (ArrayCell) cell;
+      List<String> valuesList = new ArrayList<>();
+      arrayCell.forEach(arrayElement -> {
+        valuesList.add(((SimpleCell) arrayElement.getValue()).getSimpleData());
+      });
+      result.setListValue(valuesList);
     } else if (!(cell instanceof NullCell)) {
       // nothing to do for null cells
       throw new ViewerException("Unexpected cell type");

@@ -9,6 +9,7 @@ package com.databasepreservation.common.client.models.structure;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -17,6 +18,7 @@ public class ViewerCell implements Serializable {
   @Serial
   private static final long serialVersionUID = -5345114836590659380L;
   private String value;
+  private List<String> listValue;
   private String mimeType;
   private String fileExtension;
   private ViewerLobStoreType storeType;
@@ -51,6 +53,19 @@ public class ViewerCell implements Serializable {
 
   public void setValue(String value) {
     this.value = value;
+  }
+
+  /**
+   * Gets the value of this cell as list of strings
+   *
+   * @return the value or null if the database cell value was NULL
+   */
+  public List<String> getListValue() {
+    return listValue;
+  }
+
+  public void setListValue(List<String> listValue) {
+    this.listValue = listValue;
   }
 
   public String getMimeType() {

@@ -102,8 +102,12 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     doc.setField(SOLR_ROWS_TABLE_UUID, row.getTableUUID());
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
       String solrColumnName = cellEntry.getKey();
-      String cellValue = cellEntry.getValue().getValue();
-      doc.addField(solrColumnName, cellValue);
+      if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_STRING_MULTI)) {
+        doc.addField(solrColumnName, cellEntry.getValue().getListValue());
+      } else {
+        String cellValue = cellEntry.getValue().getValue();
+        doc.addField(solrColumnName, cellValue);
+      }
     }
 
     for (Map.Entry<String, ViewerMimeType> cellEntry : row.getColsMimeTypeList().entrySet()) {
