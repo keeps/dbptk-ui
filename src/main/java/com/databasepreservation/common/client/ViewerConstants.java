@@ -231,7 +231,7 @@ public class ViewerConstants {
   public static final String SOLR_ROWS_NESTED_ORIGINAL_UUID = "nestedOriginalUUID";
   public static final String SOLR_ROWS_NESTED_TABLE_ID = "nestedTableId";
   public static final String SOLR_ROWS_NESTED = "nested";
-
+  public static final String SOLR_ROWS_NESTED_COL = "nst_";
   /*
    * DYNAMIC FIELD TYPES (suffixes)
    */
@@ -246,8 +246,8 @@ public class ViewerConstants {
   public static final String SOLR_DYN_LONG = "_l";
   public static final String SOLR_DYN_STRING = "_s";
   public static final String SOLR_DYN_STRING_MULTI = "_ss";
-  public static final String SOLR_DYN_TEXT_GENERAL = "_t";
-  public static final String SOLR_DYN_TEXT_MULTI = "_txt";
+  public static final String SOLR_DYN_TEXT_GENERAL = "_t_sort";
+  public static final String SOLR_DYN_TEXT_MULTI = "_txt_sort";
   public static final String SOLR_DYN_NEST_MULTI = "_nst";
   public static final String SOLR_DYN_MIMETYPE = "_mimetype";
   public static final String SOLR_DYN_FILE_EXTENSION = "_fileExtension";

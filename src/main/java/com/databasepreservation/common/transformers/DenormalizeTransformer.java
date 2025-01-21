@@ -265,7 +265,7 @@ public class DenormalizeTransformer {
     ViewerTable viewerTable = database.getMetadata().getTable(relatedTableUUID);
     for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
       for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
-        String key = cell.getKey();
+        String key = ViewerConstants.SOLR_ROWS_NESTED_COL + cell.getKey();
         String urlPath = null;
         if (cell.getKey().equals(viewerColumn.getSolrName())
           && viewerColumn.getType().getTypeName().equals("BINARY LARGE OBJECT")) {

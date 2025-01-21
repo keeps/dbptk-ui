@@ -277,6 +277,10 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     }
   }
 
+  public void clearSearchInputBox() {
+    this.searchInputBox.setText("");
+  }
+
   public void setSearchAdvancedGoEnabled(boolean enabled) {
     searchAdvancedGo.setEnabled(enabled);
   }
