@@ -772,12 +772,13 @@
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
-            <version>1.26</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parsers</artifactId>
-            <version>1.4</version>
+            <version>3.0.0</version>
+            <type>pom</type>
         </dependency>
         <!-- / Mime Type detection -->
 
