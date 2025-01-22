@@ -740,7 +740,7 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>jquery-ui</artifactId>
-            <version>1.12.1</version>
+            <version>1.14.1</version>
         </dependency>
         <!-- / File upload -->
 
