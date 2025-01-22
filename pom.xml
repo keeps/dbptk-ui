@@ -113,7 +113,7 @@
                 <configuration>
                     <excludes>
                         <exclude>
-                            <groupId>com.google.gwt</groupId>
+                            <groupId>org.gwtproject</groupId>
                             <artifactId>gwt-dev</artifactId>
                         </exclude>
                     </excludes>
