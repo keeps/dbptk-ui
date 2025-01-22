@@ -10,7 +10,7 @@ package com.databasepreservation.common.api.v1.utils;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 
-import javax.activation.MimetypesFileTypeMap;
+import jakarta.activation.MimetypesFileTypeMap;
 
 public class MimeTypeHelper {
 
