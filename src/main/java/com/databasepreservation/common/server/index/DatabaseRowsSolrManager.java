@@ -635,10 +635,9 @@ public class DatabaseRowsSolrManager {
   public SolrInputDocument createNestedDocument(String uuid, String originalRowUUID, String tableRowUUID,
     Map<String, ?> fields, String tableId, String nestedUUID) {
     SolrInputDocument nestedDoc = new SolrInputDocument();
-    nestedDoc.addField(ViewerConstants.INDEX_ID, uuid);
+    nestedDoc.addField(ViewerConstants.INDEX_ID, SolrUtils.randomUUID());
     nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_UUID, nestedUUID);
     nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID, tableId);
-    nestedDoc.addField("originalRowUUID_t", originalRowUUID);
     nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, tableRowUUID);
     for (Map.Entry<String, ?> entry : fields.entrySet()) {
       if (entry.getKey().equals(ViewerConstants.SOLR_ROWS_NESTED)) {
