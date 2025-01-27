@@ -39,12 +39,14 @@ import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -234,6 +236,17 @@ public class PermissionsNavigationPanel {
       public Boolean getValue(AuthorizationGroup group) {
         return databasePermissionGroups.contains(group.getAttributeValue());
       }
+
+      @Override
+      public String getCellStyleNames(Cell.Context context, AuthorizationGroup group) {
+        if (groupDetails.getOrDefault(group.getAttributeValue(), new AuthorizationDetails()).hasExpiryDate()) {
+          Date now = new Date();
+          if (now.after(groupDetails.get(group.getAttributeValue()).getExpiry())) {
+            return "expired";
+          }
+        }
+        return "";
+      }
     };
 
     checkbox.setFieldUpdater((index, group, value) -> {
@@ -242,6 +255,7 @@ public class PermissionsNavigationPanel {
         if (!databasePermissionGroups.contains(group.getAttributeValue())) {
           databasePermissionGroups.add(group.getAttributeValue());
         }
+        deferSetIndeterminateCheckboxes();
       } else {
         // Remove
         databasePermissionGroups.remove(group.getAttributeValue());
@@ -378,6 +392,7 @@ public class PermissionsNavigationPanel {
             }
             groupDetails.put(currentGroup.getAttributeValue(), authorizationDetails);
             cellTable.refresh();
+            deferSetIndeterminateCheckboxes();
           }
         }
       });
@@ -421,6 +436,7 @@ public class PermissionsNavigationPanel {
       new BasicTablePanel.ColumnInfo<AuthorizationGroup>(
         messages.SIARDHomePageLabelForPermissionsTableGroupExpiryDate(), 12, expiry,
         "force_column_ellipsis expiry_column"));
+    deferSetIndeterminateCheckboxes();
   }
 
   private void doSearch(String searchValue, FlowPanel permissionListPanel) {
@@ -476,5 +492,13 @@ public class PermissionsNavigationPanel {
       permissions.put(permission, groupDetails.getOrDefault(permission, new AuthorizationDetails()));
     }
     return permissions;
+  }
+
+  private void deferSetIndeterminateCheckboxes() {
+    Scheduler.get().scheduleDeferred(new Command() {
+      public void execute() {
+        JavascriptUtils.setIndeterminate(".expired input");
+      }
+    });
   }
 }
