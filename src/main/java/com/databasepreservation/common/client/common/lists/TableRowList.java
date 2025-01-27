@@ -232,7 +232,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         if (row.getNestedRowList() != null) {
           for (ViewerRow nestedRow : row.getNestedRowList()) {
             if (nestedRow != null && nestedRow.getCells() != null && !nestedRow.getCells().isEmpty()
-              && nestedRow.getUuid().equals(configColumn.getId())) {
+              && nestedRow.getNestedUUID().equals(configColumn.getId())) {
               Map<String, ViewerCell> cells = nestedRow.getCells();
 
               // removes the nested prefix of the nested collumn
