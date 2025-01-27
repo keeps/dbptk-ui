@@ -678,7 +678,7 @@ public class SolrUtils {
         + param.getNestedOriginalUUID());
     } else if (parameter instanceof BlockJoinParentFilterParameter) {
       BlockJoinParentFilterParameter param = (BlockJoinParentFilterParameter) parameter;
-      ret.append("+({!parent which='tableId:" + param.getParentTableId() + "' filters='uuid:" + param.getNestedUUID()
+      ret.append("+({!parent which='tableId:" + param.getParentTableId() + "' filters='nestedUUID:" + param.getNestedUUID()
         + "' }" + param.getSolrName() + ":" + param.getValue() + ")");
     } else {
       LOGGER.error("Unsupported filter parameter class: {}", parameter.getClass().getName());

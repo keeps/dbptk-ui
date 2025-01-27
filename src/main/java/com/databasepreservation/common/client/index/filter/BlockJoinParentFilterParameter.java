@@ -68,6 +68,8 @@ public class BlockJoinParentFilterParameter extends FilterParameter {
   }
 
   @Override
-  public String toString() { return "{!parent which='tableId:" + parentTableId +"' filters='uuid:"+ nestedUUID +"' }" + solrName + ":" + value;
+  public String toString() {
+    return "{!parent which='tableId:" + parentTableId + "' filters='nestedUUID:" + nestedUUID + "' }" + solrName + ":"
+      + value;
   }
 }
