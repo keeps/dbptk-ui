@@ -9,6 +9,7 @@ package com.databasepreservation.common.client.common.search.panel;
 
 import java.util.List;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SearchField;
 import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
@@ -39,7 +40,7 @@ public class NestedSearchFieldPanel extends SearchFieldPanel {
     List<String> searchFields = getSearchField().getSearchFields();
 
     if (searchFields != null && searchFields.size() >= 1) {
-      String field = searchFields.get(0);
+      String field = ViewerConstants.SOLR_ROWS_NESTED_COL + searchFields.get(0);
       if (!inputText.getValue().isEmpty()) {
         filterParameter = new BlockJoinParentFilterParameter(field, inputText.getValue(), searchFields.get(1),
           searchFields.get(2));
