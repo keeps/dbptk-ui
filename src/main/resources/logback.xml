@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<include resource="org/springframework/boot/logging/logback/base.xml" />
+	<statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+	<include resource="org/springframework/boot/logging/logback/base.xml"/>
 	<property name="appender" value="${dbvtk.loggerMethod}" />
 
 	<appender name="FILEOUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -17,72 +18,50 @@
 		</rollingPolicy>
 	</appender>
 
-	<logger name="org.roda" additivity="false">
-		<level value="INFO"/>
-		<if condition='property("appender").equalsIgnoreCase("FILEOUT")'>
-			<then>
-				<appender-ref ref="${dbvtk.loggerMethod}"/>
-			</then>
-		</if>
+	<logger name="org.roda" additivity="false" level="INFO">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
 
-	<logger name="org.apache.solr" additivity="false">
-		<level value="WARN"/>
-		<if condition='property("appender").equalsIgnoreCase("FILEOUT")'>
-			<then>
-				<appender-ref ref="${dbvtk.loggerMethod}"/>
-			</then>
-		</if>
+	<logger name="org.apache.solr" additivity="false" level="WARN">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
 
-	<logger name="org.eclipse.jetty" additivity="false">
-		<level value="WARN"/>
-		<if condition='property("appender").equalsIgnoreCase("FILEOUT")'>
-			<then>
-				<appender-ref ref="${dbvtk.loggerMethod}"/>
-			</then>
-		</if>
+	<logger name="org.eclipse.jetty" additivity="false" level="WARN">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
 
-	<logger name="org.apache.http" additivity="false">
-		<level value="INFO"/>
-		<if condition='property("appender").equalsIgnoreCase("FILEOUT")'>
-			<then>
-				<appender-ref ref="${dbvtk.loggerMethod}"/>
-			</then>
-		</if>
+	<logger name="org.apache.http" additivity="false" level="INFO">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
 
-	<logger name="org.roda" additivity="false">
-		<level value="INFO" />
-		<if condition='property("appender").equalsIgnoreCase("FILEOUT")'>
-			<then>
-				<appender-ref ref="${dbvtk.loggerMethod}"/>
-			</then>
-		</if>
+	<logger name="com.databasepreservation" additivity="false" level="INFO">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
 
-	<logger name="com.databasepreservation" additivity="false">
-		<level value="INFO" />
-		<if condition='property("appender").equalsIgnoreCase("FILEOUT")'>
-			<then>
-				<appender-ref ref="${dbvtk.loggerMethod}"/>
-			</then>
-		</if>
-		<appender-ref ref="CONSOLE"/>
-	</logger>
-
-	<root level="warn">
-		<if condition='property("appender").equalsIgnoreCase("FILEOUT")'>
-			<then>
-				<appender-ref ref="${dbvtk.loggerMethod}"/>
-			</then>
-		</if>
+	<root level="WARN">
 		<appender-ref ref="CONSOLE"/>
 	</root>
+
+	<if condition='property("appender").equalsIgnoreCase("FILEOUT")'>
+		<then>
+			<logger name="org.roda" additivity="false">
+				<appender-ref ref="${dbvtk.loggerMethod}"/>
+			</logger>
+			<logger name="org.apache.solr" additivity="false">
+				<appender-ref ref="${dbvtk.loggerMethod}"/>
+			</logger>
+			<logger name="org.eclipse.jetty" additivity="false">
+				<appender-ref ref="${dbvtk.loggerMethod}"/>
+			</logger>
+			<logger name="org.apache.http" additivity="false">
+				<appender-ref ref="${dbvtk.loggerMethod}"/>
+			</logger>
+			<logger name="com.databasepreservation" additivity="false">
+				<appender-ref ref="${dbvtk.loggerMethod}"/>
+			</logger>
+			<root>
+				<appender-ref ref="${dbvtk.loggerMethod}"/>
+			</root>
+		</then>
+	</if>
 </configuration>
