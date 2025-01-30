@@ -63,4 +63,9 @@ public interface JobService extends DirectRestService {
   IndexResult<ViewerJob> find(
     @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody FindRequest findRequest,
     @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+
+  @RequestMapping(path = "/reindex", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Reindex all jobs")
+  IndexResult<ViewerJob> reindex(
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 }

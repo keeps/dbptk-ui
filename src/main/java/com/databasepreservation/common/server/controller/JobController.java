@@ -18,6 +18,7 @@ import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -26,6 +27,9 @@ import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.NoSuchJobException;
+import org.springframework.batch.core.repository.JobRepository;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -111,5 +115,25 @@ public class JobController {
     ViewerJob viewerJob = createViewerJob(jobExecution);
     viewerJob.setExitDescription(message);
     solrManager.editBatchJob(viewerJob);
+  }
+
+  public static void deleteSolrBatchJobs() throws GenericException {
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    solrManager.deleteBatchJob();
+  }
+
+  public static void reindex(JobRepository jobRepository, JobExplorer jobExplorer)
+    throws NotFoundException, GenericException, NoSuchJobException {
+    deleteSolrBatchJobs();
+    for (String jobName : jobRepository.getJobNames()) {
+
+      for (JobInstance jobInstance : jobRepository.findJobInstancesByName(jobName, 0,
+        (int) jobExplorer.getJobInstanceCount(jobName))) {
+        for (JobExecution jobExecution : jobRepository.findJobExecutions(jobInstance)) {
+          //ViewerJob viewerJob = createViewerJob(jobExecution);
+          JobController.editSolrBatchJob(jobExecution);
+        }
+      }
+    }
   }
 }
