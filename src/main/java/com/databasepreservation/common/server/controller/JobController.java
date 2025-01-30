@@ -13,11 +13,13 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+import com.databasepreservation.common.server.ViewerConfiguration;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -26,6 +28,9 @@ import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.NoSuchJobException;
+import org.springframework.batch.core.repository.JobRepository;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -53,6 +58,29 @@ public class JobController {
 
     return viewerJob;
   }
+
+  private static ViewerJob createCompleteViewerJob(JobExecution jobExecution) throws GenericException {
+    ViewerJob viewerJob = createViewerJob(jobExecution);
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    try {
+      ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, viewerJob.getDatabaseUuid());
+      viewerJob.setDatabaseName(database.getMetadata().getName());
+      viewerJob.setTableName(database.getMetadata().getTable(viewerJob.getTableUuid()).getName());
+      viewerJob.setSchemaName(database.getMetadata().getTable(viewerJob.getTableUuid()).getSchemaName());
+      if (viewerJob.getStatus().equals(ViewerJobStatus.COMPLETED)) {
+        long rowsNumber = database.getMetadata().getTable(viewerJob.getTableUuid()).getCountRows();
+        viewerJob.setRowsToProcess(rowsNumber);
+        viewerJob.setProcessRows(rowsNumber);
+      }
+    } catch (NotFoundException e) {
+      viewerJob.setDatabaseName(viewerJob.getDatabaseUuid());
+      viewerJob.setTableName(viewerJob.getTableUuid());
+      viewerJob.setSchemaName(ViewerConstants.UNKNOWN);
+    }
+
+    return viewerJob;
+  }
+
 
   private static Date convertToDate(LocalDateTime localDateTime) {
     if (localDateTime == null) {
@@ -105,11 +133,41 @@ public class JobController {
     solrManager.editBatchJob(viewerJob);
   }
 
+  public static void createSolrBatchJob(JobExecution jobExecution) throws NotFoundException, GenericException {
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    ViewerJob viewerJob = createCompleteViewerJob(jobExecution);
+    solrManager.editBatchJob(viewerJob);
+  }
+
   public static void setMessageToSolrBatchJob(JobExecution jobExecution, String message)
     throws NotFoundException, GenericException {
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     ViewerJob viewerJob = createViewerJob(jobExecution);
     viewerJob.setExitDescription(message);
     solrManager.editBatchJob(viewerJob);
+  }
+
+  public static void deleteSolrBatchJobs() throws GenericException {
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    solrManager.deleteBatchJob();
+  }
+
+  public static void reindex(JobRepository jobRepository, JobExplorer jobExplorer)
+    throws NotFoundException, GenericException, NoSuchJobException {
+    deleteSolrBatchJobs();
+    int startIndex = 0;
+    int batchSize =  ViewerConfiguration.getInstance().getViewerConfigurationAsInt(100,
+      ViewerConstants.REINDEX_BATCH_SIZE);
+
+    for (String jobName : jobRepository.getJobNames()) {
+      while (startIndex < (int) jobExplorer.getJobInstanceCount(jobName)) {
+        for (JobInstance jobInstance : jobRepository.findJobInstancesByName(jobName, startIndex, batchSize)) {
+          for (JobExecution jobExecution : jobRepository.findJobExecutions(jobInstance)) {
+            JobController.createSolrBatchJob(jobExecution);
+          }
+        }
+        startIndex += batchSize;
+      }
+    }
   }
 }

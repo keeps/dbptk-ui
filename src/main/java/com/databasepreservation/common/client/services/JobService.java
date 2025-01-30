@@ -9,6 +9,7 @@ package com.databasepreservation.common.client.services;
 
 import java.util.function.Consumer;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -63,4 +64,8 @@ public interface JobService extends DirectRestService {
   IndexResult<ViewerJob> find(
     @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody FindRequest findRequest,
     @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+
+  @RequestMapping(path = "/reindex", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Reindex all jobs")
+  StringResponse reindex();
 }

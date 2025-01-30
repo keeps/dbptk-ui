@@ -326,6 +326,14 @@ public class DatabaseRowsSolrManager {
     }
   }
 
+  public void deleteBatchJob() throws GenericException {
+    try {
+      SolrUtils.delete(client, SolrDefaultCollectionRegistry.get(ViewerJob.class), new Filter());
+    } catch (RequestNotValidException e) {
+      LOGGER.debug("Solr error while deleting document", e);
+    }
+  }
+
   public void addSavedSearch(SavedSearch savedSearch) throws NotFoundException, GenericException {
     SolrCollection<SavedSearch> savedSearchesCollection = SolrDefaultCollectionRegistry.get(SavedSearch.class);
 
