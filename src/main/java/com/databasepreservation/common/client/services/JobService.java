@@ -9,12 +9,11 @@ package com.databasepreservation.common.client.services;
 
 import java.util.function.Consumer;
 
-import com.databasepreservation.common.api.utils.ApiResponseMessage;
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -68,6 +67,5 @@ public interface JobService extends DirectRestService {
 
   @RequestMapping(path = "/reindex", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Reindex all jobs")
-  ResponseEntity<ApiResponseMessage> reindex(
-    @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+  StringResponse reindex();
 }
