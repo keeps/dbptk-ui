@@ -111,7 +111,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getName() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getName())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -120,7 +120,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getDescription() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDescription())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -129,7 +129,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getDatabaseProduct() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDatabaseProduct())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -138,7 +138,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getDataOwner() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDataOwner())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -186,9 +186,9 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
         if (searchValue != null && !searchValue.isEmpty()) {
           return database != null
             ? String.valueOf(database.getSearchHits()) + " " + messages.manageDatabaseSearchAllResults()
-            : "unknown";
+            : ViewerConstants.UNKNOWN;
         } else {
-          return database != null ? "" : "unknown";
+          return database != null ? "" : ViewerConstants.UNKNOWN;
         }
       }
     };

@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.api.utils;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -50,7 +51,7 @@ public class ApiResponseMessage {
         setType("too busy");
         break;
       default:
-        setType("unknown");
+        setType(ViewerConstants.UNKNOWN);
         break;
     }
     this.message = message;

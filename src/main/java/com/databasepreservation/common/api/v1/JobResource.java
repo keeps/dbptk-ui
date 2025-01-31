@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.api.v1;
 
+import com.databasepreservation.common.api.utils.ApiResponseMessage;
 import com.databasepreservation.common.server.controller.JobController;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -16,6 +17,7 @@ import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -72,7 +74,7 @@ public class JobResource implements JobService {
   }
 
   @Override
-  public IndexResult<ViewerJob> reindex(String localeString) {
+  public ResponseEntity<ApiResponseMessage> reindex(String localeString) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -80,14 +82,13 @@ public class JobResource implements JobService {
     try {
       user = controllerAssistant.checkRoles(request);
       JobController.reindex(jobRepository, jobExplorer);
-      return new IndexResult<>();
+      return ResponseEntity.ok().body(new ApiResponseMessage(ApiResponseMessage.OK, "Jobs reindexed."));
     } catch (NotFoundException | GenericException | AuthorizationException | NoSuchJobException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILTER_PARAM,
-        "Reindex all jobs");
+      controllerAssistant.registerAction(user, state);
     }
   }
 }

@@ -624,4 +624,16 @@ public class ViewerConstants {
   public static final String IIIF_EXTERNAL_VIEWER_SERVICE_NAME = "ui.iiif_viewer.service_name";
   public static final String PRESENTATION_EXTERNAL_SERVICE_NAME = "ui.iiif_viewer.presentation.service_name";
   public static final String VIEWER_ENABLED = "ui.iiif_viewer.enabled";
+
+  /**
+   * Unkown status
+   */
+
+  public static final String UNKNOWN = "unknown";
+
+  /**
+   * Reindex batch size
+   */
+
+  public static final String REINDEX_BATCH_SIZE = "reindex.batch.size";
 }

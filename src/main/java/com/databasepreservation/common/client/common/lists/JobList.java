@@ -65,7 +65,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getJobId() != null
           ? SafeHtmlUtils.fromString(viewerJob.getJobId().toString())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -74,7 +74,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getDatabaseName() != null
           ? SafeHtmlUtils.fromString(viewerJob.getDatabaseName())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -83,7 +83,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getTableName() != null
           ? SafeHtmlUtils.fromString(viewerJob.getTableName())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -91,7 +91,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getName() != null ? SafeHtmlUtils.fromString(viewerJob.getName())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -100,7 +100,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getCreateTime() != null
           ? SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getCreateTime()))
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -109,7 +109,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getStartTime() != null
           ? SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getStartTime()))
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -119,7 +119,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
         if (viewerJob != null && viewerJob.getEndTime() != null) {
           return SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getEndTime()));
         } else {
-          return SafeHtmlUtils.fromString("unknown");
+          return SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
         }
       }
     };
@@ -134,7 +134,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
           return SafeHtmlUtils.fromString(
             currentGlobalPercent + "% (" + viewerJob.getProcessRows() + " of " + viewerJob.getRowsToProcess() + ")");
         } else {
-          return SafeHtmlUtils.fromString("0%");
+          return SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
         }
       }
     };
@@ -143,7 +143,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getStatus() != null ? LabelUtils.getJobStatus(viewerJob.getStatus())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
 
       @Override

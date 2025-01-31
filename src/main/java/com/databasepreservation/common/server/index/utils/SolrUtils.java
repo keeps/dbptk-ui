@@ -115,7 +115,7 @@ public class SolrUtils {
   }
 
   private static <T> String getHumanFriendlyName(Class<T> resultClass) throws GenericException {
-    String humanFriendlyName = "unknown";
+    String humanFriendlyName = ViewerConstants.UNKNOWN;
     if (resultClass.equals(ViewerDatabase.class)) {
       humanFriendlyName = "database";
     } else if (resultClass.equals(SavedSearch.class)) {

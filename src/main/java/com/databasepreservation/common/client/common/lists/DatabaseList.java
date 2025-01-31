@@ -79,7 +79,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getName() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getName())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -88,7 +88,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getDescription() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDescription())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -97,7 +97,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getDatabaseProduct() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDatabaseProduct())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -106,7 +106,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getDataOwner() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDataOwner())
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -139,14 +139,14 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null ? SafeHtmlUtils.fromString(Humanize.readableFileSize(database.getSize()))
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
     Column<ViewerDatabase, SafeHtml> versionColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(database.getVersion()) : SafeHtmlUtils.fromString("unknown");
+        return database != null ? SafeHtmlUtils.fromString(database.getVersion()) : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 

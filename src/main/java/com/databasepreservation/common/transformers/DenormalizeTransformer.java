@@ -93,7 +93,7 @@ public class DenormalizeTransformer {
       throw new ModuleException().withMessage("Configuration file not exist: " + configurationPath.toString());
     }
   }
-
+  //listConfiguration
   private void updateCollectionStatus() throws GenericException {
     ViewerFactory.getConfigurationManager().removeDenormalizationColumns(databaseUUID,
       denormalizeConfiguration.getTableUUID());

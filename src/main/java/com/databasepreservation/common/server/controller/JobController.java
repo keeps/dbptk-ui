@@ -13,6 +13,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+import com.databasepreservation.common.server.ViewerConfiguration;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -57,6 +58,29 @@ public class JobController {
 
     return viewerJob;
   }
+
+  private static ViewerJob createCompleteViewerJob(JobExecution jobExecution) throws GenericException {
+    ViewerJob viewerJob = createViewerJob(jobExecution);
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    try {
+      ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, viewerJob.getDatabaseUuid());
+      viewerJob.setDatabaseName(database.getMetadata().getName());
+      viewerJob.setTableName(database.getMetadata().getTable(viewerJob.getTableUuid()).getName());
+      viewerJob.setSchemaName(database.getMetadata().getTable(viewerJob.getTableUuid()).getSchemaName());
+      if (viewerJob.getStatus().equals(ViewerJobStatus.COMPLETED)) {
+        long rowsNumber = database.getMetadata().getTable(viewerJob.getTableUuid()).getCountRows();
+        viewerJob.setRowsToProcess(rowsNumber);
+        viewerJob.setProcessRows(rowsNumber);
+      }
+    } catch (NotFoundException e) {
+      viewerJob.setDatabaseName(viewerJob.getDatabaseUuid());
+      viewerJob.setTableName(viewerJob.getTableUuid());
+      viewerJob.setSchemaName(ViewerConstants.UNKNOWN);
+    }
+
+    return viewerJob;
+  }
+
 
   private static Date convertToDate(LocalDateTime localDateTime) {
     if (localDateTime == null) {
@@ -109,6 +133,12 @@ public class JobController {
     solrManager.editBatchJob(viewerJob);
   }
 
+  public static void createSolrBatchJob(JobExecution jobExecution) throws NotFoundException, GenericException {
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    ViewerJob viewerJob = createCompleteViewerJob(jobExecution);
+    solrManager.editBatchJob(viewerJob);
+  }
+
   public static void setMessageToSolrBatchJob(JobExecution jobExecution, String message)
     throws NotFoundException, GenericException {
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
@@ -125,14 +155,18 @@ public class JobController {
   public static void reindex(JobRepository jobRepository, JobExplorer jobExplorer)
     throws NotFoundException, GenericException, NoSuchJobException {
     deleteSolrBatchJobs();
-    for (String jobName : jobRepository.getJobNames()) {
+    int startIndex = 0;
+    int batchSize =  ViewerConfiguration.getInstance().getViewerConfigurationAsInt(100,
+      ViewerConstants.REINDEX_BATCH_SIZE);
 
-      for (JobInstance jobInstance : jobRepository.findJobInstancesByName(jobName, 0,
-        (int) jobExplorer.getJobInstanceCount(jobName))) {
-        for (JobExecution jobExecution : jobRepository.findJobExecutions(jobInstance)) {
-          //ViewerJob viewerJob = createViewerJob(jobExecution);
-          JobController.editSolrBatchJob(jobExecution);
+    for (String jobName : jobRepository.getJobNames()) {
+      while (startIndex < (int) jobExplorer.getJobInstanceCount(jobName)) {
+        for (JobInstance jobInstance : jobRepository.findJobInstancesByName(jobName, startIndex, batchSize)) {
+          for (JobExecution jobExecution : jobRepository.findJobExecutions(jobInstance)) {
+            JobController.createSolrBatchJob(jobExecution);
+          }
         }
+        startIndex += batchSize;
       }
     }
   }
