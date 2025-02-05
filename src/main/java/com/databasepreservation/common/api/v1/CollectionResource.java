@@ -250,9 +250,10 @@ public class CollectionResource implements CollectionService {
           savedSearchFilter);
 
         ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
+        ViewerFactory.getConfigurationManager().updateDatabaseStatus(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
         return true;
       }
-    } catch (GenericException | RequestNotValidException | AuthorizationException e) {
+    } catch (ViewerException | GenericException | RequestNotValidException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

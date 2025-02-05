@@ -32,7 +32,6 @@ import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.DatabaseService;
-import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.widgets.Alert;
@@ -56,6 +55,7 @@ import config.i18n.client.ClientMessages;
 public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private String searchValue;
+  private boolean getDataTrigger = false;
 
   public CrossDatabaseList() {
     this(new Filter(), null, null, false, false);
@@ -236,7 +236,11 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets());
 
-    DatabaseService.Util.call(callback).findAll(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+    if (getDataTrigger) {
+      DatabaseService.Util.call(callback).findAll(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+    } else {
+      getDataTrigger = true;
+    }
   }
 
   public String getSearchValue() {

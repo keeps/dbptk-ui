@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.server.ConfigurationManager;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -459,10 +460,11 @@ public class DatabaseRowsSolrManager {
     updateDatabaseFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, status.toString()));
   }
 
-  public void markDatabaseAsReady(final String databaseUUID) throws ViewerException {
+  public void markDatabaseAsReady(final String databaseUUID) throws ViewerException, GenericException {
     updateDatabaseFields(databaseUUID,
       Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.AVAILABLE.toString()),
       Pair.of(ViewerConstants.SOLR_DATABASES_BROWSE_LOAD_DATE, new DateTime().toString()));
+    ViewerFactory.getConfigurationManager().updateDatabaseStatus(databaseUUID, ViewerDatabaseStatus.AVAILABLE);
   }
 
   @SafeVarargs
@@ -594,8 +596,9 @@ public class DatabaseRowsSolrManager {
       doc.addField(ViewerConstants.SOLR_DATABASES_METADATA,
         SolrUtils.asValueUpdate(JsonTransformer.getJsonFromObject(metadata)));
       insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
+      ViewerFactory.getConfigurationManager().updateDatabaseMetadata(databaseUUID, metadata);
       LOGGER.debug("Finish updating database metadata ({})", databaseUUID);
-    } catch (ViewerException e) {
+    } catch (GenericException | ViewerException e) {
       LOGGER.error("Could not update database metadata ({})", databaseUUID, e);
     }
 

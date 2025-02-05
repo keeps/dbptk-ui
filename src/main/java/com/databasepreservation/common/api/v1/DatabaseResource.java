@@ -7,7 +7,9 @@
  */
 package com.databasepreservation.common.api.v1;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -19,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.databasepreservation.common.server.index.utils.JsonTransformer;
+import com.databasepreservation.common.server.storage.fs.FSUtils;
+import com.databasepreservation.model.exception.ModuleException;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -190,6 +195,7 @@ public class DatabaseResource implements DatabaseService {
   private IndexResult<ViewerDatabase> getCrossViewerDatabaseIndexResult(FindRequest findRequest,
     ControllerAssistant controllerAssistant, User user, LogEntryState state) {
     long count = 0;
+    String collectionAlias = "";
     try {
       IterableDatabaseResult<ViewerDatabase> databases;
       ArrayList<Filter> filterQueries = new ArrayList<>();
@@ -232,7 +238,7 @@ public class DatabaseResource implements DatabaseService {
         return new IndexResult<>();
       }
 
-      String collectionAlias = SolrUtils.createSearchAllAlias(ViewerFactory.getSolrClient(),
+      collectionAlias = SolrUtils.createSearchAllAlias(ViewerFactory.getSolrClient(),
         ViewerConstants.ALIAS_PREFIX + UUID.randomUUID(), collections);
 
       SimpleFacetParameter simpleFacetParameter = new SimpleFacetParameter(ViewerConstants.SOLR_ROWS_DATABASE_UUID,
@@ -243,8 +249,6 @@ public class DatabaseResource implements DatabaseService {
 
       final IndexResult<ViewerDatabase> facetsSearch = ViewerFactory.getSolrManager().findHits(ViewerDatabase.class,
         collectionAlias, findRequest.filter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter));
-
-      SolrUtils.deleteSearchAllAlias(ViewerFactory.getSolrClient(), collectionAlias);
 
       count = facetsSearch.getTotalCount();
       FacetFieldResult facetResults = facetsSearch.getFacetResults().get(0);
@@ -280,10 +284,16 @@ public class DatabaseResource implements DatabaseService {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
-      // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILTER_PARAM,
-        JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
-        JsonUtils.getJsonFromObject(findRequest.sublist), ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
+      try {
+        SolrUtils.deleteSearchAllAlias(ViewerFactory.getSolrClient(), collectionAlias);
+      } catch (SolrServerException | IOException e) {
+        state = LogEntryState.FAILURE;
+        throw new RESTException(e);
+      } finally {
+        controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILTER_PARAM,
+          JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
+          JsonUtils.getJsonFromObject(findRequest.sublist), ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
+      }
     }
   }
 
@@ -373,7 +383,7 @@ public class DatabaseResource implements DatabaseService {
       user = controllerAssistant.checkRoles(request);
       UserUtility.checkDatabasePermission(user, databaseUUID);
       return SIARDController.deleteAll(databaseUUID);
-    } catch (RequestNotValidException | GenericException | NotFoundException | AuthorizationException e) {
+    } catch (ViewerException | RequestNotValidException | GenericException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -449,4 +459,23 @@ public class DatabaseResource implements DatabaseService {
 
   }
 
+  @Override
+  public StringResponse reindex() {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+    try {
+      user = controllerAssistant.checkRoles(request);
+      return SIARDController.reindex();
+    } catch (ModuleException | AuthorizationException | GenericException | NotFoundException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state);
+    }
+  }
+
 }
+

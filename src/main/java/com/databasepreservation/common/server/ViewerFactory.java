@@ -16,6 +16,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
 import org.apache.solr.client.solrj.SolrClient;
 import org.roda.core.data.exceptions.GenericException;
@@ -52,20 +53,21 @@ public class ViewerFactory {
       activityLogStrategyFactory = new ActivityLogStrategyFactory();
       try {
         checkIngestingDBs();
-      } catch (GenericException | RequestNotValidException e) {
+      } catch (GenericException | RequestNotValidException | ViewerException e) {
         LOGGER.error("Error checking for ingesting databases in initialization: " + e.getMessage());
       }
       instantiated = true;
     }
   }
 
-  public static void checkIngestingDBs() throws RequestNotValidException, GenericException {
+  public static void checkIngestingDBs() throws RequestNotValidException, GenericException, ViewerException {
     Filter ingestingFilter = new Filter(new BasicSearchFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.INGESTING.toString()));
 
     IterableDatabaseResult<ViewerDatabase> dataBases = solrManager.findAll(ViewerDatabase.class, ingestingFilter, Sorter.NONE, new ArrayList<>());
 
     for (ViewerDatabase db : dataBases) {
       solrManager.markDatabaseCollection(db.getUuid(), ViewerDatabaseStatus.ERROR);
+      ViewerFactory.getConfigurationManager().updateDatabaseStatus(db.getUuid(), ViewerDatabaseStatus.ERROR);
     }
   }
 

@@ -81,6 +81,7 @@ public class SearchWrapper extends Composite {
 
     // create
     if (isSearchAll) {
+      list.setVisible(false);
       searchPanel = new SearchPanelWithSearchAll(filter, allFilter, messages.searchPlaceholder(),
         hasMultipleSearchPanels, false);
     } else {
