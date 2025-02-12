@@ -10,6 +10,7 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.api.v1.utils.JobResponse;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
@@ -103,7 +104,7 @@ public class DataTransformationUtils {
       CollectionService.Util.call((Boolean result) -> {
         final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
         collectionObserver.setCollectionStatus(collectionStatus);
-        CollectionService.Util.call((Void response) -> {
+        CollectionService.Util.call((JobResponse response) -> {
           Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
             "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
         }, errorMessage -> {

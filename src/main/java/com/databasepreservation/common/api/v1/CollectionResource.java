@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.databasepreservation.common.api.v1.utils.JobResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -400,7 +401,7 @@ public class CollectionResource implements CollectionService {
   }
 
   @Override
-  public synchronized void run(String databaseUUID, String collectionUUID, String tableUUID) {
+  public synchronized JobResponse run(String databaseUUID, String collectionUUID, String tableUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -419,7 +420,8 @@ public class CollectionResource implements CollectionService {
 
       JobParametersBuilder jobBuilder = new JobParametersBuilder();
       jobBuilder.addDate(ViewerConstants.SOLR_SEARCHES_DATE_ADDED, new Date());
-      jobBuilder.addString(ViewerConstants.INDEX_ID, SolrUtils.randomUUID());
+      String jobId = SolrUtils.randomUUID();
+      jobBuilder.addString(ViewerConstants.INDEX_ID, jobId);
       jobBuilder.addString(ViewerConstants.CONTROLLER_COLLECTION_ID_PARAM, collectionUUID);
       jobBuilder.addString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
       jobBuilder.addString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
@@ -432,6 +434,7 @@ public class CollectionResource implements CollectionService {
       if (jobExecution.getStatus().equals(BatchStatus.FAILED)) {
         JobController.setMessageToSolrBatchJob(jobExecution, "Queue is full, please try later");
       }
+      return new JobResponse(jobId, jobExecution.getStatus().toString(), jobExecution.getCreateTime().toString());
     } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
       | JobParametersInvalidException | NotFoundException | GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;

@@ -10,6 +10,7 @@ package com.databasepreservation.common.client.services;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.databasepreservation.common.api.v1.utils.JobResponse;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -118,7 +119,7 @@ public interface CollectionService extends DirectRestService {
 
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}/run", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Runs a specific denormalization configuration for a certain table within a database")
-  void run(@PathVariable(name = "databaseUUID") String databaseUUID,
+  JobResponse run(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID);
 
   /*******************************************************************************

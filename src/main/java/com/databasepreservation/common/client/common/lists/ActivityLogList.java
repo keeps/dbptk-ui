@@ -82,7 +82,7 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
         return log != null
           ? SafeHtmlUtils
             .fromString(Humanize.formatDateTimeFromSolr(log.getDatetime(), "yyyy-MM-dd HH:mm:ss", showInUTC))
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -92,7 +92,7 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
         return log != null
           ? SafeHtmlUtils
             .fromString(translate(ViewerConstants.SOLR_ACTIVITY_LOG_ACTION_COMPONENT, log.getActionComponent()))
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -101,14 +101,14 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
       public SafeHtml getValue(ActivityLogEntry log) {
         return log != null
           ? SafeHtmlUtils.fromString(ViewerStringUtils.getPrettifiedActionMethod(log.getActionMethod()))
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
     userColumn = new TooltipColumn<ActivityLogEntry>() {
       @Override
       public SafeHtml getValue(ActivityLogEntry log) {
-        return log != null ? SafeHtmlUtils.fromString(log.getUsername()) : SafeHtmlUtils.fromString("unknown");
+        return log != null ? SafeHtmlUtils.fromString(log.getUsername()) : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -116,21 +116,21 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
       @Override
       public SafeHtml getValue(ActivityLogEntry log) {
         return log != null ? SafeHtmlUtils.fromString(Humanize.durationMillisToShortDHMS(log.getDuration()))
-          : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
     addressColumn = new TooltipColumn<ActivityLogEntry>() {
       @Override
       public SafeHtml getValue(ActivityLogEntry log) {
-        return log != null ? SafeHtmlUtils.fromString(log.getAddress()) : SafeHtmlUtils.fromString("unknown");
+        return log != null ? SafeHtmlUtils.fromString(log.getAddress()) : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
     outcomeColumn = new Column<ActivityLogEntry, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ActivityLogEntry log) {
-        return log != null ? LabelUtils.getLogEntryState(log.getState()) : SafeHtmlUtils.fromString("unknown");
+        return log != null ? LabelUtils.getLogEntryState(log.getState()) : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
