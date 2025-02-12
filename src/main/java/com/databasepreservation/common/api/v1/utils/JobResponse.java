@@ -3,7 +3,7 @@ package com.databasepreservation.common.api.v1.utils;
 import java.io.Serializable;
 
 /**
- * @author António Lindo <gbarros@keep.pt>
+ * @author António Lindo <alindo@keep.pt>
  */
 public class JobResponse implements Serializable {
 
