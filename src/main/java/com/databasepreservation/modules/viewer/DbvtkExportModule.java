@@ -205,7 +205,11 @@ public class DbvtkExportModule implements DatabaseFilterModule {
    */
   @Override
   public void finishDatabase() throws ModuleException {
-    solrManager.markDatabaseAsReady(databaseUUID);
+    try {
+      solrManager.markDatabaseAsReady(databaseUUID);
+    } catch (GenericException e) {
+      throw new ModuleException().withMessage("Error marking database as ready").withCause(e);
+    }
     collectionConfiguration.setConsolidateProperty(LargeObjectConsolidateProperty.NOT_CONSOLIDATED);
     ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, collectionConfiguration);
     LOGGER.info("Finished processing database {}", databaseUUID);

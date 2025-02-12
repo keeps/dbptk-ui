@@ -20,6 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
+import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.server.storage.fs.FSUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +31,7 @@ import org.joda.time.DateTime;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
+import org.roda.core.data.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -885,8 +890,14 @@ public class SIARDController {
     return solrManager.updateDatabaseSearchAllAvailability(databaseUUID, !database.isAvailableToSearchAll());
   }
 
+  public static StringResponse reindex() throws GenericException, ModuleException, NotFoundException {
+    final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+    reindexDatabasesOnPath(databasesDirectoryPath);
+    return new StringResponse("Databases reindexed.");
+  }
+
   public static boolean deleteAll(String databaseUUID)
-    throws NotFoundException, GenericException, RequestNotValidException {
+    throws NotFoundException, GenericException, RequestNotValidException, ViewerException {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
@@ -921,10 +932,54 @@ public class SIARDController {
           savedSearchFilter);
 
         ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
+        ViewerFactory.getConfigurationManager().updateDatabaseStatus(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
       }
     }
     ViewerFactory.getSolrManager().deleteDatabasesCollection(databaseUUID);
     return true;
+  }
+
+  public static void reindexDatabasesOnPath(Path databasesDirectoryPath) throws ModuleException, GenericException {
+    final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    File databasesDir = databasesDirectoryPath.toFile();
+    if (databasesDir.exists() && databasesDir.isDirectory()) {
+      File[] directories = databasesDir.listFiles(File::isDirectory);
+      if (directories != null) {
+        for (File directory : directories) {
+          String databaseId = directory.getName();
+          final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseId);
+          Path databaseFile = databaseDirectoryPath
+            .resolve(ViewerConstants.DATABASE_STATUS_PREFIX + databaseId + ViewerConstants.JSON_EXTENSION);
+          if (FSUtils.exists(databaseFile)) {
+            final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
+            if (databaseStatus != null) {
+              ViewerDatabase viewerDatabase = buildViewerDatabase(databaseStatus);
+              solrManager.addDatabaseMetadata(viewerDatabase);
+            }
+          }
+        }
+      } else {
+        throw new GenericException("Error listing directories in " + databasesDir);
+      }
+    } else {
+      throw new GenericException("The path is not a valid directory: " + databasesDir);
+    }
+  }
+
+  public static ViewerDatabase buildViewerDatabase(DatabaseStatus databaseStatus) {
+    ViewerDatabase viewerDatabase = new ViewerDatabase();
+    Path siardPath = Paths.get(databaseStatus.getSiardStatus().getLocation());
+    viewerDatabase.setUuid(databaseStatus.getId());
+    viewerDatabase.setPath(siardPath.toString());
+    viewerDatabase.setSize(databaseStatus.getSiardStatus().getSize());
+    viewerDatabase.setAvailableToSearchAll(databaseStatus.isAvailableToSearchAll());
+    viewerDatabase.setValidationStatus(databaseStatus.getValidationStatus().getValidationStatus());
+    viewerDatabase.setStatus(databaseStatus.getStatus());
+    viewerDatabase.setVersion(databaseStatus.getSiardVersion());
+    viewerDatabase.setVersion(databaseStatus.getSiardVersion());
+    viewerDatabase.setMetadata(databaseStatus.getMetadata());
+
+    return viewerDatabase;
   }
 
   public static void deleteSIARDFileFromPath(String siardPath, String databaseUUID) throws GenericException {

@@ -162,6 +162,9 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     Filter filter = buildSearchFilter(searchInputBox.getText(), defaultFilter, allFilter, fieldsPanel,
       defaultFilterIncremental);
     list.setFilter(filter);
+    if (!filter.getParameters().isEmpty() && !list.isVisible()) {
+      list.setVisible(true);
+    }
   }
 
   public void attachSearchPanelSelectionDropdown(Dropdown dropdown) {

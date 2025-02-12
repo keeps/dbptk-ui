@@ -97,10 +97,14 @@ public interface DatabaseService extends DirectRestService {
   @RequestMapping(path = "/{databaseUUID}/permissions", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Updates database permissions")
   Map<String, AuthorizationDetails> updateDatabasePermissions(@PathVariable(name = "databaseUUID") String databaseUUID,
-                                                              @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody Map<String, AuthorizationDetails> permissions);
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody Map<String, AuthorizationDetails> permissions);
 
   @RequestMapping(path = "/{databaseUUID}/searchable", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Updates database permissions")
   boolean updateDatabaseSearchAllAvailability(@PathVariable(name = "databaseUUID") String databaseUUID);
+
+  @RequestMapping(path = "/reindex", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Reindexes all databases")
+  StringResponse reindex();
 
 }

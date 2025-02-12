@@ -15,8 +15,17 @@ import java.io.Serializable;
 public class SiardStatus implements Serializable {
 
   private String location;
+  private long size;
 
   public SiardStatus() {}
+
+  public long getSize() {
+    return size;
+  }
+
+  public void setSize(long size) {
+    this.size = size;
+  }
 
   public String getLocation() {
     return location;

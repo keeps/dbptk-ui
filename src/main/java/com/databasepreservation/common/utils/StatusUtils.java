@@ -183,6 +183,10 @@ public class StatusUtils {
   public static DatabaseStatus getDatabaseStatus(ViewerDatabase database) {
     DatabaseStatus status = new DatabaseStatus();
     status.setId(database.getUuid());
+    status.setStatus(database.getStatus());
+    status.setLoadedAt(database.getLoadedAt());
+    status.setMetadata(database.getMetadata());
+    status.setSiardVersion(database.getVersion());
     status.setValidationStatus(getValidationStatus(database));
     status.setSiardStatus(getSiardStatus(database));
     if (database.getPermissions() != null && !database.getPermissions().isEmpty()){

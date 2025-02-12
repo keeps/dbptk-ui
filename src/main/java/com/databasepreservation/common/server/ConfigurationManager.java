@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
@@ -305,6 +306,31 @@ public class ConfigurationManager {
     }
   }
 
+  public void updateDatabaseStatus(String databaseId, ViewerDatabaseStatus status)
+    throws GenericException, ViewerException {
+    synchronized (databaseStatusFileLock) {
+      try {
+        final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+        final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseId);
+
+        Path databaseFile = databaseDirectoryPath
+          .resolve(ViewerConstants.DATABASE_STATUS_PREFIX + databaseId + ViewerConstants.JSON_EXTENSION);
+
+        // verify if file exists
+        if (FSUtils.exists(databaseFile)) {
+          final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
+          databaseStatus.setStatus(status);
+
+          // update database file
+          JsonTransformer.writeObjectToFile(databaseStatus, databaseFile);
+        }
+      } catch (GenericException | ViewerException e) {
+        LOGGER.debug(e.getMessage(), e);
+        throw e;
+      }
+    }
+  }
+
   public void updateDatabaseSearchAllAvailability(String databaseId, boolean isAvailableToSearchAll)
     throws GenericException, ViewerException {
     synchronized (databaseStatusFileLock) {
@@ -319,6 +345,31 @@ public class ConfigurationManager {
         if (FSUtils.exists(databaseFile)) {
           final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
           databaseStatus.setAvailableToSearchAll(isAvailableToSearchAll);
+
+          // update database file
+          JsonTransformer.writeObjectToFile(databaseStatus, databaseFile);
+        }
+      } catch (GenericException | ViewerException e) {
+        LOGGER.debug(e.getMessage(), e);
+        throw e;
+      }
+    }
+  }
+
+  public void updateDatabaseMetadata(String databaseId, ViewerMetadata viewerMetadata)
+    throws GenericException, ViewerException {
+    synchronized (databaseStatusFileLock) {
+      try {
+        final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+        final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseId);
+
+        Path databaseFile = databaseDirectoryPath
+          .resolve(ViewerConstants.DATABASE_STATUS_PREFIX + databaseId + ViewerConstants.JSON_EXTENSION);
+
+        // verify if file exists
+        if (FSUtils.exists(databaseFile)) {
+          final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
+          databaseStatus.setMetadata(viewerMetadata);
 
           // update database file
           JsonTransformer.writeObjectToFile(databaseStatus, databaseFile);
