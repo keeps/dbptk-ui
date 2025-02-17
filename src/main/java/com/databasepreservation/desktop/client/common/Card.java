@@ -25,6 +25,10 @@ public class Card extends Composite {
     return new Card(header, about, button);
   }
 
+  public static Card createInstance(String header, String about, Button button1, Button button2) {
+    return new Card(header, about, button1, button2);
+  }
+
   interface cardsUiBinder extends UiBinder<Widget, Card> {
   }
 
@@ -46,5 +50,20 @@ public class Card extends Composite {
     header.add(headingElement);
     text.add(aboutElement);
     buttonHolder.add(button);
+  }
+
+  private Card(String headerTxt, String aboutTxt, Button button1, Button button2) {
+    initWidget(binder.createAndBindUi(this));
+
+    HTML headingElement = new HTML();
+    headingElement.setHTML("<h3>" + headerTxt + "</h3>");
+
+    HTML aboutElement = new HTML();
+    aboutElement.setHTML("<p>" + aboutTxt + "</p>");
+
+    header.add(headingElement);
+    text.add(aboutElement);
+    buttonHolder.add(button1);
+    buttonHolder.add(button2);
   }
 }

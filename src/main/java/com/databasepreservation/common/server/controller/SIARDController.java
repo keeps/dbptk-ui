@@ -614,6 +614,11 @@ public class SIARDController {
     try {
       Reporter reporter = new NoOpReporter();
       SIARDEdition siardEdition = SIARDEdition.newInstance();
+
+      if (siardVersion == null) {
+        siardVersion = detectSiardVersion(siardPath);
+      }
+
       if (siardVersion.equals(ViewerConstants.SiardVersion.DK_1007)
         || siardVersion.equals(ViewerConstants.SiardVersion.DK_128)) {
         siardEdition.editModule(new SIARDDKEditFactory()).editModuleParameter(SIARDDKEditFactory.PARAMETER_FOLDER,
@@ -667,6 +672,18 @@ public class SIARDController {
     } catch (ModuleException | RuntimeException e) {
       throw new GenericException("Could not import the metadata to the Solr instance.", e);
     }
+  }
+
+  private static ViewerConstants.SiardVersion detectSiardVersion(Path path) {
+    if (Files.isDirectory(path)) {
+      if (Files.exists(path.resolve(ViewerConstants.SIARDDK_SCHEMAS_FOLDER)
+        .resolve(ViewerConstants.SIARDDK_STANDARD_FOLDER).resolve(ViewerConstants.SIARDDK_RESEARCH_INDEX_FILE))) {
+        return ViewerConstants.SiardVersion.DK_128;
+      } else {
+        return ViewerConstants.SiardVersion.DK_1007;
+      }
+    }
+    return ViewerConstants.SiardVersion.V2_1;
   }
 
   private static void validateSIARDLocation(Path siardPath) throws GenericException {

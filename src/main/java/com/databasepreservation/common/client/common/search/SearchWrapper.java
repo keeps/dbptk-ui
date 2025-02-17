@@ -69,9 +69,13 @@ public class SearchWrapper extends Composite {
     // get configuration
 
     boolean searchEnabled = true;
+    String defaultLabelText = null;
 
-    String defaultLabelText = ClientConfigurationManager.resolveTranslation(ViewerConstants.UI_LISTS_PROPERTY,
-      listBuilder.getOptions().getListId(), ViewerConstants.UI_LISTS_SEARCH_SELECTEDINFO_LABEL_DEFAULT_I18N_PROPERTY);
+    if (listBuilder.getOptions().getListId().equals(ViewerConstants.SEARCH_METADATA_LIST_ID)) {
+      defaultLabelText = messages.dropdownDatabaseListMetadata();
+    } else {
+      defaultLabelText = messages.dropdownDatabaseListAll();
+    }
 
     if (defaultLabelText == null) {
       defaultLabelText = messages.someOfAObject(listBuilder.getOptions().getClassToReturn().getName());

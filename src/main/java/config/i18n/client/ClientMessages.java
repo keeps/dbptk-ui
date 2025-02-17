@@ -659,6 +659,8 @@ public interface ClientMessages extends Messages {
 
   String homePageButtonTextForOpenSIARD();
 
+  String homePageButtonTextForOpenSIARDDK();
+
   String homePageButtonTextForManageSIARD();
 
   String homePageHeaderTextForCreateSIARD();
@@ -737,6 +739,10 @@ public interface ClientMessages extends Messages {
   String manageDatabaseAllSearchableDescription();
 
   String manageDatabaseContactAdministratorDescription();
+
+  String dropdownDatabaseListMetadata();
+
+  String dropdownDatabaseListAll();
 
   /********************************************
    * SIARD Home Page

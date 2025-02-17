@@ -80,12 +80,22 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
           public void onSuccess(User user) {
             if (database != null) {
               if (user.isAdmin()) {
-                if (columnIndex == 7) {
-                  HistoryManager.gotoDatabaseSearchWithValue(database.getUuid(), searchValue);
-                  getSelectionModel().clear();
+                if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+                  if (columnIndex == 7) {
+                    HistoryManager.gotoDatabaseSearchWithValue(database.getUuid(), searchValue);
+                    getSelectionModel().clear();
+                  } else {
+                    HistoryManager.gotoDatabase(database.getUuid());
+                    getSelectionModel().clear();
+                  }
                 } else {
-                  HistoryManager.gotoSIARDInfo(database.getUuid());
-                  getSelectionModel().clear();
+                  if (columnIndex == 8) {
+                    HistoryManager.gotoDatabaseSearchWithValue(database.getUuid(), searchValue);
+                    getSelectionModel().clear();
+                  } else {
+                    HistoryManager.gotoDatabase(database.getUuid());
+                    getSelectionModel().clear();
+                  }
                 }
               } else {
                 if (columnIndex == 4) {

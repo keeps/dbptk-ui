@@ -56,19 +56,25 @@ public class SponsorsPanel extends ContentPanel {
     final SponsorWidget eark = new SponsorWidget("/img/sponsors/E-ARK.png", "https://www.eark-project.com/", height);
     final SponsorWidget cef = new SponsorWidget("/img/sponsors/CEF.png",
       "https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL", null);
-    final SponsorWidget eark4all = new SponsorWidget("/img/sponsors/E-ARK4ALL.jpg", "https://e-ark4all.eu/", height);
     final SponsorWidget naeFeder = new SponsorWidget("/img/sponsors/NAE-FEDER.png",
       "https://www.struktuurifondid.ee/et", height);
     final SponsorWidget nae = new SponsorWidget("/img/sponsors/NAE.png", "http://www.ra.ee/", height);
+    final SponsorWidget dna = new SponsorWidget("/img/sponsors/DNA.png", "https://www.rigsarkivet.dk/", height);
 
     content.add(CommonClientUtils.constructParagraph(
       "The development of DBPTK started in 2006. At an early stage the project was sponsored by the Directorate-General of Portuguese Archives (DGARQ) and financially supported by the Community Support Framework - POAP (grant agreement no 000613/2006/111). The initial purpose of the project was to build a functioning prototype of a digital repository that would lead to more concrete ideas and knowledge on how to build an operational digital preservation repository for DGARQ. As part of that project the first version of DBPTK was developed. At the time the tool was embedded in RODA-in, a SIP creation tool."));
 
     content.add(CommonClientUtils.constructParagraph(
-      "Between 2014 and 2016 DBPTK has received financial and technical support from the E-ARK project (co-funded by KEEP SOLUTIONS and the European Commission Competiveness and Innovation Framework Programme, grant agreement no 620998). In this project DBPTK has been enhanced to support more archival formats such as SIARD and SIARD DK, and also to include a visualization component for SIARD files. The tool has been released as an independent tool under its own branding."));
+      "Between 2014 and 2016 DBPTK has received financial and technical support from the E-ARK project (co-funded by KEEP SOLUTIONS and the European Commission Competitiveness and Innovation Framework Programme, grant agreement no 620998). In this project DBPTK has been enhanced to support more archival formats such as SIARD and SIARD DK, and also to include a visualization component for SIARD files. The tool has been released as an independent tool under its own branding."));
 
     content.add(CommonClientUtils.constructParagraph(
       "In 2018 the product continued to be developed under the project EARK4ALL CEF eArchiving Building Block.\nIn 2019 the product received special funding from the Estonian National Archives, co-funded by the European Regional Development Fund of the European Union, and a new major version has been released to meet the special requirements of the Estonian and Danish National Archives.\nDuring 2020 and 2021, the product continued to be enhanced under the auspices of the CEF eArchiving Building Block."));
+
+    content.add(CommonClientUtils.constructParagraph(
+      "In 2022, the European Commission’s eArchiving initiative started and promptly included support for DBPTK, specifically on the maintaining and enhancing support for the SIARD specification, for maintenance of SIARD 2.1 version and development of the support for SIARD 2.2 version. This support is scheduled to be maintained at least until 2026."));
+
+    content.add(CommonClientUtils.constructParagraph(
+      "In 2025, the Danish National Archives sponsored the development of several features, improving the support for SIARD DK specific sub-versions, and additional features for search and access control.\n"));
 
     content.add(CommonClientUtils
       .constructParagraph("Till this day, the product continues to be maintained and supported by KEEP SOLUTIONS."));
@@ -79,7 +85,7 @@ public class SponsorsPanel extends ContentPanel {
       "Throughout the years, DBPTK has received contributions from various individuals that have enhanced the product in many different ways (ideas, bug fixes, features, translations, etc.). "));
 
     content.add(CommonClientUtils.constructParagraph(
-      "A special thanks goes to José Carlos Ramalho from the University of Minho for his contribution to the body of knowledge that instigated the development of DBPTK, including the development of the first version of an XML-based database archival format (DBML); Luís Faria from KEEP SOLUTIONS for managing the roadmap of the product over the years and for kicking of the development of the first version; Bruno Ferreira for its contributions to the SIARD 2.0 specification and its implementation in code; Miguel Ferreira for its lateral contributions to the vision and quality assessment of the tool; Miguel Guimarães and Gabriel Barros, both from KEEP SOLUTIONS for developing one of the largest releases of the product; Kuldar Aas and Lauri Rätsep from the Estonian National Archives for all the ideas, funding and quality control; Anders Bo Nielsen and Philip Tømmerholt from the Danish National Archives for their contribution on testing and steering the tool roadmap; Czech Republic National Archives for translating the DBPTK into Czech and German and all others that have directly or indirectly supported the project over the years."));
+      "A special thanks goes to José Carlos Ramalho from the University of Minho for his contribution to the body of knowledge that instigated the development of DBPTK, including the development of the first version of an XML-based database archival format (DBML); Luís Faria from KEEP SOLUTIONS for managing the roadmap of the product over the years and for kicking off the development of the first version; Bruno Ferreira for its contributions to the SIARD 2.0 specification and its implementation in code; Miguel Ferreira for its lateral contributions to the vision and quality assessment of the tool; Miguel Guimarães and Gabriel Barros, both from KEEP SOLUTIONS for developing one of the largest releases of the product; Kuldar Aas and Lauri Rätsep from the Estonian National Archives for all the ideas, funding and quality control; Anders Bo Nielsen and Philip Tømmerholt from the Danish National Archives for their contribution on testing and steering the tool roadmap; Czech Republic National Archives for translating the DBPTK into Czech and German, Danish National Archives for translating the DBPTK into Danish and all others that have directly or indirectly supported the project over the years."));
 
     content.add(new HTMLPanel(HeadingElement.TAG_H2, "Sponsored by"));
 
@@ -88,8 +94,8 @@ public class SponsorsPanel extends ContentPanel {
         CommonClientUtils.wrapOnDiv("sponsor", dglab), CommonClientUtils.wrapOnDiv("sponsor", cip),
         CommonClientUtils.wrapOnDiv("sponsor", eark)),
       CommonClientUtils.wrapOnDiv("sponsors", CommonClientUtils.wrapOnDiv("sponsor", cef),
-        CommonClientUtils.wrapOnDiv("sponsor", eark4all), CommonClientUtils.wrapOnDiv("sponsor", naeFeder),
-        CommonClientUtils.wrapOnDiv("sponsor", nae))));
+        CommonClientUtils.wrapOnDiv("sponsor", naeFeder), CommonClientUtils.wrapOnDiv("sponsor", nae),
+        CommonClientUtils.wrapOnDiv("sponsor", dna))));
 
     content.add(new HTMLPanel(HeadingElement.TAG_H2, "Developed by"));
 

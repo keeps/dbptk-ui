@@ -7,18 +7,15 @@
  */
 package com.databasepreservation.desktop.client.dbptk;
 
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.helpers.HelperUploadSIARDFile;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.desktop.client.common.Card;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -66,6 +63,12 @@ public class HomePage extends Composite {
 
     btnOpen.addClickHandler(event -> new HelperUploadSIARDFile().openFile(options));
 
+    Button btnOpenSiardDK = new Button();
+    btnOpenSiardDK.setText(messages.homePageButtonTextForOpenSIARDDK());
+    btnOpenSiardDK.addStyleName("btn btn-plus btn-dk");
+
+    btnOpenSiardDK.addClickHandler(event -> new HelperUploadSIARDFile().openDirectory(options));
+
     Button btnManage = new Button();
     btnManage.setText(messages.homePageButtonTextForManageSIARD());
     btnManage.addStyleName("btn btn-manage");
@@ -75,7 +78,7 @@ public class HomePage extends Composite {
     Card createCard = Card.createInstance(messages.homePageHeaderTextForCreateSIARD(),
       messages.homePageDescriptionTextForCreateSIARD(), btnCreate);
     Card openCard = Card.createInstance(messages.homePageHeaderTextForOpenSIARD(),
-      messages.homePageDescriptionTextForOpenSIARD(), btnOpen);
+      messages.homePageDescriptionTextForOpenSIARD(), btnOpen, btnOpenSiardDK);
     Card manageCard = Card.createInstance(messages.homePageHeaderTextForManageSIARD(),
       messages.homePageDescriptionTextForManageSIARD(), btnManage);
 

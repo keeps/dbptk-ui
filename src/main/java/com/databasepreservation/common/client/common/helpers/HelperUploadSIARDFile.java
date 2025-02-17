@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.client.common.helpers;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -66,6 +67,12 @@ public class HelperUploadSIARDFile {
     }
   }
 
+  public void openDirectory(FlowPanel panel) {
+    JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
+      new ArrayList<>());
+    openSIARDPath(panel, JavascriptUtils.openFileDialog(options));
+  }
+
   private void openSIARDPath(FlowPanel panel, String path) {
     if (path != null) {
       panel.add(loading);
@@ -108,7 +115,7 @@ public class HelperUploadSIARDFile {
       Dialogs.showErrors(messages.errorMessagesOpenFile(path), errorMessage, messages.basicActionClose());
       // Toast.showError(messages.errorMessagesOpenFile(), errorMessage);
       panel.remove(loading);
-    }).create(path, ViewerConstants.SiardVersion.V2_1);
+    }).create(path, null);
   }
 
   private void successHandler(Boolean confirm, FlowPanel panel, String databaseUUID, String path) {

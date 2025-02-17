@@ -96,7 +96,7 @@ public class DatabaseSelectDialog extends DialogBox {
       });
 
       return metadataDatabaseList;
-    }, new AsyncTableCellOptions<>(ViewerDatabase.class, "DatabaseList_metadata"));
+    }, new AsyncTableCellOptions<>(ViewerDatabase.class, ViewerConstants.SEARCH_METADATA_LIST_ID));
     this.parentSearchPanel = parentSearchPanel;
     this.defaultFilter = defaultFilter;
     this.messages = messages;
