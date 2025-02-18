@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -765,7 +767,7 @@ public class SIARDController {
   }
 
   public static ViewerMetadata updateMetadataInformation(String databaseUUID, String siardPath,
-    SIARDUpdateParameters parameters, boolean updateOnModel) throws GenericException {
+    SIARDUpdateParameters parameters, boolean updateOnModel) throws GenericException, IllegalAccessException {
     LOGGER.info("Start the edit metadata process for {}, siard is located at {}", databaseUUID, siardPath);
     ViewerMetadata metadata = parameters.getMetadata();
     try (Reporter reporter = getReporter(databaseUUID, ReporterType.EDIT_METADATA)) {
@@ -897,7 +899,7 @@ public class SIARDController {
   }
 
   public static boolean deleteAll(String databaseUUID)
-    throws NotFoundException, GenericException, RequestNotValidException, ViewerException {
+    throws NotFoundException, GenericException, RequestNotValidException, ViewerException, IllegalAccessException {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
@@ -1000,8 +1002,9 @@ public class SIARDController {
   }
 
   public static void deleteValidatorReportFileFromPath(String validatorReportPath, String databaseUUID)
-    throws GenericException {
+    throws GenericException, IllegalAccessException {
     Path path = Paths.get(validatorReportPath);
+    ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getSIARDReportValidationPath(), path);
     if (!path.toFile().exists()) {
       throw new GenericException("File not found at path: " + validatorReportPath);
     }

@@ -7,9 +7,7 @@
  */
 package com.databasepreservation.common.api.v1;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -21,9 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.databasepreservation.common.api.v1.utils.RESTParameterSanitization;
-import com.databasepreservation.common.server.index.utils.JsonTransformer;
-import com.databasepreservation.common.server.storage.fs.FSUtils;
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import com.databasepreservation.model.exception.ModuleException;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
@@ -343,7 +340,8 @@ public class DatabaseResource implements DatabaseService {
     }
     // LocalDateTime gets the current time in the configured timezone...
     LocalDateTime nowDateTime = LocalDateTime.ofInstant(new Date().toInstant(), zoneId);
-    // ... and then we convert to Date using UTC so that it is sent to the query with the timezone's offset
+    // ... and then we convert to Date using UTC so that it is sent to the query
+    // with the timezone's offset
     Date now = Date.from(nowDateTime.atZone(ZoneOffset.UTC).toInstant());
 
     BlockJoinAnyParentExpiryFilterParameter param = new BlockJoinAnyParentExpiryFilterParameter(user.getAllRoles(), now,
@@ -384,7 +382,8 @@ public class DatabaseResource implements DatabaseService {
       user = controllerAssistant.checkRoles(request);
       UserUtility.checkDatabasePermission(user, databaseUUID);
       return SIARDController.deleteAll(databaseUUID);
-    } catch (ViewerException | RequestNotValidException | GenericException | NotFoundException | AuthorizationException e) {
+    } catch (ViewerException | RequestNotValidException | GenericException | NotFoundException | AuthorizationException
+      | IllegalAccessException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -426,7 +425,7 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid database UUID");
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid database UUID");
       UserUtility.checkDatabasePermission(user, databaseUUID);
       return SIARDController.updateDatabasePermissions(databaseUUID, permissions);
     } catch (GenericException | ViewerException | AuthorizationException e) {
@@ -448,10 +447,11 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid database UUID");
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid database UUID");
       UserUtility.checkDatabasePermission(user, databaseUUID);
       return SIARDController.updateDatabaseSearchAllAvailability(databaseUUID);
-    } catch (GenericException | ViewerException | NotFoundException | AuthorizationException | IllegalArgumentException e) {
+    } catch (GenericException | ViewerException | NotFoundException | AuthorizationException
+      | IllegalArgumentException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -481,4 +481,3 @@ public class DatabaseResource implements DatabaseService {
   }
 
 }
-

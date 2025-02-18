@@ -51,7 +51,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
       httpStatus = HttpStatus.CONFLICT;
     } else if (ex.getCause() instanceof GenericException || ex.getCause() instanceof RequestNotValidException
       || ex.getCause() instanceof IOException || ex.getCause() instanceof ViewerException
-      || ex.getCause() instanceof IllegalArgumentException) {
+      || ex.getCause() instanceof IllegalArgumentException || ex.getCause() instanceof IllegalAccessException) {
       message = "Request was not valid";
       details = ex.getCause().getMessage();
       httpStatus = HttpStatus.BAD_REQUEST;

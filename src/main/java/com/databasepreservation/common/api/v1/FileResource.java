@@ -9,14 +9,13 @@ package com.databasepreservation.common.api.v1;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.databasepreservation.common.api.v1.utils.RESTParameterSanitization;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import com.databasepreservation.common.utils.LobManagerUtils;
 import org.roda.core.data.exceptions.AlreadyExistsException;
 import org.roda.core.data.exceptions.GenericException;
@@ -88,7 +87,7 @@ public class FileResource implements FileService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      RESTParameterSanitization.sanitizePath(filename, "Invalid filename");
+      ParameterSanitization.sanitizePath(filename, "Invalid filename");
       java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
       java.nio.file.Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString(siardFilesPath.toString(),
         ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));

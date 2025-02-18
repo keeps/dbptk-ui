@@ -11,8 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 
-import com.databasepreservation.common.api.v1.utils.RESTParameterSanitization;
-import com.databasepreservation.common.server.ViewerConfiguration;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import org.roda.core.data.exceptions.AlreadyExistsException;
 
 import com.databasepreservation.common.server.storage.ContentPayload;
@@ -30,7 +29,7 @@ public class Browser {
   public static void createFile(InputStream uploadedInputStream, String fileName, Path path)
           throws AlreadyExistsException, GenericException {
     try{
-      Path resolvedPath = RESTParameterSanitization.sanitizeSiardPath(fileName, "Invalid path");
+      Path resolvedPath = ParameterSanitization.sanitizeSiardPath(fileName, "Invalid path");
 
       LOGGER.info("Created file {} in {}", fileName, resolvedPath);
       Path file = Files.createTempFile("siard", ".tmp");
