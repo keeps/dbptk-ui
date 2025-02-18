@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.databasepreservation.common.api.v1.utils.RESTParameterSanitization;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
 import com.databasepreservation.model.exception.ModuleException;
@@ -446,9 +447,10 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid database UUID");
       UserUtility.checkDatabasePermission(user, databaseUUID);
       return SIARDController.updateDatabaseSearchAllAvailability(databaseUUID);
-    } catch (GenericException | ViewerException | NotFoundException | AuthorizationException e) {
+    } catch (GenericException | ViewerException | NotFoundException | AuthorizationException | IllegalArgumentException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

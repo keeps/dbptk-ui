@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.databasepreservation.common.api.v1.utils.RESTParameterSanitization;
 import com.databasepreservation.common.utils.LobManagerUtils;
 import org.roda.core.data.exceptions.AlreadyExistsException;
 import org.roda.core.data.exceptions.GenericException;
@@ -87,10 +88,7 @@ public class FileResource implements FileService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      // Validate the filename to ensure it does not contain any path separators or parent directory references
-      if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
-        throw new IllegalArgumentException("Invalid filename");
-      }
+      RESTParameterSanitization.sanitizePath(filename, "Invalid filename");
       java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
       java.nio.file.Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString(siardFilesPath.toString(),
         ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
@@ -110,7 +108,7 @@ public class FileResource implements FileService {
       } else {
         throw new NotFoundException("SIARD file not found");
       }
-    } catch (NotFoundException | AuthorizationException | IOException e) {
+    } catch (NotFoundException | AuthorizationException | IOException | IllegalArgumentException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
