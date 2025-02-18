@@ -26,6 +26,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import com.databasepreservation.common.api.v1.utils.JobResponse;
+import com.databasepreservation.common.api.v1.utils.RESTParameterSanitization;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -243,6 +244,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
       final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
       if (SolrClientFactory.get().deleteCollection(collectionName)) {
         Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
