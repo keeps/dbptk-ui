@@ -16,8 +16,10 @@ import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.api.exceptions.RESTException;
 import com.databasepreservation.common.api.utils.ExtraMediaType;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
@@ -107,7 +109,7 @@ public class LobManagerUtils {
   }
 
   public static Path getConsolidatedPath(ViewerAbstractConfiguration configuration, String databaseUUID,
-    String tableUUID, int columnIndex, String rowUUID) {
+    String tableUUID, int columnIndex, String rowUUID) throws IllegalAccessException {
     Path tmpPath = configuration.getLobPath().resolve(databaseUUID).resolve(tableUUID)
       .resolve(String.valueOf(columnIndex));
 
@@ -117,6 +119,7 @@ public class LobManagerUtils {
     // obtains the path:
     // homedir/lobs/<dbuuid>/<tableuuid>/<columnindex>/123e/4567/e89b/12d3/a456/426655440000.bin
     tmpPath = tmpPath.resolve("lob-" + rowUUID + ".bin");
+    ParameterSanitization.checkPathIsWithin(configuration.getLobPath(), tmpPath);
     return tmpPath;
   }
 }

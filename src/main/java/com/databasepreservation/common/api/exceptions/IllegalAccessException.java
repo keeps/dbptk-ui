@@ -1,6 +1,8 @@
 package com.databasepreservation.common.api.exceptions;
 
-public class IllegalAccessException extends Exception {
+import java.io.IOException;
+
+public class IllegalAccessException extends IOException {
 
   public IllegalAccessException() {
   }
@@ -12,10 +14,4 @@ public class IllegalAccessException extends Exception {
   public IllegalAccessException(Throwable cause) {
     super(cause);
   }
-
-  public IllegalAccessException(String message, Throwable cause, boolean enableSuppression,
-    boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-  }
-
 }
