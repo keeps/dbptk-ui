@@ -401,8 +401,7 @@ public class CollectionResource implements CollectionService {
       if (Files.exists(path)) {
         Files.delete(path);
       }
-    } catch (GenericException | IOException | AuthorizationException | IllegalArgumentException
-      | IllegalAccessException e) {
+    } catch (GenericException | IOException | AuthorizationException | IllegalArgumentException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -568,7 +567,7 @@ public class CollectionResource implements CollectionService {
   }
 
   private ResponseEntity<StreamingResponseBody> handleConsolidatedLobDownload(String databaseUUID,
-    TableStatus tableConfiguration, int columnIndex, ViewerRow row, String rowIndex) throws IOException {
+    TableStatus tableConfiguration, int columnIndex, ViewerRow row, String rowIndex) throws IOException, IllegalAccessException {
     final java.nio.file.Path consolidatedPath = LobManagerUtils.getConsolidatedPath(
       ViewerFactory.getViewerConfiguration(), databaseUUID, tableConfiguration.getUuid(), columnIndex, rowIndex);
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);

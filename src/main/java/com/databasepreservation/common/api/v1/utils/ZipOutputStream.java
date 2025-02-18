@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.api.v1.utils;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
 
 import java.io.BufferedInputStream;
@@ -121,12 +122,12 @@ public abstract class ZipOutputStream extends CSVOutputStream {
   }
 
   protected void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row,
-    List<ColumnStatus> binaryColumns) throws IOException {
+    List<ColumnStatus> binaryColumns) throws IOException, IllegalAccessException {
     writeToZipFile(siardArchive, out, row, binaryColumns, false);
   }
 
   protected void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row,
-    List<ColumnStatus> binaryColumns, boolean isSiardDK) throws IOException {
+    List<ColumnStatus> binaryColumns, boolean isSiardDK) throws IOException, IllegalAccessException {
 
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
       final ColumnStatus binaryColumn = findLobColumn(binaryColumns, cellEntry.getKey());
@@ -154,7 +155,7 @@ public abstract class ZipOutputStream extends CSVOutputStream {
   }
 
   private void handleWriteConsolidateLobs(ZipArchiveOutputStream out, ColumnStatus binaryColumn, ViewerRow row)
-    throws IOException {
+    throws IOException, IllegalAccessException {
     final Path consolidatedPath = LobManagerUtils.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
       database.getUuid(), configTable.getId(), binaryColumn.getColumnIndex(), row.getUuid());
 
