@@ -477,9 +477,10 @@ public class ConfigurationManager {
     }
   }
 
-  public void deleteDatabaseFolder(String databaseUUID) throws GenericException {
+  public void deleteDatabaseFolder(String databaseUUID) throws GenericException, IllegalAccessException {
     final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
     final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
+    ParameterSanitization.checkPathIsWithin(databasesDirectoryPath, databaseDirectoryPath);
     try {
       Files.walk(databaseDirectoryPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
       LOGGER.info("Database folder removed from system ({})", databaseDirectoryPath.toAbsolutePath());
