@@ -322,6 +322,9 @@ public class CollectionResource implements CollectionService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      if (databaseUUID.contains("..") || databaseUUID.contains("/") || databaseUUID.contains("\\")) {
+        throw new IllegalArgumentException("Invalid databaseUUID");
+      }
       Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
         .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
       if (Files.exists(path)) {
