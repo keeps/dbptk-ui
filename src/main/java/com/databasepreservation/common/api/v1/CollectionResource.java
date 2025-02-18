@@ -160,6 +160,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
       Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID, ReporterType.BROWSE);
       String filename = reportPath.getFileName().toString();
       if (!Files.exists(reportPath)) {
@@ -170,7 +171,7 @@ public class CollectionResource implements CollectionService {
       return ResponseEntity.ok()
         .header("Content-Disposition", "attachment; filename=\"" + reportPath.toFile().getName() + "\"")
         .contentLength(reportPath.toFile().length()).contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
-    } catch (NotFoundException | IOException | AuthorizationException e) {
+    } catch (NotFoundException | IOException | AuthorizationException | IllegalArgumentException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
