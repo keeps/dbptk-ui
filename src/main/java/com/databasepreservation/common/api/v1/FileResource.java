@@ -87,11 +87,14 @@ public class FileResource implements FileService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      ParameterSanitization.sanitizePath(filename, "Invalid filename");
       java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
       java.nio.file.Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString(siardFilesPath.toString(),
         ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
       java.nio.file.Path siardPath = siardFilesPath.resolve(filename);
+      if (ViewerConstants.APPLICATION_ENV_SERVER
+        .equals(System.getProperty(ViewerConstants.APPLICATION_ENV_KEY, ViewerConstants.APPLICATION_ENV_SERVER))) {
+        ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getSIARDFilesPath(), siardPath);
+      }
 
       if (java.nio.file.Files.isDirectory(siardPath)) {
         siardPath = LobManagerUtils.zipDirectory(siardPath);
