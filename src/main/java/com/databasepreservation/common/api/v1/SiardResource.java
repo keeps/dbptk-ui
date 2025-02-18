@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.databasepreservation.common.api.v1.utils.RESTParameterSanitization;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -198,8 +199,10 @@ public class SiardResource implements SiardService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid database UUID");
+      RESTParameterSanitization.sanitizeSiardPath(path, "Invalid path");
       return SIARDController.updateMetadataInformation(databaseUUID, path, parameters, updateOnModel);
-    } catch (GenericException | AuthorizationException e) {
+    } catch (GenericException | AuthorizationException | NotFoundException | IllegalArgumentException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
