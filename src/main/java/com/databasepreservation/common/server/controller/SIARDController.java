@@ -1021,7 +1021,10 @@ public class SIARDController {
   public static void deleteValidatorReportFileFromPath(String validatorReportPath, String databaseUUID)
     throws GenericException, IllegalAccessException {
     Path path = Paths.get(validatorReportPath);
-    ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getSIARDReportValidationPath(), path);
+    if (ViewerConstants.APPLICATION_ENV_SERVER
+      .equals(System.getProperty(ViewerConstants.APPLICATION_ENV_KEY, ViewerConstants.APPLICATION_ENV_SERVER))) {
+      ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getSIARDReportValidationPath(), path);
+    }
     if (!path.toFile().exists()) {
       throw new GenericException("File not found at path: " + validatorReportPath);
     }

@@ -103,10 +103,13 @@ public class SiardResource implements SiardService {
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
       java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
       siardPath = siardFilesPath.resolve(database.getPath()).toString();
-      ParameterSanitization.sanitizePath(validationReportPath, "Invalid path.");
       result = getValidationReportPath(validationReportPath, database.getMetadata().getName());
+      if (ViewerConstants.APPLICATION_ENV_SERVER
+        .equals(System.getProperty(ViewerConstants.APPLICATION_ENV_KEY, ViewerConstants.APPLICATION_ENV_SERVER))) {
+        ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getSIARDReportValidationPath(), Paths.get(result));
+      }
       return SIARDController.validateSIARD(databaseUUID, siardPath, result, allowedTypePath, skipAdditionalChecks);
-    } catch (GenericException | NotFoundException | AuthorizationException e) {
+    } catch (GenericException | NotFoundException | AuthorizationException | IllegalAccessException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -204,7 +207,8 @@ public class SiardResource implements SiardService {
       ParameterSanitization.sanitizePath(databaseUUID, "Invalid database UUID");
       ParameterSanitization.sanitizeSiardPath(path, "Invalid path");
       return SIARDController.updateMetadataInformation(databaseUUID, path, parameters, updateOnModel);
-    } catch (GenericException | AuthorizationException | NotFoundException | IllegalArgumentException | IllegalAccessException e) {
+    } catch (GenericException | AuthorizationException | NotFoundException | IllegalArgumentException
+      | IllegalAccessException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
