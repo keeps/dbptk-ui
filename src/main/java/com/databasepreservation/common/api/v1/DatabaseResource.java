@@ -426,6 +426,7 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid database UUID");
       UserUtility.checkDatabasePermission(user, databaseUUID);
       return SIARDController.updateDatabasePermissions(databaseUUID, permissions);
     } catch (GenericException | ViewerException | AuthorizationException e) {
