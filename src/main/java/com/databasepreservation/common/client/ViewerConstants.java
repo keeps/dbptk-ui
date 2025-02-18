@@ -590,6 +590,8 @@ public class ViewerConstants {
   public static final String SEARCH_ALL_SELECTED_ALL = "all";
   public static final String SEARCH_ALL_SELECTED_NONE = "none";
   public static final String PROPERTY_SEARCH_ALL_DEFAULT_SELECTION = "ui.searchAll.defaultSelection";
+  public static final String SEARCH_METADATA_LIST_ID = "DatabaseList_metadata";
+  public static final String SEARCH_ALL_LIST_ID = "DatabaseList_all";
 
   /**
    * Permissions
@@ -606,6 +608,13 @@ public class ViewerConstants {
    * Show schema name in reference table
    */
   public static final String PROPERTY_REFERENCE_TABLE_SHOW_SCHEMA_NAME = "ui.reference.table.show.schema.name";
+
+  /**
+   * SIARD DK files and folders
+   */
+  public static final String SIARDDK_SCHEMAS_FOLDER = "Schemas";
+  public static final String SIARDDK_STANDARD_FOLDER = "standard";
+  public static final String SIARDDK_RESEARCH_INDEX_FILE = "researchIndex.xsd";
 
   public enum SiardVersion {
     V1_0, V2_0, V2_1, DK, DK_1007, DK_128;

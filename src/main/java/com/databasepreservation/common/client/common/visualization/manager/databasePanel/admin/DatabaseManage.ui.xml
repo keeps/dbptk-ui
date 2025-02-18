@@ -13,12 +13,12 @@
         <g:FlowPanel>
             <commonsearch:SearchWrapper ui:field="search" />
             <g:FlowPanel addStyleNames="button-group-panel">
-                <g:SimplePanel addStyleNames="button-group-panel-btn">
+                <g:SimplePanel ui:field="openPanel" addStyleNames="button-group-panel-btn">
                     <g:Button addStyleNames="btn btn btn-primary" ui:field="open">
                         <ui:text from='{messages.managePageButtonTextForOpenSIARD}'/>
                     </g:Button>
                 </g:SimplePanel>
-                <g:SimplePanel addStyleNames="button-group-panel-btn">
+                <g:SimplePanel ui:field="createPanel" addStyleNames="button-group-panel-btn">
                     <g:Button addStyleNames="btn btn-primary" ui:field="create">
                         <ui:text from='{messages.managePageButtonTextForCreateSIARD}'/>
                     </g:Button>

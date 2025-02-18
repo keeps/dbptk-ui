@@ -61,6 +61,12 @@ public class DatabaseManage extends ContentPanel {
   @UiField
   SimplePanel description;
 
+  @UiField
+  SimplePanel createPanel;
+
+  @UiField
+  SimplePanel openPanel;
+
   @UiField(provided = true)
   SearchWrapper search;
 
@@ -90,15 +96,15 @@ public class DatabaseManage extends ContentPanel {
         }
       });
       return metadataDatabaseList;
-    }, new AsyncTableCellOptions<>(ViewerDatabase.class, "DatabaseList_metadata"));
+    }, new AsyncTableCellOptions<>(ViewerDatabase.class, ViewerConstants.SEARCH_METADATA_LIST_ID));
 
     ListBuilder<ViewerDatabase> databaseSearchAll = new ListBuilder<>(() -> {
       CrossDatabaseList allDatabaseList = new CrossDatabaseList();
       allDatabaseList.getSelectionModel().addSelectionChangeHandler(event -> {
-        allDatabaseList.setSearchValue(search.getComponents().getSearchPanel("DatabaseList_all").getCurrentFilter());
+        allDatabaseList.setSearchValue(search.getComponents().getSearchPanel(ViewerConstants.SEARCH_ALL_LIST_ID).getCurrentFilter());
       });
       return allDatabaseList;
-    }, new AsyncTableCellOptions<>(ViewerDatabase.class, "DatabaseList_all"));
+    }, new AsyncTableCellOptions<>(ViewerDatabase.class, ViewerConstants.SEARCH_ALL_LIST_ID));
 
     search = new SearchWrapper(true).createListAndSearchPanel(databaseMetadataList, false)
       .createListAndSearchPanel(databaseSearchAll, true);
@@ -119,7 +125,9 @@ public class DatabaseManage extends ContentPanel {
   private void initButtons() {
     if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
       create.addClickHandler(event -> HistoryManager.gotoCreateSIARD());
-      open.addClickHandler(event -> new HelperUploadSIARDFile().openFile(new FlowPanel()));
+      createPanel.removeStyleName("button-group-panel-btn");
+      createPanel.addStyleName("create-siard-panel-left");
+      openPanel.setVisible(false);
       // open.addClickHandler(event -> new
       // HelperUploadSIARDFile().openFile(databaseList));
     } else {

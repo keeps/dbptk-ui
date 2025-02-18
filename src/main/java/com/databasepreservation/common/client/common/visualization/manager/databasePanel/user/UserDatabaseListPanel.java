@@ -86,14 +86,14 @@ public class UserDatabaseListPanel extends ContentPanel {
         }
       });
       return metadataDatabaseList;
-    }, new AsyncTableCellOptions<>(ViewerDatabase.class, "DatabaseList_metadata"));
+    }, new AsyncTableCellOptions<>(ViewerDatabase.class, ViewerConstants.SEARCH_METADATA_LIST_ID));
     ListBuilder<ViewerDatabase> databaseSearchAll = new ListBuilder<>(() -> {
       CrossDatabaseList allDatabaseList = new CrossDatabaseList();
       allDatabaseList.getSelectionModel().addSelectionChangeHandler(event -> {
-        allDatabaseList.setSearchValue(search.getComponents().getSearchPanel("DatabaseList_all").getCurrentFilter());
+        allDatabaseList.setSearchValue(search.getComponents().getSearchPanel(ViewerConstants.SEARCH_ALL_LIST_ID).getCurrentFilter());
       });
       return allDatabaseList;
-    }, new AsyncTableCellOptions<>(ViewerDatabase.class, "DatabaseList_all"));
+    }, new AsyncTableCellOptions<>(ViewerDatabase.class, ViewerConstants.SEARCH_ALL_LIST_ID));
     search = new SearchWrapper(true).createListAndSearchPanel(databaseMetadataList, false)
       .createListAndSearchPanel(databaseSearchAll, true);
 

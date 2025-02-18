@@ -2111,6 +2111,15 @@ html, body {
     color: #fff;
 }
 
+.btn-dk {
+    margin-left: 10px;
+}
+
+.create-siard-panel-left .btn {
+    margin-top: 5px;
+    padding: 8px;
+}
+
 .btn-small {
     font-size: 0.6em;
     padding: 4px;
