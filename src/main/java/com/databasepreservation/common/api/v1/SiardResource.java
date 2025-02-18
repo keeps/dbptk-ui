@@ -14,7 +14,8 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.databasepreservation.common.api.v1.utils.RESTParameterSanitization;
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +103,7 @@ public class SiardResource implements SiardService {
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
       java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
       siardPath = siardFilesPath.resolve(database.getPath()).toString();
+      ParameterSanitization.sanitizePath(validationReportPath, "Invalid path.");
       result = getValidationReportPath(validationReportPath, database.getMetadata().getName());
       return SIARDController.validateSIARD(databaseUUID, siardPath, result, allowedTypePath, skipAdditionalChecks);
     } catch (GenericException | NotFoundException | AuthorizationException e) {
@@ -176,7 +178,7 @@ public class SiardResource implements SiardService {
     try {
       user = controllerAssistant.checkRoles(request);
       SIARDController.deleteValidatorReportFileFromPath(path, databaseUUID);
-    } catch (GenericException | AuthorizationException e) {
+    } catch (GenericException | AuthorizationException | IllegalAccessException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -199,10 +201,10 @@ public class SiardResource implements SiardService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid database UUID");
-      RESTParameterSanitization.sanitizeSiardPath(path, "Invalid path");
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid database UUID");
+      ParameterSanitization.sanitizeSiardPath(path, "Invalid path");
       return SIARDController.updateMetadataInformation(databaseUUID, path, parameters, updateOnModel);
-    } catch (GenericException | AuthorizationException | NotFoundException | IllegalArgumentException e) {
+    } catch (GenericException | AuthorizationException | NotFoundException | IllegalArgumentException | IllegalAccessException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

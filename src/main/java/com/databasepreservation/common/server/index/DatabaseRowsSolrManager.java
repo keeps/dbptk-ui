@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.server.ConfigurationManager;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -335,7 +336,7 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void addSavedSearch(SavedSearch savedSearch) throws NotFoundException, GenericException {
+  public void addSavedSearch(SavedSearch savedSearch) throws NotFoundException, GenericException, IllegalAccessException {
     SolrCollection<SavedSearch> savedSearchesCollection = SolrDefaultCollectionRegistry.get(SavedSearch.class);
 
     try {
@@ -354,7 +355,7 @@ public class DatabaseRowsSolrManager {
   }
 
   public void editSavedSearch(String databaseUUID, String uuid, String name, String description)
-    throws SavedSearchException {
+    throws SavedSearchException, IllegalAccessException {
     SolrInputDocument doc = new SolrInputDocument();
 
     doc.addField(ViewerConstants.INDEX_ID, uuid);

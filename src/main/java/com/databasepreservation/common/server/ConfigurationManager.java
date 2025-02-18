@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -78,7 +80,7 @@ public class ConfigurationManager {
     return JsonUtils.readObjectFromFile(collectionStatusFile, CollectionStatus.class);
   }
 
-  public void editSearch(String databaseUUID, String uuid, String name, String description) {
+  public void editSearch(String databaseUUID, String uuid, String name, String description) throws IllegalAccessException {
     try {
       final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID,
         ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID);
@@ -94,7 +96,7 @@ public class ConfigurationManager {
     }
   }
 
-  public void addSearch(SavedSearch savedSearch) {
+  public void addSearch(SavedSearch savedSearch) throws IllegalAccessException {
     try {
       final CollectionStatus collectionStatus = getCollectionStatus(savedSearch.getDatabaseUUID(),
         ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + savedSearch.getDatabaseUUID());
@@ -109,19 +111,19 @@ public class ConfigurationManager {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(database.getUuid());
       // At the moment there is only one collection per database
-      if (databaseStatus.getCollections().size() >= 1) {
+      if (!databaseStatus.getCollections().isEmpty()) {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(database.getUuid(), collectionId);
         collectionStatus.setTables(StatusUtils.getTableStatusFromList(database));
         // Update collection
         updateCollectionStatus(database.getUuid(), collectionStatus);
       }
-    } catch (GenericException | ViewerException e) {
+    } catch (GenericException | ViewerException | IllegalAccessException e) {
       LOGGER.debug("Failed to manipulate the JSON file", e);
     }
   }
 
-  public void addDenormalization(String databaseUUID, String denormalizationUUID) throws GenericException {
+  public void addDenormalization(String databaseUUID, String denormalizationUUID) throws GenericException, IllegalAccessException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       // At the moment there is only one collection per database
@@ -137,7 +139,7 @@ public class ConfigurationManager {
     }
   }
 
-  public void removeDenormalization(String databaseUUID, String denormalizationUUID) throws GenericException {
+  public void removeDenormalization(String databaseUUID, String denormalizationUUID) throws GenericException, IllegalAccessException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       if (databaseStatus.getCollections().size() >= 1) {
@@ -154,7 +156,7 @@ public class ConfigurationManager {
 
   public void addDenormalizationColumns(String databaseUUID, String tableUUID, ViewerColumn column,
     NestedColumnStatus nestedId, String template, String originalType, String typeName, String nullable)
-    throws GenericException {
+    throws GenericException, IllegalAccessException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       if (!databaseStatus.getCollections().isEmpty()) {
@@ -182,7 +184,7 @@ public class ConfigurationManager {
     }
   }
 
-  public void removeDenormalizationColumns(String databaseUUID, String tableUUID) throws GenericException {
+  public void removeDenormalizationColumns(String databaseUUID, String tableUUID) throws GenericException, IllegalAccessException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       if (databaseStatus.getCollections().size() >= 1) {
@@ -266,6 +268,7 @@ public class ConfigurationManager {
 
         Path databaseFile = databaseDirectoryPath
           .resolve(ViewerConstants.DATABASE_STATUS_PREFIX + id + ViewerConstants.JSON_EXTENSION);
+        ParameterSanitization.checkPathIsWithin(databasesDirectoryPath, databaseDirectoryPath);
         // verify if file exists
         if (FSUtils.exists(databaseFile)) {
           final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
@@ -275,7 +278,7 @@ public class ConfigurationManager {
           // update database file
           JsonTransformer.writeObjectToFile(databaseStatus, databaseFile);
         }
-      } catch (GenericException | ViewerException e) {
+      } catch (GenericException | ViewerException | IllegalAccessException e) {
         LOGGER.debug(e.getMessage(), e);
       }
     }
@@ -388,15 +391,16 @@ public class ConfigurationManager {
     }
   }
 
-  public void updateCollectionStatus(String databaseUUID, CollectionStatus status) throws ViewerException {
+  public void updateCollectionStatus(String databaseUUID, CollectionStatus status) throws ViewerException, IllegalAccessException {
     synchronized (collectionStatusFileLock) {
       Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
+      ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
       JsonTransformer.writeObjectToFile(status, statusFile);
     }
   }
 
   public void updateCollectionStatus(String databaseUUID, ViewerMetadata metadata, boolean updateOnModel)
-    throws GenericException, ViewerException {
+    throws GenericException, ViewerException, IllegalAccessException {
     List<TableStatus> list = StatusUtils.getTableStatusFromList(metadata);
 
     CollectionStatus collectionStatus = getCollectionStatus(databaseUUID,

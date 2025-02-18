@@ -10,6 +10,8 @@ package com.databasepreservation.modules.viewer;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,7 +213,11 @@ public class DbvtkExportModule implements DatabaseFilterModule {
       throw new ModuleException().withMessage("Error marking database as ready").withCause(e);
     }
     collectionConfiguration.setConsolidateProperty(LargeObjectConsolidateProperty.NOT_CONSOLIDATED);
-    ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, collectionConfiguration);
+    try {
+      ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, collectionConfiguration);
+    } catch (IllegalAccessException e) {
+      throw new ModuleException().withMessage("Error updating collection status").withCause(e);
+    }
     LOGGER.info("Finished processing database {}", databaseUUID);
   }
 

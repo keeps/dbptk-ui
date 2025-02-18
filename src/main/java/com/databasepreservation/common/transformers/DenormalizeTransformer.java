@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -66,8 +67,8 @@ public class DenormalizeTransformer {
       cleanNestedDocuments();
       queryOverRootTable();
       updateCollectionStatus();
-    } catch (NotFoundException | GenericException e) {
-      throw new ModuleException().withMessage("Cannot retrieved database from solr");
+    } catch (NotFoundException | GenericException | IllegalAccessException e) {
+      throw new ModuleException().withMessage("Cannot retrieved database from solr").withCause(e);
     }
   }
 
@@ -94,7 +95,7 @@ public class DenormalizeTransformer {
     }
   }
 
-  private void updateCollectionStatus() throws GenericException {
+  private void updateCollectionStatus() throws GenericException, IllegalAccessException {
     ViewerFactory.getConfigurationManager().removeDenormalizationColumns(databaseUUID,
       denormalizeConfiguration.getTableUUID());
     for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
@@ -105,7 +106,7 @@ public class DenormalizeTransformer {
   }
 
   private void setAllColumnsToInclude(RelatedTablesConfiguration relatedTable, List<String> path)
-    throws GenericException {
+    throws GenericException, IllegalAccessException {
     List<RelatedColumnConfiguration> columnsIncluded = relatedTable.getColumnsIncluded();
     path.add(database.getMetadata().getTable(relatedTable.getTableUUID()).getName());
 

@@ -25,8 +25,9 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.api.v1.utils.JobResponse;
-import com.databasepreservation.common.api.v1.utils.RESTParameterSanitization;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -160,7 +161,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
       Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID, ReporterType.BROWSE);
       String filename = reportPath.getFileName().toString();
       if (!Files.exists(reportPath)) {
@@ -245,7 +246,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
       final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
       if (SolrClientFactory.get().deleteCollection(collectionName)) {
         Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
@@ -300,9 +301,9 @@ public class CollectionResource implements CollectionService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
       ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, status);
-    } catch (ViewerException | AuthorizationException | IllegalArgumentException e) {
+    } catch (ViewerException | AuthorizationException | IllegalArgumentException | IllegalAccessException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -326,7 +327,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
       Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
         .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
       if (Files.exists(path)) {
@@ -356,6 +357,8 @@ public class CollectionResource implements CollectionService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
+      ParameterSanitization.sanitizePath(tableUUID, "Invalid tableUUID");
       // check if there is no job running on table
       for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
         if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
@@ -368,7 +371,8 @@ public class CollectionResource implements CollectionService {
           .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION));
       ViewerFactory.getConfigurationManager().addDenormalization(databaseUUID,
         ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
-    } catch (GenericException | ViewerException | AuthorizationException e) {
+    } catch (GenericException | ViewerException | AuthorizationException | IllegalArgumentException
+      | IllegalAccessException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -388,6 +392,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
       ViewerFactory.getConfigurationManager().removeDenormalization(databaseUUID,
         ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
       Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
@@ -395,7 +400,8 @@ public class CollectionResource implements CollectionService {
       if (Files.exists(path)) {
         Files.delete(path);
       }
-    } catch (GenericException | IOException | AuthorizationException e) {
+    } catch (GenericException | IOException | AuthorizationException | IllegalArgumentException
+      | IllegalAccessException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -873,7 +879,7 @@ public class CollectionResource implements CollectionService {
 
       ViewerFactory.getSolrManager().addSavedSearch(savedSearch);
       return new StringResponse(savedSearch.getUuid());
-    } catch (NotFoundException | GenericException | AuthorizationException e) {
+    } catch (NotFoundException | GenericException | AuthorizationException | IllegalAccessException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -945,7 +951,7 @@ public class CollectionResource implements CollectionService {
     try {
       user = controllerAssistant.checkRoles(request);
       ViewerFactory.getSolrManager().editSavedSearch(databaseUUID, savedSearchUUID, name, description);
-    } catch (SavedSearchException | AuthorizationException e) {
+    } catch (SavedSearchException | AuthorizationException | IllegalAccessException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
