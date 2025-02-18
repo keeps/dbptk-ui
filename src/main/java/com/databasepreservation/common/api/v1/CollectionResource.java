@@ -397,6 +397,7 @@ public class CollectionResource implements CollectionService {
         ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
       Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
         .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
+      ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), path);
       if (Files.exists(path)) {
         Files.delete(path);
       }

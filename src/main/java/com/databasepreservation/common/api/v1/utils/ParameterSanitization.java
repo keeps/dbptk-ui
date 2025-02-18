@@ -3,13 +3,15 @@ package com.databasepreservation.common.api.v1.utils;
 import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import org.roda.core.data.exceptions.NotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
 public class ParameterSanitization {
-
+  private static final Logger LOGGER = LoggerFactory.getLogger(ParameterSanitization.class);
   public static void sanitizePath(String path, String errorMessage) throws IllegalArgumentException {
-    if (path.contains("..") || path.contains("/") || path.contains("\\")) {
+    if (path != null && (path.contains("..") || path.contains("/") || path.contains("\\"))) {
       throw new IllegalArgumentException(errorMessage);
     }
   }
@@ -23,7 +25,8 @@ public class ParameterSanitization {
     ret &= normalized.startsWith(scope);
 
     if (!ret) {
-      throw new IllegalAccessException("Trying to access path outside the scope:" + scope);
+      LOGGER.debug("Trying to access {} outside the scope {}", normalized, scope);
+      throw new IllegalAccessException("Trying to access path outside the scope");
     }
   }
 
