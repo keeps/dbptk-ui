@@ -299,8 +299,9 @@ public class CollectionResource implements CollectionService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      RESTParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
       ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, status);
-    } catch (ViewerException | AuthorizationException e) {
+    } catch (ViewerException | AuthorizationException | IllegalArgumentException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
