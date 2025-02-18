@@ -87,6 +87,10 @@ public class FileResource implements FileService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      // Validate the filename to ensure it does not contain any path separators or parent directory references
+      if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
+        throw new IllegalArgumentException("Invalid filename");
+      }
       java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
       java.nio.file.Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString(siardFilesPath.toString(),
         ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
