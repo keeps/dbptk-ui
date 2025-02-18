@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 
+import com.databasepreservation.common.server.ViewerConfiguration;
 import org.roda.core.data.exceptions.AlreadyExistsException;
 
 import com.databasepreservation.common.server.storage.ContentPayload;
@@ -27,12 +28,17 @@ public class Browser {
   public static void createFile(InputStream uploadedInputStream, String fileName, Path path)
           throws AlreadyExistsException, GenericException {
     try{
+      Path safeDirectory = ViewerConfiguration.getInstance().getSIARDFilesPath().normalize().toAbsolutePath();
+      Path resolvedPath = safeDirectory.resolve(path).normalize().toAbsolutePath();
+      if (!resolvedPath.startsWith(safeDirectory)) {
+        throw new GenericException("Invalid path");
+      }
 
+      LOGGER.info("Created file {} in {}", fileName, resolvedPath);
       Path file = Files.createTempFile("siard", ".tmp");
       Files.copy(uploadedInputStream, file, StandardCopyOption.REPLACE_EXISTING);
       ContentPayload payload = new FSPathContentPayload(file);
-
-      payload.writeToPath(path);
+      payload.writeToPath(resolvedPath);
       LOGGER.info("Created file {} in {}", fileName, path);
     } catch (FileAlreadyExistsException e){
       System.out.println("File exist on path: " + Paths.get(path.toString(), fileName));
