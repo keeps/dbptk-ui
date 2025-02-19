@@ -85,7 +85,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
                     HistoryManager.gotoDatabaseSearchWithValue(database.getUuid(), searchValue);
                     getSelectionModel().clear();
                   } else {
-                    HistoryManager.gotoDatabase(database.getUuid());
+                    HistoryManager.gotoSIARDInfo(database.getUuid());
                     getSelectionModel().clear();
                   }
                 } else {
@@ -93,7 +93,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
                     HistoryManager.gotoDatabaseSearchWithValue(database.getUuid(), searchValue);
                     getSelectionModel().clear();
                   } else {
-                    HistoryManager.gotoDatabase(database.getUuid());
+                    HistoryManager.gotoSIARDInfo(database.getUuid());
                     getSelectionModel().clear();
                   }
                 }
