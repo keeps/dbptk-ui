@@ -93,6 +93,6 @@ public interface MigrationService extends DirectRestService {
 
   @RequestMapping(path = "/run", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Performs the migration operation")
-  StringResponse run(@RequestParam(name = "databaseUUID") String databaseUUID,
+  StringResponse run(@RequestParam(name = "databaseUUID", required = false) String databaseUUID,
     @Parameter(name = "parameters") @RequestBody CreateSIARDParameters parameters);
 }
