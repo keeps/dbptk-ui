@@ -396,6 +396,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
             case COMPOSED_STRUCTURE:
             case COMPOSED_ARRAY:
             case STRING:
+            case CLOB:
             default:
               ret = SafeHtmlUtils.fromString(value);
           }
