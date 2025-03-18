@@ -15,7 +15,7 @@ Hey devs, here are some notes that may be of use to you!
 ## Debug WUI
 
 ```bash
-# If never GWT compiled before, compile once and copy gwt.rpc files
+# Compile GWT
 mvn -am gwt:compile -Pdebug-server -Dscope.gwt-dev=compile
 
 # Codeserver needs some dependencies installed to start
