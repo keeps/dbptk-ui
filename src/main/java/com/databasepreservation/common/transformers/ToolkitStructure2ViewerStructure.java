@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -878,11 +880,16 @@ public class ToolkitStructure2ViewerStructure {
               true, true);
           }
         } else {
-          lobName = Paths.get(binaryCell.getFile()).getFileName().toString();
-          result.setValue(lobName);
-          if (!mimeTypeAutoDetectDisable) {
-            detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
-              true);
+          // Check if LOB is a CLOB
+          if (columnType.getDbType().equals(ViewerType.dbTypes.CLOB)) {
+            getCLOBValue(databasePath, binaryCell.getFile()).ifPresent(result::setValue);
+          } else {
+            lobName = Paths.get(binaryCell.getFile()).getFileName().toString();
+            result.setValue(lobName);
+            if (!mimeTypeAutoDetectDisable) {
+              detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
+                true);
+            }
           }
         }
       }
@@ -920,6 +927,18 @@ public class ToolkitStructure2ViewerStructure {
     }
 
     return result;
+  }
+
+  private static Optional<String> getCLOBValue(String databasePath, String lobName) {
+
+    try (ZipFile zipFile = new ZipFile(databasePath)) {
+      ZipEntry entry = zipFile.getEntry(lobName);
+      InputStream inputStream = zipFile.getInputStream(entry);
+      return Optional.of(IOUtils.toString(inputStream, StandardCharsets.UTF_8));
+    } catch (IOException e) {
+      LOGGER.error("Failed to obtain CLOB value", e);
+    }
+    return Optional.empty();
   }
 
   private static void detectMimeType(ViewerRow row, ViewerCell cell, String databasePath,
@@ -1025,7 +1044,7 @@ public class ToolkitStructure2ViewerStructure {
       row.addMimeTypeListEntry(colName, viewerMimeType);
 
     } catch (IOException | MimeTypeException e) {
-      LOGGER.error("Could not calculate mimeType for cell: [" + cell.getValue() + "]", e);
+      LOGGER.error("Could not calculate mimeType for cell: [{}]", cell.getValue(), e);
     }
   }
 
