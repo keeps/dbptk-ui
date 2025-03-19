@@ -287,17 +287,35 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         if (row.getNestedRowList() != null) {
           for (ViewerRow nestedRow : row.getNestedRowList()) {
             if (nestedRow != null && nestedRow.getCells() != null && !nestedRow.getCells().isEmpty()
-              && nestedRow.getUuid().equals(configColumn.getId())) {
+              && nestedRow.getNestedUUID().equals(configColumn.getId())) {
               Map<String, ViewerCell> cells = nestedRow.getCells();
+
+              // removes the nested prefix of the nested collumn
+              Map<String, ViewerCell> cells_no_nested_prefix = cells.entrySet().stream().collect(Collectors
+                .toMap(entry -> entry.getKey().replace(ViewerConstants.SOLR_ROWS_NESTED_COL, ""), Map.Entry::getValue));
+
               String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
+
               if (template != null && !template.isEmpty()) {
-                String json = JSOUtils.cellsToJson(cells, nestedTable);
+                String json = JSOUtils.cellsToJson(cells_no_nested_prefix, nestedTable);
                 String blob = getBlobKey(configColumn.getTypeName());
+
+                // manipulate in order to have a template to view the document in the viewer
+                if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+
+                  json = json.replace("\"Document\":\"",
+                    "\"Document\":\"" + RestUtils.createUVLob() + com.google.gwt.core.client.GWT.getHostPageBaseURL());
+                }
                 if (!blob.isEmpty() && json.contains(blob)) {
                   String tempTemplate = template.replace("{{" + blob + "}}", "");
                   tempTemplate = tempTemplate.replace("}{", "} {");
-                  if (tempTemplate.isEmpty())
-                    tempTemplate = messages.row_downloadLOB();
+                  if (tempTemplate.isEmpty()) {
+                    if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+                      tempTemplate = messages.row_openLOBViewer();
+                    } else {
+                      tempTemplate = messages.row_downloadLOB();
+                    }
+                  }
                   template = "<a href=\"" + com.google.gwt.core.client.GWT.getHostPageBaseURL() + "{{" + blob + "}}\">"
                     + tempTemplate + "</a>";
                   String s = JavascriptUtils.compileTemplate(template, json);

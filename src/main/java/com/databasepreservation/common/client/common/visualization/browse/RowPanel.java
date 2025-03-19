@@ -78,6 +78,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
+import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
@@ -466,6 +468,9 @@ public class RowPanel extends RightPanel {
                       ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
                       RestUtils.createExportLobUri(database.getUuid(), nestedTable.getSchemaName(),
                         nestedTable.getName(), result.getResults().get(0).getUuid(), originalCollumnIndex));
+
+                    templateLob = ViewerConstants.DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE;
+
                   } else {
                     json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
                       ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
