@@ -326,13 +326,15 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
       openSearchAdvancedPanel();
 
       GWT.log("search info: " + searchInfo.asJson());
-      int fieldParameterIndex = 0;
       if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
         for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
           if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
             SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
             FilterParameter filterParameter;
+            String searchFieldId = searchAdvancedFieldPanel.getSearchField().getId();
             try {
+              // searchFieldId last character is always the column number
+              int fieldParameterIndex = Integer.parseInt(searchFieldId.substring(searchFieldId.length() - 1));
               filterParameter = searchInfo.getFieldParameters().get(fieldParameterIndex);
             } catch (IndexOutOfBoundsException e) {
               filterParameter = null;
@@ -340,7 +342,6 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
             if (filterParameter != null) {
               searchAdvancedFieldPanel.setInputFromFilterParam(filterParameter);
             }
-            fieldParameterIndex++;
           }
         }
       }
