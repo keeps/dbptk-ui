@@ -333,8 +333,9 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
             FilterParameter filterParameter;
             String searchFieldId = searchAdvancedFieldPanel.getSearchField().getId();
             try {
-              // searchFieldId last character is always the column number
-              int fieldParameterIndex = Integer.parseInt(searchFieldId.substring(searchFieldId.length() - 1));
+              // searchFieldId last characters after - are always the column number
+              String[] parts = searchFieldId.split("-");
+              int fieldParameterIndex = Integer.parseInt(parts[parts.length - 1]);
               filterParameter = searchInfo.getFieldParameters().get(fieldParameterIndex);
             } catch (IndexOutOfBoundsException e) {
               filterParameter = null;
