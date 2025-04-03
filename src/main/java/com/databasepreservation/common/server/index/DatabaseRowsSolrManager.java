@@ -2,7 +2,7 @@
  * The contents of this file are subject to the license and copyright
  * detailed in the LICENSE file at the root of the source
  * tree and available online at
- *
+ * <p>
  * https://github.com/keeps/dbptk-ui
  */
 package com.databasepreservation.common.server.index;
@@ -71,7 +71,7 @@ import com.databasepreservation.utils.FileUtils;
 
 /**
  * Exposes some methods to interact with a Solr Server
- * 
+ *
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class DatabaseRowsSolrManager {
@@ -86,7 +86,7 @@ public class DatabaseRowsSolrManager {
 
   /**
    * Adds a database to the databases collection
-   * 
+   *
    * @param database
    *          the new database
    */
@@ -275,7 +275,6 @@ public class DatabaseRowsSolrManager {
     try {
       SolrInputDocument doc = activityLogEntrySolrCollection.toSolrDocument(logEntry);
       client.add(activityLogEntrySolrCollection.getIndexName(), doc);
-      client.commit(activityLogEntrySolrCollection.getIndexName(), true, true, true);
     } catch (ViewerException | AuthorizationDeniedException | RequestNotValidException e) {
       LOGGER.debug("Solr error while converting to document", e);
     } catch (IOException e) {
@@ -289,8 +288,7 @@ public class DatabaseRowsSolrManager {
     SolrCollection<ViewerJob> viewerJobSolrCollection = SolrDefaultCollectionRegistry.get(ViewerJob.class);
     try {
       SolrInputDocument doc = viewerJobSolrCollection.toSolrDocument(batchJob);
-      client.add(viewerJobSolrCollection.getIndexName(), doc);
-      client.commit(viewerJobSolrCollection.getIndexName(), true, true, true);
+      client.add(viewerJobSolrCollection.getIndexName(), doc, 1000);
     } catch (ViewerException | AuthorizationDeniedException | RequestNotValidException e) {
       LOGGER.debug("Solr error while converting to document", e);
     } catch (SolrServerException e) {
@@ -419,22 +417,20 @@ public class DatabaseRowsSolrManager {
     do {
       UpdateResponse response = null;
       try {
-        response = client.add(collection, doc, 1000);
+        response = client.add(collection, doc);
         if (response.getStatus() == 0) {
           insertedAllDocuments = true;
           break;
         } else {
-          LOGGER.warn(
-            "Could not insert a document batch in collection " + collection + ". Response: " + response.toString());
+          LOGGER.warn("Could not insert a document batch in collection {}. Response: {}", collection, response);
         }
       } catch (SolrException e) {
         if (e.code() == 404) {
           // this means that the collection does not exist yet. retry
-          LOGGER.debug("Collection " + collection + " does not exist (yet). Retrying (" + tries + ")");
+          LOGGER.debug("Collection {} does not exist (yet). Retrying ({})", collection, tries);
         } else {
-          LOGGER.warn(
-            "Could not insert a document batch in collection" + collection + ". Last response (if any): " + response,
-            e);
+          LOGGER.warn("Could not insert a document batch in collection {}. Last response (if any): {}", collection,
+            response, e);
         }
       } catch (SolrServerException | IOException e) {
         throw new ViewerException("Problem adding information", e);
@@ -476,7 +472,7 @@ public class DatabaseRowsSolrManager {
 
     // add all the fields that will be updated
     for (Pair<String, ?> field : fields) {
-      LOGGER.debug("Updating " + field.getFirst() + " to " + field.getSecond());
+      LOGGER.debug("Updating {} to {}", field.getFirst(), field.getSecond());
       doc.addField(field.getFirst(), SolrUtils.asValueUpdate(field.getSecond()));
     }
 
@@ -523,7 +519,7 @@ public class DatabaseRowsSolrManager {
 
     // add all the fields that will be updated
     for (Pair<String, ?> field : fields) {
-      LOGGER.debug("Updating " + field.getFirst() + " to " + field.getSecond());
+      LOGGER.debug("Updating {} to {}",field.getFirst(), field.getSecond());
       doc.addField(field.getFirst(), SolrUtils.asValueUpdate(field.getSecond()));
     }
 
