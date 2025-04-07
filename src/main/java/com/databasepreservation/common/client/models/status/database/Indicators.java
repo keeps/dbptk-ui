@@ -14,22 +14,24 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"success", "failed", "warnings", "skipped"})
+@JsonPropertyOrder({"success", "failed", "warnings", "skipped", "errors"})
 public class Indicators implements Serializable {
 
   private String success;
   private String failed;
   private String warnings;
   private String skipped;
+  private String errors;
 
   public Indicators() {
   }
 
-  public Indicators(String success, String failed, String warnings, String skipped) {
+  public Indicators(String success, String failed, String warnings, String skipped, String errors) {
     this.success = success;
     this.failed = failed;
     this.warnings = warnings;
     this.skipped = skipped;
+    this.errors = errors;
   }
 
   public String getSuccess() {
@@ -50,6 +52,14 @@ public class Indicators implements Serializable {
 
   public String getWarnings() {
     return warnings;
+  }
+
+  public String getErrors() {
+    return errors;
+  }
+
+  public void setErrors(String errors) {
+    this.errors = errors;
   }
 
   public void setWarnings(String warnings) {

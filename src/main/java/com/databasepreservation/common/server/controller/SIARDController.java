@@ -24,6 +24,7 @@ import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
+import com.databasepreservation.common.client.models.status.database.Indicators;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
 import org.apache.commons.io.FileUtils;
@@ -993,10 +994,19 @@ public class SIARDController {
     viewerDatabase.setSize(databaseStatus.getSiardStatus().getSize());
     viewerDatabase.setAvailableToSearchAll(databaseStatus.isAvailableToSearchAll());
     viewerDatabase.setValidationStatus(databaseStatus.getValidationStatus().getValidationStatus());
+    viewerDatabase.setValidatorReportPath(databaseStatus.getValidationStatus().getReportLocation());
+    viewerDatabase.setValidatedAt(databaseStatus.getValidationStatus().getCreatedOn());
+    viewerDatabase.setValidatedVersion(databaseStatus.getValidationStatus().getValidatorVersion());
+    viewerDatabase.setValidationFailed(databaseStatus.getValidationStatus().getIndicators().getFailed());
+    viewerDatabase.setValidationErrors(databaseStatus.getValidationStatus().getIndicators().getErrors());
+    viewerDatabase.setValidationPassed(databaseStatus.getValidationStatus().getIndicators().getSuccess());
+    viewerDatabase.setValidationSkipped(databaseStatus.getValidationStatus().getIndicators().getSkipped());
+    viewerDatabase.setValidationWarnings(databaseStatus.getValidationStatus().getIndicators().getWarnings());
     viewerDatabase.setStatus(databaseStatus.getStatus());
     viewerDatabase.setVersion(databaseStatus.getSiardVersion());
     viewerDatabase.setVersion(databaseStatus.getSiardVersion());
     viewerDatabase.setMetadata(databaseStatus.getMetadata());
+    viewerDatabase.setPermissions(databaseStatus.getPermissions());
 
     return viewerDatabase;
   }

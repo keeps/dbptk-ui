@@ -225,16 +225,18 @@ public class StatusUtils {
     indicators.setFailed(database.getValidationErrors());
     indicators.setWarnings(database.getValidationWarnings());
     indicators.setSkipped(database.getValidationSkipped());
+    indicators.setErrors(database.getValidationErrors());
 
     return indicators;
   }
 
-  public static Indicators getIndicators(String passed, String failed, String warnings, String skipped) {
+  public static Indicators getIndicators(String passed, String failed, String warnings, String skipped, String errors) {
     Indicators indicators = new Indicators();
     indicators.setSuccess(passed);
     indicators.setFailed(failed);
     indicators.setWarnings(warnings);
     indicators.setSkipped(skipped);
+    indicators.setErrors(errors);
 
     return indicators;
   }

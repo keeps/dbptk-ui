@@ -504,7 +504,7 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_WARNINGS, warnings),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_SKIPPED, skipped));
     // delegate
-    ViewerFactory.getConfigurationManager().updateIndicators(databaseUUID, passed, failed, warnings, skipped);
+    ViewerFactory.getConfigurationManager().updateIndicators(databaseUUID, passed, failed, warnings, skipped, errors);
   }
 
   public void updateSIARDPath(String databaseUUID, String siardPath) {
