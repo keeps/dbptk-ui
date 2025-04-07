@@ -260,7 +260,7 @@ public class ConfigurationManager {
     return databaseDirectoryPath.resolve(id + ViewerConstants.JSON_EXTENSION);
   }
 
-  public void updateIndicators(String id, String passed, String failed, String warnings, String skipped) {
+  public void updateIndicators(String id, String passed, String failed, String warnings, String skipped, String errors) {
     synchronized (databaseStatusFileLock) {
       try {
         final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
@@ -273,7 +273,7 @@ public class ConfigurationManager {
         if (FSUtils.exists(databaseFile)) {
           final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
           databaseStatus.getValidationStatus()
-            .setIndicators(StatusUtils.getIndicators(passed, failed, warnings, skipped));
+            .setIndicators(StatusUtils.getIndicators(passed, failed, warnings, skipped, errors));
 
           // update database file
           JsonTransformer.writeObjectToFile(databaseStatus, databaseFile);
