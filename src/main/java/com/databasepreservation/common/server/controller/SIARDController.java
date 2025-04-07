@@ -27,6 +27,7 @@ import com.databasepreservation.common.client.models.status.database.DatabaseSta
 import com.databasepreservation.common.client.models.status.database.Indicators;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
+import com.databasepreservation.modules.siard.SIARDDKModuleFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -215,51 +216,67 @@ public class SIARDController {
   public static boolean migrateToDBMS(String databaseUUID, String siardVersion, String siardPath,
     ConnectionParameters connectionParameters) throws GenericException {
     Reporter reporter = getReporter(databaseUUID, ReporterType.MIGRATE_TO_LIVE_DBMS);
+    final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
+    databaseMigration.filterFactories(new ArrayList<>());
+    databaseMigration.importModule(getSIARDImportModuleFactory(siardVersion));
+
+    LOGGER.info("starting to migrate the database to a live DBMS ("
+      + ToolkitModuleName2ViewerModuleName.transform(connectionParameters.getModuleName()) + ")");
+
     File f = new File(siardPath);
-    if (f.exists() && !f.isDirectory()) {
-      LOGGER.info("starting to migrate the database to a live DBMS ("
-        + ToolkitModuleName2ViewerModuleName.transform(connectionParameters.getModuleName()) + ")");
-      final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
-
-      databaseMigration.filterFactories(new ArrayList<>());
-
-      // BUILD Import Module
-      databaseMigration.importModule(getSIARDImportModuleFactory(siardVersion));
-      databaseMigration.importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath);
-
-      // BUILD Export Module
-      final DatabaseModuleFactory exportModuleFactory = getDatabaseExportModuleFactory(
-        connectionParameters.getModuleName());
-      SiardControllerHelper.setupExportModuleSSHConfiguration(databaseMigration, connectionParameters);
-
-      for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection().entrySet()) {
-        if ("password".equals(entry.getKey())) {
-          LOGGER.info("Connection Options - {} -> {}", entry.getKey(), "****");
+    if (f.exists()) {
+      if (siardVersion.equals(ViewerConstants.SIARD_DK_1007) || siardVersion.equals(ViewerConstants.SIARD_DK_128)) {
+        if (f.isDirectory()) {
+          // BUILD Import Module
+          databaseMigration.importModuleParameter(SIARDDKModuleFactory.PARAMETER_FOLDER, siardPath);
+          databaseMigration.importModuleParameter(SIARDDKModuleFactory.PARAMETER_AS_SCHEMA,
+            ViewerConstants.SIARDDK_DEFAULT_SCHEMA_NAME);
         } else {
-          LOGGER.info("Connection Options - {} -> {}", entry.getKey(), entry.getValue());
+          throw new GenericException("SIARD DK must be a directory.");
         }
-        databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+      } else {
+        if (!f.isDirectory()) {
+          // BUILD Import Module
+          databaseMigration.importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath);
+        } else {
+          throw new GenericException("SIARD file can not be a directory.");
+        }
       }
-      databaseMigration.exportModule(exportModuleFactory);
-
-      // Progress Observer
-      databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(databaseUUID)));
-
-      long startTime = System.currentTimeMillis();
-      try {
-        databaseMigration.migrate();
-        reporter.close();
-      } catch (ModuleException | RuntimeException e) {
-        throw new GenericException(e.getMessage(), e);
-      } catch (IOException e) {
-        throw new GenericException("Could not close the reporter file", e);
-      }
-      long duration = System.currentTimeMillis() - startTime;
-      LOGGER.info("Conversion time {}m {}s", duration / 60000, duration % 60000 / 1000);
-      return true;
     } else {
       throw new GenericException("SIARD file missing");
     }
+
+    // BUILD Export Module
+    final DatabaseModuleFactory exportModuleFactory = getDatabaseExportModuleFactory(
+      connectionParameters.getModuleName());
+    SiardControllerHelper.setupExportModuleSSHConfiguration(databaseMigration, connectionParameters);
+
+    for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection().entrySet()) {
+      if ("password".equals(entry.getKey())) {
+        LOGGER.info("Connection Options - {} -> {}", entry.getKey(), "****");
+      } else {
+        LOGGER.info("Connection Options - {} -> {}", entry.getKey(), entry.getValue());
+      }
+      databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+    }
+    databaseMigration.exportModule(exportModuleFactory);
+
+    // Progress Observer
+    databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(databaseUUID)));
+
+    long startTime = System.currentTimeMillis();
+    try {
+      databaseMigration.migrate();
+      reporter.close();
+    } catch (ModuleException | RuntimeException e) {
+      throw new GenericException(e.getMessage(), e);
+    } catch (IOException e) {
+      throw new GenericException("Could not close the reporter file", e);
+    }
+    long duration = System.currentTimeMillis() - startTime;
+    LOGGER.info("Conversion time {}m {}s", duration / 60000, duration % 60000 / 1000);
+    return true;
+
   }
 
   public static String createSIARD(String uniqueId, ConnectionParameters connectionParameters,
@@ -1121,10 +1138,14 @@ public class SIARDController {
   private static DatabaseModuleFactory getSIARDImportModuleFactory(String version) {
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     final String moduleName;
-    if (version.equals("2.0") || version.equals("2.1")) {
+    if (version.equals(ViewerConstants.SIARD_V20) || version.equals(ViewerConstants.SIARD_V21)) {
       moduleName = "siard-2";
-    } else if (version.equals("1.0")) {
+    } else if (version.equals(ViewerConstants.SIARD_V10)) {
       moduleName = "siard-1";
+    } else if (version.equals(ViewerConstants.SIARD_DK_128)) {
+      moduleName = "siard-dk-128";
+    } else if (version.equals(ViewerConstants.SIARD_DK_1007)) {
+      moduleName = "siard-dk-1007";
     } else {
       moduleName = "";
     }
