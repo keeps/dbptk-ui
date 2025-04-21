@@ -473,8 +473,9 @@ public class CollectionResource implements CollectionService {
 
     try {
       user = controllerAssistant.checkRoles(request);
+      Filter filter = SolrUtils.removeIndexIdFromSearch(findRequest.filter);
       final IndexResult<ViewerRow> viewerRowIndexResult = ViewerFactory.getSolrManager().findRows(databaseUUID,
-        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn,
+        filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn,
         findRequest.extraParameters);
       count = viewerRowIndexResult.getTotalCount();
       return viewerRowIndexResult;

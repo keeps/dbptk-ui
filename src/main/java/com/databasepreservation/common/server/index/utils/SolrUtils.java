@@ -1390,4 +1390,20 @@ public class SolrUtils {
     request.setMethod(SolrRequest.METHOD.POST);
     index.request(request);
   }
+
+  public static Filter removeIndexIdFromSearch(Filter filter) {
+    for (FilterParameter parameter : filter.getParameters()) {
+      if (parameter instanceof BasicSearchFilterParameter) {
+        String searchValue = ((BasicSearchFilterParameter) parameter).getValue();
+        if (searchValue != null) {
+          NotSimpleFilterParameter notSimpleFilterParameter = new NotSimpleFilterParameter();
+          notSimpleFilterParameter.setName(ViewerConstants.INDEX_ID);
+          notSimpleFilterParameter.setValue(searchValue);
+          filter.getParameters().add(notSimpleFilterParameter);
+          return filter;
+        }
+      }
+    }
+    return filter;
+  }
 }
