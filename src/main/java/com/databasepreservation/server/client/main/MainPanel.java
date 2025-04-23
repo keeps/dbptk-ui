@@ -429,7 +429,7 @@ public class MainPanel extends Composite {
               && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_DATABASE_SEARCH)) {
               // #database/<id>/search/<search_value>
               String databaseUUID = currentHistoryPath.get(1);
-              String searchValue = currentHistoryPath.get(3);
+              String searchValue = currentHistoryPath.get(3).replaceAll(HistoryManager.HISTORY_SEP_ESCAPE, HistoryManager.HISTORY_SEP_REGEX);
               setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, currentHistoryPath.get(2),
                 new RightPanelLoader() {
                   @Override
