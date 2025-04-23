@@ -194,16 +194,17 @@ public class DatabaseResource implements DatabaseService {
     ControllerAssistant controllerAssistant, User user, LogEntryState state) {
     long count = 0;
     String collectionAlias = "";
+    Filter filter = SolrUtils.removeIndexIdFromSearch(findRequest.filter);
     try {
       IterableDatabaseResult<ViewerDatabase> databases;
       ArrayList<Filter> filterQueries = new ArrayList<>();
       filterQueries.addAll(getDatabaseFindContentTypeFilterQueries());
       filterQueries.addAll(getDatabaseFindAllFilterQueries());
       if (!user.isAdmin() && !user.isWhiteList()) {
-        filterQueries.addAll(getDatabaseFindStatusFilterQueries(findRequest.filter));
+        filterQueries.addAll(getDatabaseFindStatusFilterQueries(filter));
         filterQueries.addAll(getDatabaseFindUserPermissionsFilterQueries(user));
       }
-      if (findRequest.filter != null) {
+      if (filter != null) {
         List<String> fieldsToReturn = new ArrayList<>();
         fieldsToReturn.add(ViewerConstants.INDEX_ID);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
@@ -246,7 +247,7 @@ public class DatabaseResource implements DatabaseService {
       simpleFacetParameter.setOffset(findRequest.sublist.getFirstElementIndex());
 
       final IndexResult<ViewerDatabase> facetsSearch = ViewerFactory.getSolrManager().findHits(ViewerDatabase.class,
-        collectionAlias, findRequest.filter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter));
+        collectionAlias, filter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter));
 
       count = facetsSearch.getTotalCount();
       FacetFieldResult facetResults = facetsSearch.getFacetResults().get(0);
@@ -289,7 +290,7 @@ public class DatabaseResource implements DatabaseService {
         throw new RESTException(e);
       } finally {
         controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILTER_PARAM,
-          JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
+          JsonUtils.getJsonFromObject(filter), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
           JsonUtils.getJsonFromObject(findRequest.sublist), ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
       }
     }
