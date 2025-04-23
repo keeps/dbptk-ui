@@ -363,10 +363,22 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     List<FilterParameter> parameters = new ArrayList<>();
 
     if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
+      // start each search field parameter as null
+      for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
+        if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
+          parameters.add(null);
+        }
+      }
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
         if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
           SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
-          parameters.add(searchAdvancedFieldPanel.getFilter());
+          if (searchAdvancedFieldPanel.getFilter() != null) {
+            // set the non-null search field parameter on its index of the list
+            // index is always the number after "col" and before "_"
+            String searchFielName = searchAdvancedFieldPanel.getFilter().getName();
+            int index = Integer.parseInt(searchFielName.substring(3).split("_")[0]);
+            parameters.set(index, searchAdvancedFieldPanel.getFilter());
+          }
         }
       }
     }
