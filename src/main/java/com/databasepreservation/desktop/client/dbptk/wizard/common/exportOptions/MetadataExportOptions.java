@@ -169,6 +169,9 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
 
   public void populate(String parameterName, TextBox textBox) {
     switch (parameterName) {
+      case SIARD2ModuleFactory.PARAMETER_META_DBNAME:
+        textBox.setText(metadata.getName());
+        break;
       case SIARD2ModuleFactory.PARAMETER_META_DESCRIPTION:
         textBox.setText(metadata.getDescription());
         break;
