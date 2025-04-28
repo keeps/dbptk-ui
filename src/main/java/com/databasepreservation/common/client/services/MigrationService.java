@@ -83,7 +83,7 @@ public interface MigrationService extends DirectRestService {
 
   @RequestMapping(path = "/dbms/test/query", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the first 5 rows of the query execution")
-  List<List<String>> testQuery(@Parameter(name = "connection parameters") ConnectionParameters parameters,
+  List<List<String>> testQuery(@Parameter(name = "connection parameters") @RequestBody ConnectionParameters parameters,
     @RequestParam(name = "query") String query);
 
   @RequestMapping(path = "/dbms/metadata", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
