@@ -354,9 +354,4 @@ public class JavascriptUtils {
                                                                                 var element = $wnd.jQuery("#" + elementId);
                                                                                 element.removeAttr(attribute);
                                                                                 }-*/;
-
-  public static native void setIndeterminate(String checkboxesJQuery) /*-{
-                                                                          var checkboxes = $wnd.jQuery(checkboxesJQuery);
-                                                                          checkboxes.prop("indeterminate", true);
-                                                                          }-*/;
 }
