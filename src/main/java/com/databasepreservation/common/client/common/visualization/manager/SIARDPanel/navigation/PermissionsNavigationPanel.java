@@ -264,12 +264,23 @@ public class PermissionsNavigationPanel {
       }
 
       @Override
+      public String getCellStyleNames(Cell.Context context, AuthorizationGroup group) {
+        if (groupDetails.getOrDefault(group.getAttributeValue(), new AuthorizationDetails()).hasExpiryDate()) {
+          Date now = new Date();
+          if (now.after(groupDetails.get(group.getAttributeValue()).getExpiry())) {
+            return "expired";
+          }
+        }
+        return "";
+      }
+
+      @Override
       public void render(Cell.Context context, AuthorizationGroup object, SafeHtmlBuilder sb) {
         String value = getValue(object);
         if (databasePermissionGroups.contains(object.getAttributeValue())) {
-          sb.appendHtmlConstant("<button class=\"btn btn-link-info\" type=\"button\" tabindex=\"-1\">");
+          sb.appendHtmlConstant("<button class=\"btn tag-button\" type=\"button\" tabindex=\"-1\">");
         } else {
-          sb.appendHtmlConstant("<button class=\"btn btn-link-info\" type=\"button\" tabindex=\"-1\" disabled>");
+          sb.appendHtmlConstant("<button class=\"btn tag-button\" type=\"button\" tabindex=\"-1\" disabled>");
         }
         if (value != null) {
           sb.append(SafeHtmlUtils.fromString(value));
