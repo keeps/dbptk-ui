@@ -3523,6 +3523,43 @@ rgba(0, 0, 0, .125);
     flex: 1;
     padding: 3px 0px;
     font-size: 1.3rem;
+    border: 1px solid;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tag-button {
+    transition: 0.1s;
+    color: #78BEE7;
+    border: 1px solid;
+    border-color: #78BEE7;
+    border-radius: 16px;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+}
+
+.tag-button:hover {
+    color: white;
+    border: none;
+    background-color: #78BEE7;
+}
+
+.expiry_column.expired .tag-button {
+    color: #d9534f;
+    border-color: #d9534f;
+}
+
+.expiry_column.expired .tag-button:hover {
+    color: white;
+    border: none;
+    background-color: #d9534f;
+}
+
+.expiry_column.expired .tag-button:after {
+    content: "\f273";
 }
 
 .expiry_column button:disabled {
