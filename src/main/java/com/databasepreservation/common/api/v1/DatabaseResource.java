@@ -27,6 +27,8 @@ import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,6 +73,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping(path = ViewerConstants.ENDPOINT_DATABASE)
 public class DatabaseResource implements DatabaseService {
+  private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseResource.class);
   @Autowired
   private HttpServletRequest request;
 
@@ -132,6 +135,9 @@ public class DatabaseResource implements DatabaseService {
       return new StringResponse(SIARDController.loadMetadataFromLocal(path, siardVersion));
     } catch (GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
+      if (e.getCause() != null) {
+        LOGGER.error("Database creation failed: {}", e.getCause().getCause().toString());
+      }
       throw new RESTException(e);
     } finally {
       // register action
