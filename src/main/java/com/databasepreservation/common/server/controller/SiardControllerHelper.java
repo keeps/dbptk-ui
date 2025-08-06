@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameter;
+import com.databasepreservation.model.modules.configuration.FileExternalLobsConfiguration;
+import com.databasepreservation.model.modules.configuration.RemoteExternalLobsConfiguration;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.exceptions.GenericException;
@@ -208,16 +210,20 @@ public class SiardControllerHelper {
 
     if (StringUtils.isNotBlank(externalLobParameter.getReferenceType())) {
       if (externalLobParameter.getReferenceType().equals("file-system")) {
-        configuration.setAccessModule(ExternalLobsAccessMethod.FILE_SYSTEM);
+        configuration = new FileExternalLobsConfiguration();
+        if (StringUtils.isNotBlank(externalLobParameter.getBasePath())) {
+          ((FileExternalLobsConfiguration) configuration).setBasePath(externalLobParameter.getBasePath());
+        } else {
+          ((FileExternalLobsConfiguration) configuration).setBasePath("");
+        }
       } else if (externalLobParameter.getReferenceType().equals("remote-file-system")) {
-        configuration.setAccessModule(ExternalLobsAccessMethod.REMOTE);
+        configuration = new RemoteExternalLobsConfiguration();
+        if (StringUtils.isNotBlank(externalLobParameter.getBasePath())) {
+          ((RemoteExternalLobsConfiguration) configuration).setBasePath(externalLobParameter.getBasePath());
+        } else {
+          ((RemoteExternalLobsConfiguration) configuration).setBasePath("");
+        }
       }
-    }
-
-    if (StringUtils.isNotBlank(externalLobParameter.getBasePath())) {
-      configuration.setBasePath(externalLobParameter.getBasePath());
-    } else {
-      configuration.setBasePath("");
     }
 
     return configuration;
