@@ -230,7 +230,7 @@ public class SIARDController {
           // BUILD Import Module
           databaseMigration.importModuleParameter(SIARDDKModuleFactory.PARAMETER_FOLDER, siardPath);
           databaseMigration.importModuleParameter(SIARDDKModuleFactory.PARAMETER_AS_SCHEMA,
-            ViewerConstants.SIARDDK_DEFAULT_SCHEMA_NAME);
+            connectionParameters.getJdbcParameters().getConnection().get("database"));
         } else {
           throw new GenericException("SIARD DK must be a directory.");
         }
