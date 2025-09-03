@@ -82,6 +82,7 @@ public class ForeignKeyPanel extends RightPanel {
       if (solrColumnName == null) {
         solrColumnName = columnOrValue;
       } else {
+        columnOrValue = columnOrValue.replaceAll(HistoryManager.HISTORY_SEP_ESCAPE, HistoryManager.HISTORY_SEP_REGEX);
         columnAndValueMapping.put(solrColumnName, columnOrValue);
         filterParameters.add(new SimpleFilterParameter(solrColumnName, columnOrValue));
         solrColumnName = null;
