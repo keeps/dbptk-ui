@@ -208,7 +208,12 @@ public class CollectionResource implements CollectionService {
 
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
 
-      return new StringResponse(SIARDController.loadFromLocal(database.getPath(), databaseUUID, database.getVersion()));
+      if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
+        return new StringResponse(databaseUUID);
+      } else {
+        return new StringResponse(
+          SIARDController.loadFromLocal(database.getPath(), databaseUUID, database.getVersion()));
+      }
 
     } catch (GenericException | AuthorizationDeniedException | NotFoundException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
