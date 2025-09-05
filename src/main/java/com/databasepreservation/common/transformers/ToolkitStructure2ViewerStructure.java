@@ -830,7 +830,7 @@ public class ToolkitStructure2ViewerStructure {
           String lobName = ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
           actualViewerRow.addLobType(
             collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
-            ViewerLobStoreType.EXTERNALLY);
+            ViewerLobStoreType.INLINE);
 
           if (!mimeTypeAutoDetectDisable) {
             detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
