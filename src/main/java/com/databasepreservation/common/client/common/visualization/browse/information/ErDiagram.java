@@ -47,10 +47,11 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path, null));
   }
 
-  public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path, CollectionStatus collectionStatus) {
+  public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path,
+    CollectionStatus collectionStatus) {
     String separator = "/";
     String code = database.getUuid() + separator + schema.getUuid() + separator + path;
-    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path, collectionStatus ));
+    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path, collectionStatus));
   }
 
   @Override
@@ -85,7 +86,8 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
   private final String databaseUUID;
 
-  private ErDiagram(final ViewerDatabase database, final ViewerSchema schema, String path, CollectionStatus collectionStatus) {
+  private ErDiagram(final ViewerDatabase database, final ViewerSchema schema, String path,
+    CollectionStatus collectionStatus) {
     databaseUUID = database.getUuid();
     this.collectionStatus = collectionStatus;
     initWidget(uiBinder.createAndBindUi(this));
@@ -131,85 +133,94 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
           && (viewerTable.isMaterializedView() || viewerTable.isCustomView())) {
           continue;
         }
-        VisNode visNode = new VisNode(viewerTable.getId(), viewerTable.getName(), collectionStatus);
 
-        if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
-          visNode.description = viewerTable.getDescription();
-        } else {
-          visNode.description = "";
-        }
-        visNode.numColumns = viewerTable.getColumns().size();
-        visNode.numRows = new Long(viewerTable.getCountRows()).intValue();
-        visNode.numRelationsOut = viewerTable.getForeignKeys().size();
-        int inboundForeignKeys = 0;
-        for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
-          for (ViewerTable table : viewerSchema.getTables()) {
-            for (ViewerForeignKey viewerForeignKey : table.getForeignKeys()) {
-              if (viewerForeignKey.getReferencedTableUUID().equals(viewerTable.getUuid())) {
-                inboundForeignKeys++;
+        VisNode visNode;
+        if (collectionStatus.getTableStatus(viewerTable.getUuid()).isShow()) {
+          if (collectionStatus.getTableStatus(viewerTable.getUuid()).getCustomName() != null) {
+            visNode = new VisNode(viewerTable.getId(),
+              collectionStatus.getTableStatus(viewerTable.getUuid()).getCustomName(), collectionStatus);
+          } else {
+            visNode = new VisNode(viewerTable.getId(), viewerTable.getName(), collectionStatus);
+          }
+          if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
+            visNode.description = viewerTable.getDescription();
+          } else {
+            visNode.description = "";
+          }
+          visNode.numColumns = viewerTable.getColumns().size();
+          visNode.numRows = new Long(viewerTable.getCountRows()).intValue();
+          visNode.numRelationsOut = viewerTable.getForeignKeys().size();
+          int inboundForeignKeys = 0;
+          for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
+            for (ViewerTable table : viewerSchema.getTables()) {
+              for (ViewerForeignKey viewerForeignKey : table.getForeignKeys()) {
+                if (viewerForeignKey.getReferencedTableUUID().equals(viewerTable.getUuid())) {
+                  inboundForeignKeys++;
+                }
               }
             }
           }
-        }
-        visNode.numRelationsIn = inboundForeignKeys;
-        visNode.numRelationsTotal = visNode.numRelationsIn + visNode.numRelationsOut;
-        visNode.numColumnsAndRows = visNode.numColumns * visNode.numRows;
+          visNode.numRelationsIn = inboundForeignKeys;
+          visNode.numRelationsTotal = visNode.numRelationsIn + visNode.numRelationsOut;
+          visNode.numColumnsAndRows = visNode.numColumns * visNode.numRows;
 
-        if (maxColumns < visNode.numColumns) {
-          maxColumns = visNode.numColumns;
-        }
-        if (maxRows < visNode.numRows) {
-          maxRows = visNode.numRows;
-        }
-        if (maxRelationsOut < visNode.numRelationsOut) {
-          maxRelationsOut = visNode.numRelationsOut;
-        }
-        if (maxRelationsIn < visNode.numRelationsIn) {
-          maxRelationsIn = visNode.numRelationsIn;
-        }
-        if (maxRelationsTotal < visNode.numRelationsTotal) {
-          maxRelationsTotal = visNode.numRelationsTotal;
-        }
-        if (maxColumnsAndRows < visNode.numColumnsAndRows) {
-          maxColumnsAndRows = visNode.numColumnsAndRows;
+          if (maxColumns < visNode.numColumns) {
+            maxColumns = visNode.numColumns;
+          }
+          if (maxRows < visNode.numRows) {
+            maxRows = visNode.numRows;
+          }
+          if (maxRelationsOut < visNode.numRelationsOut) {
+            maxRelationsOut = visNode.numRelationsOut;
+          }
+          if (maxRelationsIn < visNode.numRelationsIn) {
+            maxRelationsIn = visNode.numRelationsIn;
+          }
+          if (maxRelationsTotal < visNode.numRelationsTotal) {
+            maxRelationsTotal = visNode.numRelationsTotal;
+          }
+          if (maxColumnsAndRows < visNode.numColumnsAndRows) {
+            maxColumnsAndRows = visNode.numColumnsAndRows;
+          }
+
+          if (minColumns > visNode.numColumns) {
+            minColumns = visNode.numColumns;
+          }
+          if (minRows > visNode.numRows) {
+            minRows = visNode.numRows;
+          }
+          if (minRelationsOut > visNode.numRelationsOut) {
+            minRelationsOut = visNode.numRelationsOut;
+          }
+          if (minRelationsIn > visNode.numRelationsIn) {
+            minRelationsIn = visNode.numRelationsIn;
+          }
+          if (minRelationsTotal > visNode.numRelationsTotal) {
+            minRelationsTotal = visNode.numRelationsTotal;
+          }
+          if (minColumnsAndRowsBiggerThanZero > visNode.numColumnsAndRows && visNode.numColumnsAndRows > 0) {
+            minColumnsAndRowsBiggerThanZero = visNode.numColumnsAndRows;
+          }
+
+          // create tooltip with table information
+          StringBuilder tooltip = new StringBuilder();
+          if (ViewerStringUtils.isNotBlank(viewerTable.getName())) {
+            tooltip.append(viewerTable.getName()).append("<br/>");
+          }
+          tooltip.append(visNode.description).append(" ");
+          tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
+            .append(messages.diagram_columns(visNode.numColumns)).append(", ")
+            .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
+
+          visNode.setTitle(tooltip.toString());
+
+          visNodeList.add(visNode);
+
+          for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
+            jsniEdgeList.add(new JsniEdge(viewerTable.getId(), viewerForeignKey.getReferencedTableId()));
+          }
         }
 
-        if (minColumns > visNode.numColumns) {
-          minColumns = visNode.numColumns;
-        }
-        if (minRows > visNode.numRows) {
-          minRows = visNode.numRows;
-        }
-        if (minRelationsOut > visNode.numRelationsOut) {
-          minRelationsOut = visNode.numRelationsOut;
-        }
-        if (minRelationsIn > visNode.numRelationsIn) {
-          minRelationsIn = visNode.numRelationsIn;
-        }
-        if (minRelationsTotal > visNode.numRelationsTotal) {
-          minRelationsTotal = visNode.numRelationsTotal;
-        }
-        if (minColumnsAndRowsBiggerThanZero > visNode.numColumnsAndRows && visNode.numColumnsAndRows > 0) {
-          minColumnsAndRowsBiggerThanZero = visNode.numColumnsAndRows;
-        }
-
-        // create tooltip with table information
-        StringBuilder tooltip = new StringBuilder();
-        if (ViewerStringUtils.isNotBlank(viewerTable.getName())) {
-          tooltip.append(viewerTable.getName()).append("<br/>");
-        }
-        tooltip.append(visNode.description).append(" ");
-        tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
-          .append(messages.diagram_columns(visNode.numColumns)).append(", ")
-          .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
-
-        visNode.setTitle(tooltip.toString());
-
-        visNodeList.add(visNode);
-
-        for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-          jsniEdgeList.add(new JsniEdge(viewerTable.getId(), viewerForeignKey.getReferencedTableId()));
-        }
       }
 
       Double normMinColumnsAndRows = 0.0;
@@ -359,7 +370,7 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
     public void adjustBackgroundColor(double value) {
       // this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91);
-      if(collectionStatus != null && !collectionStatus.getTableStatusByTableId(id).isShow()){
+      if (collectionStatus != null && !collectionStatus.getTableStatusByTableId(id).isShow()) {
         this.color.background = "#" + hslToRgb(0, 0, 0.784);
       } else {
         this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91 - value);
