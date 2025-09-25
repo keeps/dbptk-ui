@@ -1921,6 +1921,7 @@ html, body {
     display: block;
     overflow: auto;
     box-sizing: border-box;
+    max-height:95vh;
 }
 
 /**********************************************
