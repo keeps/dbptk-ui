@@ -8,6 +8,7 @@
 package com.databasepreservation.common.client.common.utils.html;
 
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
@@ -29,13 +30,13 @@ public class SearchInfoHtmlUtils {
   public static SafeHtml getSearchInfoHtml(SearchInfo searchInfo) {
 
     final List<SearchField> fields = searchInfo.getFields();
-    final List<FilterParameter> fieldParameters = searchInfo.getFieldParameters();
+    final Map<String, FilterParameter> fieldParameters = searchInfo.getFieldParameters();
 
     for (int i = 0; i < fields.size(); i++) {
       SearchField field = fields.get(i);
       final String label = field.getLabel();
-      if (fieldParameters.get(i) != null && fieldParameters.get(i) instanceof BasicSearchFilterParameter) {
-        BasicSearchFilterParameter parameter = (BasicSearchFilterParameter) fieldParameters.get(i);
+      if (fieldParameters.get(field.getId()) != null && fieldParameters.get(field.getId()) instanceof BasicSearchFilterParameter) {
+        BasicSearchFilterParameter parameter = (BasicSearchFilterParameter) fieldParameters.get(field.getId());
         final String value = parameter.getValue();
         return messages.basicFilterParameter(messages.activityLogFilterName(label), value);
       }

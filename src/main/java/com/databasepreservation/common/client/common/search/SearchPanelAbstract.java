@@ -8,7 +8,9 @@
 package com.databasepreservation.common.client.common.search;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.search.panel.SearchFieldPanel;
@@ -333,10 +335,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
             FilterParameter filterParameter;
             String searchFieldId = searchAdvancedFieldPanel.getSearchField().getId();
             try {
-              // searchFieldId last characters after - are always the column number
-              String[] parts = searchFieldId.split("-");
-              int fieldParameterIndex = Integer.parseInt(parts[parts.length - 1]);
-              filterParameter = searchInfo.getFieldParameters().get(fieldParameterIndex);
+              filterParameter = searchInfo.getFieldParameters().get(searchFieldId);
             } catch (IndexOutOfBoundsException e) {
               filterParameter = null;
             }
@@ -359,25 +358,16 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     return searchInputBox.getText();
   }
 
-  public List<FilterParameter> getAdvancedSearchFilterParameters() {
-    List<FilterParameter> parameters = new ArrayList<>();
+  public Map<String, FilterParameter> getAdvancedSearchFilterParameters() {
+    Map<String, FilterParameter> parameters = new HashMap<>();
 
     if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
-      // start each search field parameter as null
-      for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
-        if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
-          parameters.add(null);
-        }
-      }
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
         if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
           SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
           if (searchAdvancedFieldPanel.getFilter() != null) {
-            // set the non-null search field parameter on its index of the list
-            // index is always the number after "col" and before "_"
-            String searchFielName = searchAdvancedFieldPanel.getFilter().getName();
-            int index = Integer.parseInt(searchFielName.substring(3).split("_")[0]);
-            parameters.set(index, searchAdvancedFieldPanel.getFilter());
+            String searchFieldId = searchAdvancedFieldPanel.getSearchField().getId();
+            parameters.put(searchFieldId, searchAdvancedFieldPanel.getFilter());
           }
         }
       }
