@@ -8,7 +8,7 @@
 package com.databasepreservation.common.client.common.search;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +35,7 @@ public class SearchInfo implements Serializable {
   private Filter defaultFilter;
   private String currentFilter;
   private List<SearchField> fields;
-  private List<FilterParameter> fieldParameters;
+  private Map<String, FilterParameter> fieldParameters;
 
   /**
    * Empty instance
@@ -58,7 +58,7 @@ public class SearchInfo implements Serializable {
 
     fields = AdvancedSearchUtils.getSearchFieldsFromTable(viewerTable, status, metadata);
 
-    fieldParameters = new ArrayList<>();
+    fieldParameters = new HashMap<>();
     for (SearchField field : fields) {
       String solrColumnName = field.getSearchFields().get(0);
       FilterParameter fieldParameter = null;
@@ -85,7 +85,7 @@ public class SearchInfo implements Serializable {
           fieldParameter = new BasicSearchFilterParameter(solrColumnName, solrColumnAndValue.get(solrColumnName));
         }
       }
-      fieldParameters.add(fieldParameter);
+      fieldParameters.put(field.getId(), fieldParameter);
     }
   }
 
@@ -113,11 +113,11 @@ public class SearchInfo implements Serializable {
     this.defaultFilter = defaultFilter;
   }
 
-  public List<FilterParameter> getFieldParameters() {
+  public Map<String, FilterParameter> getFieldParameters() {
     return fieldParameters;
   }
 
-  public void setFieldParameters(List<FilterParameter> fieldParameters) {
+  public void setFieldParameters(Map<String, FilterParameter> fieldParameters) {
     this.fieldParameters = fieldParameters;
   }
 
@@ -138,7 +138,6 @@ public class SearchInfo implements Serializable {
    */
   public static boolean isPresentAndValid(SearchInfo searchInfo) {
     return searchInfo != null && searchInfo.currentFilter != null && searchInfo.defaultFilter != null
-      && searchInfo.fields != null && searchInfo.fieldParameters != null
-      && searchInfo.fields.size() == searchInfo.fieldParameters.size();
+      && searchInfo.fields != null && searchInfo.fieldParameters != null;
   }
 }
