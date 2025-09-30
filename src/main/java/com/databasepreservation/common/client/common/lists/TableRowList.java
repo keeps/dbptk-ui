@@ -189,7 +189,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           .getTableById(configColumn.getNestedColumns().getOriginalTable());
         if (configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
           Column<ViewerRow, SafeHtml> binaryColumn = buildNestedRowDownloadColumn(configColumn, nestedTable);
-          binaryColumn.setSortable(true); // add to configuration file sortable options
+          binaryColumn.setSortable(false); // add to configuration file sortable options
           addColumn(configColumn, binaryColumn);
           configColumns.put(configColumn, binaryColumn);
         } else {
