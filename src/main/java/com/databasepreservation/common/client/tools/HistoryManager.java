@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 
@@ -155,6 +156,12 @@ public class HistoryManager {
   public static void gotoTable(String databaseUUID, String tableId) {
     final String[] split = tableId.split("\\.");
     newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, ROUTE_DATA, split[0], split[1]));
+  }
+
+  public static void gotoTable(String databaseUUID, String tableId, String initialSearchQuery) {
+    final String[] split = tableId.split("\\.");
+    newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, ROUTE_DATA, split[0], split[1],
+      ViewerConstants.API_QUERY_START + "query" + ViewerConstants.API_QUERY_ASSIGN_SYMBOL + initialSearchQuery));
   }
 
   public static void gotoTableOptions(String databaseUUID, String tableId) {
