@@ -340,9 +340,8 @@ public class RowPanel extends RightPanel {
             if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
               json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
                 ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
-                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
-                RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
-                  columnStatus.getColumnIndex()));
+                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+                  table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
             } else {
               json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
                 ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
@@ -364,9 +363,8 @@ public class RowPanel extends RightPanel {
             if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
               json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
                 ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
-                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
-                RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
-                  columnStatus.getColumnIndex()));
+                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+                  table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
             } else {
               json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
                 ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
@@ -463,8 +461,8 @@ public class RowPanel extends RightPanel {
                 } else {
                   SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
                   if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
-                    json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
-                      ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
+                    json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL,
+                      messages.row_openLOBViewer(), ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
                       ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
                       RestUtils.createExportLobUri(database.getUuid(), nestedTable.getSchemaName(),
                         nestedTable.getName(), result.getResults().get(0).getUuid(), originalCollumnIndex));
@@ -583,6 +581,9 @@ public class RowPanel extends RightPanel {
      */
     @Override
     public int compareTo(Ref o) {
+      if (refTable == null || o.refTable == null) {
+        return 0;
+      }
       int schemaCompare = refTable.getSchemaName().compareTo(o.refTable.getSchemaName());
       if (schemaCompare == 0) {
         return refTable.getName().compareTo(o.refTable.getName());
