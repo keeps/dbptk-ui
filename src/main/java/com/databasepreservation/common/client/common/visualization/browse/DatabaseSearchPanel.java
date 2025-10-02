@@ -19,6 +19,7 @@ import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.visualization.browse.table.TablePanel;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
@@ -37,6 +38,8 @@ import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -198,7 +201,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
     }
 
     for (TableSearchPanelContainer tableSearchPanelContainer : tableSearchPanelContainers) {
-      tableSearchPanelContainer.doSearch(filter);
+      tableSearchPanelContainer.doSearch(filter, searchText);
     }
 
   }
@@ -220,7 +223,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
   }
 
   private static class TableSearchPanelContainer extends FlowPanel {
-    private final Widget header;
+    private final FocusPanel header;
     private final SimplePanel tableContainer;
     private CollectionStatus status;
     private TableRowList tableRowList;
@@ -229,6 +232,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
     private final Callback<TableSearchPanelContainer, Void> searchCompletedCallback;
     private boolean foundRecords = false;
     private boolean stillSearching = false;
+    private String searchQuery = null;
 
     public TableSearchPanelContainer(ViewerDatabase database, ViewerTable table,
       Callback<TableSearchPanelContainer, Void> searchCompletedEvent, CollectionStatus status) {
@@ -243,8 +247,9 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
 
       final TableStatus tableStatus = status.getTableStatusByTableId(table.getId());
 
-      header = CommonClientUtils.getHeader(tableStatus, table, "h3", database.getMetadata().getSchemas().size() > 1);
+      header = new FocusPanel();
       header.setVisible(false);
+      header.add(CommonClientUtils.getHeader(tableStatus, table, "h3", database.getMetadata().getSchemas().size() > 1));
 
       add(header);
       add(tableContainer);
@@ -265,6 +270,14 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
         ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
         if (record != null) {
           HistoryManager.gotoRecord(database.getUuid(), table.getId(), record.getUuid());
+        }
+      });
+
+      header.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent clickEvent) {
+          TablePanel.preparedQuery = searchQuery;
+          HistoryManager.gotoTable(database.getUuid(), table.getId());
         }
       });
     }
@@ -294,7 +307,8 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
       stillSearching = false;
     }
 
-    void doSearch(Filter filter) {
+    void doSearch(Filter filter, String searchText) {
+      this.searchQuery = searchText;
       if (tableRowList == null) {
         init(filter);
       } else {

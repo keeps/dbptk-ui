@@ -124,6 +124,8 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   private String route;
   private List<String> columnsAndValues;
 
+  public static String preparedQuery;
+
   /**
    * Synchronous Table panel that receives the data and does not need to
    * asynchronously query solr
@@ -278,6 +280,13 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     tableSearchPanel.applySearchInfoJson(searchInfoJson);
   }
 
+  public void doInitialSearch() {
+    if (preparedQuery != null) {
+      tableSearchPanel.doInitialSearch(preparedQuery);
+      preparedQuery = null;
+    }
+  }
+
   @Override
   public void updateCollection(CollectionStatus collectionStatus) {
     instances.clear();
@@ -301,5 +310,6 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
           collectionStatus.getTableStatusByTableId(table.getId()).getCustomName()),
         messages.basicActionClose());
     }
+    doInitialSearch();
   }
 }

@@ -261,6 +261,13 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     }
   }
 
+  public void closeSearchAdvancedPanel() {
+    if (searchAdvancedPanel.isVisible()) {
+      searchAdvancedPanel.setVisible(false);
+    }
+    searchAdvancedDisclosureButton.removeStyleName("open");
+  }
+
   public void setFieldsPanel(FlowPanel fieldsPanel) {
     this.fieldsPanel = fieldsPanel;
     searchAdvancedPanel.clear();
