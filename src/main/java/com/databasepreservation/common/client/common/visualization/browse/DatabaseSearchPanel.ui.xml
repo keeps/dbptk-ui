@@ -16,6 +16,14 @@
                     <g:FlowPanel styleName="searchPanelLeftInput">
                         <g:TextBox ui:field="searchInputBox" addStyleNames="searchBox" />
                     </g:FlowPanel>
+                    <wcag:AccessibleFocusPanel styleName="searchPanelClearButton"
+                                               ui:field="clearButton" visible="false">
+                        <g:HTML addStyleNames="searchButton-html">
+                            <span class="fa-stack">
+                                <i class="fa fa-times fa-stack-1x"></i>
+                            </span>
+                        </g:HTML>
+                    </wcag:AccessibleFocusPanel>
                 </g:FlowPanel>
                 <g:FlowPanel styleName="searchPanelRight">
                     <wcag:AccessibleFocusPanel styleName="searchButton"

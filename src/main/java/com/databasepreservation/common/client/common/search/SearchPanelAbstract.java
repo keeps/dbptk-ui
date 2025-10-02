@@ -63,6 +63,9 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   AccessibleFocusPanel searchInputButton;
 
   @UiField
+  AccessibleFocusPanel clearButton;
+
+  @UiField
   AccessibleFocusPanel searchAdvancedDisclosureButton;
 
   @UiField
@@ -114,6 +117,8 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
         doSearch();
       }
     });
+
+    clearButton.addClickHandler(event -> clearSearchInputBox());
 
     searchInputButton.addClickHandler(event -> doSearch());
     searchAdvancedDisclosureButton.addClickHandler(event -> showSearchAdvancedPanel());
@@ -291,6 +296,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
 
   public void clearSearchInputBox() {
     this.searchInputBox.setText("");
+    clearButton.setVisible(false);
   }
 
   public void setSearchAdvancedGoEnabled(boolean enabled) {
