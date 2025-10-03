@@ -7,9 +7,6 @@
  */
 package com.databasepreservation.common.api.v1.utils;
 
-import com.databasepreservation.common.api.exceptions.IllegalAccessException;
-import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -20,31 +17,35 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.zip.ZipFile;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.io.IOUtils;
+
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.api.utils.ExtraMediaType;
 import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.utils.FilenameUtils;
 import com.databasepreservation.common.utils.LobManagerUtils;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.io.IOUtils;
-
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -129,7 +130,12 @@ public abstract class ZipOutputStream extends CSVOutputStream {
   protected void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row,
     List<ColumnStatus> binaryColumns, boolean isSiardDK) throws IOException, IllegalAccessException {
 
-    for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
+    Set<Map.Entry<String, ViewerCell>> cellsEntrySet = new HashSet<>(row.getCells().entrySet());
+    for (ViewerRow nestedRow : row.getNestedRowList()) {
+      cellsEntrySet.addAll(nestedRow.getCells().entrySet());
+    }
+
+    for (Map.Entry<String, ViewerCell> cellEntry : cellsEntrySet) {
       final ColumnStatus binaryColumn = findLobColumn(binaryColumns, cellEntry.getKey());
 
       if (binaryColumn != null) {
