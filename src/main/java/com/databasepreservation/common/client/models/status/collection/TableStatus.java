@@ -7,6 +7,8 @@
  */
 package com.databasepreservation.common.client.models.status.collection;
 
+import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.NESTED;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,6 @@ import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.google.gwt.core.client.GWT;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -156,7 +157,8 @@ public class TableStatus implements Serializable {
   @JsonIgnore
   public List<ColumnStatus> getLobColumns() {
     return getVisibleColumnsList().stream()
-      .filter(c -> c.getType().equals(ViewerType.dbTypes.BINARY) || c.getType().equals(ViewerType.dbTypes.CLOB))
+      .filter(c -> c.getType().equals(ViewerType.dbTypes.BINARY) || c.getType().equals(ViewerType.dbTypes.CLOB)
+        || c.getType().equals(NESTED) && c.getTypeName().contains("BINARY LARGE OBJECT"))
       .collect(Collectors.toList());
   }
 
