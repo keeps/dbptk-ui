@@ -127,7 +127,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     Map<String, Integer> binaryColumns = new HashMap<>();
     int index = 0;
     for (ColumnStatus configColumn : table.getVisibleColumnsList()) {
-      if (configColumn.getType().equals(BINARY) || configColumn.getType().equals(CLOB)) {
+      if (configColumn.getType().equals(BINARY) || configColumn.getType().equals(CLOB)
+        || (configColumn.getType().equals(NESTED) && configColumn.getTypeName().contains("BINARY LARGE OBJECT"))) {
         binaryColumns.put(configColumn.getId(), index);
       }
       index++;
