@@ -38,10 +38,13 @@ import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -81,6 +84,9 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
 
   @UiField
   TextBox searchInputBox;
+
+  @UiField
+  AccessibleFocusPanel clearButton;
 
   @UiField
   FlowPanel searchPanel;
@@ -143,7 +149,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
       for (ViewerTable viewerTable : viewerSchema.getTables()) {
         if (status.showTable(viewerTable.getUuid())) {
           TableSearchPanelContainer tableSearchPanelContainer = new TableSearchPanelContainer(database, viewerTable,
-              searchCompletedCallback, status);
+            searchCompletedCallback, status);
           tableSearchPanelContainers.add(tableSearchPanelContainer);
           content.add(tableSearchPanelContainer);
         }
@@ -163,6 +169,13 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
       }
     });
 
+    searchInputBox.addKeyUpHandler(new KeyUpHandler() {
+      @Override
+      public void onKeyUp(KeyUpEvent event) {
+        clearButton.setVisible(!searchInputBox.getText().isEmpty());
+      }
+    });
+    clearButton.addClickHandler(event -> clearSearchInputBox());
 
     searchInputButton.addClickHandler(event -> doSearch());
   }
@@ -193,12 +206,17 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb,
-        BreadcrumbManager.forDatabaseSearchPanel(database.getUuid(), database.getMetadata().getName()));
+      BreadcrumbManager.forDatabaseSearchPanel(database.getUuid(), database.getMetadata().getName()));
   }
 
   @Override
   public void updateCollection(CollectionStatus collectionStatus) {
     instances.remove(collectionStatus.getDatabaseUUID());
+  }
+
+  public void clearSearchInputBox() {
+    this.searchInputBox.setText("");
+    clearButton.setVisible(false);
   }
 
   private static class TableSearchPanelContainer extends FlowPanel {
@@ -213,7 +231,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
     private boolean stillSearching = false;
 
     public TableSearchPanelContainer(ViewerDatabase database, ViewerTable table,
-                                     Callback<TableSearchPanelContainer, Void> searchCompletedEvent, CollectionStatus status) {
+      Callback<TableSearchPanelContainer, Void> searchCompletedEvent, CollectionStatus status) {
       super();
       this.database = database;
       this.table = table;
