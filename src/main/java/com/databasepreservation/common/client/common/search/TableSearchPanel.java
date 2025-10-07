@@ -309,9 +309,20 @@ public class TableSearchPanel extends Composite {
   private void saveQuery() {
     SearchInfo searchInfo = createSearchInfo();
     CollectionService.Util
-      .call((StringResponse savedSearchUUID) -> searchPanel.querySavedHandler(true, database, savedSearchUUID.getValue()),
+      .call(
+        (StringResponse savedSearchUUID) -> searchPanel.querySavedHandler(true, database, savedSearchUUID.getValue()),
         (String errorMessage) -> searchPanel.querySavedHandler(false, database, null))
       .saveSavedSearch(database.getUuid(), database.getUuid(), table.getId(), messages.searchOnTable(table.getName()),
         "", searchInfo);
+  }
+
+  public void doInitialSearch(String initialQuery) {
+    SearchInfo initialSearch = new SearchInfo();
+    initialSearch.setDefaultFilter(searchPanel.getDefaultFilter());
+    initialSearch.setCurrentFilter(initialQuery);
+    initialSearch.setFields(searchPanel.getAdvancedSearchSearchFields());
+    initialSearch.setFieldParameters(searchPanel.getAdvancedSearchFilterParameters());
+    searchPanel.updateSearchPanel(initialSearch);
+    searchPanel.closeSearchAdvancedPanel();
   }
 }
