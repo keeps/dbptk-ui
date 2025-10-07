@@ -38,6 +38,8 @@ import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -167,6 +169,12 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
       }
     });
 
+    searchInputBox.addKeyUpHandler(new KeyUpHandler() {
+      @Override
+      public void onKeyUp(KeyUpEvent event) {
+        clearButton.setVisible(!searchInputBox.getText().isEmpty());
+      }
+    });
     clearButton.addClickHandler(event -> clearSearchInputBox());
 
     searchInputButton.addClickHandler(event -> doSearch());

@@ -3365,6 +3365,16 @@ td.datePickerMonth, td.datePickerYear {
     color: rgba(0, 0, 0, 0.5);
 }
 
+.TableSearchPanel-search .searchPanelClearButton {
+    margin-right: 50px;
+    margin-top: 10%;
+}
+
+.databaseSearch.searchPanelClearButton {
+    margin-top: 10%
+}
+
+
 .searchPanelClearButton {
     cursor: pointer;
     color: rgba(0, 0, 0, 0.5);
