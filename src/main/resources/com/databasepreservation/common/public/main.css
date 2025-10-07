@@ -899,6 +899,14 @@ p[data-value]:after {
     margin-top: 2rem;
 }
 
+.underlineClickable {
+    cursor: pointer;
+}
+
+.underlineClickable:hover {
+    text-decoration: underline;
+}
+
 /***********************************************
    Login page
 ************************************************/

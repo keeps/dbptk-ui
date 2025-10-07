@@ -249,6 +249,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
 
       header = new FocusPanel();
       header.setVisible(false);
+      header.addStyleName("underlineClickable");
       header.add(CommonClientUtils.getHeader(tableStatus, table, "h3", database.getMetadata().getSchemas().size() > 1));
 
       add(header);
