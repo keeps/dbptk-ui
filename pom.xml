@@ -6,7 +6,7 @@
     <groupId>com.databasepreservation.visualization</groupId>
     <artifactId>dbvtk</artifactId>
     <packaging>war</packaging>
-    <version>3.2.0-SNAPSHOT</version>
+    <version>3.2.0</version>
     <name>Database Visualization Toolkit</name>
 
     <description>A viewer and explorer for preserved databases</description>
