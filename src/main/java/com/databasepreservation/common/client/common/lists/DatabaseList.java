@@ -110,13 +110,13 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
-    Column<ViewerDatabase, SafeHtml> archivalDateColumn = new TooltipColumn<ViewerDatabase>() {
+    Column<ViewerDatabase, SafeHtml> dataOriginTimespanColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null
-          && database.getMetadata().getArchivalDate() != null
-          ? SafeHtmlUtils.fromString(database.getMetadata().getArchivalDate().substring(0, 10))
-          : null;
+          && database.getMetadata().getDataOriginTimespan() != null
+            ? SafeHtmlUtils.fromString(database.getMetadata().getDataOriginTimespan())
+            : null;
       }
     };
 
@@ -146,7 +146,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, SafeHtml> versionColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(database.getVersion()) : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
+        return database != null ? SafeHtmlUtils.fromString(database.getVersion())
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -179,7 +180,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
           addColumn(nameColumn, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 8);
           addColumn(description, messages.managePageTableHeaderTextForDescription(), true, TextAlign.NONE, 15);
           addColumn(dataOwnerColumn, messages.managePageTableHeaderTextForDataOwner(), true, TextAlign.NONE, 5);
-          addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
+          addColumn(dataOriginTimespanColumn, messages.managePageTableHeaderTextForDataOriginTimespan(), true,
+            TextAlign.NONE, 7);
           if (user.isAdmin()) {
             addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
             addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
@@ -195,7 +197,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       addColumn(nameColumn, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 8);
       addColumn(description, messages.managePageTableHeaderTextForDescription(), true, TextAlign.NONE, 15);
       addColumn(dataOwnerColumn, messages.managePageTableHeaderTextForDataOwner(), true, TextAlign.NONE, 5);
-      addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
+      addColumn(dataOriginTimespanColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
       addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);
       addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
       addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
