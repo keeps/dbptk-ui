@@ -65,7 +65,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   AccessibleFocusPanel searchInputButton;
 
   @UiField
-  AccessibleFocusPanel clearButton;
+  AccessibleFocusPanel clearCrossButton;
 
   @UiField
   AccessibleFocusPanel searchAdvancedDisclosureButton;
@@ -123,10 +123,10 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     searchInputBox.addKeyUpHandler(new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
-        clearButton.setVisible(!searchInputBox.getText().isEmpty());
+        clearCrossButton.setVisible(!searchInputBox.getText().isEmpty());
       }
     });
-    clearButton.addClickHandler(event -> clearSearchInputBox());
+    clearCrossButton.addClickHandler(event -> clearSearchInputBox());
 
     searchInputButton.addClickHandler(event -> doSearch());
     searchAdvancedDisclosureButton.addClickHandler(event -> showSearchAdvancedPanel());
@@ -170,10 +170,10 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     searchInputBox.addKeyUpHandler(new KeyUpHandler() {
       @Override
       public void onKeyUp(KeyUpEvent event) {
-        clearButton.setVisible(!searchInputBox.getText().isEmpty());
+        clearCrossButton.setVisible(!searchInputBox.getText().isEmpty());
       }
     });
-    clearButton.addClickHandler(event -> clearSearchInputBox());
+    clearCrossButton.addClickHandler(event -> clearSearchInputBox());
 
     searchInputButton.addClickHandler(event -> doSearch());
     searchAdvancedDisclosureButton.addClickHandler(event -> showSearchAdvancedPanel());
@@ -320,7 +320,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
 
   public void clearSearchInputBox() {
     this.searchInputBox.setText("");
-    clearButton.setVisible(false);
+    clearCrossButton.setVisible(false);
   }
 
   public void setSearchAdvancedGoEnabled(boolean enabled) {
@@ -419,6 +419,10 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     }
 
     return searchFields;
+  }
+
+  public void setClearCrossButtonVisible(boolean visible) {
+    clearCrossButton.setVisible(visible);
   }
 
   private void saveSearchReset() {

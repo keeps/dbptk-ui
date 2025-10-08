@@ -324,5 +324,6 @@ public class TableSearchPanel extends Composite {
     initialSearch.setFieldParameters(searchPanel.getAdvancedSearchFilterParameters());
     searchPanel.updateSearchPanel(initialSearch);
     searchPanel.closeSearchAdvancedPanel();
+    searchPanel.setClearCrossButtonVisible(true);
   }
 }
