@@ -59,7 +59,7 @@ public class AdvancedSearchUtils {
     for (ColumnStatus column : configTable.getColumns()) {
       if (!column.getType().equals(ViewerType.dbTypes.NESTED)) {
         if (column.getSearchStatus().getAdvanced().isFixed()) {
-          SearchField searchField = new SearchField(configTable.getId() + "-" + column.getColumnIndex(),
+          SearchField searchField = new SearchField(configTable.getUuid() + "-" + column.getColumnIndex(),
             Collections.singletonList(column.getId()), column.getCustomName(),
             viewerTypeToSearchFieldType(column.getType()));
           searchField.setFixed(column.getSearchStatus().getAdvanced().isFixed());
