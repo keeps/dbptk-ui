@@ -698,6 +698,8 @@ public interface ClientMessages extends Messages {
 
   String managePageTableHeaderTextForArchivalDate();
 
+  String managePageTableHeaderTextForDataOriginTimespan();
+
   String managePageTableHeaderTextForSIARDLocation();
 
   String managePageTableHeaderTextForSIARDSize();
