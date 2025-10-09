@@ -16,7 +16,7 @@
                     <g:FlowPanel styleName="searchPanelLeftInputRow">
                         <g:TextBox ui:field="searchInputBox" addStyleNames="searchBox"/>
                         <wcag:AccessibleFocusPanel styleName="searchPanelClearButton"
-                                                   ui:field="clearButton" visible="false">
+                                                   ui:field="clearCrossButton" visible="false">
                             <g:HTML addStyleNames="searchButton-html">
                                 <span class="fa-stack">
                                     <i class="fa fa-times fa-stack-1x"></i>
