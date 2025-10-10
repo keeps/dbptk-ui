@@ -17,6 +17,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.utils.FilenameUtils;
 import com.databasepreservation.common.utils.LobManagerUtils;
 
@@ -123,17 +125,17 @@ public abstract class ZipOutputStream extends CSVOutputStream {
   }
 
   protected void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row,
-    List<ColumnStatus> binaryColumns) throws IOException, IllegalAccessException {
-    writeToZipFile(siardArchive, out, row, binaryColumns, false);
+    Map<String, IterableIndexResult> nestedRows, List<ColumnStatus> binaryColumns,
+    Map<ColumnStatus, ColumnStatus> nestedBinaryColumnsMap) throws IOException, IllegalAccessException {
+    writeToZipFile(siardArchive, out, row, nestedRows, binaryColumns, nestedBinaryColumnsMap, false);
   }
 
   protected void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row,
-    List<ColumnStatus> binaryColumns, boolean isSiardDK) throws IOException, IllegalAccessException {
+    Map<String, IterableIndexResult> nestedRows, List<ColumnStatus> binaryColumns,
+    Map<ColumnStatus, ColumnStatus> nestedBinaryColumnsMap, boolean isSiardDK)
+    throws IOException, IllegalAccessException {
 
     Set<Map.Entry<String, ViewerCell>> cellsEntrySet = new HashSet<>(row.getCells().entrySet());
-    for (ViewerRow nestedRow : row.getNestedRowList()) {
-      cellsEntrySet.addAll(nestedRow.getCells().entrySet());
-    }
 
     for (Map.Entry<String, ViewerCell> cellEntry : cellsEntrySet) {
       final ColumnStatus binaryColumn = findLobColumn(binaryColumns, cellEntry.getKey());
@@ -153,6 +155,50 @@ public abstract class ZipOutputStream extends CSVOutputStream {
               handleWriteExternalLobs(out, binaryColumn, row, cellEntry.getValue());
             } else {
               handleWriteInternalLobs(out, siardArchive, binaryColumn, row);
+            }
+          }
+        }
+      }
+    }
+
+    Map<String, Map<String, ViewerCell>> nestedCellsEntrySet = new HashMap<>();
+    for (ViewerRow nestedRow : row.getNestedRowList()) {
+      if (!nestedCellsEntrySet.containsKey(nestedRow.getNestedUUID())) {
+        HashMap<String, ViewerCell> nestedCells = new HashMap<>(nestedRow.getCells());
+        nestedCellsEntrySet.put(nestedRow.getNestedUUID(), nestedCells);
+      }
+    }
+
+    for (Map.Entry<String, Map<String, ViewerCell>> nestedTableViewerCells : nestedCellsEntrySet.entrySet()) {
+      for (Map.Entry<String, ViewerCell> viewerCell : nestedTableViewerCells.getValue().entrySet()) {
+        Map.Entry<ColumnStatus, ColumnStatus> columnMapping = null;
+        for (Map.Entry<ColumnStatus, ColumnStatus> entry : nestedBinaryColumnsMap.entrySet()) {
+          if (viewerCell.getKey().equals("nst_" + entry.getValue().getId())) {
+            columnMapping = entry;
+            break;
+          }
+        }
+        if (columnMapping != null) {
+          for (ViewerRow nestedRow : nestedRows.get(columnMapping.getKey().getId())) {
+            ViewerCell originalCell = nestedRow.getCells().get(columnMapping.getValue().getId());
+            if (originalCell != null) {
+              if (isSiardDK) {
+                handleWriteSIARDDKLobs(out, originalCell, columnMapping.getKey(), row);
+              } /*else {
+                if (ViewerType.dbTypes.CLOB.equals(columnMapping.getValue().getType())) {
+                  handleWriteNestedClob(out, columnMapping.getValue(), nestedRow, columnMapping.getKey());
+                } else if (configurationCollection.getConsolidateProperty()
+                  .equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
+                  handleWriteConsolidateLobs(out, binaryColumn, row);
+                } else {
+                  if (ViewerLobStoreType.EXTERNALLY.equals(row.getCells()
+                    .get(configTable.getColumnByIndex(binaryColumn.getColumnIndex()).getId()).getStoreType())) {
+                    handleWriteExternalLobs(out, binaryColumn, row, cellEntry.getValue());
+                  } else {
+                    handleWriteInternalLobs(out, siardArchive, binaryColumn, row);
+                  }
+                }
+              }*/
             }
           }
         }
@@ -234,6 +280,22 @@ public abstract class ZipOutputStream extends CSVOutputStream {
     }
 
     ByteArrayInputStream in = new ByteArrayInputStream(row.getCells().get(binaryColumn.getId()).getValue().getBytes());
+
+    addEntryToZip(out, in, handlebarsFilename);
+  }
+
+  private void handleWriteNestedClob(ZipArchiveOutputStream out, ColumnStatus originalBinaryColumn,
+    ViewerRow originalRow, ColumnStatus transformBinaryColumn) throws IOException {
+
+    String handlebarsFilename = HandlebarsUtils.applyExportTemplate(originalRow,
+      configurationCollection.getTableStatusByTableId(originalRow.getTableId()), originalBinaryColumn.getColumnIndex());
+
+    if (ViewerStringUtils.isBlank(handlebarsFilename)) {
+      handlebarsFilename = "file_" + transformBinaryColumn.getCustomName();
+    }
+
+    ByteArrayInputStream in = new ByteArrayInputStream(
+      originalRow.getCells().get(originalBinaryColumn.getId()).getValue().getBytes());
 
     addEntryToZip(out, in, handlebarsFilename);
   }
