@@ -10,16 +10,23 @@ package com.databasepreservation.common.api.v1.utils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.csv.CSVPrinter;
 
 import com.databasepreservation.common.api.utils.HandlebarsUtils;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.OneOfManyFilterParameter;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 
 /**
@@ -31,6 +38,7 @@ public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
   private final TableStatus configTable;
   private final List<String> fieldsToReturn;
   private final boolean exportDescription;
+  private final String databaseUUID;
 
   /**
    * Constructor.
@@ -43,12 +51,14 @@ public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
    *          the CSV field delimiter.
    */
   public IterableIndexResultsCSVOutputStream(final IterableIndexResult results, final TableStatus configTable,
-    final String filename, final boolean exportDescription, final char delimiter, String fieldsToHeader) {
+    final String filename, final boolean exportDescription, final char delimiter, String fieldsToHeader,
+    String databaseUUID) {
     super(filename, delimiter);
     this.results = results;
     this.configTable = configTable;
     this.fieldsToReturn = Stream.of(fieldsToHeader.split(",")).collect(Collectors.toList());
     this.exportDescription = exportDescription;
+    this.databaseUUID = databaseUUID;
   }
 
   @Override
@@ -65,7 +75,28 @@ public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
         isFirst = false;
       }
 
-      printer.printRecord(HandlebarsUtils.getCellValues(row, configTable, fieldsToReturn));
+      Map<String, List<String>> rowNestedUUIDs = new HashMap<>();
+      Map<String, List<String>> rowNestedFields = new HashMap<>();
+
+      for (ViewerRow nestedRow : row.getNestedRowList()) {
+        if (!rowNestedUUIDs.containsKey(nestedRow.getNestedUUID())) {
+          rowNestedUUIDs.put(nestedRow.getNestedUUID(), new ArrayList<>());
+          rowNestedFields.put(nestedRow.getNestedUUID(),
+            nestedRow.getCells().keySet().stream().map(k -> k.substring(4)).toList());
+        }
+        rowNestedUUIDs.get(nestedRow.getNestedUUID()).add(nestedRow.getNestedOriginalUUID());
+      }
+
+      Map<String, IterableIndexResult> nestedOriginalRowsForThisRow = new HashMap<>();
+      for (Map.Entry<String, List<String>> entry : rowNestedUUIDs.entrySet()) {
+        final IterableIndexResult nestedRows = ViewerFactory.getSolrManager().findAllRows(databaseUUID,
+          new Filter(new OneOfManyFilterParameter("uuid", entry.getValue())), new Sorter(),
+          rowNestedFields.get(entry.getKey()));
+        nestedOriginalRowsForThisRow.put(entry.getKey(), nestedRows);
+      }
+
+      printer
+        .printRecord(HandlebarsUtils.getCellValues(row, nestedOriginalRowsForThisRow, configTable, fieldsToReturn));
 
     }
 
