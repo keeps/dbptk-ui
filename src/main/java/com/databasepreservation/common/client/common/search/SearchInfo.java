@@ -2,7 +2,7 @@
  * The contents of this file are subject to the license and copyright
  * detailed in the LICENSE file at the root of the source
  * tree and available online at
- *
+ * <p>
  * https://github.com/keeps/dbptk-ui
  */
 package com.databasepreservation.common.client.common.search;
@@ -28,14 +28,15 @@ import com.google.gwt.safehtml.shared.UriUtils;
 
 /**
  * Simple class to hold search info to be serialized as Json
- * 
+ *
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SearchInfo implements Serializable {
   private Filter defaultFilter;
   private String currentFilter;
   private List<SearchField> fields;
-  private Map<String, FilterParameter> fieldParameters;
+  private List<FilterParameter> fieldParameters;
+  private Map<String, FilterParameter> mapFieldParameters;
 
   /**
    * Empty instance
@@ -45,7 +46,7 @@ public class SearchInfo implements Serializable {
 
   /**
    * Instance to show foreign key related records
-   * 
+   *
    * @param viewerTable
    *          the foreign table
    * @param solrColumnAndValue
@@ -58,7 +59,7 @@ public class SearchInfo implements Serializable {
 
     fields = AdvancedSearchUtils.getSearchFieldsFromTable(viewerTable, status, metadata);
 
-    fieldParameters = new HashMap<>();
+    mapFieldParameters = new HashMap<>();
     for (SearchField field : fields) {
       String solrColumnName = field.getSearchFields().get(0);
       FilterParameter fieldParameter = null;
@@ -85,7 +86,7 @@ public class SearchInfo implements Serializable {
           fieldParameter = new BasicSearchFilterParameter(solrColumnName, solrColumnAndValue.get(solrColumnName));
         }
       }
-      fieldParameters.put(field.getId(), fieldParameter);
+      mapFieldParameters.put(field.getId(), fieldParameter);
     }
   }
 
@@ -113,12 +114,20 @@ public class SearchInfo implements Serializable {
     this.defaultFilter = defaultFilter;
   }
 
-  public Map<String, FilterParameter> getFieldParameters() {
+  public List<FilterParameter> getFieldParameters() {
     return fieldParameters;
   }
 
-  public void setFieldParameters(Map<String, FilterParameter> fieldParameters) {
+  public void setFieldParameters(List<FilterParameter> fieldParameters) {
     this.fieldParameters = fieldParameters;
+  }
+
+  public Map<String, FilterParameter> getMapFieldParameters() {
+    return mapFieldParameters;
+  }
+
+  public void setMapFieldParameters(Map<String, FilterParameter> mapFieldParameters) {
+    this.mapFieldParameters = mapFieldParameters;
   }
 
   public List<SearchField> getFields() {
@@ -131,13 +140,13 @@ public class SearchInfo implements Serializable {
 
   /**
    * Checks if the search info is not null and is valid
-   * 
+   *
    * @param searchInfo
    *          the search info to test
    * @return true if the search info is not null and valid; false otherwise
    */
   public static boolean isPresentAndValid(SearchInfo searchInfo) {
     return searchInfo != null && searchInfo.currentFilter != null && searchInfo.defaultFilter != null
-      && searchInfo.fields != null && searchInfo.fieldParameters != null;
+      && searchInfo.fields != null && (searchInfo.fieldParameters != null || searchInfo.mapFieldParameters != null);
   }
 }
