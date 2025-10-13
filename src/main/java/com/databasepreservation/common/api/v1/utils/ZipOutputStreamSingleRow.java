@@ -58,6 +58,8 @@ public class ZipOutputStreamSingleRow extends ZipOutputStream {
       zipArchiveOutputStream.setMethod(ZipArchiveOutputStream.DEFLATED);
 
       final List<ColumnStatus> binaryColumns = getConfigTable().getLobColumns();
+      final Map<ColumnStatus, ColumnStatus> nestedBinaryColumnsMap = getConfigTable()
+        .getNestedLobColumns(getConfigurationCollection());
 
       Map<String, List<String>> rowNestedUUIDs = new HashMap<>();
       Map<String, List<String>> rowNestedFields = new HashMap<>();
@@ -78,13 +80,13 @@ public class ZipOutputStreamSingleRow extends ZipOutputStream {
           rowNestedFields.get(entry.getKey()));
         nestedOriginalRowsForThisRow.put(entry.getKey(), nestedRows);
       }
-      // TODO NESTED
       if (getDatabase().getVersion().equals(ViewerConstants.SIARD_DK_1007)
         || getDatabase().getVersion().equals(ViewerConstants.SIARD_DK_128)) {
-        writeToZipFile(null, zipArchiveOutputStream, row, nestedOriginalRowsForThisRow, binaryColumns, null, true);
+        writeToZipFile(null, zipArchiveOutputStream, row, nestedOriginalRowsForThisRow, binaryColumns,
+          nestedBinaryColumnsMap, true);
       } else {
         writeToZipFile(new ZipFile(getDatabase().getPath()), zipArchiveOutputStream, row, nestedOriginalRowsForThisRow,
-          binaryColumns, null);
+          binaryColumns, nestedBinaryColumnsMap);
       }
 
       final ByteArrayOutputStream byteArrayOutputStream = writeCSVFile();

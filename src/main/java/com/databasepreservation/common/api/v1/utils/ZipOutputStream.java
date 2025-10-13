@@ -179,26 +179,27 @@ public abstract class ZipOutputStream extends CSVOutputStream {
           }
         }
         if (columnMapping != null) {
-          for (ViewerRow nestedRow : nestedRows.get(columnMapping.getKey().getId())) {
-            ViewerCell originalCell = nestedRow.getCells().get(columnMapping.getValue().getId());
+          for (ViewerRow originalRow : nestedRows.get(columnMapping.getKey().getId())) {
+            ViewerCell originalCell = originalRow.getCells().get(columnMapping.getValue().getId());
             if (originalCell != null) {
               if (isSiardDK) {
                 handleWriteSIARDDKLobs(out, originalCell, columnMapping.getKey(), row);
-              } /*else {
+              } else {
                 if (ViewerType.dbTypes.CLOB.equals(columnMapping.getValue().getType())) {
-                  handleWriteNestedClob(out, columnMapping.getValue(), nestedRow, columnMapping.getKey());
+                  handleWriteNestedClob(out, columnMapping.getValue(), originalRow, columnMapping.getKey());
                 } else if (configurationCollection.getConsolidateProperty()
                   .equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
-                  handleWriteConsolidateLobs(out, binaryColumn, row);
+                  handleWriteNestedConsolidateLobs(out, columnMapping.getValue(), originalRow);
                 } else {
-                  if (ViewerLobStoreType.EXTERNALLY.equals(row.getCells()
-                    .get(configTable.getColumnByIndex(binaryColumn.getColumnIndex()).getId()).getStoreType())) {
-                    handleWriteExternalLobs(out, binaryColumn, row, cellEntry.getValue());
+                  if (ViewerLobStoreType.EXTERNALLY.equals(
+                    row.getCells().get(getConfigurationCollection().getTableStatusByTableId(originalRow.getTableId())
+                      .getColumnByIndex(columnMapping.getValue().getColumnIndex()).getId()).getStoreType())) {
+                    handleWriteNestedExternalLobs(out, columnMapping.getValue(), originalRow, originalCell);
                   } else {
-                    handleWriteInternalLobs(out, siardArchive, binaryColumn, row);
+                    handleWriteNestedInternalLobs(out, siardArchive, columnMapping.getValue(), originalRow);
                   }
                 }
-              }*/
+              }
             }
           }
         }
@@ -213,6 +214,19 @@ public abstract class ZipOutputStream extends CSVOutputStream {
 
     InputStream in = new FileInputStream(consolidatedPath.toFile());
     final String templateFilename = FilenameUtils.getTemplateFilename(row, configTable, binaryColumn,
+      consolidatedPath.getFileName().toString());
+    addEntryToZip(out, in, templateFilename);
+  }
+
+  private void handleWriteNestedConsolidateLobs(ZipArchiveOutputStream out, ColumnStatus originalBinaryColumn,
+    ViewerRow originalRow) throws IOException, IllegalAccessException {
+    final Path consolidatedPath = LobManagerUtils.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
+      database.getUuid(), getConfigurationCollection().getTableStatusByTableId(originalRow.getTableId()).getId(),
+      originalBinaryColumn.getColumnIndex(), originalRow.getUuid());
+
+    InputStream in = new FileInputStream(consolidatedPath.toFile());
+    final String templateFilename = FilenameUtils.getTemplateFilename(originalRow,
+      getConfigurationCollection().getTableStatusByTableId(originalRow.getTableId()), originalBinaryColumn,
       consolidatedPath.getFileName().toString());
     addEntryToZip(out, in, templateFilename);
   }
@@ -234,6 +248,27 @@ public abstract class ZipOutputStream extends CSVOutputStream {
     }
   }
 
+  private void handleWriteNestedInternalLobs(ZipArchiveOutputStream out, ZipFile siardArchive,
+    ColumnStatus originalBinaryColumn, ViewerRow originalRow) throws IOException {
+    TableStatus originalConfigTable = getConfigurationCollection().getTableStatusByTableId(originalRow.getTableId());
+
+    final String templateFilename = FilenameUtils.getTemplateFilename(originalRow, originalConfigTable,
+      originalBinaryColumn);
+
+    if (LobManagerUtils.isLobEmbedded(originalConfigTable, originalRow, originalBinaryColumn.getColumnIndex())) {
+      String lobCellValue = LobManagerUtils.getLobCellValue(originalConfigTable, originalRow,
+        originalBinaryColumn.getColumnIndex());
+      lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
+      String decodedString = new String(Base64.decodeBase64(lobCellValue.getBytes()));
+
+      addEntryToZip(out, new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())), templateFilename);
+    } else {
+      final InputStream in = siardArchive.getInputStream(siardArchive.getEntry(
+        LobManagerUtils.getZipFilePath(originalConfigTable, originalBinaryColumn.getColumnIndex(), originalRow)));
+      addEntryToZip(out, in, templateFilename);
+    }
+  }
+
   private void handleWriteExternalLobs(ZipArchiveOutputStream out, ColumnStatus binaryColumn, ViewerRow row,
     ViewerCell cell) throws IOException {
     final String lobLocation = cell.getValue();
@@ -241,6 +276,19 @@ public abstract class ZipOutputStream extends CSVOutputStream {
     final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
 
     final String templateFilename = FilenameUtils.getTemplateFilename(row, configTable, binaryColumn,
+      completeLobPath.getFileName().toString());
+    InputStream inputStream = Files.newInputStream(completeLobPath);
+    addEntryToZip(out, inputStream, templateFilename);
+  }
+
+  private void handleWriteNestedExternalLobs(ZipArchiveOutputStream out, ColumnStatus originalBinaryColumn,
+    ViewerRow originalRow, ViewerCell originalCell) throws IOException {
+    final String lobLocation = originalCell.getValue();
+    final Path lobPath = Paths.get(lobLocation);
+    final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
+
+    final String templateFilename = FilenameUtils.getTemplateFilename(originalRow,
+      getConfigurationCollection().getTableStatusByTableId(originalRow.getTableId()), originalBinaryColumn,
       completeLobPath.getFileName().toString());
     InputStream inputStream = Files.newInputStream(completeLobPath);
     addEntryToZip(out, inputStream, templateFilename);
@@ -256,9 +304,10 @@ public abstract class ZipOutputStream extends CSVOutputStream {
       for (File file : Objects.requireNonNull(lobPath.toFile().listFiles())) {
         InputStream inputStream = Files.newInputStream(file.toPath());
         String extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
-        String templateFilename = index + "_" + FilenameUtils.getTemplateFilename(row, configTable, binaryColumn,
-          lobPath.getFileName().toString());
-        String templateFilenameWithActualExtension = templateFilename.replace(ExtraMediaType.ZIP_FILE_EXTENSION, "." + extension);
+        String templateFilename = index + "_"
+          + FilenameUtils.getTemplateFilename(row, configTable, binaryColumn, lobPath.getFileName().toString());
+        String templateFilenameWithActualExtension = templateFilename.replace(ExtraMediaType.ZIP_FILE_EXTENSION,
+          "." + extension);
         addEntryToZip(out, inputStream, templateFilenameWithActualExtension);
         index++;
       }
