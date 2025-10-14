@@ -350,7 +350,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     ValueChangeEvent.fire(this, searchInputListBox.getSelectedValue());
   }
 
-  public void updateSearchPanel(SearchInfo searchInfo) {
+  public void updateSearchPanelWithMap(SearchInfo searchInfo) {
     if (SearchInfo.isPresentAndValid(searchInfo)) {
       this.defaultFilter = searchInfo.getDefaultFilter();
       this.searchInputBox.setText(searchInfo.getCurrentFilter());
@@ -365,13 +365,44 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
             FilterParameter filterParameter;
             String searchFieldId = searchAdvancedFieldPanel.getSearchField().getId();
             try {
-              filterParameter = searchInfo.getFieldParameters().get(searchFieldId);
+              filterParameter = searchInfo.getMapFieldParameters().get(searchFieldId);
             } catch (IndexOutOfBoundsException e) {
               filterParameter = null;
             }
             if (filterParameter != null) {
               searchAdvancedFieldPanel.setInputFromFilterParam(filterParameter);
             }
+          }
+        }
+      }
+
+      doSearch();
+    }
+  }
+
+  public void updateSearchPanel(SearchInfo searchInfo) {
+    if (SearchInfo.isPresentAndValid(searchInfo)) {
+      this.defaultFilter = searchInfo.getDefaultFilter();
+      this.searchInputBox.setText(searchInfo.getCurrentFilter());
+
+      openSearchAdvancedPanel();
+
+      GWT.log("search info: " + searchInfo.asJson());
+      int fieldParameterIndex = 0;
+      if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
+        for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
+          if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
+            SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+            FilterParameter filterParameter;
+            try {
+              filterParameter = searchInfo.getFieldParameters().get(fieldParameterIndex);
+            } catch (IndexOutOfBoundsException e) {
+              filterParameter = null;
+            }
+            if (filterParameter != null) {
+              searchAdvancedFieldPanel.setInputFromFilterParam(filterParameter);
+            }
+            fieldParameterIndex++;
           }
         }
       }

@@ -30,7 +30,7 @@ public class SearchInfoHtmlUtils {
   public static SafeHtml getSearchInfoHtml(SearchInfo searchInfo) {
 
     final List<SearchField> fields = searchInfo.getFields();
-    final Map<String, FilterParameter> fieldParameters = searchInfo.getFieldParameters();
+    final Map<String, FilterParameter> fieldParameters = searchInfo.getMapFieldParameters();
 
     for (int i = 0; i < fields.size(); i++) {
       SearchField field = fields.get(i);

@@ -264,7 +264,11 @@ public class TableSearchPanel extends Composite {
       // END
 
       // update search panel and trigger a search
-      searchPanel.updateSearchPanel(currentSearchInfo);
+      if (currentSearchInfo.getMapFieldParameters() != null) {
+        searchPanel.updateSearchPanelWithMap(currentSearchInfo);
+      } else if (currentSearchInfo.getFieldParameters() != null) {
+        searchPanel.updateSearchPanel(currentSearchInfo);
+      }
 
       // show only visible columns
       columnDisplayNameToVisibleState.clear();
@@ -298,7 +302,7 @@ public class TableSearchPanel extends Composite {
     searchInfo.setDefaultFilter(searchPanel.getDefaultFilter());
     searchInfo.setCurrentFilter(searchPanel.getCurrentFilter());
     searchInfo.setFields(searchPanel.getAdvancedSearchSearchFields());
-    searchInfo.setFieldParameters(searchPanel.getAdvancedSearchFilterParameters());
+    searchInfo.setMapFieldParameters(searchPanel.getAdvancedSearchFilterParameters());
     return searchInfo;
   }
 
@@ -321,8 +325,8 @@ public class TableSearchPanel extends Composite {
     initialSearch.setDefaultFilter(searchPanel.getDefaultFilter());
     initialSearch.setCurrentFilter(initialQuery);
     initialSearch.setFields(searchPanel.getAdvancedSearchSearchFields());
-    initialSearch.setFieldParameters(searchPanel.getAdvancedSearchFilterParameters());
-    searchPanel.updateSearchPanel(initialSearch);
+    initialSearch.setMapFieldParameters(searchPanel.getAdvancedSearchFilterParameters());
+    searchPanel.updateSearchPanelWithMap(initialSearch);
     searchPanel.closeSearchAdvancedPanel();
     searchPanel.setClearCrossButtonVisible(true);
   }
