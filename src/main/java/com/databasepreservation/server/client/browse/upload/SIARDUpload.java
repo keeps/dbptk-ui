@@ -161,7 +161,7 @@ public class SIARDUpload extends RightPanel {
             // Toast.showError("Cannot create SIARD", PathUtils.getFileName(path));
             item.addClassName("error");
             doneItemLoadHandler(item, errorMessage, null);
-          }).create(path, ViewerConstants.SiardVersion.V2_1);
+          }).create(path, ViewerConstants.SiardVersion.V2_2);
         }
       });
     } else {
