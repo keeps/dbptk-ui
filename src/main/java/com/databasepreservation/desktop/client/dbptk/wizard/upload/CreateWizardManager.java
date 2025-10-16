@@ -502,6 +502,6 @@ public class CreateWizardManager extends WizardManager {
       HistoryManager.gotoHome();
       Dialogs.showErrors(messages.createSIARDWizardManagerInformationMessagesTitle(), errorMessage,
         messages.basicActionClose());
-    }).create(path, ViewerConstants.SiardVersion.V2_1);
+    }).create(path, ViewerConstants.SiardVersion.V2_2);
   }
 }

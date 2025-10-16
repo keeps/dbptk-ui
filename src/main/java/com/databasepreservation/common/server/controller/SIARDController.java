@@ -19,15 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipFile;
 
-import com.databasepreservation.common.api.exceptions.IllegalAccessException;
-import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
-import com.databasepreservation.common.api.v1.utils.StringResponse;
-import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
-import com.databasepreservation.common.client.models.status.database.Indicators;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.server.storage.fs.FSUtils;
-import com.databasepreservation.modules.siard.SIARDDKModuleFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +35,9 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
 import com.databasepreservation.SIARDValidation;
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.filter.Filter;
@@ -50,6 +46,7 @@ import com.databasepreservation.common.client.models.authorization.Authorization
 import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
+import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -73,6 +70,7 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
+import com.databasepreservation.common.server.storage.fs.FSUtils;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
@@ -93,6 +91,7 @@ import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDDK1007ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDDK128ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDDKEditFactory;
+import com.databasepreservation.modules.siard.SIARDDKModuleFactory;
 import com.databasepreservation.modules.siard.SIARDEditFactory;
 import com.databasepreservation.modules.siard.SIARDValidateFactory;
 import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
@@ -641,7 +640,8 @@ public class SIARDController {
         || siardVersion.equals(ViewerConstants.SiardVersion.DK_128)) {
         siardEdition.editModule(new SIARDDKEditFactory()).editModuleParameter(SIARDDKEditFactory.PARAMETER_FOLDER,
           Collections.singletonList(siardPath.toAbsolutePath().toString()));
-      } else if (siardVersion.equals(ViewerConstants.SiardVersion.V2_1)) {
+      } else if (siardVersion.equals(ViewerConstants.SiardVersion.V2_1)
+        || siardVersion.equals(ViewerConstants.SiardVersion.V2_2)) {
         siardEdition.editModule(new SIARDEditFactory()).editModuleParameter(SIARDEditFactory.PARAMETER_FILE,
           Collections.singletonList(siardPath.toAbsolutePath().toString()));
       } else {
@@ -700,8 +700,22 @@ public class SIARDController {
       } else {
         return ViewerConstants.SiardVersion.DK_1007;
       }
+    } else {
+      try (ZipFile siard = new ZipFile(path.toFile())) {
+        if (siard.getEntry("header/siardversion/2.0") != null) {
+          return ViewerConstants.SiardVersion.V2_0;
+        } else if (siard.getEntry("header/siardversion/2.1") != null) {
+          return ViewerConstants.SiardVersion.V2_1;
+        } else if (siard.getEntry("header/siardversion/2.2") != null) {
+          return ViewerConstants.SiardVersion.V2_2;
+        }
+      } catch (IOException e) {
+        LOGGER.error("Could not open the SIARD file to detect the version.", e);
+        return null;
+      }
     }
-    return ViewerConstants.SiardVersion.V2_1;
+    LOGGER.error("Could not detect SIARD version (" + path + ").");
+    return null;
   }
 
   private static void validateSIARDLocation(Path siardPath) throws GenericException {
@@ -773,7 +787,7 @@ public class SIARDController {
           .importModuleParameter(SIARDDK1007ModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
           .importModuleParameter(SIARDDK1007ModuleFactory.PARAMETER_AS_SCHEMA,
             ViewerConstants.SIARDDK_DEFAULT_SCHEMA_NAME);
-      } else if (siardVersion.equals(ViewerConstants.SIARD_V21)) {
+      } else if (siardVersion.equals(ViewerConstants.SIARD_V21) || siardVersion.equals(ViewerConstants.SIARD_V22)) {
         databaseMigration.importModule(new SIARD2ModuleFactory())
           .importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath.toAbsolutePath().toString())
           .importModuleParameter(SIARD2ModuleFactory.PARAMETER_IGNORE_LOBS, "true");

@@ -452,6 +452,7 @@ public class ViewerConstants {
   public static final String SIARD_V10 = "1.0";
   public static final String SIARD_V20 = "2.0";
   public static final String SIARD_V21 = "2.1";
+  public static final String SIARD_V22 = "2.2";
   public static final String SIARD_DK = "dk";
   public static final String SIARD_DK_1007 = "dk-1007";
   public static final String SIARD_DK_128 = "dk-128";
@@ -544,8 +545,8 @@ public class ViewerConstants {
   public static final String TEMPLATE_LOB_AUTO_DETECTED_MIME_TYPE = "auto_detected_mime_type";
   public static final String TEMPLATE_LOB_AUTO_DETECTED_EXTENSION = "auto_detected_extension";
   public static final String DEFAULT_VIEWER_DOWNLOAD_LABEL_TEMPLATE = "<a href=\""
-    + ViewerConstants.OPEN_TEMPLATE_ENGINE
-    + ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + ViewerConstants.OPEN_TEMPLATE_ENGINE
+    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK
+    + ViewerConstants.CLOSE_TEMPLATE_ENGINE + ViewerConstants.OPEN_TEMPLATE_ENGINE
     + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">"
     + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL
     + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</a>";
@@ -554,10 +555,11 @@ public class ViewerConstants {
     + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL
     + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</a>";
   public static final String DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE = "<iframe class=\"embedded-iiif-viewer\" src=\""
-    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE
-    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK
-    + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">" + ViewerConstants.OPEN_TEMPLATE_ENGINE
-    + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</iframe>";
+    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK
+    + ViewerConstants.CLOSE_TEMPLATE_ENGINE + ViewerConstants.OPEN_TEMPLATE_ENGINE
+    + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">"
+    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL
+    + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</iframe>";
 
   /**
    * SIARD prefixes
@@ -617,7 +619,7 @@ public class ViewerConstants {
   public static final String SIARDDK_RESEARCH_INDEX_FILE = "researchIndex.xsd";
 
   public enum SiardVersion {
-    V1_0, V2_0, V2_1, DK, DK_1007, DK_128;
+    V1_0, V2_0, V2_1, V2_2, DK, DK_1007, DK_128;
   }
 
   /**
