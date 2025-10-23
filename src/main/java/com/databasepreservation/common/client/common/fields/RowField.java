@@ -13,7 +13,12 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -81,28 +86,30 @@ public class RowField extends Composite {
   }
 
   public void addRelatedTo(SafeHtml safeHtml) {
-    addRelatedTo(safeHtml, null);
+    addRelatedTo(safeHtml, null, null);
   }
 
-  public void addRelatedTo(SafeHtml safeHtml, String css) {
+  public void addRelatedTo(SafeHtml safeHtml, String tooltip, String css) {
     FlowPanel panel = new FlowPanel();
     if (css != null) {
       panel.addStyleName(css);
     }
     panel.add(new HTML(safeHtml));
+    panel.setTitle(tooltip);
     main.add(panel);
   }
 
   public void addReferencedBy(SafeHtml safeHtml) {
-    addReferencedBy(safeHtml, null);
+    addReferencedBy(safeHtml, null, null);
   }
 
-  public void addReferencedBy(SafeHtml safeHtml, String css) {
+  public void addReferencedBy(SafeHtml safeHtml, String tooltip, String css) {
     FlowPanel panel = new FlowPanel();
     if (css != null) {
       panel.addStyleName(css);
     }
     panel.add(new HTML(safeHtml));
+    panel.setTitle(tooltip);
     main.add(panel);
   }
 }

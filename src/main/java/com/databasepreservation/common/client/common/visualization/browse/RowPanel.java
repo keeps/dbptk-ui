@@ -78,8 +78,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
-import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE;
-
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
@@ -309,6 +307,19 @@ public class RowPanel extends RightPanel {
     }
   }
 
+  private String getRelatedDescriptionTooltip(Set<Ref> refs) {
+    StringBuilder sb = new StringBuilder();
+    for (Ref ref : refs) {
+      if (ViewerStringUtils.isNotBlank(ref.getTableDescription())) {
+        if (sb.length() > 0) {
+          sb.append("\n");
+        }
+        sb.append(ref.getTableDescription());
+      }
+    }
+    return sb.toString();
+  }
+
   private void getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy, boolean isPrimaryKeyColumn,
     ColumnStatus columnStatus) {
     String label = columnStatus.getCustomName();
@@ -394,11 +405,13 @@ public class RowPanel extends RightPanel {
     }
 
     if (relatedTo != null && !relatedTo.isEmpty()) {
-      rowField.addRelatedTo(getForeignKeyHTML(messages.references_isRelatedTo(), relatedTo, row), "field");
+      rowField.addRelatedTo(getForeignKeyHTML(messages.references_isRelatedTo(), relatedTo, row),
+        getRelatedDescriptionTooltip(relatedTo), "field");
     }
 
     if (referencedBy != null && !referencedBy.isEmpty()) {
-      rowField.addReferencedBy(getForeignKeyHTML(messages.references_isReferencedBy(), referencedBy, row), "field");
+      rowField.addReferencedBy(getForeignKeyHTML(messages.references_isReferencedBy(), referencedBy, row),
+        getRelatedDescriptionTooltip(referencedBy), "field");
     }
 
     if (showNullValues) {
@@ -562,6 +575,10 @@ public class RowPanel extends RightPanel {
 
     public String getSchemaAndTableName() {
       return refTable.getSchemaName() + "." + refTable.getName();
+    }
+
+    public String getTableDescription() {
+      return refTable.getDescription();
     }
 
     public String getSingleColumnIndex() {
