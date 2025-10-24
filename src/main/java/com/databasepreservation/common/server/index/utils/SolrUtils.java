@@ -65,6 +65,7 @@ import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.BlockJoinAnyParentExpiryFilterParameter;
 import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
+import com.databasepreservation.common.client.index.filter.CrossCollectionInnerJoinFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateIntervalFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
 import com.databasepreservation.common.client.index.filter.EmptyKeyFilterParameter;
@@ -676,10 +677,15 @@ public class SolrUtils {
       InnerJoinFilterParameter param = (InnerJoinFilterParameter) parameter;
       ret.append("{!join from=nestedOriginalUUID to=uuid }_root_:" + param.getRowUUID() + " AND nestedUUID:"
         + param.getNestedOriginalUUID());
+    } else if (parameter instanceof CrossCollectionInnerJoinFilterParameter) {
+      CrossCollectionInnerJoinFilterParameter param = (CrossCollectionInnerJoinFilterParameter) parameter;
+      ret.append(
+        "{!join method=crossCollection fromIndex=" + param.getFromIndex() + " from=nestedOriginalUUID to=uuid }_root_:"
+          + param.getRowUUID() + " AND nestedUUID:" + param.getNestedOriginalUUID());
     } else if (parameter instanceof BlockJoinParentFilterParameter) {
       BlockJoinParentFilterParameter param = (BlockJoinParentFilterParameter) parameter;
-      ret.append("+({!parent which='tableId:" + param.getParentTableId() + "' filters='nestedUUID:" + param.getNestedUUID()
-        + "' }" + param.getSolrName() + ":" + param.getValue() + ")");
+      ret.append("+({!parent which='tableId:" + param.getParentTableId() + "' filters='nestedUUID:"
+        + param.getNestedUUID() + "' }" + param.getSolrName() + ":" + param.getValue() + ")");
     } else {
       LOGGER.error("Unsupported filter parameter class: {}", parameter.getClass().getName());
       throw new RequestNotValidException("Unsupported filter parameter class: " + parameter.getClass().getName());

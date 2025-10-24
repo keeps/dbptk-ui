@@ -33,9 +33,9 @@ import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.filter.CrossCollectionInnerJoinFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
-import com.databasepreservation.common.client.index.filter.InnerJoinFilterParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
@@ -77,8 +77,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-
-import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -416,7 +414,8 @@ public class RowPanel extends RightPanel {
       ViewerTable nestedTable = database.getMetadata().getTableById(nestedColumns.getOriginalTable());
 
       List<FilterParameter> filterParameterList = new ArrayList<>();
-      filterParameterList.add(new InnerJoinFilterParameter(rowUUID, columnStatus.getId()));
+      filterParameterList.add(new CrossCollectionInnerJoinFilterParameter(rowUUID, columnStatus.getId(),
+        ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid()));
       Filter filter = new Filter();
       filter.add(filterParameterList);
 
