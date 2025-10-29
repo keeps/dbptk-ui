@@ -9,7 +9,13 @@ package com.databasepreservation.common.client.index.filter;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
+ * 
+ * @deprecated Does not work for sharded solr deployments. Use
+ *             {@link CrossCollectionInnerJoinFilterParameter} if querying
+ *             fields a single sharded collection
  */
+
+@Deprecated()
 public class InnerJoinFilterParameter extends FilterParameter {
   private static final long serialVersionUID = 2618241901314423671L;
   private String rowUUID;
