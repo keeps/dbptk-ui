@@ -34,7 +34,7 @@
         <version.cas-client>4.0.4</version.cas-client>
         <version.solr>9.8.0</version.solr>
         <version.springboot>3.4.1</version.springboot>
-        <version.logback>1.5.16</version.logback>
+        <version.logback>1.5.19</version.logback>
 
         <desktop>com.databasepreservation.desktop.Desktop</desktop>
         <server>com.databasepreservation.server.Server</server>
