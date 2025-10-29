@@ -136,11 +136,9 @@ public class DatabaseResource implements DatabaseService {
     } catch (GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       if (e.getCause() != null) {
-        if (e.getCause().getCause() != null) {
-          LOGGER.error("Database creation failed: {}", e.getCause().getCause().toString());
-        } else {
-          LOGGER.error("Database creation failed: {}", e.getCause().toString());
-        }
+        LOGGER.error("Database creation failed: {}", e.getCause().toString());
+      } else {
+        LOGGER.error("Database creation failed: {}", e.toString());
       }
       throw new RESTException(e);
     } finally {
