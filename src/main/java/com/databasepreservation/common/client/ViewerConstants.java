@@ -357,6 +357,8 @@ public class ViewerConstants {
 
   public static final String API_V1_REPORT_RESOURCE = "/v1/report";
 
+  public static final String API_V1_COLLECTION_RESOURCE = "/v1/collection";
+
   public static final String API_V1_FILE_RESOURCE = "/v1/file";
   public static final String API_PATH_PARAM_SIARD = "siard";
   public static final String API_PATH_PARAM_DOWNLOAD = "download";
@@ -486,6 +488,11 @@ public class ViewerConstants {
   public static final String DEFAULT_ATTRIBUTE_EMAIL = "email";
   public static final String DEFAULT_ATTRIBUTE_ROLES = "memberOf";
   public static final String ROLES_PREFIX = "user.attribute.roles.";
+
+  /*
+   * USER EXPORT FIELDS
+   */
+  public static final String USER_EXPORT_FULLNAME_ATTRIBUTE = "user.export.fullname";
 
   /*
    * ASSISTANT CONTROLLER
