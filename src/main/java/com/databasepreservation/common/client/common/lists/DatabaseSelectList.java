@@ -32,11 +32,12 @@ public class DatabaseSelectList extends DatabaseList {
   private final ClientLogger logger = new ClientLogger(getClass().getName());
 
   public DatabaseSelectList() {
-    this(new Filter(), null, null, false, false);
+    this(new Filter(), null, null, false, false, false);
   }
 
-  public DatabaseSelectList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
-    super(filter, facets, summary, selectable, exportable);
+  public DatabaseSelectList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable,
+    boolean copiable) {
+    super(filter, facets, summary, selectable, exportable, copiable);
     setPersistSelections(true);
   }
 
@@ -101,7 +102,8 @@ public class DatabaseSelectList extends DatabaseList {
     Column<ViewerDatabase, SafeHtml> versionColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(database.getVersion()) : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
+        return database != null ? SafeHtmlUtils.fromString(database.getVersion())
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 

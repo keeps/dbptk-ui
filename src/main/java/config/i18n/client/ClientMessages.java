@@ -584,6 +584,8 @@ public interface ClientMessages extends Messages {
 
   String basicActionExport();
 
+  String basicActionCopySelected();
+
   String basicActionConfiguration();
 
   String basicActionEditPermissions();

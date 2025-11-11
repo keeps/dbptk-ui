@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.tools.HistoryManager;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -32,6 +31,7 @@ import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.widgets.Alert;
@@ -58,12 +58,13 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   private boolean getDataTrigger = false;
 
   public CrossDatabaseList() {
-    this(new Filter(), null, null, false, false);
+    this(new Filter(), null, null, false, false, false);
     this.searchValue = "";
   }
 
-  public CrossDatabaseList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
-    super(filter, facets, summary, selectable, exportable, 15, 15);
+  public CrossDatabaseList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable,
+    boolean copiable) {
+    super(filter, facets, summary, selectable, exportable, copiable, 15, 15);
   }
 
   @Override
@@ -264,6 +265,10 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   @Override
   public void exportClickHandler() {
     // do nothing
+  }
+
+  @Override
+  public void selectedToCopyHtml() {
   }
 
   @Override

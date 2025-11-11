@@ -59,15 +59,16 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
   private final boolean showInUTC;
 
   public ActivityLogList() {
-    this(null, null, null, false, false);
+    this(null, null, null, false, false, false);
   }
 
-  public ActivityLogList(Filter filter, Facets facets, boolean selectable, boolean exportable) {
-    this(filter, facets, null, selectable, exportable);
+  public ActivityLogList(Filter filter, Facets facets, boolean selectable, boolean exportable, boolean copiable) {
+    this(filter, facets, null, selectable, exportable, copiable);
   }
 
-  private ActivityLogList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
-    super(filter, facets, summary, selectable, exportable, INITIAL_PAGE_SIZE, INITIAL_PAGE_SIZE_INCREMENT);
+  private ActivityLogList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable,
+    boolean copiable) {
+    super(filter, facets, summary, selectable, exportable, copiable, INITIAL_PAGE_SIZE, INITIAL_PAGE_SIZE_INCREMENT);
     this.showInUTC = ClientConfigurationManager.getBoolean(false, "ui.interface.show.datetime.utc");
   }
 
@@ -108,7 +109,8 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
     userColumn = new TooltipColumn<ActivityLogEntry>() {
       @Override
       public SafeHtml getValue(ActivityLogEntry log) {
-        return log != null ? SafeHtmlUtils.fromString(log.getUsername()) : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
+        return log != null ? SafeHtmlUtils.fromString(log.getUsername())
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -123,14 +125,16 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
     addressColumn = new TooltipColumn<ActivityLogEntry>() {
       @Override
       public SafeHtml getValue(ActivityLogEntry log) {
-        return log != null ? SafeHtmlUtils.fromString(log.getAddress()) : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
+        return log != null ? SafeHtmlUtils.fromString(log.getAddress())
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
     outcomeColumn = new Column<ActivityLogEntry, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ActivityLogEntry log) {
-        return log != null ? LabelUtils.getLogEntryState(log.getState()) : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
+        return log != null ? LabelUtils.getLogEntryState(log.getState())
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
 
@@ -181,5 +185,10 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
   @Override
   public void exportClickHandler() {
     // do nothing, for now
+  }
+
+  @Override
+  public void selectedToCopyHtml() {
+
   }
 }

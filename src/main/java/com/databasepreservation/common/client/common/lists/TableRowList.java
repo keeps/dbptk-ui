@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -38,6 +39,8 @@ import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.OneOfManyFilterParameter;
+import com.databasepreservation.common.client.index.select.SelectedItemsList;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
@@ -95,8 +98,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   private final boolean showInUTC;
 
   public TableRowList(ViewerDatabase database, ViewerTable table, Filter filter, Facets facets, String summary,
-    boolean selectable, boolean exportable, CollectionStatus status, Boolean isNested) {
-    super(filter, false, facets, summary, selectable, exportable,
+    boolean selectable, boolean exportable, boolean copiable, CollectionStatus status, Boolean isNested) {
+    super(filter, false, facets, summary, selectable, exportable, copiable,
       new TableRowListWrapper(database, table, status, isNested));
     this.viewerTable = table;
     this.database = database;
@@ -144,6 +147,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     final ViewerDatabase database = wrapper.getDatabase();
     final CollectionStatus status = wrapper.getStatus();
     TableStatus tableStatus = status.getTableStatus(table.getUuid());
+
+    setSelectedClass(ViewerRow.class);
 
     configColumns = new LinkedHashMap<>(tableStatus.getVisibleColumnsList().size());
 
@@ -454,9 +459,9 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       String json = "";
       if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
         json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
-          ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(), ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
-          RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
-            columnIndex));
+          ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
+          ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+            table.getSchemaName(), table.getName(), row.getUuid(), columnIndex));
       } else {
         json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
           ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
@@ -559,6 +564,105 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           }
         }
       });
+  }
+
+  @Override
+  public void selectedToCopyHtml() {
+    Filter rowsFilter = new Filter(getFilter());
+    if (getSelected() instanceof SelectedItemsList<?>) {
+      SelectedItemsList<ViewerRow> selectedList = (SelectedItemsList<ViewerRow>) getSelected();
+      List<String> ids = selectedList.getIds();
+      rowsFilter.add(new OneOfManyFilterParameter("uuid", ids));
+    }
+    TableRowListWrapper wrapper = getObject();
+    ViewerTable table = wrapper.getTable();
+    CollectionStatus status = wrapper.getStatus();
+    Map<String, String> extraParameters = new HashMap<>();
+    List<String> fieldsToReturn = new ArrayList<>();
+    fieldsToReturn.add(ViewerConstants.INDEX_ID);
+
+    boolean hasNested = false;
+
+    for (ColumnStatus column : status.getTableStatus(table.getUuid()).getVisibleColumnsList()) {
+      if (column.getNestedColumns() != null) {
+        hasNested = true;
+      } else {
+        fieldsToReturn.add(column.getId());
+      }
+    }
+
+    if (hasNested) {
+      DataTransformationUtils.buildNestedFieldsToReturn(wrapper.getTable(), wrapper.getStatus(), extraParameters,
+        fieldsToReturn);
+    }
+
+    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), rowsFilter, currentSorter, currentSubList,
+      getFacets(), false, fieldsToReturn, extraParameters);
+
+    if (!wrapper.isNested()) {
+      FilterUtils.filterByTable(rowsFilter, table.getSchemaName() + "." + table.getName());
+    }
+
+    CollectionService.Util.call(new MethodCallback<IndexResult<ViewerRow>>() {
+      @Override
+      public void onFailure(Method method, Throwable throwable) {
+        GWT.log("Couldn't copy rows.", throwable);
+      }
+
+      @Override
+      public void onSuccess(Method method, IndexResult<ViewerRow> o) {
+        TableStatus tableStatus = status.getTableStatus(table.getUuid());
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table>");
+        for (ViewerRow row : o.getResults()) {
+          sb.append("<tr>");
+          for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
+            sb.append("<td>");
+            if (!NESTED.equals(configColumn.getType())) {
+              // Treat as non nested
+              if (BINARY.equals(configColumn.getType()) || CLOB.equals(configColumn.getType())) {
+                // do nothing
+              } else {
+                sb.append(SafeHtmlUtils.htmlEscape(row.getCells().get(configColumn.getId()).getValue()));
+              }
+            } else {
+              // Treat as nested
+              // this is the table of nested document
+              ViewerTable nestedTable = database.getMetadata()
+                .getTableById(configColumn.getNestedColumns().getOriginalTable());
+              if (configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
+                // do nothing
+              } else {
+                boolean isFirst = true;
+                for (ViewerRow nestedRow : row.getNestedRowList()) {
+                  if (!isFirst) {
+                    sb.append(", ");
+                  } else {
+                    isFirst = false;
+                  }
+                  boolean isFirstNested = true;
+                  for (String nestedSolrName : configColumn.getNestedColumns().getNestedSolrNames()) {
+                    if (nestedRow.getCells().containsKey("nst_" + nestedSolrName)) {
+                      if (!isFirstNested) {
+                        sb.append(" ");
+                      } else {
+                        isFirstNested = false;
+                      }
+                      sb.append(nestedRow.getCells().get("nst_" + nestedSolrName).getValue());
+                    }
+                  }
+                }
+              }
+            }
+            sb.append("</td>");
+          }
+          sb.append("</tr>");
+        }
+        sb.append("</table>");
+        JavascriptUtils.copyToClipboard(sb.toString());
+      }
+    }).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(), table.getSchemaName(),
+      table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
   public void refreshColumnVisibility() {

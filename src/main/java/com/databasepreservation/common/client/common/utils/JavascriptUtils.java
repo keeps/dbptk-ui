@@ -354,4 +354,14 @@ public class JavascriptUtils {
                                                                                 var element = $wnd.jQuery("#" + elementId);
                                                                                 element.removeAttr(attribute);
                                                                                 }-*/;
+
+  public static native void copyToClipboard(String text) /*-{
+                                                          var textArea = document.createElement("textarea");
+                                                          textArea.value = text;
+                                                          document.body.appendChild(textArea);
+                                                          textArea.focus();
+                                                          textArea.select();
+                                                          document.execCommand('copy');
+                                                          document.body.removeChild(textArea);
+                                                          }-*/;
 }
