@@ -14,7 +14,6 @@ import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
-import com.databasepreservation.common.client.common.helpers.HelperUploadSIARDFile;
 import com.databasepreservation.common.client.common.lists.CrossDatabaseList;
 import com.databasepreservation.common.client.common.lists.DatabaseList;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCellOptions;
@@ -31,7 +30,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -67,6 +65,12 @@ public class DatabaseManage extends ContentPanel {
   @UiField
   SimplePanel openPanel;
 
+  @UiField
+  SimplePanel exportDatabasesPanel;
+
+  @UiField
+  SimplePanel exportUsersPanel;
+
   @UiField(provided = true)
   SearchWrapper search;
 
@@ -75,6 +79,12 @@ public class DatabaseManage extends ContentPanel {
 
   @UiField
   Button open;
+
+  @UiField
+  Button exportDatabases;
+
+  @UiField
+  Button exportUsers;
 
   private static DatabaseManage instance = null;
 
@@ -101,7 +111,8 @@ public class DatabaseManage extends ContentPanel {
     ListBuilder<ViewerDatabase> databaseSearchAll = new ListBuilder<>(() -> {
       CrossDatabaseList allDatabaseList = new CrossDatabaseList();
       allDatabaseList.getSelectionModel().addSelectionChangeHandler(event -> {
-        allDatabaseList.setSearchValue(search.getComponents().getSearchPanel(ViewerConstants.SEARCH_ALL_LIST_ID).getCurrentFilter());
+        allDatabaseList
+          .setSearchValue(search.getComponents().getSearchPanel(ViewerConstants.SEARCH_ALL_LIST_ID).getCurrentFilter());
       });
       return allDatabaseList;
     }, new AsyncTableCellOptions<>(ViewerDatabase.class, ViewerConstants.SEARCH_ALL_LIST_ID));
@@ -136,7 +147,19 @@ public class DatabaseManage extends ContentPanel {
         Window.open("https://database-preservation.com/#desktop", "_blank", "");
       });
       open.addClickHandler(event -> HistoryManager.gotoNewUpload());
+      exportDatabases.addClickHandler(event -> Window.Location.assign(getExportDatabasesUrl()));
+      exportUsers.addClickHandler(event -> Window.Location.assign(getExportUsersUrl()));
     }
+  }
+
+  private String getExportDatabasesUrl() {
+    return GWT.getHostPageBaseURL() + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE
+      + ViewerConstants.API_SEP + "export";
+  }
+
+  private String getExportUsersUrl() {
+    return GWT.getHostPageBaseURL() + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_CONTEXT_RESOURCE
+      + ViewerConstants.API_SEP + "authorizations/csv";
   }
 
   /**

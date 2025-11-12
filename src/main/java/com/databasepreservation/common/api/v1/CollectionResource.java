@@ -1001,7 +1001,7 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  @RequestMapping(path = "/export", method = RequestMethod.POST)
+  @RequestMapping(path = "/export", method = RequestMethod.GET)
   @Operation(summary = "Exports list of loaded databases to CSV")
   public ResponseEntity<StreamingResponseBody> exportDatabases() {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};

@@ -30,7 +30,6 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import com.databasepreservation.common.api.exceptions.RESTException;
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.api.utils.StreamResponse;
-import com.databasepreservation.common.api.v1.utils.DatabasesCSVOutputStream;
 import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.api.v1.utils.UsersCSVOutputStream;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -115,10 +114,13 @@ public class ContextResource implements ContextService {
     try {
       user = controllerAssistant.checkRoles(request);
       findRequest = new FindRequest(ViewerDatabase.class.getName(), new Filter(), new Sorter(), null, null, false,
-          List.of(ViewerConstants.SOLR_DATABASES_METADATA));
+        List.of(ViewerConstants.SOLR_DATABASES_METADATA, "uuid"));
+      AuthorizationGroupsList authorizationGroupsList = ViewerConfiguration.getInstance()
+        .getCollectionsAuthorizationGroupsWithDefault();
       try (IterableDatabaseResult<ViewerDatabase> allDatabases = solrManager.findAll(ViewerDatabase.class,
-          findRequest.filter, findRequest.sorter, findRequest.fieldsToReturn)) {
-        return ApiUtils.okResponse(new StreamResponse(new DatabasesCSVOutputStream(allDatabases, "users.csv", ',')));
+        findRequest.filter, findRequest.sorter, findRequest.fieldsToReturn)) {
+        return ApiUtils.okResponse(
+          new StreamResponse(new UsersCSVOutputStream(allDatabases, authorizationGroupsList, "users.csv", ',')));
       }
     } catch (AuthorizationException | IOException e) {
       state = LogEntryState.FAILURE;

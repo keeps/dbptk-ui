@@ -23,6 +23,16 @@
                         <ui:text from='{messages.managePageButtonTextForCreateSIARD}'/>
                     </g:Button>
                 </g:SimplePanel>
+                <g:SimplePanel ui:field="exportDatabasesPanel" addStyleNames="button-group-panel-btn">
+                    <g:Button addStyleNames="btn btn-primary" ui:field="exportDatabases">
+                        <ui:text from='{messages.managePageButtonTextForExportDatabases}'/>
+                    </g:Button>
+                </g:SimplePanel>
+                <g:SimplePanel ui:field="exportUsersPanel" addStyleNames="button-group-panel-btn">
+                    <g:Button addStyleNames="btn btn-primary" ui:field="exportUsers">
+                        <ui:text from='{messages.managePageButtonTextForExportUsers}'/>
+                    </g:Button>
+                </g:SimplePanel>
             </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>

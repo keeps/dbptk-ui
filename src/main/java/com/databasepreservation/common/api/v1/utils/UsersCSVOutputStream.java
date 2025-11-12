@@ -3,6 +3,7 @@ package com.databasepreservation.common.api.v1.utils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,18 +12,27 @@ import java.util.Map;
 
 import org.apache.commons.csv.CSVPrinter;
 import org.roda.core.data.exceptions.GenericException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
+import com.databasepreservation.common.server.index.utils.Pair;
 
 /**
  * @author Alexandre Flores <aflores@keep.pt>
  */
 public class UsersCSVOutputStream extends CSVOutputStream {
-  /** The results to write to output stream. */
+  private static final Logger LOGGER = LoggerFactory.getLogger(UsersCSVOutputStream.class);
+
+  /** The loaded databases. */
   private final IterableDatabaseResult<ViewerDatabase> databases;
+  /** The system users */
+  private final AuthorizationGroupsList authorizationGroups;
 
   /**
    * Constructor.
@@ -34,10 +44,11 @@ public class UsersCSVOutputStream extends CSVOutputStream {
    * @param delimiter
    *          the CSV field delimiter.
    */
-  public UsersCSVOutputStream(final IterableDatabaseResult<ViewerDatabase> databases, final String filename,
-    final char delimiter) {
+  public UsersCSVOutputStream(final IterableDatabaseResult<ViewerDatabase> databases,
+    AuthorizationGroupsList authorizationGroups, final String filename, final char delimiter) {
     super(filename, delimiter);
     this.databases = databases;
+    this.authorizationGroups = authorizationGroups;
   }
 
   @Override
@@ -68,28 +79,36 @@ public class UsersCSVOutputStream extends CSVOutputStream {
     boolean isFirst = true;
 
     Iterator<ViewerDatabase> iterator = this.databases.iterator();
-    Map<String, List<String>> usersMap = new HashMap<>();
+    Map<String, Pair<String, List<String>>> usersMap = new HashMap<>();
+
+    for (AuthorizationGroup group : this.authorizationGroups.getAuthorizationGroupsList()) {
+      if (group.getAttributeName().equals("userPrincipalName")) {
+        usersMap.put(group.getAttributeValue(), Pair.of(group.getLabel(), new ArrayList<>()));
+      }
+    }
 
     while (iterator.hasNext()) {
       ViewerDatabase database = iterator.next();
-      Map<String, AuthorizationDetails> permissions = ViewerFactory.getConfigurationManager()
-        .getDatabaseStatus(database.getUuid()).getPermissions();
-      for (Map.Entry<String, AuthorizationDetails> entry : permissions.entrySet()) {
-        String user = entry.getKey();
-        if (!usersMap.containsKey(user)) {
-          usersMap.put(user, List.of(database.getMetadata().getName()));
-        } else {
-          usersMap.get(user).add(database.getMetadata().getName());
+      try {
+        Map<String, AuthorizationDetails> permissions = ViewerFactory.getConfigurationManager()
+          .getDatabaseStatus(database.getUuid()).getPermissions();
+        for (Map.Entry<String, AuthorizationDetails> entry : permissions.entrySet()) {
+          String user = entry.getKey();
+          if (usersMap.containsKey(user)) {
+            usersMap.get(user).getSecond().add(database.getMetadata().getName());
+          }
         }
+      } catch (GenericException e) {
+        LOGGER.debug("Skipping database {} without permissions", e);
       }
     }
-    for (Map.Entry<String, List<String>> entry : usersMap.entrySet()) {
+    for (Map.Entry<String, Pair<String, List<String>>> entry : usersMap.entrySet()) {
       if (isFirst) {
-        printer = getFormat().withHeader("User", "Databases").print(writer);
+        printer = getFormat().withHeader("Name", "Label", "Databases").print(writer);
         isFirst = false;
       }
 
-      printer.printRecord(entry.getKey(), String.join(", ", entry.getValue()));
+      printer.printRecord(entry.getKey(), entry.getValue().getFirst(), String.join(", ", entry.getValue().getSecond()));
     }
   }
 }
