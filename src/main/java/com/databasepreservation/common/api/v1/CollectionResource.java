@@ -25,9 +25,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import com.databasepreservation.common.api.exceptions.IllegalAccessException;
-import com.databasepreservation.common.api.v1.utils.JobResponse;
-import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -65,6 +62,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.api.exceptions.RESTException;
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.api.utils.DownloadUtils;
@@ -72,6 +70,8 @@ import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.api.utils.StreamResponse;
 import com.databasepreservation.common.api.utils.ViewerStreamingOutput;
 import com.databasepreservation.common.api.v1.utils.IterableIndexResultsCSVOutputStream;
+import com.databasepreservation.common.api.v1.utils.JobResponse;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import com.databasepreservation.common.api.v1.utils.ResultsCSVOutputStream;
 import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.api.v1.utils.ZipOutputStreamMultiRow;
@@ -808,7 +808,8 @@ public class CollectionResource implements CollectionService {
 
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
     return ApiUtils.okResponse(new ViewerStreamingOutput(
-      new ResultsCSVOutputStream(row, configTable, filename, exportDescriptions, ',', String.join(",", fieldsToReturn)))
+      new ResultsCSVOutputStream(row, configTable, filename, exportDescriptions, ',', String.join(",", fieldsToReturn),
+        databaseUUID))
       .toStreamResponse());
   }
 
@@ -817,7 +818,7 @@ public class CollectionResource implements CollectionService {
     boolean exportDescriptions) throws GenericException {
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
     return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamSingleRow(configurationCollection, database,
-      configTable, row, zipFilename, filename, fieldsToReturn, exportDescriptions)));
+      configTable, row, zipFilename, filename, fieldsToReturn, exportDescriptions, database.getUuid())));
   }
 
   private ResponseEntity<StreamingResponseBody> handleCSVExport(DatabaseRowsSolrManager solrManager,
@@ -827,13 +828,13 @@ public class CollectionResource implements CollectionService {
       final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
         findRequest.fieldsToReturn, findRequest.extraParameters);
       return ApiUtils.okResponse(new ViewerStreamingOutput(new IterableIndexResultsCSVOutputStream(allRows, configTable,
-        filename, exportDescriptions, ',', fieldsToHeader)).toStreamResponse());
+        filename, exportDescriptions, ',', fieldsToHeader, databaseUUID)).toStreamResponse());
     } else {
       final IndexResult<ViewerRow> rows = solrManager.findRows(databaseUUID, findRequest.filter, findRequest.sorter,
         findRequest.sublist, null, findRequest.fieldsToReturn, findRequest.extraParameters);
 
       return ApiUtils.okResponse(new ViewerStreamingOutput(
-        new ResultsCSVOutputStream(rows, configTable, filename, exportDescriptions, ',', fieldsToHeader))
+        new ResultsCSVOutputStream(rows, configTable, filename, exportDescriptions, ',', fieldsToHeader, databaseUUID))
         .toStreamResponse());
     }
   }
@@ -849,7 +850,8 @@ public class CollectionResource implements CollectionService {
     final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
       fields, findRequest.extraParameters);
     return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamMultiRow(configurationCollection, database,
-      configTable, allRows, clone, zipFilename, filename, findRequest.sublist, exportDescription, fieldsToHeader)));
+      configTable, allRows, clone, zipFilename, filename, findRequest.sublist, exportDescription, fieldsToHeader,
+      databaseUUID)));
   }
 
   private Object[] appendValue(Object[] obj, Object newObj) {
