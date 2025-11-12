@@ -192,7 +192,7 @@ public abstract class ZipOutputStream extends CSVOutputStream {
                   handleWriteNestedConsolidateLobs(out, columnMapping.getValue(), originalRow);
                 } else {
                   if (ViewerLobStoreType.EXTERNALLY.equals(
-                    row.getCells().get(getConfigurationCollection().getTableStatusByTableId(originalRow.getTableId())
+                    originalRow.getCells().get(getConfigurationCollection().getTableStatusByTableId(originalRow.getTableId())
                       .getColumnByIndex(columnMapping.getValue().getColumnIndex()).getId()).getStoreType())) {
                     handleWriteNestedExternalLobs(out, columnMapping.getValue(), originalRow, originalCell);
                   } else {
