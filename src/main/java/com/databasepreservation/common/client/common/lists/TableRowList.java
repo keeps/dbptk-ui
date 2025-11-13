@@ -599,7 +599,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), rowsFilter, currentSorter, currentSubList,
       getFacets(), false, fieldsToReturn, extraParameters);
 
-    if (!wrapper.isNested()) {
+    if (Boolean.FALSE.equals(wrapper.isNested())) {
       FilterUtils.filterByTable(rowsFilter, table.getSchemaName() + "." + table.getName());
     }
 
@@ -614,41 +614,51 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         TableStatus tableStatus = status.getTableStatus(table.getUuid());
         StringBuilder sb = new StringBuilder();
         sb.append("<table>");
+        boolean isFirstRow = true;
         for (ViewerRow row : o.getResults()) {
+          if (isFirstRow) {
+            // header
+            sb.append("<tr>");
+            for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
+              if ((!NESTED.equals(configColumn.getType())
+                && (!BINARY.equals(configColumn.getType()) && !CLOB.equals(configColumn.getType())))
+                || (NESTED.equals(configColumn.getType())
+                  && !configColumn.getTypeName().contains("BINARY LARGE OBJECT"))) {
+                sb.append("<th>");
+                sb.append(SafeHtmlUtils.htmlEscape(configColumn.getCustomName()));
+                sb.append("</th>");
+              }
+            }
+            sb.append("</tr>");
+            isFirstRow = false;
+          }
           sb.append("<tr>");
           for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
             sb.append("<td>");
             if (!NESTED.equals(configColumn.getType())) {
               // Treat as non nested
-              if (BINARY.equals(configColumn.getType()) || CLOB.equals(configColumn.getType())) {
-                // do nothing
-              } else {
+              if (!BINARY.equals(configColumn.getType()) && !CLOB.equals(configColumn.getType())) {
                 sb.append(SafeHtmlUtils.htmlEscape(row.getCells().get(configColumn.getId()).getValue()));
               }
             } else {
-              // Treat as nested
-              // this is the table of nested document
-              ViewerTable nestedTable = database.getMetadata()
-                .getTableById(configColumn.getNestedColumns().getOriginalTable());
-              if (configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
-                // do nothing
-              } else {
-                boolean isFirst = true;
+              if (!configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
+                boolean isFirstNestedRow = true;
                 for (ViewerRow nestedRow : row.getNestedRowList()) {
-                  if (!isFirst) {
+                  if (!isFirstNestedRow) {
                     sb.append(", ");
                   } else {
-                    isFirst = false;
+                    isFirstNestedRow = false;
                   }
-                  boolean isFirstNested = true;
+                  boolean isFirstNestedName = true;
                   for (String nestedSolrName : configColumn.getNestedColumns().getNestedSolrNames()) {
-                    if (nestedRow.getCells().containsKey("nst_" + nestedSolrName)) {
-                      if (!isFirstNested) {
+                    String nestedKey = "nst_" + nestedSolrName;
+                    if (nestedRow.getCells().containsKey(nestedKey)) {
+                      if (!isFirstNestedName) {
                         sb.append(" ");
                       } else {
-                        isFirstNested = false;
+                        isFirstNestedName = false;
                       }
-                      sb.append(nestedRow.getCells().get("nst_" + nestedSolrName).getValue());
+                      sb.append(nestedRow.getCells().get(nestedKey).getValue());
                     }
                   }
                 }
