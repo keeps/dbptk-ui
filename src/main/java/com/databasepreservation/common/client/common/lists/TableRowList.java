@@ -659,7 +659,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           sb.append("</tr>");
         }
         sb.append("</table>");
-        JavascriptUtils.copyToClipboard(sb.toString());
+        JavascriptUtils.copyHTMLToClipboard(sb.toString());
       }
     }).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(), table.getSchemaName(),
       table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());

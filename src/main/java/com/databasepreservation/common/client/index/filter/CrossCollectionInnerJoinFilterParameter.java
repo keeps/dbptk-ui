@@ -7,11 +7,14 @@
  */
 package com.databasepreservation.common.client.index.filter;
 
+import java.io.Serial;
+
 /**
  * @author Alexandre Flores <aflores@keep.pt>
  */
 public class CrossCollectionInnerJoinFilterParameter extends FilterParameter {
-  private static final long serialVersionUID = 2618241901313423671L;
+  @Serial
+  private static final long serialVersionUID = 7316041677163297711L;
   private String rowUUID;
   private String nestedOriginalUUID;
   private String fromIndex;

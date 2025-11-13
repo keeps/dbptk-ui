@@ -355,13 +355,31 @@ public class JavascriptUtils {
                                                                                 element.removeAttr(attribute);
                                                                                 }-*/;
 
-  public static native void copyToClipboard(String text) /*-{
-                                                          var textArea = document.createElement("textarea");
-                                                          textArea.value = text;
-                                                          document.body.appendChild(textArea);
-                                                          textArea.focus();
-                                                          textArea.select();
-                                                          document.execCommand('copy');
-                                                          document.body.removeChild(textArea);
-                                                          }-*/;
+  public static native void copyHTMLToClipboard(String innerHTML) /*-{
+                                                                  var div = document.createElement('div');
+                                                                  div.innerHTML = innerHTML;
+                                                                  var table = div.firstChild;
+                                                                  document.body.appendChild(div);
+
+                                                                  var body = document.body, range, sel;
+                                                                  if (document.createRange && window.getSelection) {
+                                                                    range = document.createRange();
+                                                                    sel = window.getSelection();
+                                                                    sel.removeAllRanges();
+                                                                    try {
+                                                                      range.selectNodeContents(table);
+                                                                      sel.addRange(range);
+                                                                    }
+                                                                    catch (e) {
+                                                                      range.selectNode(table);
+                                                                      sel.addRange(range);
+                                                                    }
+                                                                  } else if (body.createTextRange) {
+                                                                    range = body.createTextRange();
+                                                                    range.moveToElementText(table);
+                                                                    range.select();
+                                                                  }
+                                                                  document.execCommand('copy');
+                                                                  document.body.removeChild(div);
+                                                                  }-*/;
 }

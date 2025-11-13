@@ -196,7 +196,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     }
     if (copiable) {
       copyButton = new Anchor(messages.basicActionCopySelected());
-      copyButton.addClickHandler(event -> AsyncTableCell.this.copyClickHandler());
+      copyButton.addClickHandler(event -> AsyncTableCell.this.selectedToCopyHtml());
       copyButton.setVisible(false);
       exportButtons.setWidget(0, 0, copyButton);
     }
@@ -860,10 +860,6 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   public abstract void exportClickHandler();
 
   public abstract void selectedToCopyHtml();
-
-  public void copyClickHandler() {
-    selectedToCopyHtml();
-  }
 
   private boolean createAndBindFacets(FlowPanel facetsPanel) {
     facetsPanel.clear();
