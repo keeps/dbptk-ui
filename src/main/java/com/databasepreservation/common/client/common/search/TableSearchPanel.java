@@ -121,7 +121,7 @@ public class TableSearchPanel extends Composite {
     this.database = database;
     this.table = table;
 
-    tableRowList = new TableRowList(database, table, initialFilter, null, null, false, table.getCountRows() != 0,
+    tableRowList = new TableRowList(database, table, initialFilter, null, null, true, table.getCountRows() != 0, true,
       status, isNested);
     tableRowList.setColumnVisibility(columnDisplayNameToVisibleState);
 

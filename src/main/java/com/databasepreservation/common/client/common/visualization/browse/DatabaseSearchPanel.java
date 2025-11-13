@@ -261,7 +261,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
         filter = ViewerConstants.DEFAULT_FILTER;
       }
 
-      tableRowList = new TableRowList(database, table, filter, null, null, false, false, status, false);
+      tableRowList = new TableRowList(database, table, filter, null, null, true, false, true, status, false);
 
       tableContainer.setWidget(tableRowList);
 

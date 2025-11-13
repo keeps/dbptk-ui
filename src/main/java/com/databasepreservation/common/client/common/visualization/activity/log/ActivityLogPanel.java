@@ -72,7 +72,7 @@ public class ActivityLogPanel extends ContentPanel {
 
   private ActivityLogPanel() {
     activityLogList = new ActivityLogList(new Filter(),
-      ClientConfigurationManager.FacetFactory.getFacets(ViewerConstants.ACTIVITY_LOG_PROPERTY), false, false);
+      ClientConfigurationManager.FacetFactory.getFacets(ViewerConstants.ACTIVITY_LOG_PROPERTY), false, false, false);
 
     initWidget(uiBinder.createAndBindUi(this));
 

@@ -73,7 +73,7 @@ public class DatabaseSearchesPanel extends RightPanel {
       FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH), messages.menusidebar_savedSearches(), "h1"));
     savedSearchList = new SavedSearchList(database.getUuid(),
       new Filter(new BasicSearchFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUuid())), null,
-      null, false, false);
+      null, false, false, false);
 
     savedSearchList.getSelectionModel().addSelectionChangeHandler(event -> {
       SavedSearch selected = savedSearchList.getSelectionModel().getSelectedObject();
