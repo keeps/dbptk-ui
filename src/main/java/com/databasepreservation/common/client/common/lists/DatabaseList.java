@@ -62,11 +62,12 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   private static final String OPEN_NOT_VALIDATED_SPAN = "<span>&#10006;</span>";
 
   public DatabaseList() {
-    this(new Filter(), null, null, false, false);
+    this(new Filter(), null, null, false, false, false);
   }
 
-  protected DatabaseList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
-    super(filter, facets, summary, selectable, exportable, 15, 15);
+  protected DatabaseList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable,
+    boolean copiable) {
+    super(filter, facets, summary, selectable, exportable, copiable, 15, 15);
     autoUpdate(10000);
   }
 
@@ -227,6 +228,11 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   @Override
   public void exportClickHandler() {
     // do nothing
+  }
+
+  @Override
+  public void selectedToCopyHtml() {
+
   }
 
   @Override

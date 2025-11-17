@@ -96,6 +96,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   private final CellTable<T> display;
   private FlexTable exportButtons;
   private Anchor exportButton;
+  private Anchor copyButton;
 
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
@@ -116,6 +117,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   private boolean justActive;
   private Facets facets;
   private boolean selectable;
+  private boolean copiable;
   private boolean autoUpdating = false;
   private IndexResult<T> result;
 
@@ -128,16 +130,16 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   private final O object;
 
   public AsyncTableCell() {
-    this(null, false, null, null, false, false, 20, 100, null);
+    this(null, false, null, null, false, false, false, 20, 100, null);
   }
 
   public AsyncTableCell(Filter filter, boolean justActive, Facets facets, String summary, boolean selectable,
-    boolean exportable, O object) {
-    this(filter, justActive, facets, summary, selectable, exportable, 20, 100, object);
+    boolean exportable, boolean copiable, O object) {
+    this(filter, justActive, facets, summary, selectable, exportable, copiable, 20, 100, object);
   }
 
   public AsyncTableCell(Filter filter, boolean justActive, Facets facets, String summary, boolean selectable,
-    boolean exportable, int initialPageSize, int pageSizeIncrement, O object) {
+    boolean exportable, boolean copiable, int initialPageSize, int pageSizeIncrement, O object) {
     super();
 
     this.initialPageSize = initialPageSize;
@@ -152,6 +154,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     this.justActive = justActive;
     this.facets = facets;
     this.selectable = selectable;
+    this.copiable = copiable;
 
     display = new AccessibleCellTable<T>(getInitialPageSize(), GWT.create(MyCellTableResources.class), getKeyProvider(),
       summary);
@@ -182,16 +185,20 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
     dataProvider.addDataDisplay(display);
 
+    // mimic PageSizePager
+    exportButtons = new FlexTable();
+    exportButtons.setCellPadding(0);
+    exportButtons.setCellSpacing(0);
     if (exportable) {
-      // mimic PageSizePager
-      exportButtons = new FlexTable();
-      exportButtons.setCellPadding(0);
-      exportButtons.setCellSpacing(0);
-
       exportButton = new Anchor(messages.basicActionExport());
       exportButton.addClickHandler(event -> AsyncTableCell.this.exportClickHandler());
-
-      exportButtons.setWidget(0, 0, exportButton);
+      exportButtons.setWidget(0, 1, exportButton);
+    }
+    if (copiable) {
+      copyButton = new Anchor(messages.basicActionCopySelected());
+      copyButton.addClickHandler(event -> AsyncTableCell.this.selectedToCopyHtml());
+      copyButton.setVisible(false);
+      exportButtons.setWidget(0, 0, copyButton);
     }
 
     resultsPager = new AccessibleSimplePager(AccessibleSimplePager.TextLocation.LEFT,
@@ -745,6 +752,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     for (CheckboxSelectionListener<T> listener : listeners) {
       listener.onSelectionChange(getSelected());
     }
+    copyButton.setVisible((!selected.isEmpty() || selectingAll) && copiable);
   }
 
   public Boolean getSelectingAll() {
@@ -850,6 +858,8 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   }
 
   public abstract void exportClickHandler();
+
+  public abstract void selectedToCopyHtml();
 
   private boolean createAndBindFacets(FlowPanel facetsPanel) {
     facetsPanel.clear();

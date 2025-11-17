@@ -92,7 +92,7 @@ public class DatabaseSelectDialog extends DialogBox {
       Filter available = new Filter();
       available
         .add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.AVAILABLE.name()));
-      DatabaseSelectList metadataDatabaseList = new DatabaseSelectList(available, null, null, true, false);
+      DatabaseSelectList metadataDatabaseList = new DatabaseSelectList(available, null, null, true, false, false);
       metadataDatabaseList.getSelectionModel().addSelectionChangeHandler(event -> {
         ViewerDatabase selected = metadataDatabaseList.getSelectionModel().getSelectedObject();
         if (selected != null) {

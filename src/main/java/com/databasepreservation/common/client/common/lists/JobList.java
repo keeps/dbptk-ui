@@ -49,11 +49,12 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
   private Column<ViewerJob, SafeHtml> statusColumn;
 
   public JobList() {
-    this(new Filter(), null, null, false, false);
+    this(new Filter(), null, null, false, false, false);
   }
 
-  private JobList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
-    super(filter, facets, summary, selectable, exportable, 15, 15);
+  private JobList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable,
+    boolean copiable) {
+    super(filter, facets, summary, selectable, exportable, copiable, 15, 15);
     autoUpdate(5000);
   }
 
@@ -195,6 +196,11 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
   @Override
   public void exportClickHandler() {
     // do nothing
+  }
+
+  @Override
+  public void selectedToCopyHtml() {
+
   }
 
   @Override

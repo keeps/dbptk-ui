@@ -58,8 +58,8 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
   private Column<SavedSearch, SavedSearch> actionsColumn;
 
   public SavedSearchList(String databaseUUID, Filter filter, Facets facets, String summary, boolean selectable,
-    boolean exportable) {
-    super(filter, false, facets, summary, selectable, exportable, databaseUUID);
+    boolean exportable, boolean copiable) {
+    super(filter, false, facets, summary, selectable, exportable, copiable, databaseUUID);
   }
 
   private String getDatabaseUUID() {
@@ -146,6 +146,11 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
   @Override
   public void exportClickHandler() {
     // do nothing
+  }
+
+  @Override
+  public void selectedToCopyHtml() {
+
   }
 
   @Override
