@@ -15,8 +15,8 @@ public final class UriQueryUtils {
   }
   
   public static String encodeQuery(String queryFieldValue) {
-    // in query  chars [] cannot appear
-    return UriUtils.encode(queryFieldValue).replaceAll("\\[", "%5B").replaceAll("\\]", "%5D");
+    // in query chars [] and / cannot appear
+    return UriUtils.encode(queryFieldValue).replaceAll("\\[", "%5B").replaceAll("\\]", "%5D").replaceAll("/", "%2F");
   }
 
 }

@@ -7,16 +7,20 @@
  */
 package com.databasepreservation.common.client.models.status.collection;
 
+import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.NESTED;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.google.gwt.core.client.GWT;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -158,6 +162,25 @@ public class TableStatus implements Serializable {
     return getVisibleColumnsList().stream()
       .filter(c -> c.getType().equals(ViewerType.dbTypes.BINARY) || c.getType().equals(ViewerType.dbTypes.CLOB))
       .collect(Collectors.toList());
+  }
+
+  @JsonIgnore
+  public Map<ColumnStatus, ColumnStatus> getNestedLobColumns(CollectionStatus collectionStatus) {
+    Map<ColumnStatus, ColumnStatus> ret = new HashMap<>();
+    for (ColumnStatus column : getVisibleColumnsList()) {
+      if (column.getType().equals(NESTED)) {
+        TableStatus nestedTable = collectionStatus.getTableStatusByTableId(column.getNestedColumns().getOriginalTable());
+        for (ColumnStatus nestedColumn : nestedTable.getLobColumns()) {
+          if ((nestedColumn.getType().equals(ViewerType.dbTypes.BINARY)
+            || nestedColumn.getType().equals(
+              ViewerType.dbTypes.CLOB))
+            && column.getNestedColumns().getNestedSolrNames().contains(nestedColumn.getId())) {
+              ret.put(column, nestedColumn);
+            }
+        }
+      }
+    }
+    return ret;
   }
 
   @JsonIgnore
