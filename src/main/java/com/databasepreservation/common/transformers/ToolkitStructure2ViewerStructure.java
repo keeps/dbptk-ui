@@ -2,7 +2,7 @@
  * The contents of this file are subject to the license and copyright
  * detailed in the LICENSE file at the root of the source
  * tree and available online at
- *
+ * <p>
  * https://github.com/keeps/dbptk-ui
  */
 package com.databasepreservation.common.transformers;
@@ -665,7 +665,9 @@ public class ToolkitStructure2ViewerStructure {
     String suffix;
     String prefix = ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX;
 
-    if (type instanceof SimpleTypeBinary) {
+    if (type.getOriginalTypeName() != null && type.getOriginalTypeName().equals("uuid")) {
+      suffix = ViewerConstants.SOLR_DYN_STRING;
+    } else if (type instanceof SimpleTypeBinary) {
       suffix = ViewerConstants.SOLR_DYN_STRING;
       prefix = ViewerConstants.SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX;
     } else if (type instanceof SimpleTypeBoolean) {
