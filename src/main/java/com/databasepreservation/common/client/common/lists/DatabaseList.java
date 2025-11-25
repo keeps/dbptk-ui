@@ -234,10 +234,4 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   public void selectedToCopyHtml() {
 
   }
-
-  @Override
-  protected void onAttach() {
-    super.onAttach();
-    refresh();
-  }
 }

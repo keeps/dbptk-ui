@@ -202,10 +202,4 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
   public void selectedToCopyHtml() {
 
   }
-
-  @Override
-  protected void onAttach() {
-    super.onAttach();
-    refresh();
-  }
 }
