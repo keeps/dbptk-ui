@@ -355,31 +355,38 @@ public class JavascriptUtils {
                                                                                 element.removeAttr(attribute);
                                                                                 }-*/;
 
-  public static native void copyHTMLToClipboard(String innerHTML) /*-{
-                                                                  var div = document.createElement('div');
-                                                                  div.innerHTML = innerHTML;
-                                                                  var table = div.firstChild;
-                                                                  document.body.appendChild(div);
+  public static native void copyHTMLToClipboard(String innerHTML, String text) /*-{
+                                                                                // 1. Check for API support
+                                                                                if (!$wnd.navigator.clipboard || !$wnd.navigator.clipboard.write) {
+                                                                                    $wnd.console.error("Clipboard API not supported");
+                                                                                    return;
+                                                                                }
 
-                                                                  var body = document.body, range, sel;
-                                                                  if (document.createRange && window.getSelection) {
-                                                                    range = document.createRange();
-                                                                    sel = window.getSelection();
-                                                                    sel.removeAllRanges();
-                                                                    try {
-                                                                      range.selectNodeContents(table);
-                                                                      sel.addRange(range);
-                                                                    }
-                                                                    catch (e) {
-                                                                      range.selectNode(table);
-                                                                      sel.addRange(range);
-                                                                    }
-                                                                  } else if (body.createTextRange) {
-                                                                    range = body.createTextRange();
-                                                                    range.moveToElementText(table);
-                                                                    range.select();
-                                                                  }
-                                                                  document.execCommand('copy');
-                                                                  document.body.removeChild(div);
-                                                                  }-*/;
+                                                                                try {
+                                                                                    // 2. Create Blobs for the data types
+                                                                                    // We use $wnd.Blob to ensure we use the browser's native Blob, not a GWT wrapper
+                                                                                    var htmlBlob = new $wnd.Blob([innerHTML], {type: "text/html"});
+                                                                                    var textBlob = new $wnd.Blob([text], {type: "text/plain"});
+
+                                                                                    // 3. Create the ClipboardItem
+                                                                                    // We provide both HTML (for Word/Excel/Gmail) and Plain Text (for Notepad)
+                                                                                    var data = {};
+                                                                                    data["text/html"] = htmlBlob;
+                                                                                    data["text/plain"] = textBlob;
+
+                                                                                    var item = new $wnd.ClipboardItem(data);
+
+                                                                                    // 4. Write to clipboard (Async operation)
+                                                                                    // We use .then() instead of await to keep JSNI happy
+                                                                                    $wnd.navigator.clipboard.write([item]).then(function() {
+                                                                                        $wnd.console.log("Clipboard write successful!");
+                                                                                    })['catch'](function(err) {
+                                                                                        // Note: 'catch' is in quotes to avoid keyword collision in older GWT parsers
+                                                                                        $wnd.console.error("Clipboard write failed: ", err);
+                                                                                    });
+
+                                                                                } catch (e) {
+                                                                                    $wnd.console.error("Exception in clipboard logic: ", e);
+                                                                                }
+                                                                                }-*/;
 }
