@@ -10,7 +10,6 @@ package com.databasepreservation.common.client.services;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.databasepreservation.common.api.v1.utils.JobResponse;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.databasepreservation.common.api.v1.utils.JobResponse;
 import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
@@ -95,6 +95,12 @@ public interface CollectionService extends DirectRestService {
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Updates the internal collection configuration")
   Boolean updateCollectionConfiguration(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID,
+    @Parameter(name = "collectionStatus", required = true) @RequestBody CollectionStatus status);
+
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/customize", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Updates the internal collection configuration's customization properties")
+  Boolean updateCollectionCustomizeProperties(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID,
     @Parameter(name = "collectionStatus", required = true) @RequestBody CollectionStatus status);
 

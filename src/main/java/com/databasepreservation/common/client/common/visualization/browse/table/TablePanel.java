@@ -218,8 +218,13 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
       @Override
       public void onSuccess(User user) {
-        if (user.isAdmin() && ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
-          buildMenu();
+
+        if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+          if (user.isAdmin()) {
+            buildMenuAdmin();
+          } else if (!user.isGuest()) {
+            buildMenuUser();
+          }
         } else if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
           advancedOptions.remove(configurationMenu);
           Button columnsManagementBtn = new Button(messages
@@ -251,7 +256,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     tableSearchPanel.provideSource(database, table);
   }
 
-  private void buildMenu() {
+  private void buildMenuAdmin() {
     MenuBar configurationSubMenuBar = new MenuBar(true);
     MenuItem columnMenuItem = new MenuItem(
       SafeHtmlUtils.fromString(
@@ -265,6 +270,18 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       configurationSubMenuBar.addItem(dataTransformationMenuItem);
     }
+    configurationMenu.addItem(SafeHtmlUtils.fromString(messages.advancedConfigurationLabelForMainTitle()),
+      configurationSubMenuBar);
+    configurationMenu.setStyleName("btn btn-link");
+  }
+
+  private void buildMenuUser() {
+    MenuBar configurationSubMenuBar = new MenuBar(true);
+    MenuItem columnMenuItem = new MenuItem(
+      SafeHtmlUtils.fromString(
+        messages.dataTransformationBtnManageTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
+      () -> HistoryManager.gotoColumnsManagement(database.getUuid(), table.getId()));
+    configurationSubMenuBar.addItem(columnMenuItem);
     configurationMenu.addItem(SafeHtmlUtils.fromString(messages.advancedConfigurationLabelForMainTitle()),
       configurationSubMenuBar);
     configurationMenu.setStyleName("btn btn-link");

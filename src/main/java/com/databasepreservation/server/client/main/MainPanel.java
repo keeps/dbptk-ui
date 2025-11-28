@@ -314,7 +314,7 @@ public class MainPanel extends Composite {
       UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
         public void onSuccess(User user) {
-          if (user.isAdmin()) {
+          if (!user.isGuest()) {
             final String databaseUUID = currentHistoryPath.get(1);
             Sidebar sidebar = ColumnsManagementSidebar.getInstance(databaseUUID);
             if (currentHistoryPath.size() == 2) {
