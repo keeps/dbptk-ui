@@ -688,6 +688,10 @@ public interface ClientMessages extends Messages {
 
   String managePageButtonTextForDownloadDBPTK();
 
+  String managePageButtonTextForExportDatabases();
+
+  String managePageButtonTextForExportUsers();
+
   String managePageButtonTextForOpenSIARD();
 
   String managePageTableHeaderTextForDatabaseName();

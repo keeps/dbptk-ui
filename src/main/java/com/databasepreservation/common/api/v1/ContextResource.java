@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.api.v1;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Comparator;
@@ -20,21 +21,36 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.databasepreservation.common.api.exceptions.RESTException;
-import com.databasepreservation.common.exceptions.AuthorizationException;
+import com.databasepreservation.common.api.utils.ApiUtils;
+import com.databasepreservation.common.api.utils.StreamResponse;
 import com.databasepreservation.common.api.v1.utils.StringResponse;
+import com.databasepreservation.common.api.v1.utils.UsersCSVOutputStream;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.sort.Sorter;
+import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.ContextService;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import com.databasepreservation.common.server.ServerTools;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
 import com.databasepreservation.common.utils.ControllerAssistant;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -83,5 +99,35 @@ public class ContextResource implements ContextService {
     return authorizationGroupsList.getAuthorizationGroupsList().stream()
       .sorted(Comparator.comparing(AuthorizationGroup::getLabel, String.CASE_INSENSITIVE_ORDER))
       .collect(Collectors.toCollection(LinkedHashSet::new));
+  }
+
+  @RequestMapping(path = "/authorizations/csv", method = RequestMethod.GET)
+  @Operation(summary = "Exports list of authorization groups to CSV")
+  public ResponseEntity<StreamingResponseBody> exportAuthorizationsToCSV() {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+    FindRequest findRequest = null;
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+      findRequest = new FindRequest(ViewerDatabase.class.getName(), new Filter(), new Sorter(), null, null, false,
+        List.of(ViewerConstants.SOLR_DATABASES_METADATA, "uuid"));
+      AuthorizationGroupsList authorizationGroupsList = ViewerConfiguration.getInstance()
+        .getCollectionsAuthorizationGroupsWithDefault();
+      try (IterableDatabaseResult<ViewerDatabase> allDatabases = solrManager.findAll(ViewerDatabase.class,
+        findRequest.filter, findRequest.sorter, findRequest.fieldsToReturn)) {
+        return ApiUtils.okResponse(
+          new StreamResponse(new UsersCSVOutputStream(allDatabases, authorizationGroupsList, "users.csv", ',')));
+      }
+    } catch (AuthorizationException | IOException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state);
+    }
   }
 }
