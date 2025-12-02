@@ -18,15 +18,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.api.exceptions.IllegalAccessException;
-import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
@@ -38,6 +37,7 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerType;
@@ -396,6 +396,22 @@ public class ConfigurationManager {
       Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
       ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
       JsonTransformer.writeObjectToFile(status, statusFile);
+    }
+  }
+
+  public void updateCollectionCustomizeProperties(String databaseUUID, CollectionStatus status)
+    throws ViewerException, IllegalAccessException, GenericException {
+    synchronized (collectionStatusFileLock) {
+      CollectionStatus updatingStatus = getCollectionStatus(databaseUUID, status.getId());
+      for (TableStatus table : status.getTables()) {
+        for (ColumnStatus column : table.getColumns()) {
+          updatingStatus.getColumnByTableIdAndColumn(table.getId(), column.getId())
+            .updateCustomizeProperties(column.getSearchStatus().getList().getCustomizeProperties());
+        }
+      }
+      Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
+      ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
+      JsonTransformer.writeObjectToFile(updatingStatus, statusFile);
     }
   }
 

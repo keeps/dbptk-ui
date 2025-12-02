@@ -18,6 +18,7 @@ import java.util.Set;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
@@ -47,6 +48,8 @@ import com.databasepreservation.common.client.models.status.formatters.Formatter
 import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.models.user.User;
+import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -138,10 +141,20 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   private void init() {
     configureHeader();
     final TableStatus table = collectionStatus.getTableStatusByTableId(tableId);
-    cellTable = populateTable(table);
-    content.add(cellTable);
-
-    configureButtonsPanel();
+    UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+      @Override
+      public void onSuccess(User user) {
+        AuthenticationService.Util.call((Boolean authenticationIsEnabled) -> {
+          if (!authenticationIsEnabled || user.isAdmin()) {
+            cellTable = populateTableAdmin(table);
+          } else {
+            cellTable = populateTableUser(table);
+          }
+          content.add(cellTable);
+          configureButtonsPanel();
+        }).isAuthenticationEnabled();
+      }
+    });
   }
 
   private void configureButtonsPanel() {
@@ -240,7 +253,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     }
   }
 
-  private BasicTablePanel<ColumnStatus> populateTable(final TableStatus tableStatus) {
+  private BasicTablePanel<ColumnStatus> populateTableAdmin(final TableStatus tableStatus) {
     Collections.sort(tableStatus.getColumns());
     BasicTablePanel<ColumnStatus> tablePanel = new BasicTablePanel<>(new FlowPanel(), SafeHtmlUtils.EMPTY_SAFE_HTML,
       GWT.create(ConfigurationCellTableResources.class), tableStatus.getColumns().iterator(),
@@ -273,6 +286,34 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SEARCH_PLUS,
           messages.columnManagementPageTooltipForAdvancedSearch(), FA_FW)),
         false, 3, getAdvancedSearchCheckboxColumn()));
+
+    tablePanel.getSelectionModel().addSelectionChangeHandler(event -> {
+      final ColumnStatus selected = tablePanel.getSelectionModel().getSelectedObject();
+      if (selected != null) {
+        tablePanel.getSelectionModel().clear();
+      }
+    });
+
+    return tablePanel;
+  }
+
+  private BasicTablePanel<ColumnStatus> populateTableUser(final TableStatus tableStatus) {
+    Collections.sort(tableStatus.getColumns());
+    BasicTablePanel<ColumnStatus> tablePanel = new BasicTablePanel<>(new FlowPanel(), SafeHtmlUtils.EMPTY_SAFE_HTML,
+      GWT.create(ConfigurationCellTableResources.class), tableStatus.getColumns().iterator(),
+      new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 0,
+        new Column<ColumnStatus, SafeHtml>(new SafeHtmlCell()) {
+          @Override
+          public SafeHtml getValue(ColumnStatus column) {
+            if (column.getType().equals(ViewerType.dbTypes.NESTED)) {
+              return SafeHtmlUtils.fromSafeConstant(column.getNestedColumns().getPath());
+            }
+            return SafeHtmlUtils.fromString(column.getName());
+          }
+        }),
+      new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+        .getTagWithStyleName(FontAwesomeIconManager.PAINT_BRUSH, messages.basicTableHeaderOptions(), FA_FW)), false, 3,
+        getTableCustomizationColumn()));
 
     tablePanel.getSelectionModel().addSelectionChangeHandler(event -> {
       final ColumnStatus selected = tablePanel.getSelectionModel().getSelectedObject();
@@ -747,11 +788,26 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   }
 
   private void saveChanges(boolean value) {
-    CollectionService.Util.call((Boolean result) -> {
-      ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
-      this.changes = value;
-      Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
-    }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+    UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+      @Override
+      public void onSuccess(User user) {
+        AuthenticationService.Util.call((Boolean authenticationIsEnabled) -> {
+          if (!authenticationIsEnabled || user.isAdmin()) {
+            CollectionService.Util.call((Boolean result) -> {
+              ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
+              changes = value;
+              Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
+            }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+          } else {
+            CollectionService.Util.call((Boolean result) -> {
+              ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
+              changes = value;
+              Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
+            }).updateCollectionCustomizeProperties(database.getUuid(), database.getUuid(), collectionStatus);
+          }
+        }).isAuthenticationEnabled();
+      }
+    });
   }
 
   @Override
@@ -787,9 +843,20 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   private void reset(CollectionStatus collectionStatus) {
     this.collectionStatus = collectionStatus;
     final TableStatus table = collectionStatus.getTableStatusByTableId(tableId);
-    content.remove(cellTable);
-    cellTable = populateTable(table);
-    content.insert(cellTable, 2);
+    UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+      @Override
+      public void onSuccess(User user) {
+        AuthenticationService.Util.call((Boolean authenticationIsEnabled) -> {
+          content.remove(cellTable);
+          if (!authenticationIsEnabled || user.isAdmin()) {
+            cellTable = populateTableAdmin(table);
+          } else {
+            cellTable = populateTableUser(table);
+          }
+          content.insert(cellTable, 2);
+        }).isAuthenticationEnabled();
+      }
+    });
   }
 
   @Override
