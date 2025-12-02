@@ -613,40 +613,58 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       @Override
       public void onSuccess(Method method, IndexResult<ViewerRow> o) {
         TableStatus tableStatus = status.getTableStatus(table.getUuid());
-        StringBuilder sb = new StringBuilder();
-        sb.append("<table>");
+        StringBuilder htmlSB = new StringBuilder();
+        StringBuilder textSB = new StringBuilder();
+        htmlSB.append("<table>");
         boolean isFirstRow = true;
         for (ViewerRow row : o.getResults()) {
           if (isFirstRow) {
             // header
-            sb.append("<tr>");
+            htmlSB.append("<tr>");
+            boolean isFirstHeaderColumn = true;
             for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
               if ((!NESTED.equals(configColumn.getType())
                 && (!BINARY.equals(configColumn.getType()) && !CLOB.equals(configColumn.getType())))
                 || (NESTED.equals(configColumn.getType())
                   && !configColumn.getTypeName().contains("BINARY LARGE OBJECT"))) {
-                sb.append("<th>");
-                sb.append(SafeHtmlUtils.htmlEscape(configColumn.getCustomName()));
-                sb.append("</th>");
+                htmlSB.append("<th>");
+                if (!isFirstHeaderColumn) {
+                  textSB.append("\t");
+                }
+                else {
+                  isFirstHeaderColumn = false;
+                }
+                htmlSB.append(SafeHtmlUtils.htmlEscape(configColumn.getCustomName()));
+                textSB.append(configColumn.getCustomName());
+                htmlSB.append("</th>");
               }
             }
-            sb.append("</tr>");
+            htmlSB.append("</tr>");
             isFirstRow = false;
           }
-          sb.append("<tr>");
+          textSB.append("\n");
+          htmlSB.append("<tr>");
+          boolean isFirstRowColumn = true;
           for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
-            sb.append("<td>");
+            if (!isFirstRowColumn) {
+              textSB.append("\t");
+            } else {
+              isFirstRowColumn = false;
+            }
+            htmlSB.append("<td>");
             if (!NESTED.equals(configColumn.getType())) {
               // Treat as non nested
               if (!BINARY.equals(configColumn.getType()) && !CLOB.equals(configColumn.getType())) {
-                sb.append(SafeHtmlUtils.htmlEscape(row.getCells().get(configColumn.getId()).getValue()));
+                htmlSB.append(SafeHtmlUtils.htmlEscape(row.getCells().get(configColumn.getId()).getValue()));
+                textSB.append(row.getCells().get(configColumn.getId()).getValue());
               }
             } else {
               if (!configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
                 boolean isFirstNestedRow = true;
                 for (ViewerRow nestedRow : row.getNestedRowList()) {
                   if (!isFirstNestedRow) {
-                    sb.append(", ");
+                    htmlSB.append(", ");
+                    textSB.append(", ");
                   } else {
                     isFirstNestedRow = false;
                   }
@@ -655,22 +673,24 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
                     String nestedKey = "nst_" + nestedSolrName;
                     if (nestedRow.getCells().containsKey(nestedKey)) {
                       if (!isFirstNestedName) {
-                        sb.append(" ");
+                        htmlSB.append(" ");
+                        textSB.append(" ");
                       } else {
                         isFirstNestedName = false;
                       }
-                      sb.append(nestedRow.getCells().get(nestedKey).getValue());
+                      htmlSB.append(nestedRow.getCells().get(nestedKey).getValue());
+                      textSB.append(nestedRow.getCells().get(nestedKey).getValue());
                     }
                   }
                 }
               }
             }
-            sb.append("</td>");
+            htmlSB.append("</td>");
           }
-          sb.append("</tr>");
+          htmlSB.append("</tr>");
         }
-        sb.append("</table>");
-        JavascriptUtils.copyHTMLToClipboard(sb.toString());
+        htmlSB.append("</table>");
+        JavascriptUtils.copyHTMLToClipboard(htmlSB.toString(), textSB.toString());
       }
     }).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(), table.getSchemaName(),
       table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
