@@ -662,8 +662,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
                   isFirstRowColumn = false;
                 }
                 htmlSB.append("<td>");
-                htmlSB.append(SafeHtmlUtils.htmlEscape(row.getCells().get(configColumn.getId()).getValue()));
-                textSB.append(row.getCells().get(configColumn.getId()).getValue());
+                if (row.getCells().containsKey(configColumn.getId())) {
+                  htmlSB.append(SafeHtmlUtils.htmlEscape(row.getCells().get(configColumn.getId()).getValue()));
+                  textSB.append(row.getCells().get(configColumn.getId()).getValue());
+                }
                 htmlSB.append("</td>");
               }
             } else {
