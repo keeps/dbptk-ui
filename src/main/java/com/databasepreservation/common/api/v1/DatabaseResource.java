@@ -19,9 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.databasepreservation.common.api.exceptions.IllegalAccessException;
-import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
-import com.databasepreservation.model.exception.ModuleException;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -30,10 +27,18 @@ import org.roda.core.data.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.api.exceptions.RESTException;
+import com.databasepreservation.common.api.utils.ApiUtils;
+import com.databasepreservation.common.api.utils.StreamResponse;
+import com.databasepreservation.common.api.v1.utils.DatabasesCSVOutputStream;
+import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
 import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.FindRequest;
@@ -60,11 +65,14 @@ import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.controller.SIARDController;
+import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.UserUtility;
+import com.databasepreservation.model.exception.ModuleException;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -481,6 +489,41 @@ public class DatabaseResource implements DatabaseService {
       user = controllerAssistant.checkRoles(request);
       return SIARDController.reindex();
     } catch (ModuleException | AuthorizationException | GenericException | NotFoundException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state);
+    }
+  }
+
+  private ResponseEntity<StreamingResponseBody> handleDatabasesCSVExport(DatabaseRowsSolrManager solrManager,
+    FindRequest findRequest) throws IOException {
+    List<Filter> filterQueries = getDatabaseFindContentTypeFilterQueries();
+
+    try (IterableDatabaseResult<ViewerDatabase> allDatabases = solrManager.findAll(ViewerDatabase.class,
+      findRequest.filter, findRequest.sorter, findRequest.fieldsToReturn, filterQueries)) {
+      return ApiUtils.okResponse(new StreamResponse(new DatabasesCSVOutputStream(allDatabases, "databases.csv", ',')));
+    }
+  }
+
+  @RequestMapping(path = "/export", method = RequestMethod.GET)
+  @Operation(summary = "Exports list of loaded databases to CSV")
+  public ResponseEntity<StreamingResponseBody> exportDatabases() {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+
+    FindRequest findRequest = null;
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+      findRequest = new FindRequest(ViewerDatabase.class.getName(), new Filter(), new Sorter(), null, null);
+      return handleDatabasesCSVExport(solrManager, findRequest);
+    } catch (AuthorizationException | IOException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
