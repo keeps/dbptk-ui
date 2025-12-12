@@ -161,20 +161,22 @@ public abstract class ZipOutputStream extends CSVOutputStream {
       }
     }
 
-    Map<String, Map<String, ViewerCell>> nestedCellsEntrySet = new HashMap<>();
+    Map<ViewerRow, Map<String, ViewerCell>> nestedCellsEntrySet = new HashMap<>();
     for (ViewerRow nestedRow : row.getNestedRowList()) {
       if (!nestedCellsEntrySet.containsKey(nestedRow.getNestedUUID())) {
         HashMap<String, ViewerCell> nestedCells = new HashMap<>(nestedRow.getCells());
-        nestedCellsEntrySet.put(nestedRow.getNestedUUID(), nestedCells);
+        nestedCellsEntrySet.put(nestedRow, nestedCells);
       }
     }
 
-    for (Map.Entry<String, Map<String, ViewerCell>> nestedTableViewerCells : nestedCellsEntrySet.entrySet()) {
-      for (Map.Entry<String, ViewerCell> viewerCell : nestedTableViewerCells.getValue().entrySet()) {
+    for (Map.Entry<ViewerRow, Map<String, ViewerCell>> nestedRowViewerCells : nestedCellsEntrySet.entrySet()) {
+      for (Map.Entry<String, ViewerCell> nestedViewerCell : nestedRowViewerCells.getValue().entrySet()) {
         Map.Entry<ColumnStatus, ColumnStatus> columnMapping = null;
-        for (Map.Entry<ColumnStatus, ColumnStatus> entry : nestedBinaryColumnsMap.entrySet()) {
-          if (viewerCell.getKey().equals("nst_" + entry.getValue().getId())) {
-            columnMapping = entry;
+        for (Map.Entry<ColumnStatus, ColumnStatus> columnMappingEntry : nestedBinaryColumnsMap.entrySet()) {
+          if (nestedRowViewerCells.getKey().getTableId()
+            .equals(columnMappingEntry.getKey().getNestedColumns().getOriginalTable())
+            && nestedViewerCell.getKey().equals("nst_" + columnMappingEntry.getValue().getId())) {
+            columnMapping = columnMappingEntry;
             break;
           }
         }
