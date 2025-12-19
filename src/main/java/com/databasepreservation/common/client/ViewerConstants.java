@@ -458,6 +458,7 @@ public class ViewerConstants {
   public static final String SIARD_DK = "dk";
   public static final String SIARD_DK_1007 = "dk-1007";
   public static final String SIARD_DK_128 = "dk-128";
+  public static final String SIARD_DK_128_EXT = "dk-128-ext";
   /*
    * DBPTK Metadata
    */
@@ -626,7 +627,7 @@ public class ViewerConstants {
   public static final String SIARDDK_RESEARCH_INDEX_FILE = "researchIndex.xsd";
 
   public enum SiardVersion {
-    V1_0, V2_0, V2_1, V2_2, DK, DK_1007, DK_128;
+    V1_0, V2_0, V2_1, V2_2, DK, DK_1007, DK_128, DK_128_EXT;
   }
 
   /**

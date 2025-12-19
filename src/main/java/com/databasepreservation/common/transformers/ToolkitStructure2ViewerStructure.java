@@ -874,7 +874,8 @@ public class ToolkitStructure2ViewerStructure {
           collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
           ViewerLobStoreType.INTERNALLY);
 
-        if (siardVersion.equals(ViewerConstants.SIARD_DK_128) || siardVersion.equals(ViewerConstants.SIARD_DK_1007)) {
+        if (siardVersion.equals(ViewerConstants.SIARD_DK_128) || siardVersion.equals(ViewerConstants.SIARD_DK_1007)
+          || siardVersion.equals(ViewerConstants.SIARD_DK_128_EXT)) {
           lobName = binaryCell.getFile();
           result.setValue(lobName);
           if (!mimeTypeAutoDetectDisable) {
