@@ -17,6 +17,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.LoadingDiv;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.table.TablePanel;
@@ -224,6 +225,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
 
   private static class TableSearchPanelContainer extends FlowPanel {
     private final FocusPanel header;
+    private final SimplePanel description;
     private final SimplePanel tableContainer;
     private CollectionStatus status;
     private TableRowList tableRowList;
@@ -252,7 +254,14 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
       header.addStyleName("underlineClickable");
       header.add(CommonClientUtils.getHeader(tableStatus, table, "h3", database.getMetadata().getSchemas().size() > 1));
 
+      MetadataField instance = MetadataField.createInstance(table.getDescription());
+      instance.setCSS("table-row-description", "font-size-description");
+      description = new SimplePanel();
+      description.setVisible(false);
+      description.setWidget(instance);
+
       add(header);
+      add(description);
       add(tableContainer);
     }
 
@@ -296,6 +305,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
 
     private void hideEverything() {
       header.setVisible(false);
+      description.setVisible(false);
       tableContainer.setVisible(false);
       stillSearching = true;
       foundRecords = false;
@@ -303,6 +313,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
 
     private void hideLoading(boolean andShowTheTable) {
       header.setVisible(andShowTheTable);
+      description.setVisible(andShowTheTable);
       tableContainer.setVisible(andShowTheTable);
       foundRecords = andShowTheTable;
       stillSearching = false;
