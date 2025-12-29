@@ -522,6 +522,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     CollectionService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(),
       table.getSchemaName(), table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+
+    if (!getPersistSelections()) {
+      setSelectingAll(false);
+    }
   }
 
   @Override
@@ -570,10 +574,14 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   @Override
   public void selectedToCopyHtml() {
     Filter rowsFilter = new Filter(getFilter());
+    Sublist sublist = new Sublist();
     if (getSelected() instanceof SelectedItemsList<?>) {
       SelectedItemsList<ViewerRow> selectedList = (SelectedItemsList<ViewerRow>) getSelected();
       List<String> ids = selectedList.getIds();
       rowsFilter.add(new OneOfManyFilterParameter("uuid", ids));
+      sublist.setMaximumElementCount(ids.size());
+    } else {
+      sublist = currentSubList;
     }
     TableRowListWrapper wrapper = getObject();
     ViewerTable table = wrapper.getTable();
@@ -597,7 +605,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         fieldsToReturn);
     }
 
-    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), rowsFilter, currentSorter, currentSubList,
+    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), rowsFilter, currentSorter, sublist,
       getFacets(), false, fieldsToReturn, extraParameters);
 
     if (Boolean.FALSE.equals(wrapper.isNested())) {
@@ -624,14 +632,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
             boolean isFirstHeaderColumn = true;
             for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
               if ((!NESTED.equals(configColumn.getType())
-                && (!BINARY.equals(configColumn.getType()) && !CLOB.equals(configColumn.getType())))
+                && !BINARY.equals(configColumn.getType()) && !CLOB.equals(configColumn.getType()))
                 || (NESTED.equals(configColumn.getType())
                   && !configColumn.getTypeName().contains("BINARY LARGE OBJECT"))) {
                 htmlSB.append("<th>");
                 if (!isFirstHeaderColumn) {
                   textSB.append("\t");
-                }
-                else {
+                } else {
                   isFirstHeaderColumn = false;
                 }
                 htmlSB.append(SafeHtmlUtils.htmlEscape(configColumn.getCustomName()));
@@ -646,46 +653,57 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           htmlSB.append("<tr>");
           boolean isFirstRowColumn = true;
           for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
-            if (!isFirstRowColumn) {
-              textSB.append("\t");
-            } else {
-              isFirstRowColumn = false;
-            }
-            htmlSB.append("<td>");
             if (!NESTED.equals(configColumn.getType())) {
               // Treat as non nested
               if (!BINARY.equals(configColumn.getType()) && !CLOB.equals(configColumn.getType())) {
-                htmlSB.append(SafeHtmlUtils.htmlEscape(row.getCells().get(configColumn.getId()).getValue()));
-                textSB.append(row.getCells().get(configColumn.getId()).getValue());
+                if (!isFirstRowColumn) {
+                  textSB.append("\t");
+                } else {
+                  isFirstRowColumn = false;
+                }
+                htmlSB.append("<td>");
+                if (row.getCells().containsKey(configColumn.getId())) {
+                  htmlSB.append(SafeHtmlUtils.htmlEscape(row.getCells().get(configColumn.getId()).getValue()));
+                  textSB.append(row.getCells().get(configColumn.getId()).getValue());
+                }
+                htmlSB.append("</td>");
               }
             } else {
               if (!configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
-                boolean isFirstNestedRow = true;
-                for (ViewerRow nestedRow : row.getNestedRowList()) {
-                  if (!isFirstNestedRow) {
+                if (!isFirstRowColumn) {
+                  textSB.append("\t");
+                } else {
+                  isFirstRowColumn = false;
+                }
+                htmlSB.append("<td>");
+                boolean isFirstNestedName = true;
+                for (String nestedSolrName : configColumn.getNestedColumns().getNestedSolrNames()) {
+                  String nestedKey = "nst_" + nestedSolrName;
+                  String nestedTable = configColumn.getNestedColumns().getOriginalTable();
+                  if (!isFirstNestedName) {
                     htmlSB.append(", ");
                     textSB.append(", ");
                   } else {
-                    isFirstNestedRow = false;
+                    isFirstNestedName = false;
                   }
-                  boolean isFirstNestedName = true;
-                  for (String nestedSolrName : configColumn.getNestedColumns().getNestedSolrNames()) {
-                    String nestedKey = "nst_" + nestedSolrName;
-                    if (nestedRow.getCells().containsKey(nestedKey)) {
-                      if (!isFirstNestedName) {
+                  boolean isFirstNestedRow = true;
+                  for (ViewerRow nestedRow : row.getNestedRowList()) {
+                    if (nestedRow.getCells().containsKey(nestedKey)
+                      && nestedRow.getNestedTableId().equals(nestedTable)) {
+                      if (!isFirstNestedRow) {
                         htmlSB.append(" ");
                         textSB.append(" ");
                       } else {
-                        isFirstNestedName = false;
+                        isFirstNestedRow = false;
                       }
                       htmlSB.append(nestedRow.getCells().get(nestedKey).getValue());
                       textSB.append(nestedRow.getCells().get(nestedKey).getValue());
                     }
                   }
                 }
+                htmlSB.append("</td>");
               }
             }
-            htmlSB.append("</td>");
           }
           htmlSB.append("</tr>");
         }
@@ -700,6 +718,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     int count = display.getColumnCount();
     for (int i = 0; i < count; i++) {
       display.removeColumn(0);
+    }
+
+    if (isSelectable()) {
+      addSelectColumn();
     }
 
     configColumns.keySet().forEach(configColumn -> {

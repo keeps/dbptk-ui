@@ -313,116 +313,121 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   private void configure(final CellTable<T> display) {
     if (selectable) {
-      selectColumn = new Column<T, Boolean>(new CheckboxCell(true, false) {
-        private final SafeHtml INPUT_CHECKED = SafeHtmlUtils
-          .fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" checked/>");
-        private final SafeHtml INPUT_CHECKED_DISABLED = SafeHtmlUtils
-          .fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" checked disabled/>");
-        private final SafeHtml INPUT_UNCHECKED = SafeHtmlUtils
-          .fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\"/>");
+      addSelectColumn();
+    }
+    configureDisplay(display);
+  }
 
-        @Override
-        public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
-          // Get the view data.
-          Object key = context.getKey();
-          Boolean viewData = getViewData(key);
-          if (viewData != null && viewData.equals(value)) {
-            clearViewData(key);
-            viewData = null;
-          }
+  protected void addSelectColumn() {
+    CheckboxCell t;
+    selectColumn = new Column<T, Boolean>(new CheckboxCell(true, false) {
+      private final SafeHtml INPUT_CHECKED = SafeHtmlUtils
+        .fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" checked/>");
+      private final SafeHtml INPUT_CHECKED_DISABLED = SafeHtmlUtils
+        .fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\" checked disabled/>");
+      private final SafeHtml INPUT_UNCHECKED = SafeHtmlUtils
+        .fromSafeConstant("<input type=\"checkbox\" tabindex=\"-1\"/>");
 
-          if (selectingAll) {
-            sb.append(INPUT_CHECKED_DISABLED);
-          } else {
-            if (value != null && ((viewData != null) ? viewData : value)) {
-              sb.append(INPUT_CHECKED);
-            } else {
-              sb.append(INPUT_UNCHECKED);
-            }
-          }
+      @Override
+      public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
+        // Get the view data.
+        Object key = context.getKey();
+        Boolean viewData = getViewData(key);
+        if (viewData != null && viewData.equals(value)) {
+          clearViewData(key);
+          viewData = null;
         }
-      }) {
-        @Override
-        public Boolean getValue(T object) {
-          if (selectingAll) {
-            return true;
-          } else {
-            if (persistSelections) {
-              if (object == null) {
-                return false;
-              } else {
-                return persistedSelectedUUIDs.contains(object.getUuid());
-              }
-            } else {
-              return selected.contains(object);
-            }
-          }
-        }
-      };
 
-      selectColumn.setFieldUpdater((index, object, isSelected) -> {
-        if (isSelected) {
-          selected.add(object);
-          persistedSelectedUUIDs.add(object.getUuid());
+        if (selectingAll) {
+          sb.append(INPUT_CHECKED_DISABLED);
         } else {
-          selected.remove(object);
-          persistedSelectedUUIDs.remove(object.getUuid());
-        }
-
-        // update header
-        display.redrawHeaders();
-        fireOnCheckboxSelectionChanged();
-      });
-
-      Header<Boolean> selectHeader = new Header<Boolean>(new CheckboxCell(true, true) {
-        private final SafeHtml INPUT_OPEN = SafeHtmlUtils.fromSafeConstant("<");
-        private final SafeHtml INPUT_CLOSE = SafeHtmlUtils.fromSafeConstant("/>");
-        private final SafeHtml INPUT_CHECKED = SafeHtmlUtils
-          .fromSafeConstant("input type=\"checkbox\" tabindex=\"-1\" checked");
-        private final SafeHtml INPUT_UNCHECKED = SafeHtmlUtils
-          .fromSafeConstant("input type=\"checkbox\" tabindex=\"-1\"");
-
-        private SafeHtml makeTooltip() {
-          return SafeHtmlUtils.fromSafeConstant(" title=\"Select all " + dataProvider.getRowCount() + " items\" ");
-        }
-
-        @Override
-        public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
-          // Get the view data.
-          Object key = context.getKey();
-          Boolean viewData = getViewData(key);
-          if (viewData != null && viewData.equals(value)) {
-            clearViewData(key);
-            viewData = null;
-          }
-
-          sb.append(INPUT_OPEN);
           if (value != null && ((viewData != null) ? viewData : value)) {
             sb.append(INPUT_CHECKED);
           } else {
             sb.append(INPUT_UNCHECKED);
           }
-          sb.append(makeTooltip());
-          sb.append(INPUT_CLOSE);
         }
-      }) {
-
-        @Override
-        public Boolean getValue() {
-          return selectingAll;
+      }
+    }) {
+      @Override
+      public Boolean getValue(T object) {
+        if (selectingAll) {
+          return true;
+        } else {
+          if (persistSelections) {
+            if (object == null) {
+              return false;
+            } else {
+              return persistedSelectedUUIDs.contains(object.getUuid());
+            }
+          } else {
+            return selected.contains(object);
+          }
         }
-      };
+      }
+    };
 
-      selectHeader.setUpdater(value -> {
-        selectingAll = value;
-        redraw();
-        fireOnCheckboxSelectionChanged();
-      });
+    selectColumn.setFieldUpdater((index, object, isSelected) -> {
+      if (isSelected) {
+        selected.add(object);
+        persistedSelectedUUIDs.add(object.getUuid());
+      } else {
+        selected.remove(object);
+        persistedSelectedUUIDs.remove(object.getUuid());
+      }
 
-      display.addColumn(selectColumn, selectHeader);
-      display.setColumnWidth(selectColumn, "45px");
-    }
-    configureDisplay(display);
+      // update header
+      display.redrawHeaders();
+      fireOnCheckboxSelectionChanged();
+    });
+
+    Header<Boolean> selectHeader = new Header<Boolean>(new CheckboxCell(true, true) {
+      private final SafeHtml INPUT_OPEN = SafeHtmlUtils.fromSafeConstant("<");
+      private final SafeHtml INPUT_CLOSE = SafeHtmlUtils.fromSafeConstant("/>");
+      private final SafeHtml INPUT_CHECKED = SafeHtmlUtils
+        .fromSafeConstant("input type=\"checkbox\" tabindex=\"-1\" checked");
+      private final SafeHtml INPUT_UNCHECKED = SafeHtmlUtils
+        .fromSafeConstant("input type=\"checkbox\" tabindex=\"-1\"");
+
+      private SafeHtml makeTooltip() {
+        return SafeHtmlUtils.fromSafeConstant(" title=\"Select all " + dataProvider.getRowCount() + " items\" ");
+      }
+
+      @Override
+      public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
+        // Get the view data.
+        Object key = context.getKey();
+        Boolean viewData = getViewData(key);
+        if (viewData != null && viewData.equals(value)) {
+          clearViewData(key);
+          viewData = null;
+        }
+
+        sb.append(INPUT_OPEN);
+        if (value != null && ((viewData != null) ? viewData : value)) {
+          sb.append(INPUT_CHECKED);
+        } else {
+          sb.append(INPUT_UNCHECKED);
+        }
+        sb.append(makeTooltip());
+        sb.append(INPUT_CLOSE);
+      }
+    }) {
+
+      @Override
+      public Boolean getValue() {
+        return selectingAll;
+      }
+    };
+
+    selectHeader.setUpdater(value -> {
+      selectingAll = value;
+      redraw();
+      fireOnCheckboxSelectionChanged();
+    });
+
+    display.addColumn(selectColumn, selectHeader);
+    display.setColumnWidth(selectColumn, "45px");
   }
 
   protected abstract void configureDisplay(CellTable<T> display);
@@ -752,7 +757,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     for (CheckboxSelectionListener<T> listener : listeners) {
       listener.onSelectionChange(getSelected());
     }
-    copyButton.setVisible((!selected.isEmpty() || selectingAll) && copiable);
+    if (copiable) {
+      copyButton.setVisible((!selected.isEmpty() || selectingAll));
+    }
   }
 
   public Boolean getSelectingAll() {
@@ -1013,6 +1020,10 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   public void setResult(IndexResult<T> result) {
     this.result = result;
+  }
+
+  public boolean getPersistSelections() {
+    return persistSelections;
   }
 
   public void setPersistSelections(boolean persistSelections) {
