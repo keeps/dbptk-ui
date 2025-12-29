@@ -69,7 +69,6 @@ import com.databasepreservation.common.api.utils.DownloadUtils;
 import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.api.utils.StreamResponse;
 import com.databasepreservation.common.api.utils.ViewerStreamingOutput;
-import com.databasepreservation.common.api.v1.utils.DatabasesCSVOutputStream;
 import com.databasepreservation.common.api.v1.utils.IterableIndexResultsCSVOutputStream;
 import com.databasepreservation.common.api.v1.utils.JobResponse;
 import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
@@ -84,7 +83,6 @@ import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.progress.ProgressData;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -112,7 +110,6 @@ import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
-import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
@@ -883,14 +880,6 @@ public class CollectionResource implements CollectionService {
       databaseUUID)));
   }
 
-  private ResponseEntity<StreamingResponseBody> handleDatabasesCSVExport(DatabaseRowsSolrManager solrManager,
-    FindRequest findRequest) throws IOException {
-    try (IterableDatabaseResult<ViewerDatabase> allDatabases = solrManager.findAll(ViewerDatabase.class,
-      findRequest.filter, findRequest.sorter, findRequest.fieldsToReturn)) {
-      return ApiUtils.okResponse(new StreamResponse(new DatabasesCSVOutputStream(allDatabases, "databases.csv", ',')));
-    }
-  }
-
   private Object[] appendValue(Object[] obj, Object newObj) {
     ArrayList<Object> temp = new ArrayList<>(Arrays.asList(obj));
     temp.add(newObj);
@@ -1028,28 +1017,4 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  @RequestMapping(path = "/export", method = RequestMethod.GET)
-  @Operation(summary = "Exports list of loaded databases to CSV")
-  public ResponseEntity<StreamingResponseBody> exportDatabases() {
-    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-
-    LogEntryState state = LogEntryState.SUCCESS;
-    User user = new User();
-
-    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-
-    FindRequest findRequest = null;
-
-    try {
-      user = controllerAssistant.checkRoles(request);
-      findRequest = new FindRequest(ViewerDatabase.class.getName(), new Filter(), new Sorter(), null, null);
-      return handleDatabasesCSVExport(solrManager, findRequest);
-    } catch (AuthorizationException | IOException e) {
-      state = LogEntryState.FAILURE;
-      throw new RESTException(e);
-    } finally {
-      // register action
-      controllerAssistant.registerAction(user, state);
-    }
-  }
 }

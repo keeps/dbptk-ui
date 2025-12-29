@@ -24,6 +24,7 @@ import com.databasepreservation.common.server.index.utils.IterableDatabaseResult
 public class DatabasesCSVOutputStream extends CSVOutputStream {
   /** The results to write to output stream. */
   private final IterableDatabaseResult<ViewerDatabase> results;
+  private final String[] UNITS = new String[] {"B", "KB", "MB", "GB", "TB", "PB"};
 
   /**
    * Constructor.
@@ -61,6 +62,14 @@ public class DatabasesCSVOutputStream extends CSVOutputStream {
     return -1;
   }
 
+  private String readableFileSize(long size) {
+    if (size <= 0) {
+      return "0 B";
+    }
+    int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+    return String.format("%.1f", (size / Math.pow(1024, digitGroups))) + " " + UNITS[digitGroups];
+  }
+
   private void multiRow(OutputStreamWriter writer, CSVPrinter printer) throws IOException {
     boolean isFirst = true;
 
@@ -68,14 +77,17 @@ public class DatabasesCSVOutputStream extends CSVOutputStream {
     while (iterator.hasNext()) {
       ViewerDatabase database = iterator.next();
       if (isFirst) {
-        printer = getFormat().withHeader("Name").print(writer);
+        printer = getFormat().withHeader("Name", "Size", "Status").print(writer);
         isFirst = false;
       }
+
 
       String name = database.getMetadata() != null && database.getMetadata().getName() != null
         ? database.getMetadata().getName()
         : "";
-      printer.printRecord(name);
+      String size = readableFileSize(database.getSize());
+      String status = database.getStatus() != null ? database.getStatus().toString() : "";
+      printer.printRecord(name, size, status);
     }
   }
 }
