@@ -661,7 +661,8 @@ public class CollectionResource implements CollectionService {
 
     String mimeType = handleMimeType(tableConfiguration, row, columnIndex);
 
-    if (version.equals(ViewerConstants.SIARD_DK_1007) || version.equals(ViewerConstants.SIARD_DK_128)) {
+    if (version.equals(ViewerConstants.SIARD_DK_1007) || version.equals(ViewerConstants.SIARD_DK_128)
+      || version.equals(ViewerConstants.SIARD_DK_128_EXT)) {
       String filePath = LobManagerUtils.getLobCellValue(tableConfiguration, row, columnIndex);
       Path path = Paths.get(filePath);
       // if the lob is a directory zip it

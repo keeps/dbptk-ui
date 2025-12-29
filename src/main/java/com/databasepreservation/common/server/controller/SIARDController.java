@@ -89,6 +89,7 @@ import com.databasepreservation.modules.config.ImportConfigurationModuleFactory;
 import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDDK1007ModuleFactory;
+import com.databasepreservation.modules.siard.SIARDDK128ExtModuleFactory;
 import com.databasepreservation.modules.siard.SIARDDK128ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDDKEditFactory;
 import com.databasepreservation.modules.siard.SIARDDKModuleFactory;
@@ -637,7 +638,8 @@ public class SIARDController {
       }
 
       if (siardVersion.equals(ViewerConstants.SiardVersion.DK_1007)
-        || siardVersion.equals(ViewerConstants.SiardVersion.DK_128)) {
+        || siardVersion.equals(ViewerConstants.SiardVersion.DK_128)
+        || siardVersion.equals(ViewerConstants.SiardVersion.DK_128_EXT)) {
         siardEdition.editModule(new SIARDDKEditFactory()).editModuleParameter(SIARDDKEditFactory.PARAMETER_FOLDER,
           Collections.singletonList(siardPath.toAbsolutePath().toString()));
       } else if (siardVersion.equals(ViewerConstants.SiardVersion.V2_1)
@@ -696,7 +698,7 @@ public class SIARDController {
     if (Files.isDirectory(path)) {
       if (Files.exists(path.resolve(ViewerConstants.SIARDDK_SCHEMAS_FOLDER)
         .resolve(ViewerConstants.SIARDDK_STANDARD_FOLDER).resolve(ViewerConstants.SIARDDK_RESEARCH_INDEX_FILE))) {
-        return ViewerConstants.SiardVersion.DK_128;
+        return ViewerConstants.SiardVersion.DK_128_EXT;
       } else {
         return ViewerConstants.SiardVersion.DK_1007;
       }
@@ -786,6 +788,11 @@ public class SIARDController {
         databaseMigration.importModule(new SIARDDK1007ModuleFactory())
           .importModuleParameter(SIARDDK1007ModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
           .importModuleParameter(SIARDDK1007ModuleFactory.PARAMETER_AS_SCHEMA,
+            ViewerConstants.SIARDDK_DEFAULT_SCHEMA_NAME);
+      } else if (siardVersion.equals(ViewerConstants.SIARD_DK_128_EXT)) {
+        databaseMigration.importModule(new SIARDDK128ExtModuleFactory())
+          .importModuleParameter(SIARDDK128ExtModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
+          .importModuleParameter(SIARDDK128ExtModuleFactory.PARAMETER_AS_SCHEMA,
             ViewerConstants.SIARDDK_DEFAULT_SCHEMA_NAME);
       } else if (siardVersion.equals(ViewerConstants.SIARD_V21) || siardVersion.equals(ViewerConstants.SIARD_V22)) {
         databaseMigration.importModule(new SIARD2ModuleFactory())

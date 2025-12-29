@@ -70,6 +70,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
@@ -344,24 +345,32 @@ public class RowPanel extends RightPanel {
           && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
           rowField = RowField.createInstance(label, new HTML(messages.rowPanelTextForLobUnavailable()));
         } else {
-          SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
-          String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
-          String json = "";
-          if (template != null && !template.isEmpty()) {
-            if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
-              json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
-                ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
-                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
-                  table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
-            } else {
-              json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
-                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
-                  table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
+          if (cell.getMimeType().equals("application/pdf") || value.endsWith(".pdf") || value.endsWith(".PDF")) {
+            String exportLobUri = RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(),
+              table.getName(), row.getUuid(), columnStatus.getColumnIndex());
+            String viewerPdf = GWT.getHostPageBaseURL() + "webjars/pdf-js/web/viewer.html?file=" + exportLobUri;
+            Frame frame = new Frame(viewerPdf);
+            frame.addStyleName("embedded-iiif-viewer");
+            rowField = RowField.createInstance(label, frame);
+          } else {
+            SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
+            String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
+            if (template != null && !template.isEmpty()) {
+              String json = "";
+              if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+                json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
+                  ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
+                  ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+                    table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
+              } else {
+                json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+                  ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+                    table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
+              }
+              safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
             }
-            safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
+            rowField = RowField.createInstance(label, new HTML(safeHtml));
           }
-
-          rowField = RowField.createInstance(label, new HTML(safeHtml));
         }
       } else if (ViewerType.dbTypes.CLOB.equals(column.getType().getDbType())) {
         if (columnStatus.getDetailsStatus().isShowContent()) {
@@ -458,14 +467,15 @@ public class RowPanel extends RightPanel {
               if (columnStatus.getTypeName().contains("BINARY LARGE OBJECT")) {
                 String templateLob = "<a href=\"{{" + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + "}}\">{{"
                   + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL + "}}</a>";
-                int originalCollumnIndex = 0;
 
                 // loop to find the original column index
+                Map.Entry<String, ViewerCell> originalCell = null;
                 for (Map.Entry<String, ViewerCell> entry : result.getResults().get(0).getCells().entrySet()) {
                   ViewerCell v = entry.getValue();
-                  if (v.getStoreType() != null)
+                  if (v.getStoreType() != null) {
+                    originalCell = entry;
                     break;
-                  originalCollumnIndex++;
+                  }
                 }
 
                 if ((database.getPath() == null || database.getPath().isEmpty())
@@ -473,26 +483,32 @@ public class RowPanel extends RightPanel {
                   rowField = RowField.createInstance(new Label(s).getText(),
                     new HTML(messages.rowPanelTextForLobUnavailable()));
                 } else {
-                  SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
-                  if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
-                    json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL,
-                      messages.row_openLOBViewer(), ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
-                      ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
-                      RestUtils.createExportLobUri(database.getUuid(), nestedTable.getSchemaName(),
-                        nestedTable.getName(), result.getResults().get(0).getUuid(), originalCollumnIndex));
-
-                    templateLob = ViewerConstants.DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE;
-
+                  String exportLobUri = GWT.getHostPageBaseURL()
+                    + row.getNestedRowList().get(0).getCells().get("nst_" + originalCell.getKey()).getValue();
+                  if (originalCell.getValue().getMimeType().equals("application/pdf")
+                    || originalCell.getValue().getValue().endsWith(".pdf")
+                    || originalCell.getValue().getValue().endsWith(".PDF")) {
+                    String viewerPdf = GWT.getHostPageBaseURL() + "webjars/pdf-js/web/viewer.html?file=" + exportLobUri;
+                    Frame frame = new Frame(viewerPdf);
+                    frame.addStyleName("embedded-iiif-viewer");
+                    rowField = RowField.createInstance(columnStatus.getCustomName(), frame);
                   } else {
-                    json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
-                      ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK,
-                      RestUtils.createExportLobUri(database.getUuid(), nestedTable.getSchemaName(),
-                        nestedTable.getName(), result.getResults().get(0).getUuid(), originalCollumnIndex));
+                    SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
+                    if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+                      json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL,
+                        messages.row_openLOBViewer(), ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK,
+                        RestUtils.createUVLob(), ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, exportLobUri);
+
+                      templateLob = ViewerConstants.DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE;
+                    } else {
+                      json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL,
+                        messages.row_downloadLOB(), ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, exportLobUri);
+                    }
+
+                    safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(templateLob, json));
+
+                    rowField = RowField.createInstance(columnStatus.getCustomName(), new HTML(safeHtml));
                   }
-
-                  safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(templateLob, json));
-
-                  rowField = RowField.createInstance(columnStatus.getCustomName(), new HTML(safeHtml));
                 }
               } else {
                 rowField = RowField.createInstance(columnStatus.getCustomName(), new Label(s));
