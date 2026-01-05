@@ -169,7 +169,7 @@ public class SolrUtils {
     parseAndConfigureFacets(facets, query);
 
     try {
-      QueryResponse response = index.query(collection.getIndexName(), query);
+      QueryResponse response = index.query(collection.getIndexName(), query, SolrRequest.METHOD.POST);
       ret = queryResponseToIndexResult(response, collection, facets);
     } catch (SolrException e) {
       boolean shouldReturnEmptyResult = (e.code() == 404);
@@ -302,7 +302,8 @@ public class SolrUtils {
     }
 
     try {
-      QueryResponse response = index.query(SolrDefaultCollectionRegistry.get(classToRetrieve).getIndexName(), query);
+      QueryResponse response = index.query(SolrDefaultCollectionRegistry.get(classToRetrieve).getIndexName(), query,
+        SolrRequest.METHOD.POST);
       IndexResult<T> result = queryResponseToIndexResult(response, SolrDefaultCollectionRegistry.get(classToRetrieve),
         Facets.NONE);
       ret = Pair.of(result, response.getNextCursorMark());
@@ -347,7 +348,7 @@ public class SolrUtils {
     final RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
 
     try {
-      QueryResponse response = index.query(collection.getIndexName(), query);
+      QueryResponse response = index.query(collection.getIndexName(), query, SolrRequest.METHOD.POST);
       final IndexResult<ViewerRow> result = queryResponseToIndexResult(response, collection, Facets.NONE);
       ret = Pair.of(result, response.getNextCursorMark());
     } catch (SolrServerException | IOException e) {
@@ -375,7 +376,7 @@ public class SolrUtils {
     final RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
 
     try {
-      QueryResponse response = index.query(collection.getIndexName(), query);
+      QueryResponse response = index.query(collection.getIndexName(), query, SolrRequest.METHOD.POST);
       final IndexResult<ViewerRow> result = queryResponseToIndexResult(response, collection, Facets.NONE);
       ret = Pair.of(result, response.getNextCursorMark());
     } catch (SolrServerException | IOException e) {
@@ -429,7 +430,7 @@ public class SolrUtils {
     final RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
 
     try {
-      QueryResponse response = index.query(collection.getIndexName(), query);
+      QueryResponse response = index.query(collection.getIndexName(), query, SolrRequest.METHOD.POST);
       ret = queryResponseToIndexResult(response, collection, Facets.NONE);
     } catch (SolrServerException | IOException e) {
       throw new GenericException("Could not query index", e);
