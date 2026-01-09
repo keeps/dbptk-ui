@@ -13,6 +13,7 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.SavedSearchList;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.visualization.browse.table.TableSavedSearchPanel;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -78,6 +79,7 @@ public class DatabaseSearchesPanel extends RightPanel {
     savedSearchList.getSelectionModel().addSelectionChangeHandler(event -> {
       SavedSearch selected = savedSearchList.getSelectionModel().getSelectedObject();
       if (selected != null) {
+        TableSavedSearchPanel.clearInstance(database, selected.getUuid());
         HistoryManager.gotoSavedSearch(selected.getDatabaseUUID(), selected.getUuid());
       }
     });

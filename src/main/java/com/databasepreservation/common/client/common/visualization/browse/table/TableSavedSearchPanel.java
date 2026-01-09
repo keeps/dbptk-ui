@@ -7,6 +7,9 @@
  */
 package com.databasepreservation.common.client.common.visualization.browse.table;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
@@ -14,13 +17,11 @@ import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
-import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
@@ -37,10 +38,26 @@ import config.i18n.client.ClientMessages;
  */
 public class TableSavedSearchPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private static final String SEPARATOR = "/";
+  private static Map<String, TableSavedSearchPanel> instances = new HashMap<>();
 
-  public static TableSavedSearchPanel createInstance(ViewerDatabase database, String savedSearchUUID,
+  public static void clearInstance(ViewerDatabase database, String savedSearchUUID) {
+    String code = database.getUuid() + SEPARATOR + savedSearchUUID;
+    instances.remove(code);
+  }
+
+  public static TableSavedSearchPanel getInstance(ViewerDatabase database, String savedSearchUUID,
     CollectionStatus status) {
-    return new TableSavedSearchPanel(database, savedSearchUUID, status);
+
+    String code = database.getUuid() + SEPARATOR + savedSearchUUID;
+    TableSavedSearchPanel instance = instances.get(code);
+
+    if (instance == null) {
+      instance = new TableSavedSearchPanel(database, savedSearchUUID, status);
+      instances.put(code, instance);
+    }
+
+    return instance;
   }
 
   interface TableSavedSearchPanelUiBinder extends UiBinder<Widget, TableSavedSearchPanel> {
