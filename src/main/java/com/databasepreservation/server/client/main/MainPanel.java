@@ -659,7 +659,7 @@ public class MainPanel extends Composite {
               setContent(databaseUUID, currentHistoryPath.get(0), currentHistoryPath.get(0), new RightPanelLoader() {
                 @Override
                 public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-                  return TableSavedSearchPanel.createInstance(database, searchUUID, status);
+                  return TableSavedSearchPanel.getInstance(database, searchUUID, status);
                 }
               });
 
