@@ -88,6 +88,7 @@ import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.modules.config.ImportConfigurationModuleFactory;
 import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
+import com.databasepreservation.modules.siard.SIARDDK1007ExtModuleFactory;
 import com.databasepreservation.modules.siard.SIARDDK1007ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDDK128ExtModuleFactory;
 import com.databasepreservation.modules.siard.SIARDDK128ModuleFactory;
@@ -638,6 +639,7 @@ public class SIARDController {
       }
 
       if (siardVersion.equals(ViewerConstants.SiardVersion.DK_1007)
+        || siardVersion.equals(ViewerConstants.SiardVersion.DK_1007_EXT)
         || siardVersion.equals(ViewerConstants.SiardVersion.DK_128)
         || siardVersion.equals(ViewerConstants.SiardVersion.DK_128_EXT)) {
         siardEdition.editModule(new SIARDDKEditFactory()).editModuleParameter(SIARDDKEditFactory.PARAMETER_FOLDER,
@@ -700,7 +702,7 @@ public class SIARDController {
         .resolve(ViewerConstants.SIARDDK_STANDARD_FOLDER).resolve(ViewerConstants.SIARDDK_RESEARCH_INDEX_FILE))) {
         return ViewerConstants.SiardVersion.DK_128_EXT;
       } else {
-        return ViewerConstants.SiardVersion.DK_1007;
+        return ViewerConstants.SiardVersion.DK_1007_EXT;
       }
     } else {
       try (ZipFile siard = new ZipFile(path.toFile())) {
@@ -793,6 +795,11 @@ public class SIARDController {
         databaseMigration.importModule(new SIARDDK128ExtModuleFactory())
           .importModuleParameter(SIARDDK128ExtModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
           .importModuleParameter(SIARDDK128ExtModuleFactory.PARAMETER_AS_SCHEMA,
+            ViewerConstants.SIARDDK_DEFAULT_SCHEMA_NAME);
+      } else if (siardVersion.equals(ViewerConstants.SIARD_DK_1007_EXT)) {
+        databaseMigration.importModule(new SIARDDK1007ExtModuleFactory())
+          .importModuleParameter(SIARDDK1007ExtModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
+          .importModuleParameter(SIARDDK1007ExtModuleFactory.PARAMETER_AS_SCHEMA,
             ViewerConstants.SIARDDK_DEFAULT_SCHEMA_NAME);
       } else if (siardVersion.equals(ViewerConstants.SIARD_V21) || siardVersion.equals(ViewerConstants.SIARD_V22)) {
         databaseMigration.importModule(new SIARD2ModuleFactory())
