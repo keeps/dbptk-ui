@@ -62,14 +62,6 @@ public class DatabasesCSVOutputStream extends CSVOutputStream {
     return -1;
   }
 
-  private String readableFileSize(long size) {
-    if (size <= 0) {
-      return "0 B";
-    }
-    int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
-    return String.format("%.1f", (size / Math.pow(1024, digitGroups))) + " " + UNITS[digitGroups];
-  }
-
   private void multiRow(OutputStreamWriter writer, CSVPrinter printer) throws IOException {
     boolean isFirst = true;
 
@@ -85,7 +77,7 @@ public class DatabasesCSVOutputStream extends CSVOutputStream {
       String name = database.getMetadata() != null && database.getMetadata().getName() != null
         ? database.getMetadata().getName()
         : "";
-      String size = readableFileSize(database.getSize());
+      String size = String.valueOf(database.getSize());
       String status = database.getStatus() != null ? database.getStatus().toString() : "";
       printer.printRecord(name, size, status);
     }
