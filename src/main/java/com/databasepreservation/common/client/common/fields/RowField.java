@@ -13,6 +13,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -35,34 +36,45 @@ public class RowField extends Composite {
   @UiField
   FlowPanel rowField;
 
+  public static RowField createInstance(String iconTag, String label, String url, Widget value, Widget more) {
+    return new RowField(iconTag, label, url, value, more);
+  }
+
   public static RowField createInstance(String iconTag, String label, Widget value, Widget more) {
-    return new RowField(iconTag, label, value, more);
+    return new RowField(iconTag, label, null, value, more);
   }
 
   public static RowField createInstance(String label, Widget value) {
-    return new RowField(null, label, value, null);
+    return new RowField(null, label, null, value, null);
   }
 
   public static RowField createInstance(String iconTag, String label, Widget value) {
-    return new RowField(iconTag, label, value, null);
+    return new RowField(iconTag, label, null, value, null);
   }
 
-  private RowField(String iconTag, String label, Widget value, Widget more) {
+  private RowField(String iconTag, String label, String url, Widget value, Widget more) {
     initWidget(binder.createAndBindUi(this));
 
     if (iconTag != null) {
       HTML icon = new HTML();
       SafeHtmlBuilder builder = new SafeHtmlBuilder();
       builder.append(SafeHtmlUtils.fromSafeConstant(iconTag)).appendEscaped(" ")
-              .append(SafeHtmlUtils.fromSafeConstant(label));
+        .append(SafeHtmlUtils.fromSafeConstant(label));
       icon.setHTML(builder.toSafeHtml());
       icon.addStyleName("metadata-information-element-label");
       rowField.add(icon);
     } else {
       if (label != null) {
-        Label l = new Label(label);
-        l.addStyleName("metadata-information-element-label");
-        rowField.add(l);
+        if (url != null) {
+          Anchor a = new Anchor(label, url);
+          a.addStyleName("metadata-information-element-label");
+          a.setTarget("_blank");
+          rowField.add(a);
+        } else {
+          Label l = new Label(label);
+          l.addStyleName("metadata-information-element-label");
+          rowField.add(l);
+        }
       }
     }
 

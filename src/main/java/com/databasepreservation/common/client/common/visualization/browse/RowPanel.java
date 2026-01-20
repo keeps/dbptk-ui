@@ -351,7 +351,7 @@ public class RowPanel extends RightPanel {
             String viewerPdf = GWT.getHostPageBaseURL() + "webjars/pdf-js/web/viewer.html?file=" + exportLobUri;
             Frame frame = new Frame(viewerPdf);
             frame.addStyleName("embedded-iiif-viewer");
-            rowField = RowField.createInstance(label, frame);
+            rowField = RowField.createInstance(null, label, viewerPdf, frame, null);
           } else {
             SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
             String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
@@ -491,7 +491,7 @@ public class RowPanel extends RightPanel {
                     String viewerPdf = GWT.getHostPageBaseURL() + "webjars/pdf-js/web/viewer.html?file=" + exportLobUri;
                     Frame frame = new Frame(viewerPdf);
                     frame.addStyleName("embedded-iiif-viewer");
-                    rowField = RowField.createInstance(columnStatus.getCustomName(), frame);
+                    rowField = RowField.createInstance(null, columnStatus.getCustomName(), viewerPdf, frame, null);
                   } else {
                     SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
                     if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
