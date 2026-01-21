@@ -30,6 +30,7 @@ import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.models.progress.ProgressData;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.google.gwt.core.client.GWT;
@@ -127,6 +128,15 @@ public interface CollectionService extends DirectRestService {
   @Operation(summary = "Runs a specific denormalization configuration for a certain table within a database")
   JobResponse run(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID);
+
+  /*******************************************************************************
+   * Collection Resource - Config Sub-resource - Virtual columns
+   ******************************************************************************/
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}/virtualColumn", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Updates the internal collection configuration's customization properties")
+  Boolean createVirtualColumn(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID,
+    @Parameter(name = "virtualColumnStatus", required = true) @RequestBody VirtualColumnStatus virtualColumnStatus);
 
   /*******************************************************************************
    * Collection Resource - Data Sub-resource

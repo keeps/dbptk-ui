@@ -2135,7 +2135,7 @@ html, body {
     margin: 0 2px;
 }
 
-.btn.btn-primary.btn-small {
+.btn.btn-primary.btn-small, .btn.btn-default.btn-small{
     border-radius: 11px;
     padding: 0px 7px;
     line-height: 8px;

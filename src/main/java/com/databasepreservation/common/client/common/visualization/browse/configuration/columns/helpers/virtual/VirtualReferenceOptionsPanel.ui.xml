@@ -1,0 +1,44 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+
+    <g:FlowPanel ui:field="content" addStyleNames="columns-customize-options">
+
+        <g:FlowPanel ui:field="fkReferencePanel" visible="false" addStyleNames="alert alert-info">
+            <g:FlowPanel addStyleNames="margin-bottom-10">
+                <g:HTML>
+                    <i class="fa fa-info-circle"></i>
+                    <strong><ui:text from='{messages.columnManagementLabelFkDetected}'/></strong>
+                </g:HTML>
+            </g:FlowPanel>
+
+            <g:FlowPanel>
+                <g:Label ui:field="fkTableLabel" addStyleNames="font-bold margin-bottom-5"/>
+
+                <g:Label ui:field="fkColumnsLabel" addStyleNames="font-bold"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+
+        <g:FlowPanel ui:field="virtualReferencePanel">
+            <g:Label addStyleNames="form-separator">
+                <ui:text from='{messages.columnManagementLabelForRelationship}'/>
+            </g:Label>
+
+            <g:FlowPanel addStyleNames="margin-bottom-10">
+                <g:Label addStyleNames="form-label">
+                    <ui:text from='{messages.columnManagementLabelForReferencedTable}'/>
+                </g:Label>
+                <g:ListBox ui:field="referencedTableListBox" addStyleNames="form-control"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel>
+                <g:Label addStyleNames="form-label">
+                    <ui:text from='{messages.columnManagementLabelForReferencedColumnsTemplate}'/>
+                </g:Label>
+                <g:TextBox addStyleNames="form-textbox full-width" ui:field="templateReferencedColumns"/>
+                <g:FlowPanel ui:field="templateReferencedColumnsHint" addStyleNames="margin-top-5"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+
+    </g:FlowPanel>
+</ui:UiBinder>

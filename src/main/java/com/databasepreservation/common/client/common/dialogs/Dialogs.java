@@ -8,6 +8,7 @@
 package com.databasepreservation.common.client.common.dialogs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.databasepreservation.common.client.common.NoAsyncCallback;
@@ -553,6 +554,12 @@ public class Dialogs {
 
   public static void showDialogColumnConfiguration(String title, String width, String saveButtonText,
     String cancelButtonText, ColumnOptionsPanel optionsPanel, final AsyncCallback<Boolean> callback) {
+    showDialogColumnConfiguration(title, width, saveButtonText, cancelButtonText,
+      Collections.singletonList(optionsPanel), callback);
+  }
+
+  public static void showDialogColumnConfiguration(String title, String width, String saveButtonText,
+    String cancelButtonText, List<ColumnOptionsPanel> optionsPanels, final AsyncCallback<Boolean> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
 
@@ -575,7 +582,9 @@ public class Dialogs {
       callback.onSuccess(true);
     });
 
-    form.add(optionsPanel);
+    for (ColumnOptionsPanel optionsPanel : optionsPanels) {
+      form.add(optionsPanel);
+    }
     form.setStyleName("content");
 
     layout.add(form);
@@ -885,6 +894,5 @@ public class Dialogs {
     dialogBox.center();
     dialogBox.show();
   }
-
 
 }
