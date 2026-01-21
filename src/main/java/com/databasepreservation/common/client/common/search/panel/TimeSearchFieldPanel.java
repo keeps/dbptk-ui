@@ -74,7 +74,7 @@ public class TimeSearchFieldPanel extends SearchFieldPanel {
 
     if (searchFields != null && searchFields.size() >= 1) {
       String field = searchFields.get(0);
-      if (inputTimeFromForTime.getValue() != null || inputTimeToForTime != null) {
+      if (inputTimeFromForTime.getValue() != null || inputTimeToForTime.getValue() != null) {
         if (inputTimeFromForTime.getValue() == null) {
           inputTimeFromForTime.setValue(inputTimeToForTime.getValue());
         } else if (inputTimeToForTime.getValue() == null) {
