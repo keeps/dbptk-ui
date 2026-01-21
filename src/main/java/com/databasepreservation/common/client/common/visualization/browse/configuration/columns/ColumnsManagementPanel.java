@@ -8,12 +8,15 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.jetbrains.annotations.NotNull;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -39,6 +42,8 @@ import com.databasepreservation.common.client.common.visualization.browse.config
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.CustomizeColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NestedColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NumericColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.virtual.VirtualColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.virtual.VirtualReferenceOptionsPanel;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.configuration.observer.ISaveButtonObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -68,6 +73,8 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -151,13 +158,13 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
             cellTable = populateTableUser(table);
           }
           content.add(cellTable);
-          configureButtonsPanel();
+          configureButtonsPanel(table);
         }).isAuthenticationEnabled();
       }
     });
   }
 
-  private void configureButtonsPanel() {
+  private void configureButtonsPanel(TableStatus table) {
     Button btnCancel = new Button();
     btnCancel.setText(messages.basicActionCancel());
     btnCancel.addStyleName("btn btn-danger btn-times-circle");
@@ -174,9 +181,43 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
     btnCancel.addClickHandler(e -> handleCancelEvent(changes));
 
+    Button btnAddVirtualColumn = getBtnAddVirtualColumn(table);
     btnSave.addClickHandler(e -> handleSaveEvent(changes));
     content.add(CommonClientUtils.wrapOnDiv("navigation-panel-buttons",
-      CommonClientUtils.wrapOnDiv("btn-item", btnSave), CommonClientUtils.wrapOnDiv("btn-item", btnCancel)));
+      CommonClientUtils.wrapOnDiv("btn-item", btnSave), CommonClientUtils.wrapOnDiv("btn-item", btnCancel),
+      CommonClientUtils.wrapOnDiv("btn-item", btnAddVirtualColumn)));
+  }
+
+  @NotNull
+  private Button getBtnAddVirtualColumn(TableStatus table) {
+    Button btnAddVirtualColumn = new Button();
+    btnAddVirtualColumn.setText("Add virtual column");
+    btnAddVirtualColumn.addStyleName("btn btn-primary");
+
+    btnAddVirtualColumn.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        VirtualColumnOptionsPanel virtualColumnOptionsPanel = VirtualColumnOptionsPanel.createInstance(table, new ColumnStatus());
+        VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel
+          .createInstance(database, collectionStatus, table, new ColumnStatus());
+        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
+          messages.basicActionCancel(), Arrays.asList(virtualColumnOptionsPanel, virtualReferenceOptionsPanel),
+          new DefaultAsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean value) {
+              if (value) {
+                ColumnStatus columnStatus = virtualColumnOptionsPanel.getColumnStatus();
+                columnStatus.setVirtualReferenceStatus(virtualReferenceOptionsPanel.getVirtualReferenceStatus());
+                collectionStatus.getTableStatusByTableId(tableId).addColumnStatus(columnStatus);
+                cellTable.getDataProvider().getList().add(columnStatus);
+                cellTable.getDataProvider().refresh();
+                changes = true;
+              }
+            }
+          });
+      }
+    });
+    return btnAddVirtualColumn;
   }
 
   private void configureHeader() {
@@ -563,8 +604,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   }
 
   private boolean isAnOptionColumn(ViewerType.dbTypes type) {
-    return ViewerType.dbTypes.BINARY.equals(type) || ViewerType.dbTypes.NESTED.equals(type)
-      || ViewerType.dbTypes.CLOB.equals(type) || ViewerType.dbTypes.NUMERIC_FLOATING_POINT.equals(type);
+    return true;
+//    return ViewerType.dbTypes.BINARY.equals(type) || ViewerType.dbTypes.NESTED.equals(type)
+//      || ViewerType.dbTypes.CLOB.equals(type) || ViewerType.dbTypes.NUMERIC_FLOATING_POINT.equals(type)
+//      || ViewerType.dbTypes.VIRTUAL.equals(type);
   }
 
   private Column<ColumnStatus, String> getTableCustomizationColumn() {
@@ -624,7 +667,33 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     };
 
     options.setFieldUpdater((index, columnStatus, value) -> {
-      if (ViewerType.dbTypes.NESTED.equals(columnStatus.getType())) {
+      if (ViewerType.dbTypes.VIRTUAL.equals(columnStatus.getType())) {
+        VirtualColumnOptionsPanel virtualColumnOptionsPanel = VirtualColumnOptionsPanel
+          .createInstance(collectionStatus.getTableStatusByTableId(tableId), columnStatus);
+        VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel
+          .createInstance(database, collectionStatus, collectionStatus.getTableStatusByTableId(tableId), columnStatus);
+        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
+          messages.basicActionCancel(), Arrays.asList(virtualColumnOptionsPanel, virtualReferenceOptionsPanel),
+          new DefaultAsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean value) {
+              if (value) {
+                ColumnStatus updatedColumnStatus = virtualColumnOptionsPanel.getColumnStatus();
+                updatedColumnStatus.setVirtualReferenceStatus(virtualReferenceOptionsPanel.getVirtualReferenceStatus());
+
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .setDescription(updatedColumnStatus.getDescription());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .setCustomDescription(updatedColumnStatus.getDescription());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .setVirtualColumnStatus(updatedColumnStatus.getVirtualColumnStatus());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .setVirtualReferenceStatus(updatedColumnStatus.getVirtualReferenceStatus());
+                saveChanges(true);
+              }
+            }
+          });
+      } else if (ViewerType.dbTypes.NESTED.equals(columnStatus.getType())) {
         final ColumnOptionsPanel nestedColumnOptionPanel = NestedColumnOptionsPanel.createInstance(columnStatus);
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
           messages.basicActionCancel(), nestedColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
@@ -710,6 +779,21 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                   Dialogs.showErrors(messages.columnManagementPageTitle(),
                     messages.columnManagementPageDialogErrorValueMustBeAnInteger(), messages.basicActionClose());
                 }
+              }
+            }
+          });
+      } else {
+        VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel
+          .createInstance(database, collectionStatus, collectionStatus.getTableStatusByTableId(tableId), columnStatus);
+        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
+          messages.basicActionCancel(), virtualReferenceOptionsPanel, new DefaultAsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean value) {
+              if (value) {
+                columnStatus.setVirtualReferenceStatus(virtualReferenceOptionsPanel.getVirtualReferenceStatus());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .setVirtualReferenceStatus(columnStatus.getVirtualReferenceStatus());
+                saveChanges(true);
               }
             }
           });
