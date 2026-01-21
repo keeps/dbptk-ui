@@ -1,0 +1,42 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+    <g:FlowPanel ui:field="content" addStyleNames="columns-customize-options">
+        <g:HTML addStyleNames="dialog-numeric-description" ui:field="description"/>
+        <g:FlowPanel addStyleNames="dialog-customize-columns-options">
+            <g:FlowPanel addStyleNames="dialog-customize-columns-option">
+
+                <!-- Metadata -->
+                <g:FlowPanel>
+                    <g:Label addStyleNames="form-separator">
+                        <ui:text from='{messages.columnManagementLabelForVirtualColumn}'/>
+                    </g:Label>
+                </g:FlowPanel>
+
+                <g:FlowPanel>
+                    <g:Label addStyleNames="form-label">
+                        <ui:text from='{messages.columnManagementLabelForVirtualColumnName}'/>
+                    </g:Label>
+                    <g:TextBox addStyleNames="form-textbox" ui:field="virtualColumnName"/>
+                </g:FlowPanel>
+
+                <g:FlowPanel>
+                    <g:Label addStyleNames="form-label">
+                        <ui:text from='{messages.columnManagementLabelForVirtualColumnDescription}'/>
+                    </g:Label>
+                    <g:TextBox addStyleNames="form-textbox" ui:field="virtualColumnDescription"/>
+                </g:FlowPanel>
+
+                <!-- Source columns -->
+                <g:FlowPanel>
+                    <g:Label addStyleNames="form-label">
+                        <ui:text from='{messages.columnManagementLabelForSourceColumnsTemplate}'/>
+                    </g:Label>
+                    <g:TextBox addStyleNames="form-textbox" ui:field="templateSourceColumns"/>
+                    <g:FlowPanel ui:field="templateSourceColumnsHint"/>
+                </g:FlowPanel>
+
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>
