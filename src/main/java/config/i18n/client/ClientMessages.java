@@ -1651,6 +1651,22 @@ public interface ClientMessages extends Messages {
 
   SafeHtml columnManagementCustomizeColumnTextForWidthDescription(String link);
 
+  String columnManagementLabelForVirtualColumn();
+
+  String columnManagementLabelForVirtualColumnName();
+
+  String columnManagementLabelForVirtualColumnDescription();
+
+  String columnManagementLabelForSourceColumnsTemplate();
+
+  String columnManagementLabelForRelationship();
+
+  String columnManagementLabelForReferencedTable();
+
+  String columnManagementLabelForReferencedColumnsTemplate();
+
+  String columnManagementLabelFkDetected();
+
   /********************************************
    * Column Management Panel - Binary Column
    *******************************************/
@@ -1688,3 +1704,4 @@ public interface ClientMessages extends Messages {
    *******************************************/
   String configErrorTextForMissingProperty(String property);
 }
+

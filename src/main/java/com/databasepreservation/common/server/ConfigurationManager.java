@@ -2,7 +2,7 @@
  * The contents of this file are subject to the license and copyright
  * detailed in the LICENSE file at the root of the source
  * tree and available online at
- *
+ * <p>
  * https://github.com/keeps/dbptk-ui
  */
 package com.databasepreservation.common.server;
@@ -34,6 +34,7 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -80,7 +81,8 @@ public class ConfigurationManager {
     return JsonUtils.readObjectFromFile(collectionStatusFile, CollectionStatus.class);
   }
 
-  public void editSearch(String databaseUUID, String uuid, String name, String description) throws IllegalAccessException {
+  public void editSearch(String databaseUUID, String uuid, String name, String description)
+    throws IllegalAccessException {
     try {
       final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID,
         ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID);
@@ -123,7 +125,8 @@ public class ConfigurationManager {
     }
   }
 
-  public void addDenormalization(String databaseUUID, String denormalizationUUID) throws GenericException, IllegalAccessException {
+  public void addDenormalization(String databaseUUID, String denormalizationUUID)
+    throws GenericException, IllegalAccessException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       // At the moment there is only one collection per database
@@ -139,7 +142,8 @@ public class ConfigurationManager {
     }
   }
 
-  public void removeDenormalization(String databaseUUID, String denormalizationUUID) throws GenericException, IllegalAccessException {
+  public void removeDenormalization(String databaseUUID, String denormalizationUUID)
+    throws GenericException, IllegalAccessException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       if (databaseStatus.getCollections().size() >= 1) {
@@ -184,7 +188,8 @@ public class ConfigurationManager {
     }
   }
 
-  public void removeDenormalizationColumns(String databaseUUID, String tableUUID) throws GenericException, IllegalAccessException {
+  public void removeDenormalizationColumns(String databaseUUID, String tableUUID)
+    throws GenericException, IllegalAccessException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       if (databaseStatus.getCollections().size() >= 1) {
@@ -260,7 +265,8 @@ public class ConfigurationManager {
     return databaseDirectoryPath.resolve(id + ViewerConstants.JSON_EXTENSION);
   }
 
-  public void updateIndicators(String id, String passed, String failed, String warnings, String skipped, String errors) {
+  public void updateIndicators(String id, String passed, String failed, String warnings, String skipped,
+    String errors) {
     synchronized (databaseStatusFileLock) {
       try {
         final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
@@ -391,7 +397,8 @@ public class ConfigurationManager {
     }
   }
 
-  public void updateCollectionStatus(String databaseUUID, CollectionStatus status) throws ViewerException, IllegalAccessException {
+  public void updateCollectionStatus(String databaseUUID, CollectionStatus status)
+    throws ViewerException, IllegalAccessException {
     synchronized (collectionStatusFileLock) {
       Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
       ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
@@ -412,6 +419,21 @@ public class ConfigurationManager {
       Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
       ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
       JsonTransformer.writeObjectToFile(updatingStatus, statusFile);
+    }
+  }
+
+  public void addVirtualColumn(String databaseUUID, String collectionUUID, String tableUUID,
+    VirtualColumnStatus virtualColumnStatus) throws GenericException, IllegalAccessException, ViewerException {
+
+    DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
+    if (!databaseStatus.getCollections().isEmpty()) {
+      final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionUUID);
+      TableStatus table = collectionStatus.getTableStatus(tableUUID);
+
+      int order = table.getLastColumnOrder();
+      ColumnStatus columnStatus = StatusUtils.getColumnStatus(virtualColumnStatus, true, ++order);
+      table.addColumnStatus(columnStatus);
+      updateCollectionStatus(databaseUUID, collectionStatus);
     }
   }
 
