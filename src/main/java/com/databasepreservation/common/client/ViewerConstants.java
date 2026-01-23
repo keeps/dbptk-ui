@@ -232,6 +232,7 @@ public class ViewerConstants {
   public static final String SOLR_ROWS_NESTED_TABLE_ID = "nestedTableId";
   public static final String SOLR_ROWS_NESTED = "nested";
   public static final String SOLR_ROWS_NESTED_COL = "nst_";
+  public static final String SOLR_ROWS_EXTRACTED_TEXT = "extractedText";
   /*
    * DYNAMIC FIELD TYPES (suffixes)
    */
@@ -615,7 +616,14 @@ public class ViewerConstants {
   public static final String DEFAULT_PROPERTY_UI_HEADER_TITLE = "<img src=\"api/v1/theme?resource_id=dbptk_logo_white_vector.svg\" class=\"header-logo\"><span class=\"header-text\">DBPTK Enterprise</span>";
   public static final String PROPERTY_UI_HEADER_TITLE = "ui.header.title";
 
-  /*
+  /**
+   * LOB text extraction/OCR
+   */
+  public static final String PROPERTY_OCR_TIKA_URL = "ocr.tika.url";
+  public static final String TIKA_REQUEST_FILE_PARAMETER = "file";
+  public static final String TIKA_EXTRACT_ENDPOINT = "/tika/form";
+
+  /**
    * Show schema name in reference table
    */
   public static final String PROPERTY_REFERENCE_TABLE_SHOW_SCHEMA_NAME = "ui.reference.table.show.schema.name";

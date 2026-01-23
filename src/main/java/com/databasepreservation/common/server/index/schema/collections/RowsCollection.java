@@ -15,7 +15,6 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_T
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,7 +43,6 @@ import com.databasepreservation.common.server.index.schema.AbstractSolrCollectio
 import com.databasepreservation.common.server.index.schema.CopyField;
 import com.databasepreservation.common.server.index.schema.Field;
 import com.databasepreservation.common.server.index.schema.SolrBootstrapUtils;
-import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 
@@ -73,7 +71,11 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
 
   @Override
   public List<CopyField> getCopyFields() {
-    return Collections.singletonList(SolrCollection.getCopyAllToSearchField());
+    return List.of(
+      new CopyField(ViewerConstants.SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX + ViewerConstants.INDEX_WILDCARD,
+        Field.FIELD_SEARCH),
+      new CopyField(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + ViewerConstants.INDEX_WILDCARD,
+        Field.FIELD_SEARCH));
   }
 
   @Override

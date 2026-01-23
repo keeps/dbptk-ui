@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,6 +20,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
@@ -31,6 +34,15 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
@@ -42,16 +54,22 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionResponse;
@@ -69,6 +87,7 @@ import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
@@ -827,6 +846,83 @@ public class SIARDController {
     } catch (ModuleException | RuntimeException e) {
       throw new GenericException("Could not convert the database.", e);
     }
+  }
+
+  public static String extractAndIndexTextFromSIARDLobs(String databaseUUID) throws GenericException {
+    try {
+      CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
+        .getConfigurationCollection(databaseUUID, databaseUUID);
+      for (TableStatus tableStatus : collectionStatus.getTables()) {
+        extractAndIndexTextFromSIARDTableLobs(databaseUUID, tableStatus.getUuid());
+      }
+    } catch (GenericException e) {
+      throw new GenericException(e);
+    }
+    return databaseUUID;
+  }
+
+  public static String extractAndIndexTextFromSIARDTableLobs(String databaseUUID, String tableUUID)
+    throws GenericException {
+    try {
+      TableStatus tableStatus = ViewerFactory.getConfigurationManager()
+        .getConfigurationCollection(databaseUUID, databaseUUID).getTableStatus(tableUUID);
+      List<ColumnStatus> lobColumns = tableStatus.getLobColumns();
+      if (!lobColumns.isEmpty()) {
+        List<String> lobFields = lobColumns.stream().map(ColumnStatus::getId).toList();
+        Filter rowFilter = new Filter();
+        rowFilter.add(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, tableStatus.getId()));
+        List<String> fieldsToReturn = new ArrayList<>(lobFields);
+        fieldsToReturn.add(ViewerConstants.INDEX_ID);
+
+        DatabaseRowsSolrManager solr = ViewerFactory.getSolrManager();
+        try (IterableIndexResult rows = solr.findAllRows(databaseUUID, rowFilter, new Sorter(), fieldsToReturn)) {
+          for (String lobField : lobFields) {
+            for (ViewerRow rowDocument : rows) {
+              ViewerCell lobCell = rowDocument.getCells().get(lobField);
+              if (lobCell != null && lobCell.getValue() != null && !lobCell.getValue().isBlank()) {
+                String topLobPath = lobCell.getValue();
+                Set<String> allLobFilePaths;
+
+                try (Stream<Path> walkStream = Files.walk(Paths.get(topLobPath), FileVisitOption.FOLLOW_LINKS)) {
+                  allLobFilePaths = walkStream.filter(file -> !Files.isDirectory(file)).map(Path::toString)
+                    .collect(Collectors.toSet());
+                }
+
+                for (String lobFilePath : allLobFilePaths) {
+                  extractLobText(databaseUUID, rowDocument.getUuid(), lobFilePath);
+                }
+              }
+            }
+          }
+        }
+      }
+
+    } catch (GenericException | IOException e) {
+      throw new GenericException(e);
+    }
+
+    return databaseUUID;
+  }
+
+  public static String extractLobText(String databaseUUID, String rowUUID, String lobFilePath) throws GenericException {
+    RestTemplate tikaTemplate = new RestTemplate();
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(List.of(MediaType.TEXT_PLAIN));
+    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+    String tikaURL = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
+      ViewerConstants.PROPERTY_OCR_TIKA_URL);
+    if (tikaURL == null || tikaURL.isBlank()) {
+      throw new GenericException("Tika server URL is not configured.");
+    }
+
+    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+    body.add(ViewerConstants.TIKA_REQUEST_FILE_PARAMETER, new FileSystemResource(lobFilePath));
+    HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
+    ResponseEntity<String> tikaResponse = tikaTemplate.exchange(tikaURL + ViewerConstants.TIKA_EXTRACT_ENDPOINT,
+      HttpMethod.POST, entity, String.class);
+    ViewerFactory.getSolrManager().addExtractedTextField(databaseUUID, rowUUID, tikaResponse.getBody());
+
+    return databaseUUID;
   }
 
   public static ViewerMetadata updateMetadataInformation(String databaseUUID, String siardPath,
