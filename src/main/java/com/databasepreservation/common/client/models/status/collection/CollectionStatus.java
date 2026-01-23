@@ -7,7 +7,6 @@
  */
 package com.databasepreservation.common.client.models.status.collection;
 
-import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,6 +15,7 @@ import java.util.Set;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -306,5 +306,10 @@ public class CollectionStatus implements Serializable {
     String template = ViewerConstants.SIARD_RECORD_PREFIX + "_" + ViewerCelllUtils.getRowIndexTemplate() + "_"
       + ViewerCelllUtils.getColIndexTemplate() + ViewerCelllUtils.getAutoDetectedExtensionTemplate();
     columnStatus.getExportStatus().getTemplateStatus().setTemplate(template);
+  }
+
+  public void updateColumnTextExtractionPolicy(String tableUUID, String columnId, boolean extractAndIndexLobText) {
+    getTableStatus(tableUUID).getColumnById(columnId).getLobTextExtractionPolicy()
+      .setExtractAndIndexLobText(extractAndIndexLobText);
   }
 }

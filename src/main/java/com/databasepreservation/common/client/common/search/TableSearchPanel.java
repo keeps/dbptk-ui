@@ -21,6 +21,7 @@ import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -128,17 +129,25 @@ public class TableSearchPanel extends Composite {
     final boolean showSearchAdvancedDisclosureButton = status.getTableStatusByTableId(table.getId())
       .showAdvancedSearchOption();
 
+    boolean hasExportedLobText = status.getTableStatusByTableId(table.getId()).getColumns().stream()
+      .anyMatch(columnStatus -> {
+        LobTextExtractionStatus lobExtractionStatus = columnStatus.getLobTextExtractionStatus();
+        return lobExtractionStatus != null && lobExtractionStatus.getExtractedAndIndexedText();
+      });
+    String extractedTextCopyField = hasExportedLobText ? ViewerConstants.INDEX_LOB_TEXT_SEARCH : null;
+
     if (isNested) {
-      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(),
-        table.getName(), showSearchAdvancedDisclosureButton, new DefaultAsyncCallback<Void>() {
+      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, extractedTextCopyField,
+        messages.searchPlaceholder(), table.getName(), showSearchAdvancedDisclosureButton,
+        new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void result) {
             TableSearchPanel.this.saveQuery();
           }
         });
     } else {
-      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(), false,
-        showSearchAdvancedDisclosureButton, new DefaultAsyncCallback<Void>() {
+      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, extractedTextCopyField,
+        messages.searchPlaceholder(), false, showSearchAdvancedDisclosureButton, new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void result) {
             TableSearchPanel.this.saveQuery();
@@ -183,7 +192,7 @@ public class TableSearchPanel extends Composite {
 
   private void initAdvancedSearch() {
     final Map<String, List<SearchField>> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTableMap(table,
-      status);
+      status, messages);
     TableSearchPanel.this.searchFields.clear();
     searchFieldsFromTable.forEach((key, value) -> {
       itemsSearchAdvancedFieldsPanel.add(CommonClientUtils.getAdvancedSearchDivider(key));

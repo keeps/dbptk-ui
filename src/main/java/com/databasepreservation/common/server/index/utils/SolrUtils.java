@@ -65,6 +65,7 @@ import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.BlockJoinAnyParentExpiryFilterParameter;
 import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
+import com.databasepreservation.common.client.index.filter.BoostedSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.CrossCollectionInnerJoinFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateIntervalFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
@@ -644,6 +645,10 @@ public class SolrUtils {
     } else if (parameter instanceof BasicSearchFilterParameter) {
       BasicSearchFilterParameter param = (BasicSearchFilterParameter) parameter;
       appendBasicSearch(ret, param.getName(), param.getValue(), "AND", prefixWithANDOperatorIfBuilderNotEmpty);
+    } else if (parameter instanceof BoostedSearchFilterParameter) {
+      BoostedSearchFilterParameter param = (BoostedSearchFilterParameter) parameter;
+      appendBoostedSearch(ret, param.getBoostedFilter(), param.getBoostFactor(),
+        prefixWithANDOperatorIfBuilderNotEmpty);
     } else if (parameter instanceof EmptyKeyFilterParameter) {
       EmptyKeyFilterParameter param = (EmptyKeyFilterParameter) parameter;
       appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
@@ -904,8 +909,18 @@ public class SolrUtils {
     } else if (value.matches("^\".+\"$")) {
       appendExactMatch(ret, key, value.substring(1, value.length() - 1), true, prefixWithANDOperatorIfBuilderNotEmpty);
     } else {
-      appendWhiteSpaceTokenizedString(ret, key, value, operator);
+      appendWhiteSpaceTokenizedString(ret, key, value, operator, prefixWithANDOperatorIfBuilderNotEmpty);
     }
+  }
+
+  private static void appendBoostedSearch(StringBuilder ret, FilterParameter boostedFilter, float boostFactor,
+    boolean prefixWithANDOperatorIfBuilderNotEmpty) throws RequestNotValidException {
+    appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
+
+    ret.append("(");
+    parseFilterParameter(ret, boostedFilter, false);
+    ret.append(")^");
+    ret.append(boostFactor);
   }
 
   private static void appendFiltersWithOperator(StringBuilder ret, String operator, List<FilterParameter> values,
@@ -924,8 +939,9 @@ public class SolrUtils {
     }
   }
 
-  private static void appendWhiteSpaceTokenizedString(StringBuilder ret, String key, String value, String operator) {
-    appendANDOperator(ret, true);
+  private static void appendWhiteSpaceTokenizedString(StringBuilder ret, String key, String value, String operator,
+    boolean prefixWithANDOperatorIfBuilderNotEmpty) {
+    appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
 
     String[] split = value.trim().split("\\s+");
     ret.append("(");
@@ -961,6 +977,17 @@ public class SolrUtils {
       value = null;
     }
     fieldModifier.put("add", value);
+    return fieldModifier;
+  }
+
+  public static Map<String, Object> setValueUpdate(Object value) {
+    Map<String, Object> fieldModifier = new HashMap<>(1);
+    // 20160511 this workaround fixes solr wrong behaviour with partial update
+    // of empty lists
+    if (value instanceof List && ((List<?>) value).isEmpty()) {
+      value = null;
+    }
+    fieldModifier.put("set", value);
     return fieldModifier;
   }
 

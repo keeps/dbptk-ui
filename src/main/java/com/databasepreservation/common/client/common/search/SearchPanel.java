@@ -21,20 +21,24 @@ public class SearchPanel extends SearchPanelAbstract {
 
   interface Binder extends UiBinder<Widget, SearchPanel> {
   }
-  public SearchPanel(Filter defaultFilter, String allFilter, String placeholder, boolean showSearchInputListBox,
-    boolean showSearchAdvancedDisclosureButton) {
-    super(defaultFilter, allFilter, placeholder, showSearchInputListBox, showSearchAdvancedDisclosureButton);
+
+  public SearchPanel(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField, String placeholder,
+    boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton) {
+    super(defaultFilter, metadataCopyField, extractedTextCopyField, placeholder, showSearchInputListBox,
+      showSearchAdvancedDisclosureButton);
   }
 
-  public SearchPanel(Filter defaultFilter, String allFilter, String placeholder, String context,
-    boolean showSearchAdvancedDisclosureButton, final AsyncCallback<Void> saveQueryCallback) {
-    super(defaultFilter, allFilter, placeholder, context, showSearchAdvancedDisclosureButton, saveQueryCallback);
+  public SearchPanel(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField, String placeholder,
+    String context, boolean showSearchAdvancedDisclosureButton, final AsyncCallback<Void> saveQueryCallback) {
+    super(defaultFilter, metadataCopyField, extractedTextCopyField, placeholder, context,
+      showSearchAdvancedDisclosureButton, saveQueryCallback);
   }
 
-  public SearchPanel(Filter defaultFilter, String allFilter, String placeholder, boolean showSearchInputListBox,
-    boolean showSearchAdvancedDisclosureButton, final AsyncCallback<Void> saveQueryCallback) {
-    super(defaultFilter, allFilter, placeholder, showSearchInputListBox, showSearchAdvancedDisclosureButton,
-      saveQueryCallback);
+  public SearchPanel(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField, String placeholder,
+    boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton,
+    final AsyncCallback<Void> saveQueryCallback) {
+    super(defaultFilter, metadataCopyField, extractedTextCopyField, placeholder, showSearchInputListBox,
+      showSearchAdvancedDisclosureButton, saveQueryCallback);
   }
 
   public void bindUIAndInitWidget() {

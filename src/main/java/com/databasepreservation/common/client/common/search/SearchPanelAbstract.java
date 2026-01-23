@@ -12,11 +12,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.search.panel.SearchFieldPanel;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.BoostedSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -92,16 +95,18 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   SimplePanel searchPanelSelectionDropdownWrapper;
 
   protected Filter defaultFilter;
-  protected String allFilter;
+  protected String metadataCopyField;
+  protected String extractedTextCopyField;
   protected boolean defaultFilterIncremental = false;
   protected AsyncCallback<Void> saveQueryCallback;
   protected FlowPanel fieldsPanel;
   protected AsyncTableCell<?, ?> list;
 
-  protected SearchPanelAbstract(Filter defaultFilter, String allFilter, String placeholder,
-    boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton) {
+  protected SearchPanelAbstract(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField,
+    String placeholder, boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton) {
     this.defaultFilter = defaultFilter;
-    this.allFilter = allFilter;
+    this.metadataCopyField = metadataCopyField;
+    this.extractedTextCopyField = extractedTextCopyField;
 
     bindUIAndInitWidget();
 
@@ -136,19 +141,22 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     }
   }
 
-  protected SearchPanelAbstract(Filter defaultFilter, String allFilter, String placeholder, String context,
-    boolean showSearchAdvancedDisclosureButton, final AsyncCallback<Void> saveQueryCallback) {
-    this(defaultFilter, allFilter, placeholder, false, showSearchAdvancedDisclosureButton, saveQueryCallback);
+  protected SearchPanelAbstract(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField,
+    String placeholder, String context, boolean showSearchAdvancedDisclosureButton,
+    final AsyncCallback<Void> saveQueryCallback) {
+    this(defaultFilter, metadataCopyField, extractedTextCopyField, placeholder, false,
+      showSearchAdvancedDisclosureButton, saveQueryCallback);
     searchContextPanel.setVisible(true);
     searchContextPanel.add(new HTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, context)));
   }
 
-  protected SearchPanelAbstract(Filter defaultFilter, String allFilter, String placeholder,
-    boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton,
+  protected SearchPanelAbstract(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField,
+    String placeholder, boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton,
     final AsyncCallback<Void> saveQueryCallback) {
     this.saveQueryCallback = saveQueryCallback;
     this.defaultFilter = defaultFilter;
-    this.allFilter = allFilter;
+    this.metadataCopyField = metadataCopyField;
+    this.extractedTextCopyField = extractedTextCopyField;
 
     bindUIAndInitWidget();
 
@@ -190,8 +198,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   public abstract void bindUIAndInitWidget();
 
   public void doSearch() {
-    Filter filter = buildSearchFilter(searchInputBox.getText(), defaultFilter, allFilter, fieldsPanel,
-      defaultFilterIncremental);
+    Filter filter = buildSearchFilter();
     list.setFilter(filter);
     if (!filter.getParameters().isEmpty() && !list.isVisible()) {
       list.setVisible(true);
@@ -202,13 +209,23 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     searchPanelSelectionDropdownWrapper.setWidget(dropdown);
   }
 
-  private Filter buildSearchFilter(String basicQuery, Filter defaultFilter, String allFilter, FlowPanel fieldsPanel,
-    boolean defaultFilterIncremental) {
+  private Filter buildSearchFilter() {
     List<FilterParameter> parameters = new ArrayList<>();
 
-    if (basicQuery != null && basicQuery.trim().length() > 0) {
-      parameters.add(new BasicSearchFilterParameter(allFilter, basicQuery));
+    String basicQuery = searchInputBox.getText();
+    if (basicQuery != null && !basicQuery.trim().isEmpty()) {
+      FilterParameter metadataSearchFilter = new BasicSearchFilterParameter(metadataCopyField, basicQuery);
+      if (extractedTextCopyField == null) {
+        parameters.add(metadataSearchFilter);
+      }
+      else {
+        FilterParameter extractedTextSearchFilter = new BoostedSearchFilterParameter(
+            new BasicSearchFilterParameter(extractedTextCopyField, basicQuery),
+            ClientConfigurationManager.getDouble(0.5, "ocr.index.weight").floatValue());
+        parameters.add(new OrFiltersParameters(List.of(metadataSearchFilter, extractedTextSearchFilter)));
+      }
     }
+
 
     if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
@@ -288,13 +305,17 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     this.defaultFilterIncremental = defaultFilterIncremental;
   }
 
-  public void setAllFilter(String allFilter) {
-    this.allFilter = allFilter;
+  public void setMetadataCopyField(String metadataCopyField) {
+    this.metadataCopyField = metadataCopyField;
+  }
+
+  public void setExtractedTextCopyField(String extractedTextCopyField) {
+    this.extractedTextCopyField = extractedTextCopyField;
   }
 
   public void setVariables(Filter defaultFilter, String allFilter, AsyncTableCell<?, ?> list, FlowPanel fieldsPanel) {
     setDefaultFilter(defaultFilter);
-    setAllFilter(allFilter);
+    setMetadataCopyField(allFilter);
     setList(list);
     setFieldsPanel(fieldsPanel);
   }

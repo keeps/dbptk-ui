@@ -3262,12 +3262,26 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .searchInputListBox,
-.searchInputListBoxPopup {
+.searchInputListBoxPopup,
+.searchIndexTypeListBox {
     border: none;
 }
 
 .searchInputListBoxPopup {
     border-top: 2px solid white;
+}
+
+.searchIndexTypeListBox .dropdown-label {
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    min-width: 185px;
+    line-height: 30px;
+    background-color: #089de3;
+    color: white;
+    border: none;
+    padding: 0 10px 0 20px;
+    position: relative;
 }
 
 .searchInputListBox .dropdown-label,
@@ -3284,6 +3298,16 @@ td.datePickerMonth, td.datePickerYear {
 .searchInputListBox .dropdown-label:after {
     line-height: 4rem;
     font-size: 20px;
+    position: absolute;
+    right: 0px;
+    width: 40px;
+    text-align: center;
+    padding: 0;
+}
+
+.searchIndexTypeListBox .dropdown-label:after {
+    line-height: 30px;
+    font-size: 1.1rem;
     position: absolute;
     right: 0px;
     width: 40px;
@@ -3549,6 +3573,24 @@ td.datePickerMonth, td.datePickerYear {
 
 .searchAdvancedPanelButtons {
     height: 30px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.searchAdvancedPanelButtonsLeft,
+ .searchAdvancedPanelButtonsRight {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.searchAdvancedPanelButtonsLeft {
+    flex: 1;
+}
+
+.searchAdvancedIndexSelectionDropdown {
+    flex: 0;
 }
 
 .searchAdvancedFieldsPanel + .searchAdvancedPanelButtons {

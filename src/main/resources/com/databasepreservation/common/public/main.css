@@ -330,11 +330,6 @@ p[data-value]:after {
     /*nothing yet since most of it is defined for all AsyncTableCells*/
 }
 
-.searchPanelAdvancedSaveSearchButton {
-    margin-right: 1rem;
-    float: right;
-}
-
 .search-field-left-panel .form-textbox-small {
     max-width: 15ch;
 }

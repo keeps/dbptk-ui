@@ -24,6 +24,10 @@ public class SearchFilters {
     return ViewerConstants.INDEX_SEARCH;
   }
 
+  public static String extractedTextField() {
+    return ViewerConstants.INDEX_LOB_TEXT_SEARCH;
+  }
+
   public static boolean shouldBeIncremental(final Filter filter) {
     return !filter.getParameters().isEmpty() && !SearchFilters.allFilter().equals(filter);
   }

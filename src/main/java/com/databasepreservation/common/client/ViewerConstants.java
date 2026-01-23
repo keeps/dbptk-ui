@@ -114,12 +114,15 @@ public class ViewerConstants {
   public static final String SOLR_INDEX_ROW_COLUMN_NAME_PREFIX = "col";
   public static final String SOLR_INDEX_ROW_NESTED_COLUMN_NAME_PREFIX = "nest";
   public static final String SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX = "lob";
+  public static final String SOLR_INDEX_ROW_LOB_COLUMN_OCR_PREFIX = "ocr";
+  public static final String SOLR_INDEX_ROW_LOB_COLUMN_OCR_TEXT_SUFFIX = "extractedText";
 
   /*
    * Solr indexes configuration
    */
   public static final String INDEX_ID = "uuid";
   public static final String INDEX_SEARCH = "search";
+  public static final String INDEX_LOB_TEXT_SEARCH = "ocrSearch";
   public static final String INDEX_WILDCARD = "*";
 
   /*
@@ -232,6 +235,8 @@ public class ViewerConstants {
   public static final String SOLR_ROWS_NESTED_TABLE_ID = "nestedTableId";
   public static final String SOLR_ROWS_NESTED = "nested";
   public static final String SOLR_ROWS_NESTED_COL = "nst_";
+  public static final String SOLR_ROWS_OCR_PREFIX = "ocr";
+  public static final String SOLR_ROWS_EXTRACTED_TEXT_SUFFIX = "extractedText";
   /*
    * DYNAMIC FIELD TYPES (suffixes)
    */
@@ -615,7 +620,17 @@ public class ViewerConstants {
   public static final String DEFAULT_PROPERTY_UI_HEADER_TITLE = "<img src=\"api/v1/theme?resource_id=dbptk_logo_white_vector.svg\" class=\"header-logo\"><span class=\"header-text\">DBPTK Enterprise</span>";
   public static final String PROPERTY_UI_HEADER_TITLE = "ui.header.title";
 
-  /*
+  /**
+   * LOB text extraction/OCR
+   */
+  public static final String PROPERTY_OCR_TIKA_URL = "ocr.tika.url";
+  public static final String PROPERTY_OCR_TIKA_VOLUME_PATH = "ocr.tika.filesystem.volume.path";
+  public static final String PROPERTY_OCR_TIKA_POLICY_EXTRACT_DEFAULT = "ocr.policy.extractByDefault";
+  public static final String TIKA_REQUEST_FILE_PARAMETER = "file";
+  public static final String TIKA_FORM_ENDPOINT = "/tika/form";
+  public static final String TIKA_EXTRACT_ENDPOINT = "/tika";
+
+  /**
    * Show schema name in reference table
    */
   public static final String PROPERTY_REFERENCE_TABLE_SHOW_SCHEMA_NAME = "ui.reference.table.show.schema.name";

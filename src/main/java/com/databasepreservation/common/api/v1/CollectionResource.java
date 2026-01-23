@@ -488,6 +488,61 @@ public class CollectionResource implements CollectionService {
   }
 
   /*******************************************************************************
+   * Collection Resource - Text extraction Sub-resource
+   *******************************************************************************/
+  @Override
+  public StringResponse extractAndIndexDatabaseLobText(String databaseUUID, String collectionUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+    try {
+      user = controllerAssistant.checkRoles(request);
+
+      final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
+
+      if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
+        return new StringResponse(databaseUUID);
+      } else {
+        return new StringResponse(SIARDController.extractAndIndexTextFromSIARDLobs(databaseUUID));
+      }
+
+    } catch (GenericException | NotFoundException | AuthorizationException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+    }
+  }
+
+  @Override
+  public StringResponse extractAndIndexTableLobText(String databaseUUID, String collectionUUID, String tableUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+    try {
+      user = controllerAssistant.checkRoles(request);
+
+      final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
+
+      if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
+        return new StringResponse(databaseUUID);
+      } else {
+        return new StringResponse(SIARDController.extractAndIndexTextFromSIARDTableLobs(databaseUUID, tableUUID));
+      }
+
+    } catch (GenericException | NotFoundException | AuthorizationException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+    }
+  }
+
+  /*******************************************************************************
    * Collection Resource - Data Sub-resource
    ******************************************************************************/
   @Override
