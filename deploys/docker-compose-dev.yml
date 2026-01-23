@@ -25,6 +25,16 @@ services:
       - -c
     volumes:
       - solr_data:/var/solr
+  tika:
+    image: apache/tika:3.2.3.0-full
+    restart: unless-stopped
+    command:
+      - "--config /tika-config.xml"
+    ports:
+      - "9998:9998"
+    volumes:
+      - ~/.dbvtk/SIARD-files:/SIARD-files
+      - ./tika-config/tika-config.xml:/tika-config.xml
 volumes:
   zookeeper_data:
   zookeeper_datalog:

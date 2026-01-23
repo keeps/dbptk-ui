@@ -17,6 +17,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SearchField;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -52,9 +53,29 @@ public class AdvancedSearchUtils {
   }
 
   public static Map<String, List<SearchField>> getSearchFieldsFromTableMap(ViewerTable viewerTable,
-    CollectionStatus status) {
+    CollectionStatus status, ClientMessages messages) {
     Map<String, List<SearchField>> map = new LinkedHashMap<>();
     final TableStatus configTable = status.getTableStatusByTableId(viewerTable.getId());
+
+    boolean hasExportedLobText = configTable.getColumns().stream().anyMatch(columnStatus -> {
+      LobTextExtractionStatus lobExtractionStatus = columnStatus.getLobTextExtractionStatus();
+      return lobExtractionStatus != null && lobExtractionStatus.getExtractedAndIndexedText();
+    });
+    if (hasExportedLobText) {
+      ArrayList<SearchField> searchFields = new ArrayList<>();
+      SearchField searchField = new SearchField(ViewerConstants.INDEX_SEARCH, List.of(ViewerConstants.INDEX_SEARCH),
+        messages.advancedSearchMetadataSearchFieldLabel(), ViewerConstants.SEARCH_FIELD_TYPE_TEXT);
+      searchField.setFixed(true);
+      searchFields.add(searchField);
+
+      SearchField ocrSearch = new SearchField(ViewerConstants.INDEX_LOB_TEXT_SEARCH,
+        List.of(ViewerConstants.INDEX_LOB_TEXT_SEARCH), messages.advancedSearchOCRSearchFieldLabel(),
+        ViewerConstants.SEARCH_FIELD_TYPE_TEXT);
+      ocrSearch.setFixed(true);
+      searchFields.add(ocrSearch);
+
+      map.put(configTable.getCustomName(), searchFields);
+    }
 
     for (ColumnStatus column : configTable.getColumns()) {
       if (!column.getType().equals(ViewerType.dbTypes.NESTED)) {

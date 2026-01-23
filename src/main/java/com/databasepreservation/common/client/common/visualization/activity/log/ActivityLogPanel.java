@@ -89,7 +89,7 @@ public class ActivityLogPanel extends ContentPanel {
       }
     });
 
-    searchPanel = new SearchPanel(ViewerConstants.DEFAULT_FILTER, ViewerConstants.INDEX_SEARCH,
+    searchPanel = new SearchPanel(ViewerConstants.DEFAULT_FILTER, ViewerConstants.INDEX_SEARCH, null,
       messages.searchPlaceholder(), false, true);
     searchPanel.setList(activityLogList);
     searchPanel.setDefaultFilterIncremental(false);

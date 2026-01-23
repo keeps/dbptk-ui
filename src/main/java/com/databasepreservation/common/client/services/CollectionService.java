@@ -129,6 +129,19 @@ public interface CollectionService extends DirectRestService {
     @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID);
 
   /*******************************************************************************
+   * Collection Resource - Text extraction Sub-resource
+   *******************************************************************************/
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/extract", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Runs text extraction with OCR for a certain table within a database")
+  StringResponse extractAndIndexDatabaseLobText(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID);
+
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/extract/{tableUUID}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Runs text extraction with OCR for a certain table within a database")
+  StringResponse extractAndIndexTableLobText(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID);
+
+  /*******************************************************************************
    * Collection Resource - Data Sub-resource
    *******************************************************************************/
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
