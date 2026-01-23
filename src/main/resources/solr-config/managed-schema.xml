@@ -1051,5 +1051,20 @@
             <filter class="solr.PatternCaptureGroupFilterFactory" pattern="[^\p{L}\p{N}]+" preserve_original="true" />
         </analyzer>
     </fieldType>
+  <fieldType name="lobTextSearch" class="solr.TextField" positionIncrementGap="100">
+    <analyzer type="index">
+      <tokenizer class="solr.StandardTokenizerFactory" />
+      <filter class="solr.ASCIIFoldingFilterFactory" />
+      <filter class="solr.LowerCaseFilterFactory" />
+      <filter class="solr.PatternCaptureGroupFilterFactory" pattern="[^\p{L}\p{N}]+" preserve_original="true" />
+      <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+    </analyzer>
+    <analyzer type="query">
+      <tokenizer class="solr.StandardTokenizerFactory" />
+      <filter class="solr.ASCIIFoldingFilterFactory" />
+      <filter class="solr.LowerCaseFilterFactory" />
+      <filter class="solr.PatternCaptureGroupFilterFactory" pattern="[^\p{L}\p{N}]+" preserve_original="true" />
+    </analyzer>
+  </fieldType>
 
 </schema>

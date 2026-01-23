@@ -16,8 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.api.exceptions.IllegalAccessException;
-import com.databasepreservation.common.server.ConfigurationManager;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -36,6 +34,7 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.IndexResult;
@@ -626,6 +625,40 @@ public class DatabaseRowsSolrManager {
       insertDocument(collection.getIndexName(), doc);
     } catch (ViewerException e) {
       LOGGER.error("Could not update database progress for {}", databaseUUID, e);
+    }
+  }
+
+  public final void clearExtractedLobTextField(final String databaseUUID, final String documentUUID,
+    final String lobFieldName) {
+
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, documentUUID);
+    doc.addField(
+      ViewerConstants.SOLR_ROWS_OCR_PREFIX + "_" + lobFieldName + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX,
+      SolrUtils.setValueUpdate(null));
+
+    try {
+      insertDocument(collection.getIndexName(), doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Could not update row {} for database {}", documentUUID, databaseUUID, e);
+    }
+  }
+
+  public final void addExtractedTextField(final String databaseUUID, final String documentUUID,
+    final String lobFieldName, String extractedText) {
+
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, documentUUID);
+    doc.addField(
+      ViewerConstants.SOLR_ROWS_OCR_PREFIX + "_" + lobFieldName + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX,
+      SolrUtils.addValueUpdate(extractedText));
+
+    try {
+      insertDocument(collection.getIndexName(), doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Could not update row {} for database {}", documentUUID, databaseUUID, e);
     }
   }
 

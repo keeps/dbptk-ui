@@ -36,6 +36,7 @@ import com.databasepreservation.common.client.common.visualization.browse.config
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.ColumnsManagementPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation.DataTransformation;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.table.TableManagementPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.textExtraction.TextExtractionPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
 import com.databasepreservation.common.client.common.visualization.browse.information.DatabaseInformationPanel;
@@ -337,6 +338,23 @@ public class MainPanel extends Composite {
                   }
                 });
             }
+          } else {
+            HistoryManager.gotoHome();
+          }
+        }
+      }, true);
+    } else if (HistoryManager.ROUTE_TEXT_EXTRACTION.equals(currentHistoryPath.get(0))) {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+        @Override
+        public void onSuccess(User user) {
+          if (user.isAdmin()) {
+            final String databaseUUID = currentHistoryPath.get(1);
+            setContent(databaseUUID, new ContentPanelLoader() {
+              @Override
+              public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+                return TextExtractionPanel.getInstance(database, status);
+              }
+            });
           } else {
             HistoryManager.gotoHome();
           }
