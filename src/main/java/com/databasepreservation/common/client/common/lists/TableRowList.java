@@ -458,7 +458,17 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
     if (template != null && !template.isEmpty()) {
       String json = "";
-      if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+      ViewerCell cell = row.getCells().get(configColumn.getId());
+      String value = cell.getValue();
+      if ((cell.getMimeType() != null && cell.getMimeType().equals("application/pdf")) || value.endsWith(".pdf")
+        || value.endsWith(".PDF")) {
+        String exportLobUri = RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(),
+          row.getUuid(), columnIndex);
+        String viewerPdf = com.google.gwt.core.client.GWT.getHostPageBaseURL() + "webjars/pdf-js/web/viewer.html?file="
+          + exportLobUri;
+        json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
+          ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, viewerPdf, ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, viewerPdf);
+      } else if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
         json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
           ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
           ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
@@ -631,8 +641,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
             htmlSB.append("<tr>");
             boolean isFirstHeaderColumn = true;
             for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
-              if ((!NESTED.equals(configColumn.getType())
-                && !BINARY.equals(configColumn.getType()) && !CLOB.equals(configColumn.getType()))
+              if ((!NESTED.equals(configColumn.getType()) && !BINARY.equals(configColumn.getType())
+                && !CLOB.equals(configColumn.getType()))
                 || (NESTED.equals(configColumn.getType())
                   && !configColumn.getTypeName().contains("BINARY LARGE OBJECT"))) {
                 htmlSB.append("<th>");
