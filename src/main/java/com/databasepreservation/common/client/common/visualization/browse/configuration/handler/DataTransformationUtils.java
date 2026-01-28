@@ -39,7 +39,9 @@ import config.i18n.client.ClientMessages;
  */
 public class DataTransformationUtils {
   public static ClientMessages messages = GWT.create(ClientMessages.class);
-	private DataTransformationUtils() {}
+
+  private DataTransformationUtils() {
+  }
 
   public static void includeRelatedTable(TableNode childNode, DenormalizeConfiguration denormalizeConfiguration) {
     TableNode parentNode = childNode.getParentNode();
@@ -67,8 +69,6 @@ public class DataTransformationUtils {
       }
       relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
     }
-
-
 
     RelatedTablesConfiguration returnedRelatedTable = denormalizeConfiguration
       .getRelatedTable(childNode.getParentNode().getUuid());
@@ -102,21 +102,26 @@ public class DataTransformationUtils {
     CollectionStatus collectionStatus) {
     if (denormalizeConfiguration != null && denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
       CollectionService.Util.call((Boolean result) -> {
-        final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
-        collectionObserver.setCollectionStatus(collectionStatus);
-        CollectionService.Util.call((JobResponse response) -> {
-          Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
-            "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
-        }, errorMessage -> {
-          Dialogs.showErrors(messages.advancedConfigurationLabelForDataTransformation(), errorMessage,
-            messages.basicActionClose());
-        }).run(databaseUUID,databaseUUID, denormalizeConfiguration.getTableUUID());
+        Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
+          "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
       }, errorMessage -> {
         Dialogs.showErrors(messages.advancedConfigurationLabelForDataTransformation(), errorMessage,
           messages.basicActionClose());
       }).createDenormalizeConfigurationFile(databaseUUID, databaseUUID, denormalizeConfiguration.getTableUUID(),
         denormalizeConfiguration);
     }
+  }
+
+  public static void runConfigurations(String databaseUUID, CollectionStatus collectionStatus) {
+    final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
+    collectionObserver.setCollectionStatus(collectionStatus);
+    CollectionService.Util.call((JobResponse response) -> {
+      Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
+        "Apply configuration job started with success for database " + databaseUUID);
+    }, errorMessage -> {
+      Dialogs.showErrors(messages.advancedConfigurationLabelForDataTransformation(), errorMessage,
+        messages.basicActionClose());
+    }).run(databaseUUID, databaseUUID, null);
   }
 
   public static void removeRelatedTable(TableNode childNode, DenormalizeConfiguration denormalizeConfiguration) {
@@ -181,7 +186,7 @@ public class DataTransformationUtils {
         addNestedDefaultFieldList(extraParameters, key);
         extraParameters.put(key + ".q", "+nestedUUID:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
         Integer quantity = column.getNestedColumns().getQuantityInList();
-        if(quantity <= column.getNestedColumns().getMaxQuantityInList()){
+        if (quantity <= column.getNestedColumns().getMaxQuantityInList()) {
           extraParameters.put(key + ".rows", quantity.toString());
         } else {
           extraParameters.put(key + ".rows", column.getNestedColumns().getMaxQuantityInList().toString());

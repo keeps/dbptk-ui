@@ -1477,6 +1477,11 @@ public interface ClientMessages extends Messages {
   String objectNotFound();
 
   /********************************************
+   * Configuration Status Panel
+   *******************************************/
+  String configurationStatusPanelLabelForTitle();
+
+  /********************************************
    * Advanced Configuration
    *******************************************/
   String advancedConfigurationLabelForMainTitle();

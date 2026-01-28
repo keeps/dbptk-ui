@@ -101,9 +101,6 @@ public class BatchJobsCollection extends AbstractSolrCollection<ViewerJob> {
     doc.addField(SOLR_BATCH_JOB_DATABASE_UUID, viewerJob.getDatabaseUuid());
     doc.addField(SOLR_BATCH_JOB_COLLECTION_UUID, viewerJob.getCollectionUuid());
     doc.addField(SOLR_BATCH_JOB_DATABASE_NAME, viewerJob.getDatabaseName());
-    doc.addField(SOLR_BATCH_JOB_TABLE_UUID, viewerJob.getTableUuid());
-    doc.addField(SOLR_BATCH_JOB_SCHEMA_NAME, viewerJob.getSchemaName());
-    doc.addField(SOLR_BATCH_JOB_TABLE_NAME, viewerJob.getTableName());
     doc.addField(SOLR_BATCH_JOB_NAME, viewerJob.getName());
     doc.addField(SOLR_BATCH_JOB_STATUS, viewerJob.getStatus().toString());
     doc.addField(SOLR_BATCH_JOB_CREATE_TIME, viewerJob.getCreateTime());
@@ -125,9 +122,6 @@ public class BatchJobsCollection extends AbstractSolrCollection<ViewerJob> {
     viewerJob.setDatabaseUuid(SolrUtils.objectToString(doc.get(SOLR_BATCH_JOB_DATABASE_UUID), null));
     viewerJob.setCollectionUuid(SolrUtils.objectToString(doc.get(SOLR_BATCH_JOB_COLLECTION_UUID), null));
     viewerJob.setDatabaseName(SolrUtils.objectToString(doc.get(SOLR_BATCH_JOB_DATABASE_NAME), null));
-    viewerJob.setTableUuid(SolrUtils.objectToString(doc.get(SOLR_BATCH_JOB_TABLE_UUID), null));
-    viewerJob.setSchemaName(SolrUtils.objectToString(doc.get(SOLR_BATCH_JOB_SCHEMA_NAME), null));
-    viewerJob.setTableName(SolrUtils.objectToString(doc.get(SOLR_BATCH_JOB_TABLE_NAME), null));
     viewerJob.setName(SolrUtils.objectToString(doc.get(SOLR_BATCH_JOB_NAME), null));
     viewerJob.setStatus(
       SolrUtils.objectToEnum(doc.get(SOLR_BATCH_JOB_STATUS), ViewerJobStatus.class, ViewerJobStatus.UNKNOWN));

@@ -1,7 +1,9 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:cp='urn:import:com.databasepreservation.common.client.common.visualization.browse.configuration'>
 
-    <g:FlowPanel addStyleNames="col_12">
+    <g:FlowPanel ui:field="mainPanel" addStyleNames="col_12">
+        <cp:ConfigurationStatusPanel/>
         <g:FlowPanel addStyleNames="structure-header" ui:field="header" />
         <g:SimplePanel ui:field="description" addStyleNames="table-row-description"/>
         <g:FlowPanel addStyleNames="navigation-panels" ui:field="content"/>
