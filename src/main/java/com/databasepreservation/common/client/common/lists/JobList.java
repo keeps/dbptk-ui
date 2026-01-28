@@ -79,15 +79,6 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       }
     };
 
-    Column<ViewerJob, SafeHtml> tableColumn = new TooltipColumn<ViewerJob>() {
-      @Override
-      public SafeHtml getValue(ViewerJob viewerJob) {
-        return viewerJob != null && viewerJob.getTableName() != null
-          ? SafeHtmlUtils.fromString(viewerJob.getTableName())
-          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
-      }
-    };
-
     Column<ViewerJob, SafeHtml> nameColumn = new TooltipColumn<ViewerJob>() {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
@@ -164,7 +155,6 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
 
     addColumn(idColumn, messages.batchJobsTextForJobId(), true, TextAlign.NONE, 5);
     addColumn(databaseColumn, messages.batchJobsTextForDatabase(), true, TextAlign.NONE, 10);
-    addColumn(tableColumn, messages.batchJobsTextForTable(), true, TextAlign.NONE, 10);
     addColumn(nameColumn, messages.batchJobsTextForName(), true, TextAlign.NONE, 8);
     addColumn(createTimeColumn, messages.batchJobsTextForCreateTime(), true, TextAlign.NONE, 10);
     addColumn(startTimeColumn, messages.batchJobsTextForStartTime(), true, TextAlign.NONE, 10);

@@ -5,7 +5,6 @@
         <g:HTML addStyleNames="dialog-numeric-description" ui:field="description"/>
         <g:FlowPanel addStyleNames="dialog-customize-columns-options">
             <g:FlowPanel addStyleNames="dialog-customize-columns-option">
-
                 <!-- Metadata -->
                 <g:FlowPanel>
                     <g:Label addStyleNames="form-separator">

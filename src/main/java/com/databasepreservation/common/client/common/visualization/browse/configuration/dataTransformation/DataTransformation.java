@@ -21,6 +21,7 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
@@ -227,6 +228,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     btnRunConfiguration.setStyleName("btn btn-play");
     btnRunConfiguration.addClickHandler(clickEvent -> {
         DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration, collectionStatus);
+        DataTransformationUtils.runConfigurations(database.getUuid(), collectionStatus);
         HistoryManager.gotoJobs();
     });
 
@@ -237,6 +239,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
       for (Map.Entry<String, DenormalizeConfiguration> entry : denormalizeConfigurationList.entrySet()) {
         DataTransformationUtils.saveConfiguration(database.getUuid(), entry.getValue(), collectionStatus);
       }
+      DataTransformationUtils.runConfigurations(database.getUuid(), collectionStatus);
     });
 
     buttons.add(btnCancel);
@@ -331,7 +334,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     FlowPanel container, MultipleSelectionTablePanel<ViewerColumn> selectTable) {
     RelatedTablesConfiguration targetTable = denormalizeConfiguration.getRelatedTable(childNode.getUuid());
     if (targetTable != null) {
-      switchBtn.getButton().setValue(true, true);
+      switchBtn.getButton().setValue(true, false);
       grandChild.add(expandLevel(childNode));
       card.setHideContentVisible(true);
       card.removeStyleName("card-disabled");

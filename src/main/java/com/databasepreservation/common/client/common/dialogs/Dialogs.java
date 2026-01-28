@@ -53,6 +53,10 @@ public class Dialogs {
   private static final String WUI_DIALOG_EDIT_PERMISSIONS = "wui-dialog-edit-permissions";
   private static final String WUI_DIALOG_MESSAGE = "wui-dialog-message";
 
+  public static enum DialogAction {
+    SAVE, CANCEL, REMOVE
+  }
+
   private Dialogs() {
   }
 
@@ -542,29 +546,32 @@ public class Dialogs {
     dialogBox.show();
   }
 
-  public static void showDialogColumnConfiguration(String title, ColumnOptionsPanel optionsPanel,
-    String continueButtonText, final AsyncCallback<Void> callback) {
-    showDialogColumnConfiguration(title, optionsPanel, continueButtonText, BTN_PLAY_STYLE, callback);
-  }
-
   public static void showDialogColumnConfiguration(String title, String saveButtonText, String cancelButtonText,
-    ColumnOptionsPanel optionsPanel, final AsyncCallback<Boolean> callback) {
+    ColumnOptionsPanel optionsPanel, final AsyncCallback<DialogAction> callback) {
     showDialogColumnConfiguration(title, "", saveButtonText, cancelButtonText, optionsPanel, callback);
   }
 
   public static void showDialogColumnConfiguration(String title, String width, String saveButtonText,
-    String cancelButtonText, ColumnOptionsPanel optionsPanel, final AsyncCallback<Boolean> callback) {
+    String cancelButtonText, ColumnOptionsPanel optionsPanel, final AsyncCallback<DialogAction> callback) {
     showDialogColumnConfiguration(title, width, saveButtonText, cancelButtonText,
       Collections.singletonList(optionsPanel), callback);
   }
 
   public static void showDialogColumnConfiguration(String title, String width, String saveButtonText,
-    String cancelButtonText, List<ColumnOptionsPanel> optionsPanels, final AsyncCallback<Boolean> callback) {
+    String cancelButtonText, List<ColumnOptionsPanel> optionsPanels, final AsyncCallback<DialogAction> callback) {
+    showDialogColumnConfiguration(title, width, saveButtonText, cancelButtonText, null, optionsPanels, callback);
+  }
+
+  public static void showDialogColumnConfiguration(String title, String width, String saveButtonText,
+    String cancelButtonText, String removeButtonText, List<ColumnOptionsPanel> optionsPanels,
+    final AsyncCallback<DialogAction> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
 
     FlowPanel layout = new FlowPanel();
     FlowPanel form = new FlowPanel();
+    FlowPanel buttonPanel = new FlowPanel();
+    buttonPanel.setStyleName("navigation-panel-buttons");
 
     dialogBox.setWidth(width);
 
@@ -572,15 +579,27 @@ public class Dialogs {
     btnCancel.addStyleName("btn btn-danger btn-times-circle");
     btnCancel.addClickHandler(event -> {
       dialogBox.hide();
-      callback.onSuccess(false);
+      callback.onSuccess(DialogAction.CANCEL);
     });
+    buttonPanel.add(CommonClientUtils.wrapOnDiv("btn-item", btnCancel));
 
     Button btnSave = new Button(saveButtonText);
     btnSave.addStyleName("btn btn-save");
     btnSave.addClickHandler(event -> {
       dialogBox.hide();
-      callback.onSuccess(true);
+      callback.onSuccess(DialogAction.SAVE);
     });
+    buttonPanel.add(CommonClientUtils.wrapOnDiv("btn-item", btnSave));
+
+    if (removeButtonText != null && !removeButtonText.isEmpty()) {
+      Button btnRemove = new Button(removeButtonText);
+      btnRemove.addStyleName("btn btn-danger btn-times-circle");
+      btnRemove.addClickHandler(event -> {
+        dialogBox.hide();
+        callback.onSuccess(DialogAction.REMOVE);
+      });
+      buttonPanel.add(CommonClientUtils.wrapOnDiv("btn-item dialog-customize-columns-delete-btn", btnRemove));
+    }
 
     for (ColumnOptionsPanel optionsPanel : optionsPanels) {
       form.add(optionsPanel);
@@ -588,48 +607,13 @@ public class Dialogs {
     form.setStyleName("content");
 
     layout.add(form);
-
-    layout.add(CommonClientUtils.wrapOnDiv("navigation-panel-buttons", CommonClientUtils.wrapOnDiv("btn-item", btnSave),
-      CommonClientUtils.wrapOnDiv("btn-item", btnCancel)));
+    layout.add(buttonPanel);
     layout.addStyleName("wui-dialog-layout");
 
     dialogBox.setWidget(layout);
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
     dialogBox.addStyleName("wui-dialog-information");
-    dialogBox.center();
-    dialogBox.show();
-  }
-
-  public static void showDialogColumnConfiguration(String title, ColumnOptionsPanel optionsPanel,
-    String continueButtonText, String continueButtonStyle, final AsyncCallback<Void> callback) {
-    final DialogBox dialogBox = new DialogBox(false, true);
-    dialogBox.setText(title);
-
-    FlowPanel layout = new FlowPanel();
-    FlowPanel form = new FlowPanel();
-    Button continueButton = new Button(continueButtonText);
-
-    form.add(optionsPanel);
-
-    layout.add(form);
-    layout.add(continueButton);
-
-    form.setStyleName("content");
-
-    dialogBox.setWidget(layout);
-    dialogBox.setGlassEnabled(true);
-    dialogBox.setAnimationEnabled(false);
-
-    continueButton.addClickHandler(event -> {
-      dialogBox.hide();
-      callback.onSuccess(null);
-    });
-
-    dialogBox.addStyleName("wui-dialog-information");
-    layout.addStyleName("wui-dialog-layout");
-    continueButton.addStyleName(continueButtonStyle);
-
     dialogBox.center();
     dialogBox.show();
   }

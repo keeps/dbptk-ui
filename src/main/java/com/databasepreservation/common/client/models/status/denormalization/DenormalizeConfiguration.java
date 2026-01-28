@@ -10,16 +10,18 @@ package com.databasepreservation.common.client.models.status.denormalization;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.IsProcessable;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DenormalizeConfiguration implements Serializable {
+public class DenormalizeConfiguration implements Serializable, IsProcessable {
   @Serial
   private static final long serialVersionUID = -2179137349609216271L;
   private String id;
@@ -30,6 +32,8 @@ public class DenormalizeConfiguration implements Serializable {
   private String tableUUID;
   private String tableID;
   private List<RelatedTablesConfiguration> relatedTables;
+  private Date lastUpdatedDate;
+  private Date lastExecutionDate;
 
   public DenormalizeConfiguration() {
   }
@@ -124,5 +128,23 @@ public class DenormalizeConfiguration implements Serializable {
 
   public void setRelatedTables(List<RelatedTablesConfiguration> relatedTables) {
     this.relatedTables = relatedTables;
+  }
+
+  @Override
+  public Date getLastUpdatedDate() {
+    return lastUpdatedDate;
+  }
+
+  public void setLastUpdatedDate(Date lastUpdatedDate) {
+    this.lastUpdatedDate = lastUpdatedDate;
+  }
+
+  @Override
+  public Date getLastExecutionDate() {
+    return lastExecutionDate;
+  }
+
+  public void setLastExecutionDate(Date lastExecutionDate) {
+    this.lastExecutionDate = lastExecutionDate;
   }
 }
