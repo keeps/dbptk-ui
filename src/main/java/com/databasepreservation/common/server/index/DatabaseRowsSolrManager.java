@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+import com.databasepreservation.common.client.models.structure.ViewerCell;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -176,6 +178,29 @@ public class DatabaseRowsSolrManager {
     }
   }
 
+  public void updateRow(String databaseUUID, ViewerRow row) throws ViewerException {
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, row.getUuid());
+
+    if (row.getCells() != null) {
+      for (Map.Entry<String, ViewerCell> entry : row.getCells().entrySet()) {
+        String fieldName = entry.getKey();
+
+        if (ViewerConstants.INDEX_ID.equals(fieldName) ||
+          ViewerConstants.SOLR_ROWS_TABLE_ID.equals(fieldName)) {
+          continue;
+        }
+
+        if (entry.getValue() != null) {
+          doc.addField(fieldName, SolrUtils.asValueUpdate(entry.getValue().getValue()));
+        }
+      }
+    }
+
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+    insertDocument(collection.getIndexName(), doc);
+  }
+
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
     return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,
@@ -224,6 +249,13 @@ public class DatabaseRowsSolrManager {
     Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters)
     throws GenericException, RequestNotValidException {
     return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets, fieldsToReturn, extraParameters);
+  }
+
+  public Pair<IndexResult<ViewerRow>, String> findRows(String databaseUUID, Filter filter, Sorter sorter, int pageSize,
+    String cursorMark, List<String> fieldsToReturn, Map<String, String> extraParameters)
+    throws GenericException, RequestNotValidException {
+    return SolrUtils.findRows(client, databaseUUID, filter, sorter, pageSize, cursorMark, fieldsToReturn,
+      extraParameters);
   }
 
   public IterableIndexResult findAllRows(String databaseUUID, final Filter filter, final Sorter sorter,
@@ -333,7 +365,8 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void addSavedSearch(SavedSearch savedSearch) throws NotFoundException, GenericException, IllegalAccessException {
+  public void addSavedSearch(SavedSearch savedSearch)
+    throws NotFoundException, GenericException, IllegalAccessException {
     SolrCollection<SavedSearch> savedSearchesCollection = SolrDefaultCollectionRegistry.get(SavedSearch.class);
 
     try {
@@ -518,7 +551,7 @@ public class DatabaseRowsSolrManager {
 
     // add all the fields that will be updated
     for (Pair<String, ?> field : fields) {
-      LOGGER.debug("Updating {} to {}",field.getFirst(), field.getSecond());
+      LOGGER.debug("Updating {} to {}", field.getFirst(), field.getSecond());
       doc.addField(field.getFirst(), SolrUtils.asValueUpdate(field.getSecond()));
     }
 
@@ -619,7 +652,7 @@ public class DatabaseRowsSolrManager {
     doc.addField("type" + ViewerConstants.SOLR_DYN_TEXT_GENERAL, "parent");
 
     // add nested documents to root document
-    doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.addValueUpdate(nestedDocuments));
+    doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.asValueUpdate(nestedDocuments));
 
     try {
       insertDocument(collection.getIndexName(), doc);

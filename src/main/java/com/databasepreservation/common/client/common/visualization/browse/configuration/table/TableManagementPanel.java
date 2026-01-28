@@ -27,7 +27,9 @@ import com.databasepreservation.common.client.common.lists.cells.RequiredEditabl
 import com.databasepreservation.common.client.common.lists.cells.TextAreaInputCell;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
+import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -56,7 +58,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class TableManagementPanel extends ContentPanel {
+public class TableManagementPanel extends ContentPanel implements ICollectionStatusObserver {
   private ClientMessages messages = GWT.create(ClientMessages.class);
 
   @UiField
@@ -86,6 +88,7 @@ public class TableManagementPanel extends ContentPanel {
 
   private TableManagementPanel(ViewerDatabase database, CollectionStatus collectionStatus) {
     initWidget(binder.createAndBindUi(this));
+    ObserverManager.getCollectionObserver().addObserver(this);
     this.database = database;
     this.collectionStatus = collectionStatus;
 
@@ -353,5 +356,11 @@ public class TableManagementPanel extends ContentPanel {
     List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forTableManagement(database.getUuid(),
       database.getMetadata().getName());
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
+  }
+
+  @Override
+  public void updateCollection(CollectionStatus collectionStatus) {
+    instances.clear();
+    this.collectionStatus = collectionStatus;
   }
 }

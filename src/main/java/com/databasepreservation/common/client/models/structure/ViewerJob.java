@@ -26,9 +26,6 @@ public class ViewerJob extends IsIndexed implements Serializable {
   private String databaseUuid;
   private String collectionUuid;
   private String databaseName;
-  private String tableUuid;
-  private String schemaName;
-  private String tableName;
   private String name;
   private ViewerJobStatus status;
   private Date createTime;
@@ -113,14 +110,6 @@ public class ViewerJob extends IsIndexed implements Serializable {
     return databaseUuid;
   }
 
-  public void setTableUuid(String tableUuid) {
-    this.tableUuid = tableUuid;
-  }
-
-  public String getTableUuid() {
-    return tableUuid;
-  }
-
   public String getExitCode() {
     return exitCode;
   }
@@ -145,19 +134,6 @@ public class ViewerJob extends IsIndexed implements Serializable {
     this.databaseName = databaseName;
   }
 
-  public String getTableName() {
-    return tableName;
-  }
-
-  @JsonIgnore
-  public String getTableId() {
-    return schemaName + "." + tableName;
-  }
-
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
-  }
-
   public Long getRowsToProcess() {
     return rowsToProcess;
   }
@@ -172,13 +148,5 @@ public class ViewerJob extends IsIndexed implements Serializable {
 
   public void setProcessRows(Long processRows) {
     this.processRows = processRows;
-  }
-
-  public String getSchemaName() {
-    return schemaName;
-  }
-
-  public void setSchemaName(String schemaName) {
-    this.schemaName = schemaName;
   }
 }

@@ -1,0 +1,22 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:a="urn:import:com.databasepreservation.common.client.widgets">
+
+
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+    <a:Alert ui:field="alertPanel" addStyleNames="configuration-bar-alert" visible="false">
+        <g:FlowPanel addStyleNames="navigation-panel-buttons">
+            <g:SimplePanel addStyleNames="btn-item">
+                <g:Button ui:field="btnApplyConfiguration" addStyleNames="btn btn-primary btn-play" >
+                    <ui:text from='{messages.basicActionConfirm}'/>
+                </g:Button>
+            </g:SimplePanel>
+            <g:SimplePanel addStyleNames="btn-item">
+                <g:Button ui:field="btnCancel" addStyleNames="btn btn-danger btn-times-circle">
+                    <ui:text from='{messages.basicActionCancel}'/>
+                </g:Button>
+            </g:SimplePanel>
+        </g:FlowPanel>
+    </a:Alert>
+
+</ui:UiBinder>
