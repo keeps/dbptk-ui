@@ -16,8 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.api.exceptions.IllegalAccessException;
-import com.databasepreservation.common.server.ConfigurationManager;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -36,6 +34,7 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.IndexResult;
@@ -227,6 +226,13 @@ public class DatabaseRowsSolrManager {
     return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets, fieldsToReturn, extraParameters);
   }
 
+  public Pair<IndexResult<ViewerRow>, String> findRows(String databaseUUID, Filter filter, Sorter sorter, int pageSize,
+    String cursorMark, List<String> fieldsToReturn, Map<String, String> extraParameters)
+    throws GenericException, RequestNotValidException {
+    return SolrUtils.findRows(client, databaseUUID, filter, sorter, pageSize, cursorMark, fieldsToReturn,
+      extraParameters);
+  }
+
   public IterableIndexResult findAllRows(String databaseUUID, final Filter filter, final Sorter sorter,
     final List<String> fieldsToReturn) {
     return findAllRows(databaseUUID, filter, sorter, fieldsToReturn, new HashMap<>());
@@ -334,7 +340,8 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void addSavedSearch(SavedSearch savedSearch) throws NotFoundException, GenericException, IllegalAccessException {
+  public void addSavedSearch(SavedSearch savedSearch)
+    throws NotFoundException, GenericException, IllegalAccessException {
     SolrCollection<SavedSearch> savedSearchesCollection = SolrDefaultCollectionRegistry.get(SavedSearch.class);
 
     try {
@@ -519,7 +526,7 @@ public class DatabaseRowsSolrManager {
 
     // add all the fields that will be updated
     for (Pair<String, ?> field : fields) {
-      LOGGER.debug("Updating {} to {}",field.getFirst(), field.getSecond());
+      LOGGER.debug("Updating {} to {}", field.getFirst(), field.getSecond());
       doc.addField(field.getFirst(), SolrUtils.asValueUpdate(field.getSecond()));
     }
 

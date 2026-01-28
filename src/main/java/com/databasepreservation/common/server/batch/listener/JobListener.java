@@ -5,7 +5,7 @@
  *
  * https://github.com/keeps/dbptk-ui
  */
-package com.databasepreservation.common.server.jobs;
+package com.databasepreservation.common.server.batch.listener;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,9 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.listener.JobExecutionListenerSupport;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.stereotype.Component;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -33,29 +31,28 @@ import com.databasepreservation.common.server.index.utils.JsonTransformer;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Component
-public class JobListener extends JobExecutionListenerSupport {
+public class JobListener implements JobExecutionListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(JobListener.class);
 
   @Override
   public void beforeJob(JobExecution jobExecution) {
-    super.beforeJob(jobExecution);
     String databaseUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM);
     String tableUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
     try {
       JobController.editSolrBatchJob(jobExecution);
       updateConfigurationFile(databaseUUID, tableUUID, ViewerJobStatus.valueOf(jobExecution.getStatus().name()),
         jobExecution.getJobId());
+
       LOGGER.info("Job STARTED for " + databaseUUID + "/" + tableUUID);
     } catch (GenericException | NotFoundException e) {
       LOGGER.error("Cannot update job on SOLR for " + databaseUUID + "/" + tableUUID, e);
     } catch (ViewerException e) {
-      LOGGER.error("Cannot update configuration file for "+ databaseUUID + "/" + tableUUID , e);
+      LOGGER.error("Cannot update configuration file for " + databaseUUID + "/" + tableUUID, e);
     }
   }
 
   @Override
   public void afterJob(JobExecution jobExecution) {
-    super.afterJob(jobExecution);
     String databaseUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM);
     String tableUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
     try {
@@ -66,13 +63,13 @@ public class JobListener extends JobExecutionListenerSupport {
         LOGGER.info("Job FINISHED for " + databaseUUID + "/" + tableUUID);
       } else {
         updateConfigurationFile(databaseUUID, tableUUID, ViewerJobStatus.FAILED, jobExecution.getJobId());
-        LOGGER.error("Job FINISHED for " + databaseUUID + "/" + tableUUID + "with error: "
+        LOGGER.error("Job FINISHED with ERROR for " + databaseUUID + "/" + tableUUID + ": "
           + jobExecution.getExitStatus().getExitDescription());
       }
     } catch (NotFoundException | GenericException e) {
       LOGGER.error("Cannot update job on SOLR for " + databaseUUID + "/" + tableUUID, e);
     } catch (ViewerException e) {
-      LOGGER.error("Cannot update configuration file for "+ databaseUUID + "/" + tableUUID , e);
+      LOGGER.error("Cannot update configuration file for " + databaseUUID + "/" + tableUUID, e);
     }
   }
 
