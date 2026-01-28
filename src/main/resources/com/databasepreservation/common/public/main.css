@@ -2213,6 +2213,12 @@ html, body {
     border-bottom-style: none;
     border-left: 2px solid #d9534f;
 }
+
+.dialog-customize-columns-delete-btn {
+    margin-right: auto;
+    width: auto;
+}
+
 /**********************************************
 		         Dialog Numeric
 ***********************************************/
@@ -3136,6 +3142,23 @@ rgba(0, 0, 0, .125);
 
 .switch-widget .label-for-switch:active:after {
     width: 15px;
+}
+
+/************************************************
+* Configuration Status bar
+ ************************************************/
+.apply-configuration-bar {
+
+}
+
+.configuration-bar-alert {
+  display: flex;
+  align-items: center;
+}
+
+.configuration-bar-alert .navigation-panel-buttons {
+    width: auto;
+    margin-left: auto;
 }
 
 /************************************************
