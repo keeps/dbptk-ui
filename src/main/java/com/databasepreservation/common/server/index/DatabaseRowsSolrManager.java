@@ -628,12 +628,32 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public final void addExtractedTextField(final String databaseUUID, final String documentUUID, String extractedText) {
+  public final void clearExtractedLobTextField(final String databaseUUID, final String documentUUID,
+    final String lobFieldName) {
 
     RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, documentUUID);
-    doc.addField(ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT, SolrUtils.addValueUpdate(extractedText));
+    doc.addField(
+      ViewerConstants.SOLR_ROWS_OCR_PREFIX + "_" + lobFieldName + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX,
+      SolrUtils.setValueUpdate(null));
+
+    try {
+      insertDocument(collection.getIndexName(), doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Could not update row {} for database {}", documentUUID, databaseUUID, e);
+    }
+  }
+
+  public final void addExtractedTextField(final String databaseUUID, final String documentUUID,
+    final String lobFieldName, String extractedText) {
+
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, documentUUID);
+    doc.addField(
+      ViewerConstants.SOLR_ROWS_OCR_PREFIX + "_" + lobFieldName + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX,
+      SolrUtils.addValueUpdate(extractedText));
 
     try {
       insertDocument(collection.getIndexName(), doc);

@@ -491,7 +491,7 @@ public class CollectionResource implements CollectionService {
    * Collection Resource - Text extraction Sub-resource
    *******************************************************************************/
   @Override
-  public StringResponse extractTextForDatabase(String databaseUUID, String collectionUUID) {
+  public StringResponse extractAndIndexDatabaseLobText(String databaseUUID, String collectionUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -517,7 +517,7 @@ public class CollectionResource implements CollectionService {
   }
 
   @Override
-  public StringResponse extractTextForTable(String databaseUUID, String collectionUUID, String tableUUID) {
+  public StringResponse extractAndIndexTableLobText(String databaseUUID, String collectionUUID, String tableUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;

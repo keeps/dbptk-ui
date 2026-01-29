@@ -114,12 +114,15 @@ public class ViewerConstants {
   public static final String SOLR_INDEX_ROW_COLUMN_NAME_PREFIX = "col";
   public static final String SOLR_INDEX_ROW_NESTED_COLUMN_NAME_PREFIX = "nest";
   public static final String SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX = "lob";
+  public static final String SOLR_INDEX_ROW_LOB_COLUMN_OCR_PREFIX = "ocr";
+  public static final String SOLR_INDEX_ROW_LOB_COLUMN_OCR_TEXT_SUFFIX = "extractedText";
 
   /*
    * Solr indexes configuration
    */
   public static final String INDEX_ID = "uuid";
   public static final String INDEX_SEARCH = "search";
+  public static final String INDEX_LOB_TEXT_SEARCH = "ocrSearch";
   public static final String INDEX_WILDCARD = "*";
 
   /*
@@ -232,7 +235,8 @@ public class ViewerConstants {
   public static final String SOLR_ROWS_NESTED_TABLE_ID = "nestedTableId";
   public static final String SOLR_ROWS_NESTED = "nested";
   public static final String SOLR_ROWS_NESTED_COL = "nst_";
-  public static final String SOLR_ROWS_EXTRACTED_TEXT = "extractedText";
+  public static final String SOLR_ROWS_OCR_PREFIX = "ocr";
+  public static final String SOLR_ROWS_EXTRACTED_TEXT_SUFFIX = "extractedText";
   /*
    * DYNAMIC FIELD TYPES (suffixes)
    */

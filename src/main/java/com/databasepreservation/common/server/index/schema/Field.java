@@ -15,8 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest.AddField;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest.Update;
 
-import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.server.ViewerConfiguration;
 
 public class Field {
 
@@ -36,6 +36,7 @@ public class Field {
   public static final String TYPE_STRING = "string";
 
   public static final String FIELD_SEARCH = ViewerConstants.INDEX_SEARCH;
+  public static final String FIELD_LOB_TEXT_SEARCH = ViewerConstants.INDEX_LOB_TEXT_SEARCH;
 
   public static String TYPE_TEXT = null;
   public static String TYPE_SEARCH = null;

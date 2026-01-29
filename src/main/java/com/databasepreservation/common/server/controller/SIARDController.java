@@ -863,10 +863,12 @@ public class SIARDController {
 
   public static String extractAndIndexTextFromSIARDTableLobs(String databaseUUID, String tableUUID)
     throws GenericException {
+
     try {
       TableStatus tableStatus = ViewerFactory.getConfigurationManager()
         .getConfigurationCollection(databaseUUID, databaseUUID).getTableStatus(tableUUID);
-      List<ColumnStatus> lobColumns = tableStatus.getLobColumns();
+      List<ColumnStatus> lobColumns = tableStatus.getLobColumns().stream()
+        .filter(c -> c.getLobTextExtractionPolicy().getExtractAndIndexLobText()).toList();
       if (!lobColumns.isEmpty()) {
         List<String> lobFields = lobColumns.stream().map(ColumnStatus::getId).toList();
         Filter rowFilter = new Filter();
@@ -874,8 +876,8 @@ public class SIARDController {
         List<String> fieldsToReturn = new ArrayList<>(lobFields);
         fieldsToReturn.add(ViewerConstants.INDEX_ID);
 
-        DatabaseRowsSolrManager solr = ViewerFactory.getSolrManager();
-        try (IterableIndexResult rows = solr.findAllRows(databaseUUID, rowFilter, new Sorter(), fieldsToReturn)) {
+        try (IterableIndexResult rows = ViewerFactory.getSolrManager().findAllRows(databaseUUID, rowFilter,
+          new Sorter(), fieldsToReturn)) {
           for (String lobField : lobFields) {
             for (ViewerRow rowDocument : rows) {
               ViewerCell lobCell = rowDocument.getCells().get(lobField);
@@ -889,7 +891,7 @@ public class SIARDController {
                 }
 
                 for (String lobFilePath : allLobFilePaths) {
-                  extractLobText(databaseUUID, rowDocument.getUuid(), lobFilePath);
+                  extractAndIndexLobText(databaseUUID, rowDocument.getUuid(), lobField, lobFilePath);
                 }
               }
             }
@@ -904,7 +906,12 @@ public class SIARDController {
     return databaseUUID;
   }
 
-  public static String extractLobText(String databaseUUID, String rowUUID, String lobFilePath) throws GenericException {
+  public static String extractAndIndexLobText(String databaseUUID, String rowUUID, String lobFieldName,
+    String lobFilePath) throws GenericException {
+
+    DatabaseRowsSolrManager solr = ViewerFactory.getSolrManager();
+    solr.clearExtractedLobTextField(databaseUUID, rowUUID, lobFieldName);
+
     RestTemplate tikaTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(List.of(MediaType.TEXT_PLAIN));
@@ -920,7 +927,7 @@ public class SIARDController {
     HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
     ResponseEntity<String> tikaResponse = tikaTemplate.exchange(tikaURL + ViewerConstants.TIKA_EXTRACT_ENDPOINT,
       HttpMethod.POST, entity, String.class);
-    ViewerFactory.getSolrManager().addExtractedTextField(databaseUUID, rowUUID, tikaResponse.getBody());
+    solr.addExtractedTextField(databaseUUID, rowUUID, lobFieldName, tikaResponse.getBody());
 
     return databaseUUID;
   }

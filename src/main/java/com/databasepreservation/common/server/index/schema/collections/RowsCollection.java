@@ -75,7 +75,9 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
       new CopyField(ViewerConstants.SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX + ViewerConstants.INDEX_WILDCARD,
         Field.FIELD_SEARCH),
       new CopyField(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + ViewerConstants.INDEX_WILDCARD,
-        Field.FIELD_SEARCH));
+        Field.FIELD_SEARCH),
+      new CopyField(ViewerConstants.INDEX_WILDCARD + ViewerConstants.SOLR_INDEX_ROW_LOB_COLUMN_OCR_TEXT_SUFFIX,
+        Field.FIELD_LOB_TEXT_SEARCH));
   }
 
   @Override
@@ -85,6 +87,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     fields.add(new Field(SOLR_ROWS_DATABASE_UUID, Field.TYPE_STRING).setIndexed(true).setStored(true));
     fields.add(new Field(SOLR_ROWS_TABLE_ID, Field.TYPE_STRING).setIndexed(true).setStored(true));
     fields.add(new Field(SOLR_ROWS_TABLE_UUID, Field.TYPE_STRING).setIndexed(true).setStored(true));
+    fields.add(new Field(Field.FIELD_LOB_TEXT_SEARCH, Field.TYPE_TEXT).setStored(false).setMultiValued(true));
 
     return fields;
   }
