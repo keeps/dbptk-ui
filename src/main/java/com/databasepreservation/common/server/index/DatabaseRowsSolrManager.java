@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.common.server.batch.config.VirtualColumnJobConfiguration;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -664,4 +666,17 @@ public class DatabaseRowsSolrManager {
       LOGGER.error("Could not delete nested document for {}", databaseUUID, e);
     }
   }
+
+  public void addVirtualCell(String databaseUUID, List<VirtualColumnJobConfiguration.VirtualColumnWrapper> virtualColumnWrappers) {
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, row.getUuid());
+    doc.addField(viewerCell.getTable().getSolrName(), SolrUtils.asValueUpdate(viewerCell.getValue()));
+    try {
+      insertDocument(collection.getIndexName(), doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Could not add virtual cell for {}", databaseUUID, e);
+    }
+  }
+
 }

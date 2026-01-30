@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.tools.FilterUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.springframework.batch.core.ChunkListener;
@@ -76,7 +78,7 @@ public class DenormalizeJobConfiguration {
     throws ModuleException, NotFoundException, GenericException {
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
-    DenormalizeConfiguration config = loadConfiguration(database, tableUUID);
+    DenormalizeConfiguration config = loadConfiguration(databaseUUID, tableUUID);
 
     return new DenormalizeCleanupTasklet(solrManager, config, database, databaseUUID, tableUUID);
   }
@@ -95,8 +97,7 @@ public class DenormalizeJobConfiguration {
     @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_TABLE_ID_PARAM + "']}") String tableUUID)
     throws ModuleException, NotFoundException, GenericException {
 
-    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
-    DenormalizeConfiguration config = loadConfiguration(database, tableUUID);
+    DenormalizeConfiguration config = loadConfiguration(databaseUUID, tableUUID);
 
     List<String> fieldsToReturn = new ArrayList<>();
     fieldsToReturn.add(ViewerConstants.INDEX_ID);
@@ -106,7 +107,8 @@ public class DenormalizeJobConfiguration {
       }
     }
 
-    return new SolrCursorItemReader(solrManager, databaseUUID, config.getTableID(), fieldsToReturn);
+    Filter filter = FilterUtils.filterByTable(new Filter(), config.getTableID());
+    return new SolrCursorItemReader(solrManager, databaseUUID, filter, fieldsToReturn);
   }
 
   @Bean
@@ -117,7 +119,7 @@ public class DenormalizeJobConfiguration {
     throws ModuleException, NotFoundException, GenericException {
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
-    DenormalizeConfiguration config = loadConfiguration(database, tableUUID);
+    DenormalizeConfiguration config = loadConfiguration(databaseUUID, tableUUID);
 
     return new DenormalizeProcessor(solrManager, config, database, databaseUUID);
   }
@@ -146,9 +148,9 @@ public class DenormalizeJobConfiguration {
       .next(denormalizeProcessingStep).build();
   }
 
-  private DenormalizeConfiguration loadConfiguration(ViewerDatabase database, String tableUUID) throws ModuleException {
+  private DenormalizeConfiguration loadConfiguration(String databaseUUID, String tableUUID) throws ModuleException {
     Path path = Paths.get(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
-    Path configurationPath = ViewerConfiguration.getInstance().getDatabasesPath().resolve(database.getUuid())
+    Path configurationPath = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
       .resolve(path);
 
     if (configurationPath.toFile().exists()) {

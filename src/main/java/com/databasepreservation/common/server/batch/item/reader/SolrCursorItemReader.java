@@ -16,7 +16,6 @@ import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.utils.Pair;
 
@@ -31,7 +30,7 @@ public class SolrCursorItemReader implements ItemReader<ViewerRow>, ItemStream {
 
   private final DatabaseRowsSolrManager solrManager;
   private final String databaseUUID;
-  private final String tableID;
+  private final Filter filter;
   private final List<String> fieldsToReturn;
 
   private String cursorMark = CursorMarkParams.CURSOR_MARK_START;
@@ -40,11 +39,11 @@ public class SolrCursorItemReader implements ItemReader<ViewerRow>, ItemStream {
   private Iterator<ViewerRow> currentBatchIterator;
   private boolean isFinished = false;
 
-  public SolrCursorItemReader(DatabaseRowsSolrManager solrClient, String databaseUUID, String tableID,
+  public SolrCursorItemReader(DatabaseRowsSolrManager solrClient, String databaseUUID, Filter filter,
     List<String> fieldsToReturn) {
     this.solrManager = solrClient;
     this.databaseUUID = databaseUUID;
-    this.tableID = tableID;
+    this.filter = filter;
     this.fieldsToReturn = fieldsToReturn;
   }
 
@@ -70,10 +69,7 @@ public class SolrCursorItemReader implements ItemReader<ViewerRow>, ItemStream {
   private void fetchNextBatch() throws Exception {
     LOGGER.info("Fetching batch from Solr. Cursor: {}", cursorMark);
 
-    Filter filter = FilterUtils.filterByTable(new Filter(), tableID);
-    Sorter sorter = new Sorter();
-
-    Pair<IndexResult<ViewerRow>, String> page = solrManager.findRows(databaseUUID, filter, sorter, PAGE_SIZE,
+    Pair<IndexResult<ViewerRow>, String> page = solrManager.findRows(databaseUUID, filter, new Sorter(), PAGE_SIZE,
       cursorMark, fieldsToReturn, Collections.emptyMap());
 
     IndexResult<ViewerRow> result = page.getFirst();
