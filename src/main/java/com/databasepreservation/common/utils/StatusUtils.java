@@ -18,6 +18,7 @@ import com.databasepreservation.common.client.models.status.collection.DetailsSt
 import com.databasepreservation.common.client.models.status.collection.ExportStatus;
 import com.databasepreservation.common.client.models.status.collection.FacetsStatus;
 import com.databasepreservation.common.client.models.status.collection.ListStatus;
+import com.databasepreservation.common.client.models.status.collection.LobTextExtractionPolicy;
 import com.databasepreservation.common.client.models.status.collection.SearchStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
@@ -116,6 +117,7 @@ public class StatusUtils {
     status.setExportStatus(getExportStatus());
     status.setSearchStatus(getSearchStatus(show));
     status.setDetailsStatus(getDetailsStatus(show));
+    status.setLobTextExtractionPolicy(getLOBTextExtractionPolicy());
 
     if (column.getType() != null && (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)
       || column.getType().getDbType().equals(ViewerType.dbTypes.CLOB))) {
@@ -149,6 +151,14 @@ public class StatusUtils {
     status.setTemplateStatus(getTemplateStatus());
 
     return status;
+  }
+
+  public static LobTextExtractionPolicy getLOBTextExtractionPolicy() {
+    LobTextExtractionPolicy policy = new LobTextExtractionPolicy();
+    policy.setExtractAndIndexLobText(ViewerConfiguration.getInstance()
+      .getViewerConfigurationAsBoolean(ViewerConstants.PROPERTY_OCR_TIKA_POLICY_EXTRACT_DEFAULT));
+
+    return policy;
   }
 
   public static SearchStatus getSearchStatus(boolean show) {

@@ -650,6 +650,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForTableManagement();
 
+  String breadcrumbTextForTextExtraction();
+
   String breadcrumbTextForColumnManagement();
 
   String breadcrumbTextForSponsors();
@@ -1497,6 +1499,12 @@ public interface ClientMessages extends Messages {
 
   SafeHtml advancedConfigurationTextForDataTransformationDesktop();
 
+  String advancedConfigurationLabelForTextExtraction();
+
+  SafeHtml advancedConfigurationTextForTextExtraction();
+
+  String advancedConfigurationBtnForTextExtraction();
+
   /********************************************
    * Data Transformation
    *******************************************/
@@ -1652,6 +1660,15 @@ public interface ClientMessages extends Messages {
   String clobColumnDisplayContentOnDetailedPanel();
 
   String clobColumnDisplayContentOnListPanel();
+
+  /********************************************
+   * Text Extraction Panel
+   *******************************************/
+  String textExtractionPageTitle();
+
+  String textExtractionPageTableTextForDescription();
+
+  String textExtractionPageToastDescription();
 
   /********************************************
    * Resources
