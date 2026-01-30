@@ -34,6 +34,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -67,6 +68,8 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   @UiField
   AccessibleFocusPanel clearCrossButton;
 
+  protected boolean searchDocuments = false;
+
   @UiField
   AccessibleFocusPanel searchAdvancedDisclosureButton;
 
@@ -94,6 +97,8 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   protected Filter defaultFilter;
   protected String allFilter;
   protected boolean defaultFilterIncremental = false;
+  @UiField
+  CheckBox searchDocumentsCheckbox;
   protected AsyncCallback<Void> saveQueryCallback;
   protected FlowPanel fieldsPanel;
   protected AsyncTableCell<?, ?> list;
@@ -127,6 +132,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
       }
     });
     clearCrossButton.addClickHandler(event -> clearSearchInputBox());
+    searchDocumentsCheckbox.addValueChangeHandler(this::switchSearchDocuments);
 
     searchInputButton.addClickHandler(event -> doSearch());
     searchAdvancedDisclosureButton.addClickHandler(event -> showSearchAdvancedPanel());
@@ -174,6 +180,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
       }
     });
     clearCrossButton.addClickHandler(event -> clearSearchInputBox());
+    searchDocumentsCheckbox.addValueChangeHandler(this::switchSearchDocuments);
 
     searchInputButton.addClickHandler(event -> doSearch());
     searchAdvancedDisclosureButton.addClickHandler(event -> showSearchAdvancedPanel());
@@ -321,6 +328,10 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   public void clearSearchInputBox() {
     this.searchInputBox.setText("");
     clearCrossButton.setVisible(false);
+  }
+
+  public void switchSearchDocuments(ValueChangeEvent<Boolean> event) {
+    this.searchDocuments = event.getValue();
   }
 
   public void setSearchAdvancedGoEnabled(boolean enabled) {

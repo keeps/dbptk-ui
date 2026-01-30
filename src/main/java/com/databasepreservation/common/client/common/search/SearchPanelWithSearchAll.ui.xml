@@ -23,6 +23,9 @@
                                 </span>
                             </g:HTML>
                         </wcag:AccessibleFocusPanel>
+                        <g:CheckBox styleName="searchPanelSearchDocumentsCheckbox"
+                                    ui:field="searchDocumentsCheckbox" visible="true">
+                        </g:CheckBox>
                         <search:SearchAllButtonWrapper addStyleNames="selectedDatabasesLink"
                                                        ui:field="selectedDatabasesButtonWrapper"/>
                     </g:FlowPanel>

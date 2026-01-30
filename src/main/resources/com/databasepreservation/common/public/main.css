@@ -1199,9 +1199,6 @@ p[data-value]:after {
     text-decoration: underline;
     white-space: nowrap;
     line-height: 40px;
-    position: absolute;
-    right: 32px;
-    padding-left: 20px;
     background: linear-gradient(-90deg, #eee 80%, rgba(255, 255, 255, 0) 100%);
 }
 

@@ -22,6 +22,9 @@
                         </span>
                     </g:HTML>
                 </wcag:AccessibleFocusPanel>
+                <g:CheckBox styleName="searchPanelSearchDocumentsCheckbox"
+                     ui:field="searchDocumentsCheckbox" visible="true">
+                </g:CheckBox>
             </g:FlowPanel>
             <g:FlowPanel styleName="searchPanelRight">
                 <wcag:AccessibleFocusPanel styleName="searchAdvancedDisclosureButton"

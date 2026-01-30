@@ -3246,19 +3246,18 @@ td.datePickerMonth, td.datePickerYear {
 				DEFAULT SEARCH + ADV SEARCH
 ************************************************/
 .searchPanel {
-    margin-right: 40px;
     height: 4rem;
     background-color: #eee;
+    display: flex;
+    flex-direction: row;
 }
 
 .searchPanelAdvanced {
-    margin-right: 80px;
 }
 
 .searchPanelLeft {
-    float: left;
     width: 100%;
-    display: table;
+    display: flex;
 }
 
 .searchInputListBox,
@@ -3297,7 +3296,6 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .searchPanelLeft .searchPanelLeftInput {
-    display: table-cell;
     width: 100%;
     vertical-align: top;
 }
@@ -3318,19 +3316,12 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .searchPanelRight {
-    float: right;
-    width: 40px;
-    margin-right: -40px;
-    height: 4rem;
+    display: flex;
+    flex-direction: row;
 }
 
-.searchPanelAdvanced .searchPanelRight {
-    width: 80px;
-    margin-right: -80px;
-}
-
-.searchPanelRight .fa-stack {
-    position: initial;
+.searchAdvancedDisclosureButton .fa-stack {
+    width: 25px;
 }
 
 .searchBox {
@@ -3361,11 +3352,6 @@ td.datePickerMonth, td.datePickerYear {
     color: rgba(0, 0, 0, 0.5);
 }
 
-.TableSearchPanel-search .searchPanelClearButton {
-    margin-right: 50px;
-    margin-top: 10%;
-}
-
 .databaseSearch.searchPanelClearButton {
     margin-top: 10%
 }
@@ -3378,13 +3364,20 @@ td.datePickerMonth, td.datePickerYear {
     align-items: center;
 }
 
+.searchPanelSearchDocumentsCheckbox {
+    display:flex;
+    width: 37.5px;
+    justify-content: center;
+}
+
+.searchButton {
+    width: 40px;
+}
+
 .searchButton,
 .searchAdvancedDisclosureButton {
     cursor: pointer;
     cursor: hand;
-    position: relative;
-    float: left;
-    width: 40px;
     background-color: #089de3;
 }
 
@@ -3395,6 +3388,7 @@ td.datePickerMonth, td.datePickerYear {
 .searchAdvancedDisclosureButton {
     background-color: #eee;
     color: rgba(0, 0, 0, 0.5);
+    padding: 0 10px;
 }
 
 .searchButton:hover {
@@ -3403,6 +3397,8 @@ td.datePickerMonth, td.datePickerYear {
 
 .searchButton-html {
     font-size: 15px;
+    display: flex;
+    flex-direction: row;
 }
 
 .searchAdvancedDisclosureButton .fa-angle-up {
