@@ -60,6 +60,7 @@ public class HistoryManager {
   public static final String ROUTE_ACTIVITY_LOG = "activity-log";
   public static final String ROUTE_ADVANCED_CONFIGURATION = "configuration";
   public static final String ROUTE_DATA_TRANSFORMATION = "data-transformation";
+  public static final String ROUTE_TEXT_EXTRACTION = "text-extraction";
   public static final String ROUTE_TABLE_MANAGEMENT = "table-management";
   public static final String ROUTE_COLUMNS_MANAGEMENT = "columns-management";
   public static final String ROUTE_JOBS = "jobs";
@@ -273,6 +274,11 @@ public class HistoryManager {
 
   public static void gotoDataTransformation(String databaseUUID) {
     List<String> params = Arrays.asList(ROUTE_DATA_TRANSFORMATION, databaseUUID);
+    newHistory(params);
+  }
+
+  public static void gotoTextExtraction(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_TEXT_EXTRACTION, databaseUUID);
     newHistory(params);
   }
 

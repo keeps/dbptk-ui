@@ -438,6 +438,14 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forTextExtraction(final String databaseUUID, final String databaseName) {
+    List<BreadcrumbItem> items = forAdvancedConfiguration(databaseUUID, databaseName);
+    items
+      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForTextExtraction()))));
+    return items;
+  }
+
   public static List<BreadcrumbItem> forColumnsManagement(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forAdvancedConfiguration(databaseUUID, databaseName);
     items.add(

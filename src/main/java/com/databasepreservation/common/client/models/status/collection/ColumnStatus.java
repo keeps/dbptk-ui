@@ -9,8 +9,6 @@ package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
 
-import jakarta.ws.rs.core.MediaType;
-
 import com.databasepreservation.common.client.models.status.formatters.Formatter;
 import com.databasepreservation.common.client.models.status.formatters.NoFormatter;
 import com.databasepreservation.common.client.models.structure.ViewerType;
@@ -18,12 +16,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import jakarta.ws.rs.core.MediaType;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "originalType", "typeName",
   "nullable", "type", "columnIndex", "externalLob", "formatter", "applicationType", "nestedColumn", "order",
-  "export", "search", "details"})
+  "export", "search", "details", "extract"})
 public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String id;
   private String name;
@@ -44,6 +44,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private ExportStatus exportStatus;
   private SearchStatus searchStatus;
   private DetailsStatus detailsStatus;
+  private LobTextExtractionPolicy lobTextExtractionPolicy;
 
   public ColumnStatus() {
     externalLob = false;
@@ -191,12 +192,21 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
     return exportStatus;
   }
 
+  @JsonProperty("extract")
+  public LobTextExtractionPolicy getLobTextExtractionPolicy() {
+    return lobTextExtractionPolicy;
+  }
+
   public void setExportStatus(ExportStatus exportStatus) {
     this.exportStatus = exportStatus;
   }
 
   public void setDetailsStatus(DetailsStatus detailsStatus) {
     this.detailsStatus = detailsStatus;
+  }
+
+  public void setLobTextExtractionPolicy(LobTextExtractionPolicy lobTextExtractionPolicy) {
+    this.lobTextExtractionPolicy = lobTextExtractionPolicy;
   }
 
   public void updateTableShowValue(boolean value) {
@@ -242,7 +252,8 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
       + originalType + '\'' + ", typeName='" + typeName + '\'' + ", nullable='" + nullable + '\'' + ", type=" + type
       + ", columnIndex=" + columnIndex + ", externalLob=" + externalLob + ", formatter='" + formatter + '\''
       + ", applicationType='" + applicationType + '\'' + ", nestedColumns=" + nestedColumns + ", order=" + order
-      + ", exportStatus=" + exportStatus + ", searchStatus=" + searchStatus + ", detailsStatus=" + detailsStatus + '}';
+      + ", exportStatus=" + exportStatus + ", searchStatus=" + searchStatus + ", detailsStatus=" + detailsStatus
+      + ", lobTextExtractionPolicy=" + lobTextExtractionPolicy + '}';
   }
 
   @Override
