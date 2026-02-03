@@ -54,6 +54,8 @@
         <g:FlowPanel addStyleNames="searchAdvancedPanel" ui:field="searchAdvancedPanel">
             <g:FlowPanel styleName="searchAdvancedPanelButtons"
                          ui:field="searchAdvancedPanelButtons">
+                <search:Dropdown ui:field="searchAdvancedIndexSelectionDropdown"
+                                 addStyleNames="searchIndexTypeListBox" />
                 <g:Button styleName="btn btn-search advancedSearchButton"
                           ui:field="searchAdvancedGo" enabled="false">
                     <ui:text from='{messages.search}'/>

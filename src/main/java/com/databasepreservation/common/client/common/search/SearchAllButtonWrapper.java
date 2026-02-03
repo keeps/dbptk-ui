@@ -30,13 +30,12 @@ public class SearchAllButtonWrapper extends SimplePanel implements HasValueChang
   private Button button;
   private DatabaseSelectDialog databaseSelectDialog;
 
-  public void init(Filter defaultFilter, String allFilter, ClientMessages messages,
-    SearchPanelWithSearchAll parentSearchPanel) {
+  public void init(Filter defaultFilter, ClientMessages messages, SearchPanelWithSearchAll parentSearchPanel) {
     this.messages = messages;
     this.button = new Button();
     this.button.addStyleName("btn-link-info btn btn-searchall-dialog");
     setTotalSelectedDatabases("0");
-    this.databaseSelectDialog = new DatabaseSelectDialog(defaultFilter, allFilter, messages, parentSearchPanel);
+    this.databaseSelectDialog = new DatabaseSelectDialog(defaultFilter, messages, parentSearchPanel);
     this.button.addClickHandler(event -> {
       this.databaseSelectDialog.center();
       this.databaseSelectDialog.show();

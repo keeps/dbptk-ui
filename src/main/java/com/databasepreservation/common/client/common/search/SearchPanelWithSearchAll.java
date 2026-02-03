@@ -27,24 +27,27 @@ public class SearchPanelWithSearchAll extends SearchPanelAbstract {
   SearchAllButtonWrapper selectedDatabasesButtonWrapper;
 
   public void initSearchAll() {
-    this.selectedDatabasesButtonWrapper.init(defaultFilter, allFilter, messages, this);
+    this.selectedDatabasesButtonWrapper.init(defaultFilter, messages, this);
   }
 
-  public SearchPanelWithSearchAll(Filter defaultFilter, String allFilter, String placeholder,
-    boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton) {
-    super(defaultFilter, allFilter, placeholder, showSearchInputListBox, showSearchAdvancedDisclosureButton);
+  public SearchPanelWithSearchAll(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField,
+    String placeholder, boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton) {
+    super(defaultFilter, metadataCopyField, extractedTextCopyField, placeholder, showSearchInputListBox,
+      showSearchAdvancedDisclosureButton);
   }
 
-  public SearchPanelWithSearchAll(Filter defaultFilter, String allFilter, String placeholder, String context,
-    boolean showSearchAdvancedDisclosureButton, final AsyncCallback<Void> saveQueryCallback) {
-    super(defaultFilter, allFilter, placeholder, context, showSearchAdvancedDisclosureButton, saveQueryCallback);
-  }
-
-  public SearchPanelWithSearchAll(Filter defaultFilter, String allFilter, String placeholder,
-    boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton,
+  public SearchPanelWithSearchAll(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField,
+    String placeholder, String context, boolean showSearchAdvancedDisclosureButton,
     final AsyncCallback<Void> saveQueryCallback) {
-    super(defaultFilter, allFilter, placeholder, showSearchInputListBox, showSearchAdvancedDisclosureButton,
-      saveQueryCallback);
+    super(defaultFilter, metadataCopyField, extractedTextCopyField, placeholder, context,
+      showSearchAdvancedDisclosureButton, saveQueryCallback);
+  }
+
+  public SearchPanelWithSearchAll(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField,
+    String placeholder, boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton,
+    final AsyncCallback<Void> saveQueryCallback) {
+    super(defaultFilter, metadataCopyField, extractedTextCopyField, placeholder, showSearchInputListBox,
+      showSearchAdvancedDisclosureButton, saveQueryCallback);
   }
 
   @Override

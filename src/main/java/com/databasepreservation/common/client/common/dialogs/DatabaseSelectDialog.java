@@ -69,14 +69,13 @@ public class DatabaseSelectDialog extends DialogBox {
     super(true, true);
   }
 
-  public <T extends IsIndexed> DatabaseSelectDialog(Filter defaultFilter, String allFilter, ClientMessages messages,
+  public <T extends IsIndexed> DatabaseSelectDialog(Filter defaultFilter, ClientMessages messages,
     SearchPanelWithSearchAll parentSearchPanel) {
     super(false, true);
-    init(defaultFilter, allFilter, messages, parentSearchPanel);
+    init(defaultFilter, messages, parentSearchPanel);
   }
 
-  public void init(Filter defaultFilter, String allFilter, ClientMessages messages,
-    SearchPanelWithSearchAll parentSearchPanel) {
+  public void init(Filter defaultFilter, ClientMessages messages, SearchPanelWithSearchAll parentSearchPanel) {
     setText(messages.manageDatabaseSearchAllSelectDatabases());
 
     FlowPanel layout = new FlowPanel();
