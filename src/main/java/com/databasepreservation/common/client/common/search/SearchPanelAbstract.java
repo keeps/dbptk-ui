@@ -17,6 +17,7 @@ import com.databasepreservation.common.client.common.search.panel.SearchFieldPan
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -49,6 +50,10 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   protected static final ClientMessages messages = GWT.create(ClientMessages.class);
   protected static final String FILTER_ICON = "<i class='fa fa-filter' aria-hidden='true'></i>";
 
+  protected enum IndexSearchType {
+    ALL, METADATA, EXTRACTED_TEXT,
+  }
+
   @UiField
   FlowPanel searchPanel;
 
@@ -77,6 +82,9 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   FlowPanel searchAdvancedPanelButtons;
 
   @UiField
+  Dropdown searchAdvancedIndexSelectionDropdown;
+
+  @UiField
   Button searchAdvancedGo;
 
   @UiField
@@ -92,16 +100,19 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   SimplePanel searchPanelSelectionDropdownWrapper;
 
   protected Filter defaultFilter;
-  protected String allFilter;
+  protected String metadataCopyField;
+  protected String extractedTextCopyField;
   protected boolean defaultFilterIncremental = false;
   protected AsyncCallback<Void> saveQueryCallback;
   protected FlowPanel fieldsPanel;
   protected AsyncTableCell<?, ?> list;
+  protected IndexSearchType currentIndexSearchType = IndexSearchType.ALL;
 
-  protected SearchPanelAbstract(Filter defaultFilter, String allFilter, String placeholder,
-    boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton) {
+  protected SearchPanelAbstract(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField,
+    String placeholder, boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton) {
     this.defaultFilter = defaultFilter;
-    this.allFilter = allFilter;
+    this.metadataCopyField = metadataCopyField;
+    this.extractedTextCopyField = extractedTextCopyField;
 
     bindUIAndInitWidget();
 
@@ -127,6 +138,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
       }
     });
     clearCrossButton.addClickHandler(event -> clearSearchInputBox());
+    initSearchAdvancedIndexSelectionDropdown();
 
     searchInputButton.addClickHandler(event -> doSearch());
     searchAdvancedDisclosureButton.addClickHandler(event -> showSearchAdvancedPanel());
@@ -136,19 +148,22 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     }
   }
 
-  protected SearchPanelAbstract(Filter defaultFilter, String allFilter, String placeholder, String context,
-    boolean showSearchAdvancedDisclosureButton, final AsyncCallback<Void> saveQueryCallback) {
-    this(defaultFilter, allFilter, placeholder, false, showSearchAdvancedDisclosureButton, saveQueryCallback);
+  protected SearchPanelAbstract(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField,
+    String placeholder, String context, boolean showSearchAdvancedDisclosureButton,
+    final AsyncCallback<Void> saveQueryCallback) {
+    this(defaultFilter, metadataCopyField, extractedTextCopyField, placeholder, false,
+      showSearchAdvancedDisclosureButton, saveQueryCallback);
     searchContextPanel.setVisible(true);
     searchContextPanel.add(new HTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, context)));
   }
 
-  protected SearchPanelAbstract(Filter defaultFilter, String allFilter, String placeholder,
-    boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton,
+  protected SearchPanelAbstract(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField,
+    String placeholder, boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton,
     final AsyncCallback<Void> saveQueryCallback) {
     this.saveQueryCallback = saveQueryCallback;
     this.defaultFilter = defaultFilter;
-    this.allFilter = allFilter;
+    this.metadataCopyField = metadataCopyField;
+    this.extractedTextCopyField = extractedTextCopyField;
 
     bindUIAndInitWidget();
 
@@ -174,6 +189,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
       }
     });
     clearCrossButton.addClickHandler(event -> clearSearchInputBox());
+    initSearchAdvancedIndexSelectionDropdown();
 
     searchInputButton.addClickHandler(event -> doSearch());
     searchAdvancedDisclosureButton.addClickHandler(event -> showSearchAdvancedPanel());
@@ -190,8 +206,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   public abstract void bindUIAndInitWidget();
 
   public void doSearch() {
-    Filter filter = buildSearchFilter(searchInputBox.getText(), defaultFilter, allFilter, fieldsPanel,
-      defaultFilterIncremental);
+    Filter filter = buildSearchFilter();
     list.setFilter(filter);
     if (!filter.getParameters().isEmpty() && !list.isVisible()) {
       list.setVisible(true);
@@ -202,12 +217,25 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     searchPanelSelectionDropdownWrapper.setWidget(dropdown);
   }
 
-  private Filter buildSearchFilter(String basicQuery, Filter defaultFilter, String allFilter, FlowPanel fieldsPanel,
-    boolean defaultFilterIncremental) {
+  private Filter buildSearchFilter() {
     List<FilterParameter> parameters = new ArrayList<>();
 
+    String basicQuery = searchInputBox.getText();
     if (basicQuery != null && basicQuery.trim().length() > 0) {
-      parameters.add(new BasicSearchFilterParameter(allFilter, basicQuery));
+      switch (currentIndexSearchType) {
+        case METADATA:
+          parameters.add(new BasicSearchFilterParameter(metadataCopyField, basicQuery));
+          break;
+        case EXTRACTED_TEXT:
+          parameters.add(new BasicSearchFilterParameter(extractedTextCopyField, basicQuery));
+          break;
+        case ALL:
+        default:
+          parameters.add(new OrFiltersParameters(List.of(new BasicSearchFilterParameter(metadataCopyField, basicQuery),
+            new BasicSearchFilterParameter(extractedTextCopyField, basicQuery))));
+          break;
+      }
+
     }
 
     if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
@@ -288,13 +316,17 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     this.defaultFilterIncremental = defaultFilterIncremental;
   }
 
-  public void setAllFilter(String allFilter) {
-    this.allFilter = allFilter;
+  public void setMetadataCopyField(String metadataCopyField) {
+    this.metadataCopyField = metadataCopyField;
+  }
+
+  public void setExtractedTextCopyField(String extractedTextCopyField) {
+    this.extractedTextCopyField = extractedTextCopyField;
   }
 
   public void setVariables(Filter defaultFilter, String allFilter, AsyncTableCell<?, ?> list, FlowPanel fieldsPanel) {
     setDefaultFilter(defaultFilter);
-    setAllFilter(allFilter);
+    setMetadataCopyField(allFilter);
     setList(list);
     setFieldsPanel(fieldsPanel);
   }
@@ -321,6 +353,19 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   public void clearSearchInputBox() {
     this.searchInputBox.setText("");
     clearCrossButton.setVisible(false);
+  }
+
+  public void initSearchAdvancedIndexSelectionDropdown() {
+    searchAdvancedIndexSelectionDropdown.addItem("All fields", IndexSearchType.ALL.toString());
+    searchAdvancedIndexSelectionDropdown.addItem("Metadata", IndexSearchType.METADATA.toString());
+    searchAdvancedIndexSelectionDropdown.addItem("Content", IndexSearchType.EXTRACTED_TEXT.toString());
+    searchAdvancedIndexSelectionDropdown.setSelectedValue(IndexSearchType.ALL.toString(), true);
+    searchAdvancedIndexSelectionDropdown.addValueChangeHandler(new ValueChangeHandler<String>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<String> event) {
+        currentIndexSearchType = IndexSearchType.valueOf(event.getValue());
+      }
+    });
   }
 
   public void setSearchAdvancedGoEnabled(boolean enabled) {

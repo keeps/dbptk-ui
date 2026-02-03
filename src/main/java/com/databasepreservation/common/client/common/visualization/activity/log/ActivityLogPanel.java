@@ -90,7 +90,7 @@ public class ActivityLogPanel extends ContentPanel {
     });
 
     searchPanel = new SearchPanel(ViewerConstants.DEFAULT_FILTER, ViewerConstants.INDEX_SEARCH,
-      messages.searchPlaceholder(), false, true);
+      ViewerConstants.INDEX_LOB_TEXT_SEARCH, messages.searchPlaceholder(), false, true);
     searchPanel.setList(activityLogList);
     searchPanel.setDefaultFilterIncremental(false);
     advancedSearch.add(searchPanel);

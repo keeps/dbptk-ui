@@ -129,16 +129,17 @@ public class TableSearchPanel extends Composite {
       .showAdvancedSearchOption();
 
     if (isNested) {
-      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(),
-        table.getName(), showSearchAdvancedDisclosureButton, new DefaultAsyncCallback<Void>() {
+      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, ViewerConstants.INDEX_LOB_TEXT_SEARCH,
+        messages.searchPlaceholder(), table.getName(), showSearchAdvancedDisclosureButton,
+        new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void result) {
             TableSearchPanel.this.saveQuery();
           }
         });
     } else {
-      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(), false,
-        showSearchAdvancedDisclosureButton, new DefaultAsyncCallback<Void>() {
+      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, ViewerConstants.INDEX_LOB_TEXT_SEARCH,
+        messages.searchPlaceholder(), false, showSearchAdvancedDisclosureButton, new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void result) {
             TableSearchPanel.this.saveQuery();

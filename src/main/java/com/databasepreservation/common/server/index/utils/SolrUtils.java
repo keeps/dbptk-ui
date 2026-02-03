@@ -904,7 +904,7 @@ public class SolrUtils {
     } else if (value.matches("^\".+\"$")) {
       appendExactMatch(ret, key, value.substring(1, value.length() - 1), true, prefixWithANDOperatorIfBuilderNotEmpty);
     } else {
-      appendWhiteSpaceTokenizedString(ret, key, value, operator);
+      appendWhiteSpaceTokenizedString(ret, key, value, operator, prefixWithANDOperatorIfBuilderNotEmpty);
     }
   }
 
@@ -924,8 +924,9 @@ public class SolrUtils {
     }
   }
 
-  private static void appendWhiteSpaceTokenizedString(StringBuilder ret, String key, String value, String operator) {
-    appendANDOperator(ret, true);
+  private static void appendWhiteSpaceTokenizedString(StringBuilder ret, String key, String value, String operator,
+    boolean prefixWithANDOperatorIfBuilderNotEmpty) {
+    appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
 
     String[] split = value.trim().split("\\s+");
     ret.append("(");

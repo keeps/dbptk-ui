@@ -10,7 +10,6 @@ package com.databasepreservation.common.client.common.search;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.lists.utils.ListBuilder;
@@ -70,7 +69,8 @@ public class SearchWrapper extends Composite {
     SearchPanelAbstract searchPanel;
 
     Filter filter = list.getFilter();
-    String allFilter = SearchFilters.searchField();
+    String metadataCopyField = SearchFilters.searchField();
+    String extractedTextCopyField = SearchFilters.extractedTextField();
     boolean incremental = SearchFilters.shouldBeIncremental(filter) || isSearchAll;
 
     // get configuration
@@ -93,10 +93,11 @@ public class SearchWrapper extends Composite {
     // create
     if (isSearchAll) {
       list.setVisible(false);
-      searchPanel = new SearchPanelWithSearchAll(filter, allFilter, messages.searchPlaceholder(),
-        hasMultipleSearchPanels, false);
+      searchPanel = new SearchPanelWithSearchAll(filter, metadataCopyField, extractedTextCopyField,
+        messages.searchPlaceholder(), hasMultipleSearchPanels, false);
     } else {
-      searchPanel = new SearchPanel(filter, allFilter, messages.searchPlaceholder(), hasMultipleSearchPanels, false);
+      searchPanel = new SearchPanel(filter, metadataCopyField, extractedTextCopyField, messages.searchPlaceholder(),
+        hasMultipleSearchPanels, false);
     }
     searchPanel.setList(list);
     searchPanel.setDefaultFilterIncremental(incremental);
