@@ -1,4 +1,4 @@
-package com.databasepreservation.common.server.batch.item.tasklet;
+package com.databasepreservation.common.server.batch.steps.denormalize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,34 +13,28 @@ import org.springframework.batch.repeat.RepeatStatus;
 
 import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DenormalizeCleanupTasklet implements Tasklet {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DenormalizeCleanupTasklet.class);
+public class DenormalizeFinalizeTasklet implements Tasklet {
 
-  private final DatabaseRowsSolrManager solrManager;
+  private static final Logger LOGGER = LoggerFactory.getLogger(DenormalizeFinalizeTasklet.class);
+
   private final DenormalizeConfiguration config;
   private final ViewerDatabase database;
   private final String databaseUUID;
   private final String tableUUID;
 
-  public DenormalizeCleanupTasklet(DatabaseRowsSolrManager solrManager, DenormalizeConfiguration config,
-    ViewerDatabase database, String databaseUUID, String tableUUID) {
-    this.solrManager = solrManager;
+  public DenormalizeFinalizeTasklet(DenormalizeConfiguration config, ViewerDatabase database, String databaseUUID,
+    String tableUUID) {
     this.config = config;
     this.database = database;
     this.databaseUUID = databaseUUID;
@@ -49,32 +43,9 @@ public class DenormalizeCleanupTasklet implements Tasklet {
 
   @Override
   public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-    LOGGER.info("Starting cleanup for table: {}", config.getTableID());
-
-    cleanNestedDocuments();
+    LOGGER.info("Finalizing denormalization: Updating collection status for table {}", config.getTableID());
     updateCollectionStatus();
-
     return RepeatStatus.FINISHED;
-  }
-
-  private void cleanNestedDocuments() {
-    Filter filter = FilterUtils.filterByTable(new Filter(), config.getTableID());
-
-    IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, filter, null, new ArrayList<>());
-
-    for (ViewerRow row : allRows) {
-      solrManager.deleteNestedDocuments(databaseUUID, row.getUuid());
-    }
-
-    try {
-      allRows.close();
-    } catch (Exception e) {
-      LOGGER.warn("Error closing cursor during cleanup", e);
-    }
-
-    for (RelatedTablesConfiguration relatedTable : config.getRelatedTables()) {
-      solrManager.deleteNestedDocuments(databaseUUID, relatedTable.getUuid());
-    }
   }
 
   private void updateCollectionStatus() throws GenericException, IllegalAccessException {
@@ -95,17 +66,20 @@ public class DenormalizeCleanupTasklet implements Tasklet {
       ViewerColumn viewerColumn = new ViewerColumn();
       viewerColumn.setDescription("Please EDIT");
       viewerColumn.setSolrName(relatedTable.getUuid());
+
       NestedColumnStatus nestedColumn = new NestedColumnStatus();
       nestedColumn.setMultiValue(relatedTable.getMultiValue());
       nestedColumn.setOriginalTable(relatedTable.getTableID());
+
       List<String> columnName = new ArrayList<>();
       List<String> originalType = new ArrayList<>();
       List<String> typeName = new ArrayList<>();
       List<String> nullable = new ArrayList<>();
 
       for (RelatedColumnConfiguration column : columnsIncluded) {
-        ViewerColumn columnBySolrName = database.getMetadata().getTable(relatedTable.getTableUUID())
-          .getColumnBySolrName(column.getSolrName());
+        var tableMetadata = database.getMetadata().getTable(relatedTable.getTableUUID());
+        var columnBySolrName = tableMetadata.getColumnBySolrName(column.getSolrName());
+
         nestedColumn.getNestedFields().add(column.getColumnName());
         nestedColumn.getNestedSolrNames().add(column.getSolrName());
         columnName.add(column.getColumnName());
@@ -120,21 +94,17 @@ public class DenormalizeCleanupTasklet implements Tasklet {
           + ViewerConstants.CLOSE_TEMPLATE_ENGINE;
       }
 
-      String columnStatusName = "";
-      String separator = "";
-      for (String tableName : path) {
-        columnStatusName = columnStatusName + separator + tableName;
-        separator = ">";
-      }
-
-      viewerColumn.setDisplayName(columnStatusName + separator + columnName.toString());
+      String columnStatusName = String.join(">", path);
+      viewerColumn.setDisplayName(columnStatusName + ">" + columnName.toString());
       nestedColumn.setPath(relatedTable.getPath());
+
       ViewerFactory.getConfigurationManager().addDenormalizationColumns(databaseUUID, config.getTableUUID(),
         viewerColumn, nestedColumn, template, removeBrackets(originalType), removeBrackets(typeName),
         removeBrackets(nullable));
     }
+
     for (RelatedTablesConfiguration innerRelatedTable : relatedTable.getRelatedTables()) {
-      setAllColumnsToInclude(innerRelatedTable, path);
+      setAllColumnsToInclude(innerRelatedTable, new ArrayList<>(path));
     }
   }
 

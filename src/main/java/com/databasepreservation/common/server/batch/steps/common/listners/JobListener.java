@@ -5,7 +5,7 @@
  *
  * https://github.com/keeps/dbptk-ui
  */
-package com.databasepreservation.common.server.batch.listener;
+package com.databasepreservation.common.server.batch.steps.common.listners;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

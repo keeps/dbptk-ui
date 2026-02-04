@@ -36,6 +36,7 @@ import com.databasepreservation.common.client.models.status.collection.NestedCol
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -56,6 +57,7 @@ public class ConfigurationManager {
   private final Object logFileLock = new Object();
   private final Object databaseStatusFileLock = new Object();
   private final Object collectionStatusFileLock = new Object();
+  private final Object denormalizeStatusFileLock = new Object();
   private long entryLogLineNumber = -1;
 
   public ConfigurationManager() {
@@ -251,6 +253,14 @@ public class ConfigurationManager {
     }
   }
 
+  public DenormalizeConfiguration getDenormalizeConfiguration(String databaseUUID, String tableUUID)
+    throws GenericException {
+    synchronized (denormalizeStatusFileLock) {
+      Path denormalizeStatusFile = getDenormalizeStatusPath(databaseUUID, tableUUID);
+      return JsonUtils.readObjectFromFile(denormalizeStatusFile, DenormalizeConfiguration.class);
+    }
+  }
+
   private Path getDatabaseStatusPath(String id) {
     final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
     final Path databaseDirectoryPath = databasesDirectoryPath.resolve(id);
@@ -263,6 +273,14 @@ public class ConfigurationManager {
     final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
 
     return databaseDirectoryPath.resolve(id + ViewerConstants.JSON_EXTENSION);
+  }
+
+  private Path getDenormalizeStatusPath(String databaseUUID, String tableUUID) {
+    final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+    final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
+
+    return databaseDirectoryPath
+      .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
   }
 
   public void updateIndicators(String id, String passed, String failed, String warnings, String skipped,

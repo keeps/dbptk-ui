@@ -134,7 +134,7 @@ public class CollectionResource implements CollectionService {
   private HttpServletRequest request;
 
   @Autowired
-  @Qualifier("denormalizeJob")
+  @Qualifier("processWorkflowJob")
   Job job;
 
   @Autowired
@@ -453,7 +453,7 @@ public class CollectionResource implements CollectionService {
       user = controllerAssistant.checkRoles(request);
 
       // check if there is no job running on table
-      for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
+      for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("processWorkflowJob")) {
         if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
           .equals(tableUUID)) {
           throw new RESTException(new AlreadyExistsException("A job is already running on this table"));

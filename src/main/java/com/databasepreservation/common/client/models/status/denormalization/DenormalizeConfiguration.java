@@ -10,6 +10,7 @@ package com.databasepreservation.common.client.models.status.denormalization;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -30,6 +31,8 @@ public class DenormalizeConfiguration implements Serializable {
   private String tableUUID;
   private String tableID;
   private List<RelatedTablesConfiguration> relatedTables;
+  private Date lastUpdatedDate;
+  private Date lastExecutionDate;
 
   public DenormalizeConfiguration() {
   }
@@ -41,6 +44,7 @@ public class DenormalizeConfiguration implements Serializable {
     setTableID(table.getId());
     setState(ViewerJobStatus.UNKNOWN);
     relatedTables = new ArrayList<>();
+    lastUpdatedDate = new Date();
   }
 
   public String getId() {
@@ -124,5 +128,21 @@ public class DenormalizeConfiguration implements Serializable {
 
   public void setRelatedTables(List<RelatedTablesConfiguration> relatedTables) {
     this.relatedTables = relatedTables;
+  }
+
+  public Date getLastUpdatedDate() {
+    return lastUpdatedDate;
+  }
+
+  public void setLastUpdatedDate(Date lastUpdatedDate) {
+    this.lastUpdatedDate = lastUpdatedDate;
+  }
+
+  public Date getLastExecutionDate() {
+    return lastExecutionDate;
+  }
+
+  public void setLastExecutionDate(Date lastExecutionDate) {
+    this.lastExecutionDate = lastExecutionDate;
   }
 }

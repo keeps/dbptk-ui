@@ -16,8 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.structure.ViewerCell;
-import com.databasepreservation.common.server.batch.config.VirtualColumnJobConfiguration;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -47,6 +45,7 @@ import com.databasepreservation.common.client.index.filter.SimpleFilterParameter
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -58,6 +57,7 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.exceptions.SavedSearchException;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.batch.config.VirtualColumnJobConfiguration;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
@@ -667,15 +667,22 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void addVirtualCell(String databaseUUID, List<VirtualColumnJobConfiguration.VirtualColumnWrapper> virtualColumnWrappers) {
+  public void addVirtualCell(String databaseUUID,
+    List<VirtualColumnJobConfiguration.VirtualColumnWrapper> virtualColumnWrappers) {
     RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
     SolrInputDocument doc = new SolrInputDocument();
-    doc.addField(ViewerConstants.INDEX_ID, row.getUuid());
-    doc.addField(viewerCell.getTable().getSolrName(), SolrUtils.asValueUpdate(viewerCell.getValue()));
-    try {
-      insertDocument(collection.getIndexName(), doc);
-    } catch (ViewerException e) {
-      LOGGER.error("Could not add virtual cell for {}", databaseUUID, e);
+    for (VirtualColumnJobConfiguration.VirtualColumnWrapper virtualColumnWrapper : virtualColumnWrappers) {
+      ViewerRow row = virtualColumnWrapper.getRow();
+      doc.addField(ViewerConstants.INDEX_ID, row.getUuid());
+      for (VirtualColumnJobConfiguration.VirtualColumnWrapper.Cells viewerCells : virtualColumnWrapper.getCells()) {
+        ViewerCell viewerCell = viewerCells.getCell();
+        doc.addField(viewerCells.getSolrName(), SolrUtils.asValueUpdate(viewerCell.getValue()));
+      }
+      try {
+        insertDocument(collection.getIndexName(), doc);
+      } catch (ViewerException e) {
+        LOGGER.error("Could not add virtual cell for {}", databaseUUID, e);
+      }
     }
   }
 

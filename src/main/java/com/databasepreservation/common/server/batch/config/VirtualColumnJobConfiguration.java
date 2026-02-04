@@ -12,7 +12,6 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.filter.Filter;
@@ -26,15 +25,15 @@ import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.batch.item.reader.SolrCursorItemReader;
-import com.databasepreservation.common.server.batch.listener.JobListener;
-import com.databasepreservation.common.server.batch.listener.ProgressChunkListener;
+import com.databasepreservation.common.server.batch.steps.common.readers.SolrCursorItemReader;
+import com.databasepreservation.common.server.batch.steps.common.listners.JobListener;
+import com.databasepreservation.common.server.batch.steps.common.listners.ProgressChunkListener;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-@Configuration
+//@Configuration
 public class VirtualColumnJobConfiguration {
 
   private final DatabaseRowsSolrManager solrManager;
@@ -116,9 +115,9 @@ public class VirtualColumnJobConfiguration {
 
   @Bean
   @StepScope
-  public void virtualColumnWriter(
+  public ItemWriter<List<VirtualColumnWrapper>> virtualColumnWriter(
     @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID) {
-    new ItemWriter<List<VirtualColumnWrapper>>() {
+    return new ItemWriter<List<VirtualColumnWrapper>>() {
       @Override
       public void write(Chunk<? extends List<VirtualColumnWrapper>> chunk) throws Exception {
         for (List<VirtualColumnWrapper> virtualColumnWrappers : chunk) {

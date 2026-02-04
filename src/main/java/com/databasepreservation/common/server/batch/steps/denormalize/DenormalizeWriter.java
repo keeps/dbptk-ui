@@ -1,9 +1,8 @@
-package com.databasepreservation.common.server.batch.item.writer;
+package com.databasepreservation.common.server.batch.steps.denormalize;
 
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 
-import com.databasepreservation.common.server.batch.item.processor.DenormalizeProcessor;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
 /**

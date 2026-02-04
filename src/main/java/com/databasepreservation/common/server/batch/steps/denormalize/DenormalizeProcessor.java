@@ -1,4 +1,4 @@
-package com.databasepreservation.common.server.batch.item.processor;
+package com.databasepreservation.common.server.batch.steps.denormalize;
 
 import java.util.ArrayList;
 import java.util.HashMap;

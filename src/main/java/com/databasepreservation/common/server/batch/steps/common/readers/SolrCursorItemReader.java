@@ -1,4 +1,4 @@
-package com.databasepreservation.common.server.batch.item.reader;
+package com.databasepreservation.common.server.batch.steps.common.readers;
 
 import java.util.Collections;
 import java.util.Iterator;
