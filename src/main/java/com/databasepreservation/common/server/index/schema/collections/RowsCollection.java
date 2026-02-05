@@ -74,8 +74,13 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     return List.of(
       new CopyField(ViewerConstants.SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX + ViewerConstants.INDEX_WILDCARD,
         Field.FIELD_SEARCH),
+      new CopyField(ViewerConstants.SOLR_ROWS_NESTED_COL + ViewerConstants.SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX
+        + ViewerConstants.INDEX_WILDCARD, Field.FIELD_SEARCH),
       new CopyField(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + ViewerConstants.INDEX_WILDCARD,
         Field.FIELD_SEARCH),
+      new CopyField(ViewerConstants.SOLR_ROWS_NESTED_COL + ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX
+        + ViewerConstants.INDEX_WILDCARD, Field.FIELD_SEARCH),
+      new CopyField("*_nst", Field.FIELD_SEARCH),
       new CopyField(ViewerConstants.INDEX_WILDCARD + ViewerConstants.SOLR_INDEX_ROW_LOB_COLUMN_OCR_TEXT_SUFFIX,
         Field.FIELD_LOB_TEXT_SEARCH));
   }
@@ -233,8 +238,9 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
 
         Object mimeTypeObj = doc.get(ViewerCelllUtils.getMimeTypeSolrName(columnName));
         Object fileExtensionObj = doc.get(ViewerCelllUtils.getFileExtensionSolrName(columnName));
-        ViewerLobStoreType storeType = SolrUtils.objectToEnum(doc.get(ViewerCelllUtils.getStoreTypeSolrColumnName(columnName)),
-          ViewerLobStoreType.class, ViewerLobStoreType.INTERNALLY);
+        ViewerLobStoreType storeType = SolrUtils.objectToEnum(
+          doc.get(ViewerCelllUtils.getStoreTypeSolrColumnName(columnName)), ViewerLobStoreType.class,
+          ViewerLobStoreType.INTERNALLY);
 
         if (mimeTypeObj != null && fileExtensionObj != null) {
           viewerCell = Optional
