@@ -261,6 +261,14 @@ public class ConfigurationManager {
     }
   }
 
+  public DenormalizeConfiguration getDenormalizeConfigurationFromCollectionStatusEntry(String databaseUUID, String denormalizeUUID)
+    throws GenericException {
+    synchronized (denormalizeStatusFileLock) {
+      Path denormalizeStatusFile = getDenormalizeStatusPathByEntry(databaseUUID, denormalizeUUID);
+      return JsonUtils.readObjectFromFile(denormalizeStatusFile, DenormalizeConfiguration.class);
+    }
+  }
+
   private Path getDatabaseStatusPath(String id) {
     final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
     final Path databaseDirectoryPath = databasesDirectoryPath.resolve(id);
@@ -273,6 +281,13 @@ public class ConfigurationManager {
     final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
 
     return databaseDirectoryPath.resolve(id + ViewerConstants.JSON_EXTENSION);
+  }
+
+  private Path getDenormalizeStatusPathByEntry(String databaseUUID, String denormalizeUUID) {
+    final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+    final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
+
+    return databaseDirectoryPath.resolve(denormalizeUUID + ViewerConstants.JSON_EXTENSION);
   }
 
   private Path getDenormalizeStatusPath(String databaseUUID, String tableUUID) {

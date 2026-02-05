@@ -1,16 +1,20 @@
 package com.databasepreservation.common.server.batch.config;
 
+import com.databasepreservation.common.server.batch.steps.common.listners.ProgressChunkListener;
 import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobOperator;
 import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
@@ -70,5 +74,15 @@ public class BatchJobConfig {
     jobOperator.setJobLauncher(jobLauncher);
     jobOperator.afterPropertiesSet();
     return jobOperator;
+  }
+
+  @Bean
+  @StepScope
+  public CollectionStatus collectionStatus(
+    @Value("#{jobExecutionContext['COLLECTION_STATUS_CONFIG']}") CollectionStatus collectionStatus) {
+    if (collectionStatus == null) {
+      throw new IllegalStateException("Collection status not found in job execution context.");
+    }
+    return collectionStatus;
   }
 }

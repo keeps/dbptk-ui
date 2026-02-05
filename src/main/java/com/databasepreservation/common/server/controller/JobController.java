@@ -13,7 +13,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-import com.databasepreservation.common.server.ViewerConfiguration;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -21,16 +20,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.NoSuchJobException;
+import org.springframework.batch.core.repository.JobRepository;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
+import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.launch.NoSuchJobException;
-import org.springframework.batch.core.repository.JobRepository;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -44,7 +44,6 @@ public class JobController {
     viewerJob.setDatabaseUuid(jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM));
     viewerJob
       .setCollectionUuid(jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_COLLECTION_ID_PARAM));
-    viewerJob.setTableUuid(jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM));
     viewerJob.setJobId(jobExecution.getJobId());
     viewerJob.setName(jobExecution.getJobInstance().getJobName());
     viewerJob.setCreateTime(convertToDate(jobExecution.getCreateTime()));
@@ -65,22 +64,17 @@ public class JobController {
     try {
       ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, viewerJob.getDatabaseUuid());
       viewerJob.setDatabaseName(database.getMetadata().getName());
-      viewerJob.setTableName(database.getMetadata().getTable(viewerJob.getTableUuid()).getName());
-      viewerJob.setSchemaName(database.getMetadata().getTable(viewerJob.getTableUuid()).getSchemaName());
       if (viewerJob.getStatus().equals(ViewerJobStatus.COMPLETED)) {
-        long rowsNumber = database.getMetadata().getTable(viewerJob.getTableUuid()).getCountRows();
+        long rowsNumber = 0;
         viewerJob.setRowsToProcess(rowsNumber);
         viewerJob.setProcessRows(rowsNumber);
       }
     } catch (NotFoundException e) {
       viewerJob.setDatabaseName(viewerJob.getDatabaseUuid());
-      viewerJob.setTableName(viewerJob.getTableUuid());
-      viewerJob.setSchemaName(ViewerConstants.UNKNOWN);
     }
 
     return viewerJob;
   }
-
 
   private static Date convertToDate(LocalDateTime localDateTime) {
     if (localDateTime == null) {
@@ -97,7 +91,6 @@ public class JobController {
     viewerJob.setUuid(parameters.getString(ViewerConstants.INDEX_ID));
     viewerJob.setDatabaseUuid(parameters.getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM));
     viewerJob.setCollectionUuid(parameters.getString(ViewerConstants.CONTROLLER_COLLECTION_ID_PARAM));
-    viewerJob.setTableUuid(parameters.getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM));
     viewerJob.setStatus(ViewerJobStatus.STARTING);
 
     return viewerJob;
@@ -108,23 +101,10 @@ public class JobController {
     ViewerJob viewerJob = createMinimalViewerJob(parameters);
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, viewerJob.getDatabaseUuid());
     viewerJob.setDatabaseName(database.getMetadata().getName());
-    viewerJob.setTableName(database.getMetadata().getTable(viewerJob.getTableUuid()).getName());
-    viewerJob.setSchemaName(database.getMetadata().getTable(viewerJob.getTableUuid()).getSchemaName());
     solrManager.addBatchJob(viewerJob);
-    LOGGER.info("Job CREATED for " + database.getUuid() + "/" + viewerJob.getTableUuid() + " ("
-      + viewerJob.getDatabaseName() + "/" + viewerJob.getTableName() + ")");
-  }
 
-  public static void addSolrBatchJob(JobExecution jobExecution) throws NotFoundException, GenericException {
-    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-    ViewerJob viewerJob = createViewerJob(jobExecution);
-    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, viewerJob.getDatabaseUuid());
-    viewerJob.setDatabaseName(database.getMetadata().getName());
-    viewerJob.setTableName(database.getMetadata().getTable(viewerJob.getTableUuid()).getName());
-    viewerJob.setSchemaName(database.getMetadata().getTable(viewerJob.getTableUuid()).getSchemaName());
-    solrManager.addBatchJob(viewerJob);
-    LOGGER.info("Job CREATED for " + database.getUuid() + "/" + viewerJob.getTableUuid() + " ("
-      + viewerJob.getDatabaseName() + "/" + viewerJob.getTableName() + ")");
+    LOGGER.info("JOB Created in Solr with ID: {} for Database UUID: {}, Collection UUID: {}", viewerJob.getUuid(),
+      viewerJob.getDatabaseUuid(), viewerJob.getCollectionUuid());
   }
 
   public static void editSolrBatchJob(JobExecution jobExecution) throws NotFoundException, GenericException {
@@ -156,7 +136,7 @@ public class JobController {
     throws NotFoundException, GenericException, NoSuchJobException {
     deleteSolrBatchJobs();
     int startIndex = 0;
-    int batchSize =  ViewerConfiguration.getInstance().getViewerConfigurationAsInt(100,
+    int batchSize = ViewerConfiguration.getInstance().getViewerConfigurationAsInt(100,
       ViewerConstants.REINDEX_BATCH_SIZE);
 
     for (String jobName : jobRepository.getJobNames()) {

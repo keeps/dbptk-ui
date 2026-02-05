@@ -27,6 +27,7 @@ public class SolrCursorItemReader implements ItemReader<ViewerRow>, ItemStream {
   private static final Logger LOGGER = LoggerFactory.getLogger(SolrCursorItemReader.class);
 
   private static final int PAGE_SIZE = 1000;
+  private static final int CHUNK_SIZE = 1000;
 
   private final DatabaseRowsSolrManager solrManager;
   private final String databaseUUID;
@@ -45,6 +46,10 @@ public class SolrCursorItemReader implements ItemReader<ViewerRow>, ItemStream {
     this.databaseUUID = databaseUUID;
     this.filter = filter;
     this.fieldsToReturn = fieldsToReturn;
+  }
+
+  public int getChunkSize() {
+    return CHUNK_SIZE;
   }
 
   @Override

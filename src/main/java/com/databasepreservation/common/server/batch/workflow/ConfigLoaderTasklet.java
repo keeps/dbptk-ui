@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
-import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 
 /**
@@ -23,8 +22,6 @@ public class ConfigLoaderTasklet implements Tasklet {
       .get(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM);
     String collectionUUID = (String) chunkContext.getStepContext().getJobParameters()
       .get(ViewerConstants.CONTROLLER_COLLECTION_ID_PARAM);
-    String tableUUID = (String) chunkContext.getStepContext().getJobParameters()
-      .get(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
 
     DatabaseStatus databaseStatus = ViewerFactory.getConfigurationManager().getDatabaseStatus(databaseUUID);
 
@@ -36,11 +33,6 @@ public class ConfigLoaderTasklet implements Tasklet {
 
     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext()
       .put("COLLECTION_STATUS_CONFIG", configurationCollection);
-
-    DenormalizeConfiguration denormalizeConfiguration = ViewerFactory.getConfigurationManager()
-      .getDenormalizeConfiguration(databaseUUID, tableUUID);
-    chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext()
-      .put("DENORMALIZE_STATUS_CONFIG", denormalizeConfiguration);
 
     return RepeatStatus.FINISHED;
   }

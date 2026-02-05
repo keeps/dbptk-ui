@@ -454,9 +454,9 @@ public class CollectionResource implements CollectionService {
 
       // check if there is no job running on table
       for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("processWorkflowJob")) {
-        if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
-          .equals(tableUUID)) {
-          throw new RESTException(new AlreadyExistsException("A job is already running on this table"));
+        if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM)
+          .equals(databaseUUID)) {
+          throw new RESTException(new AlreadyExistsException("A job is already running on this database"));
         }
       }
 
@@ -466,7 +466,6 @@ public class CollectionResource implements CollectionService {
       jobBuilder.addString(ViewerConstants.INDEX_ID, jobId);
       jobBuilder.addString(ViewerConstants.CONTROLLER_COLLECTION_ID_PARAM, collectionUUID);
       jobBuilder.addString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
-      jobBuilder.addString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
       JobParameters jobParameters = jobBuilder.toJobParameters();
 
       JobController.addMinimalSolrBatchJob(jobParameters);
@@ -484,7 +483,7 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID, ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
+        databaseUUID);
     }
   }
 

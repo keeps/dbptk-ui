@@ -47,12 +47,6 @@ public class VirtualColumnJobConfiguration {
 
   @Bean
   @StepScope
-  public ProgressChunkListener progressListener() {
-    return new ProgressChunkListener(solrManager);
-  }
-
-  @Bean
-  @StepScope
   public CollectionStatus sharedCollectionStatus(
     @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID) {
 

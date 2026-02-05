@@ -227,6 +227,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     btnRunConfiguration.setStyleName("btn btn-play");
     btnRunConfiguration.addClickHandler(clickEvent -> {
         DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration, collectionStatus);
+        DataTransformationUtils.runConfigurations(database.getUuid(), collectionStatus);
         HistoryManager.gotoJobs();
     });
 
@@ -237,6 +238,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
       for (Map.Entry<String, DenormalizeConfiguration> entry : denormalizeConfigurationList.entrySet()) {
         DataTransformationUtils.saveConfiguration(database.getUuid(), entry.getValue(), collectionStatus);
       }
+      DataTransformationUtils.runConfigurations(database.getUuid(), collectionStatus);
     });
 
     buttons.add(btnCancel);
