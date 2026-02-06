@@ -1357,6 +1357,10 @@ public interface ClientMessages extends Messages {
 
   String advancedSearchBooleanValueDefault();
 
+  String advancedSearchMetadataSearchFieldLabel();
+
+  String advancedSearchOCRSearchFieldLabel();
+
   /********************************************
    * Activity Log
    *******************************************/
@@ -1664,6 +1668,8 @@ public interface ClientMessages extends Messages {
   /********************************************
    * Text Extraction Panel
    *******************************************/
+  String textExtractionPageTableHeaderTextForExtractPolicy();
+
   String textExtractionPageTitle();
 
   String textExtractionPageTableTextForDescription();

@@ -61,6 +61,7 @@ import com.databasepreservation.common.client.models.parameters.PreservationPara
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
@@ -865,41 +866,44 @@ public class SIARDController {
     throws GenericException {
 
     try {
-      TableStatus tableStatus = ViewerFactory.getConfigurationManager()
-        .getConfigurationCollection(databaseUUID, databaseUUID).getTableStatus(tableUUID);
+      CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
+        .getConfigurationCollection(databaseUUID, databaseUUID);
+      TableStatus tableStatus = collectionStatus.getTableStatus(tableUUID);
       List<ColumnStatus> lobColumns = tableStatus.getLobColumns().stream()
         .filter(c -> c.getLobTextExtractionPolicy().getExtractAndIndexLobText()).toList();
       if (!lobColumns.isEmpty()) {
-        List<String> lobFields = lobColumns.stream().map(ColumnStatus::getId).toList();
         Filter rowFilter = new Filter();
         rowFilter.add(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, tableStatus.getId()));
-        List<String> fieldsToReturn = new ArrayList<>(lobFields);
+        List<String> fieldsToReturn = new ArrayList<>();
+        lobColumns.stream().map(ColumnStatus::getId).forEach(fieldsToReturn::add);
         fieldsToReturn.add(ViewerConstants.INDEX_ID);
 
         try (IterableIndexResult rows = ViewerFactory.getSolrManager().findAllRows(databaseUUID, rowFilter,
           new Sorter(), fieldsToReturn)) {
-          for (String lobField : lobFields) {
+          for (ColumnStatus lobColumn : lobColumns) {
             for (ViewerRow rowDocument : rows) {
-              ViewerCell lobCell = rowDocument.getCells().get(lobField);
+              ViewerCell lobCell = rowDocument.getCells().get(lobColumn.getId());
               if (lobCell != null && lobCell.getValue() != null && !lobCell.getValue().isBlank()) {
                 String topLobPath = lobCell.getValue();
                 Set<String> allLobFilePaths;
-
                 try (Stream<Path> walkStream = Files.walk(Paths.get(topLobPath), FileVisitOption.FOLLOW_LINKS)) {
                   allLobFilePaths = walkStream.filter(file -> !Files.isDirectory(file)).map(Path::toString)
                     .collect(Collectors.toSet());
                 }
 
                 for (String lobFilePath : allLobFilePaths) {
-                  extractAndIndexLobText(databaseUUID, rowDocument.getUuid(), lobField, lobFilePath);
+                  extractAndIndexLobText(databaseUUID, rowDocument.getUuid(), lobColumn.getId(), lobFilePath);
+                  LobTextExtractionStatus lobTextExtractionStatus = lobColumn.getLobTextExtractionStatus();
+                  lobTextExtractionStatus.setExtractedAndIndexedText(true);
+                  lobColumn.setLobTextExtractionStatus(lobTextExtractionStatus);
                 }
               }
             }
           }
         }
       }
-
-    } catch (GenericException | IOException e) {
+      ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, collectionStatus);
+    } catch (GenericException | IOException | ViewerException e) {
       throw new GenericException(e);
     }
 

@@ -3275,7 +3275,7 @@ td.datePickerMonth, td.datePickerYear {
     font-weight: 600;
     font-size: 1.1rem;
     text-transform: uppercase;
-    min-width: 150px;
+    min-width: 185px;
     line-height: 30px;
     background-color: #089de3;
     color: white;
@@ -3575,8 +3575,22 @@ td.datePickerMonth, td.datePickerYear {
     height: 30px;
     display: flex;
     flex-direction: row;
-    justify-content: end;
     gap: 10px;
+}
+
+.searchAdvancedPanelButtonsLeft,
+ .searchAdvancedPanelButtonsRight {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.searchAdvancedPanelButtonsLeft {
+    flex: 1;
+}
+
+.searchAdvancedIndexSelectionDropdown {
+    flex: 0;
 }
 
 .searchAdvancedFieldsPanel + .searchAdvancedPanelButtons {

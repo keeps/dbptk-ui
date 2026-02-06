@@ -23,7 +23,7 @@ import jakarta.ws.rs.core.MediaType;
  */
 @JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "originalType", "typeName",
   "nullable", "type", "columnIndex", "externalLob", "formatter", "applicationType", "nestedColumn", "order",
-  "export", "search", "details", "extract"})
+  "export", "search", "details", "extractStatus", "extractPolicy"})
 public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String id;
   private String name;
@@ -44,6 +44,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private ExportStatus exportStatus;
   private SearchStatus searchStatus;
   private DetailsStatus detailsStatus;
+  private LobTextExtractionStatus lobTextExtractionStatus;
   private LobTextExtractionPolicy lobTextExtractionPolicy;
 
   public ColumnStatus() {
@@ -192,9 +193,13 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
     return exportStatus;
   }
 
-  @JsonProperty("extract")
-  public LobTextExtractionPolicy getLobTextExtractionPolicy() {
-    return lobTextExtractionPolicy;
+  @JsonProperty("extractStatus")
+  public LobTextExtractionStatus getLobTextExtractionStatus() {
+    return lobTextExtractionStatus;
+  }
+
+  public void setLobTextExtractionStatus(LobTextExtractionStatus lobTextExtractionStatus) {
+    this.lobTextExtractionStatus = lobTextExtractionStatus;
   }
 
   public void setExportStatus(ExportStatus exportStatus) {
@@ -203,6 +208,11 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
 
   public void setDetailsStatus(DetailsStatus detailsStatus) {
     this.detailsStatus = detailsStatus;
+  }
+
+  @JsonProperty("extractPolicy")
+  public LobTextExtractionPolicy getLobTextExtractionPolicy() {
+    return lobTextExtractionPolicy;
   }
 
   public void setLobTextExtractionPolicy(LobTextExtractionPolicy lobTextExtractionPolicy) {
@@ -253,7 +263,8 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
       + ", columnIndex=" + columnIndex + ", externalLob=" + externalLob + ", formatter='" + formatter + '\''
       + ", applicationType='" + applicationType + '\'' + ", nestedColumns=" + nestedColumns + ", order=" + order
       + ", exportStatus=" + exportStatus + ", searchStatus=" + searchStatus + ", detailsStatus=" + detailsStatus
-      + ", lobTextExtractionPolicy=" + lobTextExtractionPolicy + '}';
+      + ", lobTextExtractionStatus=" + lobTextExtractionStatus + ", lobTextExtractionPolicy=" + lobTextExtractionPolicy
+      + '}';
   }
 
   @Override
