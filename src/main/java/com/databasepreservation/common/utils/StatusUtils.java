@@ -19,6 +19,7 @@ import com.databasepreservation.common.client.models.status.collection.ExportSta
 import com.databasepreservation.common.client.models.status.collection.FacetsStatus;
 import com.databasepreservation.common.client.models.status.collection.ListStatus;
 import com.databasepreservation.common.client.models.status.collection.LobTextExtractionPolicy;
+import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
 import com.databasepreservation.common.client.models.status.collection.SearchStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
@@ -117,6 +118,7 @@ public class StatusUtils {
     status.setExportStatus(getExportStatus());
     status.setSearchStatus(getSearchStatus(show));
     status.setDetailsStatus(getDetailsStatus(show));
+    status.setLobTextExtractionStatus(getLOBTextExtractionStatus());
     status.setLobTextExtractionPolicy(getLOBTextExtractionPolicy());
 
     if (column.getType() != null && (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)
@@ -149,6 +151,13 @@ public class StatusUtils {
     DetailsStatus status = new DetailsStatus();
     status.setShow(show);
     status.setTemplateStatus(getTemplateStatus());
+
+    return status;
+  }
+
+  public static LobTextExtractionStatus getLOBTextExtractionStatus() {
+    LobTextExtractionStatus status = new LobTextExtractionStatus();
+    status.setExtractedAndIndexedText(false);
 
     return status;
   }

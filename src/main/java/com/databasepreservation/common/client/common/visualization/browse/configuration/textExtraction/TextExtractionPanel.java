@@ -148,7 +148,7 @@ public class TextExtractionPanel extends ContentPanel {
     final ViewerTable viewerTable) {
 
     selectionTablePanel.createTable(new FlowPanel(), Arrays.asList(1, 2), viewerTable.getBinaryColumns().iterator(),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForShow(), 4,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.textExtractionPageTableHeaderTextForExtractPolicy(), 4,
         getCheckboxColumn(selectionTablePanel, viewerTable.getUuid())),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 15,
         new TextColumn<ViewerColumn>() {

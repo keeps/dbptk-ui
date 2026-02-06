@@ -65,6 +65,7 @@ import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.BlockJoinAnyParentExpiryFilterParameter;
 import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
+import com.databasepreservation.common.client.index.filter.BoostedSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.CrossCollectionInnerJoinFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateIntervalFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
@@ -644,6 +645,10 @@ public class SolrUtils {
     } else if (parameter instanceof BasicSearchFilterParameter) {
       BasicSearchFilterParameter param = (BasicSearchFilterParameter) parameter;
       appendBasicSearch(ret, param.getName(), param.getValue(), "AND", prefixWithANDOperatorIfBuilderNotEmpty);
+    } else if (parameter instanceof BoostedSearchFilterParameter) {
+      BoostedSearchFilterParameter param = (BoostedSearchFilterParameter) parameter;
+      appendBoostedSearch(ret, param.getBoostedFilter(), param.getBoostFactor(),
+        prefixWithANDOperatorIfBuilderNotEmpty);
     } else if (parameter instanceof EmptyKeyFilterParameter) {
       EmptyKeyFilterParameter param = (EmptyKeyFilterParameter) parameter;
       appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
@@ -906,6 +911,16 @@ public class SolrUtils {
     } else {
       appendWhiteSpaceTokenizedString(ret, key, value, operator, prefixWithANDOperatorIfBuilderNotEmpty);
     }
+  }
+
+  private static void appendBoostedSearch(StringBuilder ret, FilterParameter boostedFilter, float boostFactor,
+    boolean prefixWithANDOperatorIfBuilderNotEmpty) throws RequestNotValidException {
+    appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
+
+    ret.append("(");
+    parseFilterParameter(ret, boostedFilter, false);
+    ret.append(")^");
+    ret.append(boostFactor);
   }
 
   private static void appendFiltersWithOperator(StringBuilder ret, String operator, List<FilterParameter> values,
