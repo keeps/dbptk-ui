@@ -46,7 +46,7 @@ public class DenormalizeListener implements StepExecutionListener {
         DenormalizeConfiguration config = ViewerFactory.getConfigurationManager()
           .getDenormalizeConfigurationFromCollectionStatusEntry(databaseUUID, entryID);
 
-        if (config != null) {
+        if (config != null && config.shouldProcess()) {
           Filter filter = FilterUtils.filterByTable(new Filter(), config.getTableID());
           IndexResult<ViewerRow> result = solrManager.findRows(databaseUUID, filter, null, new Sublist(0, 0), null);
           grandTotal += result.getTotalCount();

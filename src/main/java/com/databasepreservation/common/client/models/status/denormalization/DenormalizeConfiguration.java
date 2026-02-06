@@ -44,7 +44,6 @@ public class DenormalizeConfiguration implements Serializable {
     setTableID(table.getId());
     setState(ViewerJobStatus.UNKNOWN);
     relatedTables = new ArrayList<>();
-    lastUpdatedDate = new Date();
   }
 
   public String getId() {
@@ -144,5 +143,17 @@ public class DenormalizeConfiguration implements Serializable {
 
   public void setLastExecutionDate(Date lastExecutionDate) {
     this.lastExecutionDate = lastExecutionDate;
+  }
+
+  public boolean shouldProcess() {
+    if (this.lastExecutionDate == null) {
+      return true;
+    }
+
+    if (this.lastUpdatedDate == null) {
+      return false;
+    }
+
+    return this.lastUpdatedDate.after(this.lastExecutionDate);
   }
 }

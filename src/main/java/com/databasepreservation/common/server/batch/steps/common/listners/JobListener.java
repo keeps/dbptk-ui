@@ -7,9 +7,6 @@
  */
 package com.databasepreservation.common.server.batch.steps.common.listners;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -20,12 +17,7 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.stereotype.Component;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
-import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
-import com.databasepreservation.common.exceptions.ViewerException;
-import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.controller.JobController;
-import com.databasepreservation.common.server.index.utils.JsonTransformer;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -40,14 +32,10 @@ public class JobListener implements JobExecutionListener {
     String tableUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
     try {
       JobController.editSolrBatchJob(jobExecution);
-      updateConfigurationFile(databaseUUID, tableUUID, ViewerJobStatus.valueOf(jobExecution.getStatus().name()),
-        jobExecution.getJobId());
 
       LOGGER.info("Job STARTED for " + databaseUUID + "/" + tableUUID);
     } catch (GenericException | NotFoundException e) {
       LOGGER.error("Cannot update job on SOLR for " + databaseUUID + "/" + tableUUID, e);
-    } catch (ViewerException e) {
-      LOGGER.error("Cannot update configuration file for " + databaseUUID + "/" + tableUUID, e);
     }
   }
 
@@ -58,30 +46,13 @@ public class JobListener implements JobExecutionListener {
     try {
       JobController.editSolrBatchJob(jobExecution);
       if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-        updateConfigurationFile(databaseUUID, tableUUID, ViewerJobStatus.valueOf(jobExecution.getStatus().name()),
-          jobExecution.getJobId());
         LOGGER.info("Job FINISHED for " + databaseUUID + "/" + tableUUID);
       } else {
-        updateConfigurationFile(databaseUUID, tableUUID, ViewerJobStatus.FAILED, jobExecution.getJobId());
         LOGGER.error("Job FINISHED with ERROR for " + databaseUUID + "/" + tableUUID + ": "
           + jobExecution.getExitStatus().getExitDescription());
       }
     } catch (NotFoundException | GenericException e) {
       LOGGER.error("Cannot update job on SOLR for " + databaseUUID + "/" + tableUUID, e);
-    } catch (ViewerException e) {
-      LOGGER.error("Cannot update configuration file for " + databaseUUID + "/" + tableUUID, e);
-    }
-  }
-
-  private void updateConfigurationFile(String databaseUUID, String tableUUID, ViewerJobStatus status, Long jobId)
-    throws ViewerException {
-    Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
-      .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
-    if (Files.exists(path)) {
-      DenormalizeConfiguration configuration = JsonTransformer.readObjectFromFile(path, DenormalizeConfiguration.class);
-      configuration.setJob(jobId);
-      configuration.setState(status);
-      JsonTransformer.writeObjectToFile(configuration, path);
     }
   }
 }

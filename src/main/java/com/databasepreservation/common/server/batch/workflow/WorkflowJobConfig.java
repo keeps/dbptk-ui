@@ -31,9 +31,14 @@ public class WorkflowJobConfig {
   @Qualifier("denormalizeStep")
   private Step denormalizeStep;
 
+  @Autowired
+  @Qualifier("virtualColumnStep")
+  private Step virtualColumnStep;
+
   @Bean
   public Job processWorkflowJob(JobRepository jobRepository, Step configLoaderStep) {
-    return new JobBuilder(JOB_NAME, jobRepository).start(configLoaderStep).listener(jobListener).next(denormalizeStep).build();
+    return new JobBuilder(JOB_NAME, jobRepository).start(configLoaderStep).listener(jobListener).next(virtualColumnStep)
+      .next(denormalizeStep).build();
   }
 
   @Bean

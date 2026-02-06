@@ -54,10 +54,10 @@ import com.databasepreservation.common.utils.StatusUtils;
 public class ConfigurationManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationManager.class);
 
-  private final Object logFileLock = new Object();
-  private final Object databaseStatusFileLock = new Object();
-  private final Object collectionStatusFileLock = new Object();
-  private final Object denormalizeStatusFileLock = new Object();
+  private static final Object logFileLock = new Object();
+  private static final Object databaseStatusFileLock = new Object();
+  private static final Object collectionStatusFileLock = new Object();
+  private static final Object denormalizeStatusFileLock = new Object();
   private long entryLogLineNumber = -1;
 
   public ConfigurationManager() {
@@ -208,6 +208,27 @@ public class ConfigurationManager {
     }
   }
 
+  public void updateDenormalizationConfigurationFile(String databaseUUID,
+    DenormalizeConfiguration denormalizeConfiguration) throws GenericException {
+    synchronized (denormalizeStatusFileLock) {
+      try {
+        Path denormalizeStatusFile = getDenormalizeStatusPath(databaseUUID, denormalizeConfiguration.getTableUUID());
+        if (FSUtils.exists(denormalizeStatusFile)) {
+          JsonTransformer.writeObjectToFile(denormalizeConfiguration, denormalizeStatusFile);
+        } else {
+          try {
+            Files.createFile(denormalizeStatusFile);
+            JsonTransformer.writeObjectToFile(denormalizeConfiguration, denormalizeStatusFile);
+          } catch (IOException e) {
+            throw new GenericException("Error creating file to write the denormalization information", e);
+          }
+        }
+      } catch (ViewerException e) {
+        throw new GenericException("Failed to manipulate the JSON file", e);
+      }
+    }
+  }
+
   public void addCollection(String databaseUUID, String databaseName, String databaseDescription,
     String solrCollectionName) {
     final CollectionStatus collectionStatus = StatusUtils.getCollectionStatus(databaseUUID, databaseName,
@@ -261,8 +282,8 @@ public class ConfigurationManager {
     }
   }
 
-  public DenormalizeConfiguration getDenormalizeConfigurationFromCollectionStatusEntry(String databaseUUID, String denormalizeUUID)
-    throws GenericException {
+  public DenormalizeConfiguration getDenormalizeConfigurationFromCollectionStatusEntry(String databaseUUID,
+    String denormalizeUUID) throws GenericException {
     synchronized (denormalizeStatusFileLock) {
       Path denormalizeStatusFile = getDenormalizeStatusPathByEntry(databaseUUID, denormalizeUUID);
       return JsonUtils.readObjectFromFile(denormalizeStatusFile, DenormalizeConfiguration.class);

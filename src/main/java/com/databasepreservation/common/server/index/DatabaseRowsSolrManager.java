@@ -629,7 +629,7 @@ public class DatabaseRowsSolrManager {
     doc.addField("type" + ViewerConstants.SOLR_DYN_TEXT_GENERAL, "parent");
 
     // add nested documents to root document
-    doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.addValueUpdate(nestedDocuments));
+    doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.asValueUpdate(nestedDocuments));
 
     try {
       insertDocument(collection.getIndexName(), doc);

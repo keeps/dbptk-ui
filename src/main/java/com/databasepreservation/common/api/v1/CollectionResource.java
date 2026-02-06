@@ -94,7 +94,6 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.CollectionService;
@@ -112,7 +111,6 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
-import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.server.storage.BinaryConsumesOutputStream;
 import com.databasepreservation.common.utils.ControllerAssistant;
@@ -358,16 +356,8 @@ public class CollectionResource implements CollectionService {
     try {
       user = controllerAssistant.checkRoles(request);
       ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
-      Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
-        .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
-      if (Files.exists(path)) {
-        return JsonTransformer.readObjectFromFile(path, DenormalizeConfiguration.class);
-      } else {
-        ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-        ViewerTable table = database.getMetadata().getTable(tableUUID);
-        return new DenormalizeConfiguration(databaseUUID, table);
-      }
-    } catch (ViewerException | NotFoundException | GenericException | AuthorizationException e) {
+      return ViewerFactory.getConfigurationManager().getDenormalizeConfiguration(databaseUUID, tableUUID);
+    } catch (GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -389,20 +379,13 @@ public class CollectionResource implements CollectionService {
       user = controllerAssistant.checkRoles(request);
       ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
       ParameterSanitization.sanitizePath(tableUUID, "Invalid tableUUID");
-      // check if there is no job running on table
-      for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
-        if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
-          .equals(tableUUID)) {
-          throw new RESTException(new AlreadyExistsException("A job is already running on this table"));
-        }
-      }
-      JsonTransformer.writeObjectToFile(configuration,
-        ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
-          .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION));
+
+      configuration.setLastUpdatedDate(new Date());
+
+      ViewerFactory.getConfigurationManager().updateDenormalizationConfigurationFile(databaseUUID, configuration);
       ViewerFactory.getConfigurationManager().addDenormalization(databaseUUID,
         ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
-    } catch (GenericException | ViewerException | AuthorizationException | IllegalArgumentException
-      | IllegalAccessException e) {
+    } catch (GenericException | AuthorizationException | IllegalArgumentException | IllegalAccessException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

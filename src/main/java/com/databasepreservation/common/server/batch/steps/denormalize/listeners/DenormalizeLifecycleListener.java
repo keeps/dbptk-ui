@@ -1,6 +1,7 @@
 package com.databasepreservation.common.server.batch.steps.denormalize.listeners;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.roda.core.data.exceptions.GenericException;
@@ -13,18 +14,14 @@ import org.springframework.batch.core.StepExecutionListener;
 
 import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.tools.FilterUtils;
+import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -32,41 +29,14 @@ import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 public class DenormalizeLifecycleListener implements StepExecutionListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(DenormalizeLifecycleListener.class);
 
-  private final DatabaseRowsSolrManager solrManager;
   private final DenormalizeConfiguration config;
   private final String databaseUUID;
   private final ViewerDatabase database;
 
-  public DenormalizeLifecycleListener(DatabaseRowsSolrManager solrManager, DenormalizeConfiguration config,
-    ViewerDatabase database, String databaseUUID) {
-    this.solrManager = solrManager;
+  public DenormalizeLifecycleListener(DenormalizeConfiguration config, ViewerDatabase database, String databaseUUID) {
     this.config = config;
     this.database = database;
     this.databaseUUID = databaseUUID;
-  }
-
-  // --- SUBSTITUI O CLEANUP TASKLET ---
-  @Override
-  public void beforeStep(StepExecution stepExecution) {
-    String tableID = config.getTableID();
-    LOGGER.info(">>> [CLEANUP] Starting cleanup for table: {}", tableID);
-    Filter filter = FilterUtils.filterByTable(new Filter(), tableID);
-
-    IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, filter, null, new ArrayList<>());
-
-    for (ViewerRow row : allRows) {
-      solrManager.deleteNestedDocuments(databaseUUID, row.getUuid());
-    }
-
-    try {
-      allRows.close();
-    } catch (Exception e) {
-      LOGGER.warn("Error closing cursor during cleanup", e);
-    }
-
-    for (RelatedTablesConfiguration relatedTable : config.getRelatedTables()) {
-      solrManager.deleteNestedDocuments(databaseUUID, relatedTable.getUuid());
-    }
   }
 
   @Override
@@ -74,14 +44,19 @@ public class DenormalizeLifecycleListener implements StepExecutionListener {
     String tableUUID = config.getTableUUID();
 
     if (stepExecution.getStatus() == BatchStatus.COMPLETED) {
-      LOGGER.info(">>> [FINALIZE] Updating status for table: {}", tableUUID);
-
+      LOGGER.info("Updating status for table: {}", tableUUID);
       try {
-        updateCollectionStatus(tableUUID);
+        ViewerJobStatus viewerJobStatus = ViewerJobStatus.valueOf(stepExecution.getStatus().name());
+        DenormalizeConfiguration retrievedConfig = ViewerFactory.getConfigurationManager()
+          .getDenormalizeConfiguration(databaseUUID, tableUUID);
+        retrievedConfig.setLastExecutionDate(new Date());
+        retrievedConfig.setState(viewerJobStatus);
+        ViewerFactory.getConfigurationManager().updateDenormalizationConfigurationFile(databaseUUID, retrievedConfig);
 
+        updateCollectionStatus(tableUUID);
       } catch (Exception e) {
         LOGGER.error("Failed to finalize table {}", tableUUID, e);
-        return ExitStatus.FAILED; // Marca o job como falhado se a finalização falhar
+        return ExitStatus.FAILED;
       }
     }
     return null;

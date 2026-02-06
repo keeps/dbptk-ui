@@ -12,6 +12,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -76,7 +77,7 @@ public class DenormalizeStepConfig {
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
 
-    return new DenormalizeLifecycleListener(solrManager, config, database, databaseUUID);
+    return new DenormalizeLifecycleListener(config, database, databaseUUID);
   }
 
   @Bean
@@ -91,15 +92,16 @@ public class DenormalizeStepConfig {
     DenormalizeListener denormalizeListener) {
 
     return new StepBuilder("denormalizeStep", jobRepository)
-      .partitioner("denormalizePartitionedStep", new DenormalizationPartitioner(status)).step(denormalizePartitionedStep)
-      .listener(denormalizeListener).taskExecutor(new SyncTaskExecutor()).gridSize(1).build();
+      .partitioner("denormalizePartitionedStep", new DenormalizationPartitioner(status))
+      .step(denormalizePartitionedStep).listener(denormalizeListener).taskExecutor(new SyncTaskExecutor()).gridSize(1)
+      .build();
   }
 
   // Step
   @Bean("denormalizePartitionedStep")
   public Step denormalizePartitionedStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-    SolrCursorItemReader reader, DenormalizeProcessor processor, DenormalizeWriter writer,
-    ProgressChunkListener progressListener, DenormalizeLifecycleListener lifecycleListener) {
+    @Qualifier("denormalizeReader") SolrCursorItemReader reader, DenormalizeProcessor processor,
+    DenormalizeWriter writer, ProgressChunkListener progressListener, DenormalizeLifecycleListener lifecycleListener) {
 
     return new StepBuilder("denormalizePartitionedStep",
       jobRepository).<ViewerRow, DenormalizeProcessor.NestedDocumentWrapper> chunk(1000, transactionManager)

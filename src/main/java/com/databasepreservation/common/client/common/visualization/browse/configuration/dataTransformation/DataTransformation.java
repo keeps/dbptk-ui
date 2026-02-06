@@ -333,7 +333,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     FlowPanel container, MultipleSelectionTablePanel<ViewerColumn> selectTable) {
     RelatedTablesConfiguration targetTable = denormalizeConfiguration.getRelatedTable(childNode.getUuid());
     if (targetTable != null) {
-      switchBtn.getButton().setValue(true, true);
+      switchBtn.getButton().setValue(true, false);
       grandChild.add(expandLevel(childNode));
       card.setHideContentVisible(true);
       card.removeStyleName("card-disabled");
