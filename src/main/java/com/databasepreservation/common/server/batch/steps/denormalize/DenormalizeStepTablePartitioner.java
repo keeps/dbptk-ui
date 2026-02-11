@@ -1,6 +1,5 @@
 package com.databasepreservation.common.server.batch.steps.denormalize;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,11 +16,11 @@ import com.databasepreservation.common.server.ViewerFactory;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DenormalizationPartitioner implements Partitioner {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DenormalizationPartitioner.class);
+public class DenormalizeStepTablePartitioner implements Partitioner {
+  private static final Logger LOGGER = LoggerFactory.getLogger(DenormalizeStepTablePartitioner.class);
   private final CollectionStatus collectionStatus;
 
-  public DenormalizationPartitioner(CollectionStatus collectionStatus) {
+  public DenormalizeStepTablePartitioner(CollectionStatus collectionStatus) {
     this.collectionStatus = collectionStatus;
   }
 
@@ -36,16 +35,13 @@ public class DenormalizationPartitioner implements Partitioner {
 
     LOGGER.info("Checking {} potential tables for denormalization...", collectionStatus.getDenormalizations().size());
 
-    int i = 0;
     for (String denormalizeEntryID : collectionStatus.getDenormalizations()) {
-
       try {
         DenormalizeConfiguration config = ViewerFactory.getConfigurationManager()
           .getDenormalizeConfigurationFromCollectionStatusEntry(collectionStatus.getDatabaseUUID(), denormalizeEntryID);
 
-
         if (config.shouldProcess()) {
-          LOGGER.info(">>> [DECIDER] Adding table {} to execution queue.", config.getTableID());
+          LOGGER.info("Adding table {} to execution queue.", config.getTableID());
 
           ExecutionContext value = new ExecutionContext();
           value.putString("denormalizeEntryID", denormalizeEntryID);
@@ -53,7 +49,7 @@ public class DenormalizationPartitioner implements Partitioner {
           partitions.put("partition-" + denormalizeEntryID, value);
 
         } else {
-          LOGGER.info(">>> [DECIDER] Skipping table {} (Already up-to-date).", config.getTableID());
+          LOGGER.info("Skipping table {} (Already up-to-date).", config.getTableID());
         }
       } catch (GenericException e) {
         throw new RuntimeException(e);

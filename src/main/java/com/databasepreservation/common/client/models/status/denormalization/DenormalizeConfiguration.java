@@ -14,13 +14,14 @@ import java.util.Date;
 import java.util.List;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.IsProcessable;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DenormalizeConfiguration implements Serializable {
+public class DenormalizeConfiguration implements Serializable, IsProcessable {
   @Serial
   private static final long serialVersionUID = -2179137349609216271L;
   private String id;
@@ -129,6 +130,7 @@ public class DenormalizeConfiguration implements Serializable {
     this.relatedTables = relatedTables;
   }
 
+  @Override
   public Date getLastUpdatedDate() {
     return lastUpdatedDate;
   }
@@ -137,23 +139,12 @@ public class DenormalizeConfiguration implements Serializable {
     this.lastUpdatedDate = lastUpdatedDate;
   }
 
+  @Override
   public Date getLastExecutionDate() {
     return lastExecutionDate;
   }
 
   public void setLastExecutionDate(Date lastExecutionDate) {
     this.lastExecutionDate = lastExecutionDate;
-  }
-
-  public boolean shouldProcess() {
-    if (this.lastExecutionDate == null) {
-      return true;
-    }
-
-    if (this.lastUpdatedDate == null) {
-      return false;
-    }
-
-    return this.lastUpdatedDate.after(this.lastExecutionDate);
   }
 }

@@ -26,12 +26,14 @@ public class VirtualOptionsPanelUtils {
     hintPanel.add(new Label(messages.columnManagementTextForPossibleFields()));
 
     final Map<String, Button> buttonMap = new HashMap<>();
+    final Map<String, ColumnStatus> columnMap = new HashMap<>();
 
     columns.stream().filter(VirtualOptionsPanelUtils::isSupportedColumnType).forEach(column -> {
       String columnName = column.getName();
       Button btn = new Button(columnName);
       btn.setStyleName("btn btn-primary btn-small");
       buttonMap.put(columnName, btn);
+      columnMap.put(columnName, column);
 
       btn.addClickHandler(click -> {
         String placeholder = ViewerConstants.OPEN_TEMPLATE_ENGINE + columnName + ViewerConstants.CLOSE_TEMPLATE_ENGINE;
@@ -43,28 +45,29 @@ public class VirtualOptionsPanelUtils {
           targetInput.setText(currentText + placeholder);
         }
 
-        syncButtonsWithText(targetInput, buttonMap, columnIdsContainer);
+        syncButtonsWithText(targetInput, buttonMap, columnMap, columnIdsContainer);
       });
       hintPanel.add(btn);
     });
 
-    targetInput.addKeyUpHandler(event -> syncButtonsWithText(targetInput, buttonMap, columnIdsContainer));
-    targetInput.addBlurHandler(event -> syncButtonsWithText(targetInput, buttonMap, columnIdsContainer));
+    targetInput.addKeyUpHandler(event -> syncButtonsWithText(targetInput, buttonMap, columnMap, columnIdsContainer));
+    targetInput.addBlurHandler(event -> syncButtonsWithText(targetInput, buttonMap, columnMap, columnIdsContainer));
 
-    syncButtonsWithText(targetInput, buttonMap, columnIdsContainer);
+    syncButtonsWithText(targetInput, buttonMap, columnMap, columnIdsContainer);
   }
 
-  private static void syncButtonsWithText(TextBox input, Map<String, Button> buttonMap, List<String> container) {
+  private static void syncButtonsWithText(TextBox input, Map<String, Button> buttonMap, Map<String, ColumnStatus> columnMap, List<String> container) {
     String text = input.getText();
     container.clear();
 
-    buttonMap.forEach((columnName, btn) -> {
+    columnMap.forEach((columnName, column) -> {
       String placeholder = ViewerConstants.OPEN_TEMPLATE_ENGINE + columnName + ViewerConstants.CLOSE_TEMPLATE_ENGINE;
+      Button btn = buttonMap.get(columnName);
 
       if (text.contains(placeholder)) {
         btn.setStyleName("btn btn-default btn-small");
-        if (!container.contains(columnName)) {
-          container.add(columnName);
+        if (!container.contains(column.getId())) {
+          container.add(column.getId());
         }
       } else {
         btn.setStyleName("btn btn-primary btn-small");

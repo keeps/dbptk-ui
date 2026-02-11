@@ -1,4 +1,4 @@
-package com.databasepreservation.common.server.batch.workflow;
+package com.databasepreservation.common.server.batch.workflow.tasklets;
 
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;

@@ -29,11 +29,9 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.batch.steps.common.StepProgressAggregator;
-import com.databasepreservation.common.server.batch.steps.common.listners.ProgressChunkListener;
+import com.databasepreservation.common.server.batch.steps.common.JobProgressAggregator;
+import com.databasepreservation.common.server.batch.steps.common.listners.SolrProgressFeedListener;
 import com.databasepreservation.common.server.batch.steps.common.readers.SolrCursorItemReader;
-import com.databasepreservation.common.server.batch.steps.denormalize.listeners.DenormalizeLifecycleListener;
-import com.databasepreservation.common.server.batch.steps.denormalize.listeners.DenormalizeListener;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
 /**
@@ -43,12 +41,12 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 public class DenormalizeStepConfig {
 
   @Autowired
-  private StepProgressAggregator aggregator;
+  private JobProgressAggregator aggregator;
 
   @Bean
   @StepScope
-  public ProgressChunkListener progressListener(DatabaseRowsSolrManager solrManager) {
-    return new ProgressChunkListener(solrManager, aggregator);
+  public SolrProgressFeedListener progressListener(DatabaseRowsSolrManager solrManager) {
+    return new SolrProgressFeedListener(solrManager, aggregator);
   }
 
   // Configuration from Job Execution Context
@@ -70,41 +68,33 @@ public class DenormalizeStepConfig {
 
   @Bean
   @StepScope
-  public DenormalizeLifecycleListener denormalizeLifecycleListener(DenormalizeConfiguration config,
+  public TableCompletionListener tableCompletionListener(DenormalizeConfiguration config,
     DatabaseRowsSolrManager solrManager,
     @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID)
     throws GenericException, NotFoundException {
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
 
-    return new DenormalizeLifecycleListener(config, database, databaseUUID);
-  }
-
-  @Bean
-  @StepScope
-  public DenormalizeListener masterSetupListener(DatabaseRowsSolrManager solrManager, CollectionStatus status,
-    @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID) {
-    return new DenormalizeListener(solrManager, status, aggregator, databaseUUID);
+    return new TableCompletionListener(config, database, databaseUUID);
   }
 
   @Bean("denormalizeStep")
-  public Step denormalizeStep(JobRepository jobRepository, Step denormalizePartitionedStep, CollectionStatus status,
-    DenormalizeListener denormalizeListener) {
+  public Step denormalizeStep(JobRepository jobRepository, Step tablePartitionerStep, CollectionStatus status) {
 
     return new StepBuilder("denormalizeStep", jobRepository)
-      .partitioner("denormalizePartitionedStep", new DenormalizationPartitioner(status))
-      .step(denormalizePartitionedStep).listener(denormalizeListener).taskExecutor(new SyncTaskExecutor()).gridSize(1)
-      .build();
+      .partitioner("tablePartitionerStep", new DenormalizeStepTablePartitioner(status)).step(tablePartitionerStep)
+      .taskExecutor(new SyncTaskExecutor()).gridSize(1).build();
   }
 
   // Step
-  @Bean("denormalizePartitionedStep")
-  public Step denormalizePartitionedStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-    @Qualifier("denormalizeReader") SolrCursorItemReader reader, DenormalizeProcessor processor,
-    DenormalizeWriter writer, ProgressChunkListener progressListener, DenormalizeLifecycleListener lifecycleListener) {
+  @Bean("tablePartitionerStep")
+  public Step tablePartitionerStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
+    @Qualifier("denormalizeReader") SolrCursorItemReader reader, DenormalizeStepProcessor processor,
+    DenormalizeStepWriter writer, SolrProgressFeedListener progressListener,
+    TableCompletionListener lifecycleListener) {
 
-    return new StepBuilder("denormalizePartitionedStep",
-      jobRepository).<ViewerRow, DenormalizeProcessor.NestedDocumentWrapper> chunk(1000, transactionManager)
+    return new StepBuilder("tablePartitionerStep",
+      jobRepository).<ViewerRow, DenormalizeStepProcessor.NestedDocumentWrapper> chunk(1000, transactionManager)
       .reader(reader).processor(processor).writer(writer)
 
       // Listeners
@@ -135,19 +125,20 @@ public class DenormalizeStepConfig {
   // Processor
   @Bean
   @StepScope
-  public DenormalizeProcessor denormalizeProcessor(DenormalizeConfiguration config, DatabaseRowsSolrManager solrManager,
+  public DenormalizeStepProcessor denormalizeProcessor(DenormalizeConfiguration config,
+    DatabaseRowsSolrManager solrManager,
     @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID)
     throws NotFoundException, GenericException {
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
-    return new DenormalizeProcessor(solrManager, config, database, databaseUUID);
+    return new DenormalizeStepProcessor(solrManager, config, database, databaseUUID);
   }
 
   // Writer
   @Bean
   @StepScope
-  public DenormalizeWriter denormalizeWriter(DatabaseRowsSolrManager solrManager,
+  public DenormalizeStepWriter denormalizeWriter(DatabaseRowsSolrManager solrManager,
     @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID) {
-    return new DenormalizeWriter(solrManager, databaseUUID);
+    return new DenormalizeStepWriter(solrManager, databaseUUID);
   }
 }

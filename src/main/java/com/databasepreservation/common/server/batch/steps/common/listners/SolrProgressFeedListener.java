@@ -9,23 +9,23 @@ import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.scope.context.ChunkContext;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.server.batch.steps.common.StepProgressAggregator;
+import com.databasepreservation.common.server.batch.steps.common.JobProgressAggregator;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class ProgressChunkListener implements ChunkListener, StepExecutionListener {
+public class SolrProgressFeedListener implements ChunkListener, StepExecutionListener {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProgressChunkListener.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SolrProgressFeedListener.class);
 
   private final DatabaseRowsSolrManager solrManager;
-  private final StepProgressAggregator aggregator;
+  private final JobProgressAggregator aggregator;
   private String jobUUID;
   private long lastReadCount = 0;
   private long startTime;
 
-  public ProgressChunkListener(DatabaseRowsSolrManager solrManager, StepProgressAggregator aggregator) {
+  public SolrProgressFeedListener(DatabaseRowsSolrManager solrManager, JobProgressAggregator aggregator) {
     this.solrManager = solrManager;
     this.aggregator = aggregator;
   }

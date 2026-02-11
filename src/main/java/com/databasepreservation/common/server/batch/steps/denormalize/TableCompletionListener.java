@@ -1,4 +1,4 @@
-package com.databasepreservation.common.server.batch.steps.denormalize.listeners;
+package com.databasepreservation.common.server.batch.steps.denormalize;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,14 +26,14 @@ import com.databasepreservation.common.server.ViewerFactory;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DenormalizeLifecycleListener implements StepExecutionListener {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DenormalizeLifecycleListener.class);
+public class TableCompletionListener implements StepExecutionListener {
+  private static final Logger LOGGER = LoggerFactory.getLogger(TableCompletionListener.class);
 
   private final DenormalizeConfiguration config;
   private final String databaseUUID;
   private final ViewerDatabase database;
 
-  public DenormalizeLifecycleListener(DenormalizeConfiguration config, ViewerDatabase database, String databaseUUID) {
+  public TableCompletionListener(DenormalizeConfiguration config, ViewerDatabase database, String databaseUUID) {
     this.config = config;
     this.database = database;
     this.databaseUUID = databaseUUID;

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import org.jetbrains.annotations.NotNull;
 
 import com.databasepreservation.common.client.ObserverManager;
@@ -202,10 +203,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
           .createInstance(database, collectionStatus, table, new ColumnStatus());
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
           messages.basicActionCancel(), Arrays.asList(virtualColumnOptionsPanel, virtualReferenceOptionsPanel),
-          new DefaultAsyncCallback<Boolean>() {
+          new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
-            public void onSuccess(Boolean value) {
-              if (value) {
+            public void onSuccess(Dialogs.DialogAction value) {
+              if (value.equals(Dialogs.DialogAction.SAVE)) {
                 ColumnStatus columnStatus = virtualColumnOptionsPanel.getColumnStatus();
                 columnStatus.setVirtualReferenceStatus(virtualReferenceOptionsPanel.getVirtualReferenceStatus());
                 collectionStatus.getTableStatusByTableId(tableId).addColumnStatus(columnStatus);
@@ -627,10 +628,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     option.setFieldUpdater((index, columnStatus, value) -> {
       CustomizeColumnOptionsPanel optionsPanel = CustomizeColumnOptionsPanel.createInstance(columnStatus);
       Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "300px", messages.basicActionSave(),
-        messages.basicActionCancel(), optionsPanel, new DefaultAsyncCallback<Boolean>() {
+        messages.basicActionCancel(), optionsPanel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
           @Override
-          public void onSuccess(Boolean value) {
-            if (value) {
+          public void onSuccess(Dialogs.DialogAction value) {
+            if (value.equals(Dialogs.DialogAction.SAVE)) {
               if (optionsPanel.validate()) {
                 collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId())
                   .updateCustomizeProperties(optionsPanel.getProperties());
@@ -673,33 +674,38 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel
           .createInstance(database, collectionStatus, collectionStatus.getTableStatusByTableId(tableId), columnStatus);
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
-          messages.basicActionCancel(), Arrays.asList(virtualColumnOptionsPanel, virtualReferenceOptionsPanel),
-          new DefaultAsyncCallback<Boolean>() {
+          messages.basicActionCancel(), messages.basicActionDelete(), Arrays.asList(virtualColumnOptionsPanel, virtualReferenceOptionsPanel),
+          new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
-            public void onSuccess(Boolean value) {
-              if (value) {
+            public void onSuccess(Dialogs.DialogAction value) {
+              TableStatus tableStatus = collectionStatus.getTableStatusByTableId(tableId);
+              ColumnStatus column = tableStatus.getColumnById(columnStatus.getId());
+
+              if (value.equals(Dialogs.DialogAction.SAVE)) {
                 ColumnStatus updatedColumnStatus = virtualColumnOptionsPanel.getColumnStatus();
                 updatedColumnStatus.setVirtualReferenceStatus(virtualReferenceOptionsPanel.getVirtualReferenceStatus());
 
-                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
-                  .setDescription(updatedColumnStatus.getDescription());
-                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
-                  .setCustomDescription(updatedColumnStatus.getDescription());
-                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
-                  .setVirtualColumnStatus(updatedColumnStatus.getVirtualColumnStatus());
-                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
-                  .setVirtualReferenceStatus(updatedColumnStatus.getVirtualReferenceStatus());
+                column.setDescription(updatedColumnStatus.getDescription());
+                column.setCustomDescription(updatedColumnStatus.getDescription());
+                column.setVirtualColumnStatus(updatedColumnStatus.getVirtualColumnStatus());
+                column.setVirtualReferenceStatus(updatedColumnStatus.getVirtualReferenceStatus());
+                saveChanges(true);
+              } else if (value.equals(Dialogs.DialogAction.REMOVE)) {
+                tableStatus.getColumns().remove(column);
                 saveChanges(true);
               }
+              // updates cell table to reflect changes in case the column was removed or its name was changed
+              cellTable.getDataProvider().setList(tableStatus.getColumns());
+              cellTable.getDataProvider().refresh();
             }
           });
       } else if (ViewerType.dbTypes.NESTED.equals(columnStatus.getType())) {
         final ColumnOptionsPanel nestedColumnOptionPanel = NestedColumnOptionsPanel.createInstance(columnStatus);
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
-          messages.basicActionCancel(), nestedColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
+          messages.basicActionCancel(), nestedColumnOptionPanel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
-            public void onSuccess(Boolean value) {
-              if (value) {
+            public void onSuccess(Dialogs.DialogAction value) {
+              if (value.equals(Dialogs.DialogAction.SAVE)) {
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .updateSearchListTemplate(nestedColumnOptionPanel.getSearchTemplate());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
@@ -719,10 +725,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
           collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId()));
 
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
-          messages.basicActionCancel(), clobColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
+          messages.basicActionCancel(), clobColumnOptionPanel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
-            public void onSuccess(Boolean value) {
-              if (value) {
+            public void onSuccess(Dialogs.DialogAction value) {
+              if (value.equals(Dialogs.DialogAction.SAVE)) {
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .updateExportTemplate(clobColumnOptionPanel.getExportTemplate());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
@@ -745,10 +751,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
           collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId()));
 
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
-          messages.basicActionCancel(), binaryColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
+          messages.basicActionCancel(), binaryColumnOptionPanel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
-            public void onSuccess(Boolean value) {
-              if (value) {
+            public void onSuccess(Dialogs.DialogAction value) {
+              if (value.equals(Dialogs.DialogAction.SAVE)) {
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .updateExportTemplate(binaryColumnOptionPanel.getExportTemplate());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
@@ -766,11 +772,11 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
           .createInstance(collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId()));
 
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "400px", messages.basicActionSave(),
-          messages.basicActionCancel(), numericColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
+          messages.basicActionCancel(), numericColumnOptionPanel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
 
             @Override
-            public void onSuccess(Boolean value) {
-              if (value) {
+            public void onSuccess(Dialogs.DialogAction value) {
+              if (value.equals(Dialogs.DialogAction.SAVE)) {
                 if (((NumericColumnOptionsPanel) numericColumnOptionPanel).validate()) {
                   Formatter formatter = ((NumericColumnOptionsPanel) numericColumnOptionPanel).getFormatter();
                   collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId()).setFormatter(formatter);
@@ -786,10 +792,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel
           .createInstance(database, collectionStatus, collectionStatus.getTableStatusByTableId(tableId), columnStatus);
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
-          messages.basicActionCancel(), virtualReferenceOptionsPanel, new DefaultAsyncCallback<Boolean>() {
+          messages.basicActionCancel(), virtualReferenceOptionsPanel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
-            public void onSuccess(Boolean value) {
-              if (value) {
+            public void onSuccess(Dialogs.DialogAction value) {
+              if (value.equals(Dialogs.DialogAction.SAVE)) {
                 columnStatus.setVirtualReferenceStatus(virtualReferenceOptionsPanel.getVirtualReferenceStatus());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .setVirtualReferenceStatus(columnStatus.getVirtualReferenceStatus());

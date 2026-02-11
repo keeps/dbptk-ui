@@ -84,7 +84,7 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel {
   }
 
   public ColumnStatus getColumnStatus() {
-    int columnIndex = tableStatus.getColumns().size() + 1;
+    int columnIndex = tableStatus.getColumns().size();
     ColumnStatus columnStatus = new ColumnStatus();
     columnStatus.setId("col" + columnIndex + "v_s");
     columnStatus.setType(ViewerType.dbTypes.VIRTUAL);

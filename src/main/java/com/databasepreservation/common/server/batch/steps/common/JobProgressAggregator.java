@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @JobScope
-public class StepProgressAggregator {
+public class JobProgressAggregator {
   private final AtomicLong totalRows = new AtomicLong(0);
   private final AtomicLong processedRows = new AtomicLong(0);
 

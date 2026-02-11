@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.structure.ViewerCell;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -45,7 +46,6 @@ import com.databasepreservation.common.client.index.filter.SimpleFilterParameter
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
-import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -57,7 +57,6 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.exceptions.SavedSearchException;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.batch.config.VirtualColumnJobConfiguration;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
@@ -176,6 +175,29 @@ public class DatabaseRowsSolrManager {
     } catch (RequestNotValidException | GenericException | NotFoundException | AuthorizationDeniedException e) {
       throw new ViewerException(e);
     }
+  }
+
+  public void updateRow(String databaseUUID, ViewerRow row) throws ViewerException {
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, row.getUuid());
+
+    if (row.getCells() != null) {
+      for (Map.Entry<String, ViewerCell> entry : row.getCells().entrySet()) {
+        String fieldName = entry.getKey();
+
+        if (ViewerConstants.INDEX_ID.equals(fieldName) ||
+          ViewerConstants.SOLR_ROWS_TABLE_ID.equals(fieldName)) {
+          continue;
+        }
+
+        if (entry.getValue() != null) {
+          doc.addField(fieldName, SolrUtils.asValueUpdate(entry.getValue().getValue()));
+        }
+      }
+    }
+
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+    insertDocument(collection.getIndexName(), doc);
   }
 
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
@@ -666,24 +688,4 @@ public class DatabaseRowsSolrManager {
       LOGGER.error("Could not delete nested document for {}", databaseUUID, e);
     }
   }
-
-  public void addVirtualCell(String databaseUUID,
-    List<VirtualColumnJobConfiguration.VirtualColumnWrapper> virtualColumnWrappers) {
-    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
-    SolrInputDocument doc = new SolrInputDocument();
-    for (VirtualColumnJobConfiguration.VirtualColumnWrapper virtualColumnWrapper : virtualColumnWrappers) {
-      ViewerRow row = virtualColumnWrapper.getRow();
-      doc.addField(ViewerConstants.INDEX_ID, row.getUuid());
-      for (VirtualColumnJobConfiguration.VirtualColumnWrapper.Cells viewerCells : virtualColumnWrapper.getCells()) {
-        ViewerCell viewerCell = viewerCells.getCell();
-        doc.addField(viewerCells.getSolrName(), SolrUtils.asValueUpdate(viewerCell.getValue()));
-      }
-      try {
-        insertDocument(collection.getIndexName(), doc);
-      } catch (ViewerException e) {
-        LOGGER.error("Could not add virtual cell for {}", databaseUUID, e);
-      }
-    }
-  }
-
 }

@@ -1,6 +1,5 @@
 package com.databasepreservation.common.server.batch.config;
 
-import com.databasepreservation.common.server.batch.steps.common.listners.ProgressChunkListener;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.explore.JobExplorer;

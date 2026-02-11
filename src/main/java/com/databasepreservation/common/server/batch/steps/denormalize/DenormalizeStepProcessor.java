@@ -28,23 +28,8 @@ import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DenormalizeProcessor implements ItemProcessor<ViewerRow, DenormalizeProcessor.NestedDocumentWrapper> {
-  public static class NestedDocumentWrapper {
-    private final String parentUUID;
-    private final List<SolrInputDocument> nestedDocuments;
-
-    public NestedDocumentWrapper(String parentUUID, List<SolrInputDocument> nestedDocuments) {
-      this.parentUUID = parentUUID;
-      this.nestedDocuments = nestedDocuments;
-    }
-
-    public String getParentUUID() {
-      return parentUUID;
-    }
-
-    public List<SolrInputDocument> getNestedDocuments() {
-      return nestedDocuments;
-    }
+public class DenormalizeStepProcessor implements ItemProcessor<ViewerRow, DenormalizeStepProcessor.NestedDocumentWrapper> {
+  public record NestedDocumentWrapper(String parentUUID, List<SolrInputDocument> nestedDocuments) {
   }
 
   private final DatabaseRowsSolrManager solrManager;
@@ -52,8 +37,8 @@ public class DenormalizeProcessor implements ItemProcessor<ViewerRow, Denormaliz
   private final ViewerDatabase database;
   private final String databaseUUID;
 
-  public DenormalizeProcessor(DatabaseRowsSolrManager solrManager, DenormalizeConfiguration config,
-    ViewerDatabase database, String databaseUUID) {
+  public DenormalizeStepProcessor(DatabaseRowsSolrManager solrManager, DenormalizeConfiguration config,
+                                  ViewerDatabase database, String databaseUUID) {
     this.solrManager = solrManager;
     this.config = config;
     this.database = database;
