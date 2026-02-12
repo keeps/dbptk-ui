@@ -90,8 +90,9 @@ public class UsersCSVOutputStream extends CSVOutputStream {
     Map<String, Pair<String, List<String>>> usersMap = new HashMap<>();
 
     for (AuthorizationGroup group : this.authorizationGroups.getAuthorizationGroupsList()) {
-      if (group.getAttributeName().equals(ViewerFactory.getViewerConfiguration()
-        .getViewerConfigurationAsString("fullname", ViewerConstants.USER_EXPORT_FULLNAME_ATTRIBUTE))) {
+      String fullNameAttributeName = ViewerFactory.getViewerConfiguration().getViewerConfigurationAsString("fullname",
+        ViewerConstants.USER_EXPORT_FULLNAME_ATTRIBUTE);
+      if (group.getAttributeName().equals(fullNameAttributeName)) {
         usersMap.put(group.getAttributeValue(), Pair.of(group.getLabel(), new ArrayList<>()));
       }
     }
@@ -103,7 +104,8 @@ public class UsersCSVOutputStream extends CSVOutputStream {
           .getDatabaseStatus(database.getUuid()).getPermissions();
         for (Map.Entry<String, AuthorizationDetails> entry : permissions.entrySet()) {
           String user = entry.getKey();
-          if (usersMap.containsKey(user)) {
+          if (usersMap.containsKey(user) && database.getMetadata() != null
+            && database.getMetadata().getName() != null) {
             usersMap.get(user).getSecond().add(database.getMetadata().getName());
           }
         }
