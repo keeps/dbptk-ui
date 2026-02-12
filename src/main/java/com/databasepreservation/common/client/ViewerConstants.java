@@ -624,8 +624,10 @@ public class ViewerConstants {
    * LOB text extraction/OCR
    */
   public static final String PROPERTY_OCR_TIKA_URL = "ocr.tika.url";
+  public static final String PROPERTY_OCR_TIKA_VOLUME_PATH = "ocr.tika.filesystem.volume.path";
   public static final String PROPERTY_OCR_TIKA_POLICY_EXTRACT_DEFAULT = "ocr.policy.extractByDefault";
   public static final String TIKA_REQUEST_FILE_PARAMETER = "file";
+  public static final String TIKA_FORM_ENDPOINT = "/tika/form";
   public static final String TIKA_EXTRACT_ENDPOINT = "/tika";
 
   /**
