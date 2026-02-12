@@ -477,14 +477,21 @@ public class RowPanel extends RightPanel {
                     break;
                   }
                 }
+                int originalColumnIndex = 0;
+                for (ViewerColumn c : nestedTable.getColumns()) {
+                  if (c.getSolrName().equals(originalCell.getKey())) {
+                    break;
+                  }
+                  originalColumnIndex++;
+                }
 
                 if ((database.getPath() == null || database.getPath().isEmpty())
                   && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
                   rowField = RowField.createInstance(new Label(s).getText(),
                     new HTML(messages.rowPanelTextForLobUnavailable()));
                 } else {
-                  String exportLobUri = GWT.getHostPageBaseURL()
-                    + row.getNestedRowList().get(0).getCells().get("nst_" + originalCell.getKey()).getValue();
+                  String exportLobUri = RestUtils.createExportLobUri(database.getUuid(), nestedTable.getSchemaName(),
+                    nestedTable.getName(), result.getResults().get(0).getUuid(), originalColumnIndex);
                   if (originalCell.getValue().getMimeType().equals("application/pdf")
                     || originalCell.getValue().getValue().endsWith(".pdf")
                     || originalCell.getValue().getValue().endsWith(".PDF")) {
