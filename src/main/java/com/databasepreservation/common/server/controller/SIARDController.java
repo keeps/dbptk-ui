@@ -915,18 +915,21 @@ public class SIARDController {
     RestTemplate tikaTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(List.of(MediaType.TEXT_PLAIN));
-    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+    headers.add("fetcherName", "fsf");
+    Path lobPath = Paths.get(lobFilePath);
+    Path tikaVolumePath = Paths
+      .get(ViewerConfiguration.getInstance().getViewerConfigurationAsString(null, "ocr.tika.filesystem.volume.path"));
+    // TODO aflores fallback for null config
+    headers.add("fetchKey", tikaVolumePath.relativize(lobPath).toString());
     String tikaURL = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
       ViewerConstants.PROPERTY_OCR_TIKA_URL);
     if (tikaURL == null || tikaURL.isBlank()) {
       throw new GenericException("Tika server URL is not configured.");
     }
 
-    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-    body.add(ViewerConstants.TIKA_REQUEST_FILE_PARAMETER, new FileSystemResource(lobFilePath));
-    HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
+    HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(null, headers);
     ResponseEntity<String> tikaResponse = tikaTemplate.exchange(tikaURL + ViewerConstants.TIKA_EXTRACT_ENDPOINT,
-      HttpMethod.POST, entity, String.class);
+      HttpMethod.PUT, entity, String.class);
     solr.addExtractedTextField(databaseUUID, rowUUID, lobFieldName, tikaResponse.getBody());
 
     return databaseUUID;

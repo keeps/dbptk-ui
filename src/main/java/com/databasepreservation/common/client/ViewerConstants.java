@@ -625,7 +625,7 @@ public class ViewerConstants {
    */
   public static final String PROPERTY_OCR_TIKA_URL = "ocr.tika.url";
   public static final String TIKA_REQUEST_FILE_PARAMETER = "file";
-  public static final String TIKA_EXTRACT_ENDPOINT = "/tika/form";
+  public static final String TIKA_EXTRACT_ENDPOINT = "/tika";
 
   /**
    * Show schema name in reference table
