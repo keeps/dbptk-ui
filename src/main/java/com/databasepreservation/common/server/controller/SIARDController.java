@@ -924,7 +924,6 @@ public class SIARDController {
     }
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(List.of(MediaType.TEXT_PLAIN));
-    headers.add("fetcherName", "fsf");
     Path lobPath = Paths.get(lobFilePath);
     String tikaVolumePathConfig = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
       ViewerConstants.PROPERTY_OCR_TIKA_VOLUME_PATH);
@@ -937,12 +936,13 @@ public class SIARDController {
       MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
       body.add(ViewerConstants.TIKA_REQUEST_FILE_PARAMETER, new FileSystemResource(lobFilePath));
       HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
-      tikaResponse = tikaTemplate.exchange(tikaURL + ViewerConstants.TIKA_FORM_ENDPOINT, HttpMethod.POST, entity,
+      tikaResponse = tikaTemplate.exchange(tikaURL + ViewerConstants.TIKA_FORM_ENDPOINT, HttpMethod.PUT, entity,
         String.class);
     } else {
       Path tikaVolumePath = Paths.get(tikaVolumePathConfig);
+      headers.add("fetcherName", "fsf");
       headers.add("fetchKey", tikaVolumePath.relativize(lobPath).toString());
-      HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(null, headers);
+      HttpEntity<Object> entity = new HttpEntity<>(null, headers);
       tikaResponse = tikaTemplate.exchange(tikaURL + ViewerConstants.TIKA_EXTRACT_ENDPOINT, HttpMethod.PUT, entity,
         String.class);
     }

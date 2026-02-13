@@ -28,6 +28,8 @@ services:
   tika:
     image: apache/tika:3.2.3.0-full
     restart: unless-stopped
+    command:
+      - "--config /tika-config.xml"
     ports:
       - "9998:9998"
     volumes:
