@@ -137,6 +137,7 @@ public class ConfigurationManager {
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         collectionStatus.addDenormalization(denormalizationUUID);
         // Update collection
+        collectionStatus.setNeedsToBeProcessed(true);
         updateCollectionStatus(databaseUUID, collectionStatus);
       }
     } catch (GenericException | ViewerException e) {
@@ -153,6 +154,7 @@ public class ConfigurationManager {
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         collectionStatus.getDenormalizations().remove(denormalizationUUID);
         // Update collection
+        collectionStatus.setNeedsToBeProcessed(true);
         updateCollectionStatus(databaseUUID, collectionStatus);
       }
     } catch (GenericException | ViewerException e) {
@@ -183,6 +185,7 @@ public class ConfigurationManager {
         columnStatus.getSearchStatus().getList().getTemplate().setTemplate(template);
 
         // Update collection
+        collectionStatus.setNeedsToBeProcessed(true);
         updateCollectionStatus(databaseUUID, collectionStatus);
       }
     } catch (GenericException | ViewerException e) {
@@ -201,6 +204,7 @@ public class ConfigurationManager {
         table.getColumns().removeIf(c -> c.getNestedColumns() != null);
         table.reorderColumns();
         // Update collection
+        collectionStatus.setNeedsToBeProcessed(true);
         updateCollectionStatus(databaseUUID, collectionStatus);
       }
     } catch (GenericException | ViewerException e) {

@@ -7,31 +7,40 @@ import java.util.List;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class VirtualReferenceStatus implements Serializable {
-    private String referencedTableUUID;
-    private List<String> referencedColumnsIds;
-    private TemplateStatus referencedTemplateStatus;
+  private ProcessingState processingState;
+  private String referencedTableUUID;
+  private List<String> referencedColumnsIds;
+  private TemplateStatus referencedTemplateStatus;
 
-    public String getReferencedTableUUID() {
-        return referencedTableUUID;
-    }
+  public ProcessingState getProcessingState() {
+    return processingState;
+  }
 
-    public void setReferencedTableUUID(String referencedTableUUID) {
-        this.referencedTableUUID = referencedTableUUID;
-    }
+  public void setProcessingState(ProcessingState processingState) {
+    this.processingState = processingState;
+  }
 
-    public List<String> getReferencedColumnsIds() {
-        return referencedColumnsIds;
-    }
+  public String getReferencedTableUUID() {
+    return referencedTableUUID;
+  }
 
-    public void setReferencedColumnsIds(List<String> referencedColumnsIds) {
-        this.referencedColumnsIds = referencedColumnsIds;
-    }
+  public void setReferencedTableUUID(String referencedTableUUID) {
+    this.referencedTableUUID = referencedTableUUID;
+  }
 
-    public TemplateStatus getReferencedTemplateStatus() {
-        return referencedTemplateStatus;
-    }
+  public List<String> getReferencedColumnsIds() {
+    return referencedColumnsIds;
+  }
 
-    public void setReferencedTemplateStatus(TemplateStatus referencedTemplateStatus) {
-        this.referencedTemplateStatus = referencedTemplateStatus;
-    }
+  public void setReferencedColumnsIds(List<String> referencedColumnsIds) {
+    this.referencedColumnsIds = referencedColumnsIds;
+  }
+
+  public TemplateStatus getReferencedTemplateStatus() {
+    return referencedTemplateStatus;
+  }
+
+  public void setReferencedTemplateStatus(TemplateStatus referencedTemplateStatus) {
+    this.referencedTemplateStatus = referencedTemplateStatus;
+  }
 }

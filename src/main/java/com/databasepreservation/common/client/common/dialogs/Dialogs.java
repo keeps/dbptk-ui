@@ -584,7 +584,12 @@ public class Dialogs {
     buttonPanel.add(CommonClientUtils.wrapOnDiv("btn-item", btnCancel));
 
     Button btnSave = new Button(saveButtonText);
-    btnSave.addStyleName("btn btn-save");
+    if (saveButtonText.equals(messages.basicActionAdd())) {
+      btnSave.addStyleName("btn btn-plus");
+    } else {
+      btnSave.addStyleName("btn btn-save");
+    }
+
     btnSave.addClickHandler(event -> {
       dialogBox.hide();
       callback.onSuccess(DialogAction.SAVE);
@@ -593,7 +598,7 @@ public class Dialogs {
 
     if (removeButtonText != null && !removeButtonText.isEmpty()) {
       Button btnRemove = new Button(removeButtonText);
-      btnRemove.addStyleName("btn btn-danger btn-times-circle");
+      btnRemove.addStyleName("btn btn-danger btn-erase");
       btnRemove.addClickHandler(event -> {
         dialogBox.hide();
         callback.onSuccess(DialogAction.REMOVE);
