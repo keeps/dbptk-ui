@@ -14,6 +14,9 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.ColumnWrapper;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
@@ -51,6 +54,7 @@ public class TransformationTable extends Composite {
   private static TransformationTableUiBinder binder = GWT.create(TransformationTableUiBinder.class);
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TransformationTable> instances = new HashMap<>();
+  private CollectionStatus collectionStatus;
   private DenormalizeConfiguration denormalizeConfiguration;
   private ViewerDatabase database;
   private ViewerTable table;
@@ -67,22 +71,24 @@ public class TransformationTable extends Composite {
    * @return
    */
   public static TransformationTable getInstance(ViewerDatabase database, ViewerTable table,
-    DenormalizeConfiguration configuration) {
+    DenormalizeConfiguration configuration, CollectionStatus collectionStatus) {
     return instances.computeIfAbsent(database.getUuid() + table.getUuid(),
-      k -> new TransformationTable(database, table, configuration));
+      k -> new TransformationTable(database, table, configuration, collectionStatus));
   }
 
   /**
-   *
    * @param database
    * @param table
    * @param configuration
+   * @param collectionStatus
    */
-  public TransformationTable(ViewerDatabase database, ViewerTable table, DenormalizeConfiguration configuration) {
+  public TransformationTable(ViewerDatabase database, ViewerTable table, DenormalizeConfiguration configuration,
+    CollectionStatus collectionStatus) {
     initWidget(binder.createAndBindUi(this));
     this.denormalizeConfiguration = configuration;
     this.database = database;
     this.table = table;
+    this.collectionStatus = collectionStatus;
     createTable();
   }
 
@@ -90,13 +96,17 @@ public class TransformationTable extends Composite {
    *
    */
   private void createTable() {
-    for (ViewerColumn column : table.getColumns()) {
+    TableStatus tableStatus = collectionStatus.getTableStatusByTableId(table.getId());
+    List<ViewerColumn> allColumns = DataTransformationUtils.getViewerColumnsWithVirtualColumns(table.getColumns(),
+      tableStatus);
+    for (ViewerColumn column : allColumns) {
       ColumnWrapper columnWrapper = new ColumnWrapper(table.getName(), denormalizeConfiguration,
         database.getMetadata());
       columnWrapper.setColumnDisplayName(column.getDisplayName());
       columnWrapper.setColumnDescription(column.getDescription());
       originalColumns.add(columnWrapper);
     }
+
     drawTable(originalColumns);
   }
 
@@ -111,10 +121,14 @@ public class TransformationTable extends Composite {
 
   private void setColumnsToInclude(RelatedTablesConfiguration relatedTable, List<ColumnWrapper> columns) {
     ViewerTable referencedTable = database.getMetadata().getTable(relatedTable.getTableUUID());
+    TableStatus referencedTableStatus = collectionStatus.getTableStatusByTableId(referencedTable.getId());
+    List<ViewerColumn> allReferencedTableColumns = DataTransformationUtils
+      .getViewerColumnsWithVirtualColumns(referencedTable.getColumns(), referencedTableStatus);
+
     ColumnWrapper columnWrapper = new ColumnWrapper(relatedTable.getUuid(), referencedTable.getName(), relatedTable,
       denormalizeConfiguration, database.getMetadata());
     for (RelatedColumnConfiguration columnToInclude : relatedTable.getColumnsIncluded()) {
-      ViewerColumn col = referencedTable.getColumns().get(columnToInclude.getIndex());
+      ViewerColumn col = allReferencedTableColumns.get(columnToInclude.getIndex());
       columnWrapper.setColumnDisplayName(col.getDisplayName());
       columnWrapper.setColumnDescription(col.getDescription());
     }

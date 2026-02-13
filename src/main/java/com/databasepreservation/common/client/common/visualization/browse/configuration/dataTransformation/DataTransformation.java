@@ -20,12 +20,12 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -87,6 +87,9 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
   @UiField
   LoadingDiv loading;
 
+  @UiField
+  ConfigurationStatusPanel configurationStatusPanel;
+
   private ViewerDatabase database;
   private ViewerTable table;
   private String tableId;
@@ -124,12 +127,14 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
   private DataTransformation(CollectionStatus collectionStatus, ViewerDatabase database, String tableId,
     DataTransformationSidebar sidebar) {
+
     initWidget(binder.createAndBindUi(this));
     ObserverManager.getCollectionObserver().addObserver(this);
     this.database = database;
     this.sidebar = sidebar;
     this.collectionStatus = collectionStatus;
     this.tableId = tableId;
+    this.configurationStatusPanel.setDatabase(database);
     if (this.tableId == null) {
       isInformation = true;
       content.add(informationPanel());
@@ -152,7 +157,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
     FlowPanel panel = new FlowPanel();
     panel.addStyleName("data-transformation-toolbar-actions");
-    panel.add(btnRunConfiguration);
+    // panel.add(btnRunConfiguration);
     panel.add(btnGotoTable);
 
     toolBar.add(tablePanel);
@@ -222,28 +227,29 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     btnGotoTable.setStyleName("btn btn-table");
     btnGotoTable.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), tableId));
 
-    btnRunConfiguration.setEnabled(false);
-    btnRunConfiguration.setText(
-      messages.dataTransformationBtnRunTable());
-    btnRunConfiguration.setStyleName("btn btn-play");
-    btnRunConfiguration.addClickHandler(clickEvent -> {
-        DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration, collectionStatus);
-        DataTransformationUtils.runConfigurations(database.getUuid(), collectionStatus);
-        HistoryManager.gotoJobs();
-    });
+    // btnRunConfiguration.setEnabled(false);
+    // btnRunConfiguration.setText(
+    // messages.dataTransformationBtnRunTable());
+    // btnRunConfiguration.setStyleName("btn btn-play");
+    // btnRunConfiguration.addClickHandler(clickEvent -> {
+    // DataTransformationUtils.saveConfiguration(database.getUuid(),
+    // denormalizeConfiguration, collectionStatus);
+    // DataTransformationUtils.runConfigurations(database.getUuid(),
+    // collectionStatus);
+    // HistoryManager.gotoJobs();
+    // });
 
-    btnRunAllConfiguration.setText(messages.dataTransformationBtnRunAll());
-    btnRunAllConfiguration.setStyleName("btn btn-play");
+    btnRunAllConfiguration.setText(messages.basicActionSave());
+    btnRunAllConfiguration.setStyleName("btn btn-save");
     btnRunAllConfiguration.addClickHandler(clickEvent -> {
-      HistoryManager.gotoJobs();
       for (Map.Entry<String, DenormalizeConfiguration> entry : denormalizeConfigurationList.entrySet()) {
         DataTransformationUtils.saveConfiguration(database.getUuid(), entry.getValue(), collectionStatus);
+        configurationStatusPanel.updateCollection(collectionStatus);
       }
-      DataTransformationUtils.runConfigurations(database.getUuid(), collectionStatus);
     });
 
     buttons.add(btnCancel);
-    buttons.add(btnRunConfiguration);
+    // buttons.add(btnRunConfiguration);
     buttons.add(btnRunAllConfiguration);
 
     updateControllerPanel();
@@ -259,7 +265,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     // card.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
     // card.setTitle(table.getId());
     card.setDescription(table.getDescription());
-    rootTable = TransformationTable.getInstance(database, table, denormalizeConfiguration);
+    rootTable = TransformationTable.getInstance(database, table, denormalizeConfiguration, collectionStatus);
     FlowPanel rootTablePanel = new FlowPanel();
     rootTablePanel.add(rootTable);
     card.addExtraContent(rootTablePanel);
@@ -289,8 +295,9 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     card.getElement().setId(childNode.getUuid());
 
     FlowPanel container = new FlowPanel();
-    TransformationChildTables tableInstance = TransformationChildTables.createInstance(childNode, denormalizeConfiguration,
-      rootTable, buttons);
+    TableStatus childTableStatus = collectionStatus.getTableStatusByTableId(childTable.getId());
+    TransformationChildTables tableInstance = TransformationChildTables.createInstance(childNode,
+      denormalizeConfiguration, rootTable, buttons, childTableStatus);
     MultipleSelectionTablePanel<ViewerColumn> selectTable = tableInstance.createTable();
 
     SwitchBtn switchBtn = new SwitchBtn("Enable", false);

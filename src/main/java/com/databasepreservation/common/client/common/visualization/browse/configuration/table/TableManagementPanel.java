@@ -67,6 +67,9 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
   @UiField
   FlowPanel content;
 
+  @UiField
+  ConfigurationStatusPanel configurationStatusPanel;
+
   interface TableManagementPanelUiBinder extends UiBinder<Widget, TableManagementPanel> {
   }
 
@@ -91,6 +94,7 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
     ObserverManager.getCollectionObserver().addObserver(this);
     this.database = database;
     this.collectionStatus = collectionStatus;
+    configurationStatusPanel.setDatabase(database);
 
     init();
   }
@@ -187,7 +191,7 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
     }
   }
 
-  private MultipleSelectionTablePanel<ViewerTable>createCellTableForViewerTable() {
+  private MultipleSelectionTablePanel<ViewerTable> createCellTableForViewerTable() {
     return new MultipleSelectionTablePanel<>(GWT.create(ConfigurationCellTableResources.class));
   }
 

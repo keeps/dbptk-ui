@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import org.jetbrains.annotations.NotNull;
 
 import com.databasepreservation.common.client.ObserverManager;
@@ -37,6 +36,7 @@ import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.BinaryColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ClobColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
@@ -49,7 +49,9 @@ import com.databasepreservation.common.client.configuration.observer.ICollection
 import com.databasepreservation.common.client.configuration.observer.ISaveButtonObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.status.collection.VirtualReferenceStatus;
 import com.databasepreservation.common.client.models.status.formatters.Formatter;
 import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -105,6 +107,9 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   @UiField
   Button btnGotoTable;
 
+  @UiField
+  ConfigurationStatusPanel configurationStatusPanel;
+
   interface TableManagementPanelUiBinder extends UiBinder<Widget, ColumnsManagementPanel> {
   }
 
@@ -138,6 +143,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     initWidget(binder.createAndBindUi(this));
     ObserverManager.getCollectionObserver().addObserver(this);
     ObserverManager.getSaveObserver().addObserver(this);
+    configurationStatusPanel.setDatabase(database);
     this.database = database;
     this.collectionStatus = collectionStatus;
     this.tableId = tableId;
@@ -193,15 +199,16 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   private Button getBtnAddVirtualColumn(TableStatus table) {
     Button btnAddVirtualColumn = new Button();
     btnAddVirtualColumn.setText("Add virtual column");
-    btnAddVirtualColumn.addStyleName("btn btn-primary");
+    btnAddVirtualColumn.addStyleName("btn btn-primary btn-plus");
 
     btnAddVirtualColumn.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent clickEvent) {
-        VirtualColumnOptionsPanel virtualColumnOptionsPanel = VirtualColumnOptionsPanel.createInstance(table, new ColumnStatus());
+        VirtualColumnOptionsPanel virtualColumnOptionsPanel = VirtualColumnOptionsPanel.createInstance(table,
+          new ColumnStatus());
         VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel
           .createInstance(database, collectionStatus, table, new ColumnStatus());
-        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
+        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionAdd(),
           messages.basicActionCancel(), Arrays.asList(virtualColumnOptionsPanel, virtualReferenceOptionsPanel),
           new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
@@ -210,6 +217,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 ColumnStatus columnStatus = virtualColumnOptionsPanel.getColumnStatus();
                 columnStatus.setVirtualReferenceStatus(virtualReferenceOptionsPanel.getVirtualReferenceStatus());
                 collectionStatus.getTableStatusByTableId(tableId).addColumnStatus(columnStatus);
+                collectionStatus.setNeedsToBeProcessed(true);
                 cellTable.getDataProvider().getList().add(columnStatus);
                 cellTable.getDataProvider().refresh();
                 changes = true;
@@ -606,9 +614,11 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
   private boolean isAnOptionColumn(ViewerType.dbTypes type) {
     return true;
-//    return ViewerType.dbTypes.BINARY.equals(type) || ViewerType.dbTypes.NESTED.equals(type)
-//      || ViewerType.dbTypes.CLOB.equals(type) || ViewerType.dbTypes.NUMERIC_FLOATING_POINT.equals(type)
-//      || ViewerType.dbTypes.VIRTUAL.equals(type);
+    // return ViewerType.dbTypes.BINARY.equals(type) ||
+    // ViewerType.dbTypes.NESTED.equals(type)
+    // || ViewerType.dbTypes.CLOB.equals(type) ||
+    // ViewerType.dbTypes.NUMERIC_FLOATING_POINT.equals(type)
+    // || ViewerType.dbTypes.VIRTUAL.equals(type);
   }
 
   private Column<ColumnStatus, String> getTableCustomizationColumn() {
@@ -674,27 +684,41 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel
           .createInstance(database, collectionStatus, collectionStatus.getTableStatusByTableId(tableId), columnStatus);
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
-          messages.basicActionCancel(), messages.basicActionDelete(), Arrays.asList(virtualColumnOptionsPanel, virtualReferenceOptionsPanel),
+          messages.basicActionCancel(), messages.basicActionDelete(),
+          Arrays.asList(virtualColumnOptionsPanel, virtualReferenceOptionsPanel),
           new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
             public void onSuccess(Dialogs.DialogAction value) {
               TableStatus tableStatus = collectionStatus.getTableStatusByTableId(tableId);
               ColumnStatus column = tableStatus.getColumnById(columnStatus.getId());
 
-              if (value.equals(Dialogs.DialogAction.SAVE)) {
-                ColumnStatus updatedColumnStatus = virtualColumnOptionsPanel.getColumnStatus();
-                updatedColumnStatus.setVirtualReferenceStatus(virtualReferenceOptionsPanel.getVirtualReferenceStatus());
+              ColumnStatus updatedColumnStatus = virtualColumnOptionsPanel.getColumnStatus();
+              VirtualReferenceStatus virtualReferenceStatus = virtualReferenceOptionsPanel.getVirtualReferenceStatus();
 
+              if (value.equals(Dialogs.DialogAction.SAVE)) {
+                if (virtualReferenceStatus != null) {
+                  virtualReferenceStatus.setProcessingState(ProcessingState.TO_PROCESS);
+                }
+                updatedColumnStatus.setVirtualReferenceStatus(virtualReferenceStatus);
+                updatedColumnStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_PROCESS);
                 column.setDescription(updatedColumnStatus.getDescription());
                 column.setCustomDescription(updatedColumnStatus.getDescription());
                 column.setVirtualColumnStatus(updatedColumnStatus.getVirtualColumnStatus());
                 column.setVirtualReferenceStatus(updatedColumnStatus.getVirtualReferenceStatus());
+                collectionStatus.setNeedsToBeProcessed(true);
                 saveChanges(true);
               } else if (value.equals(Dialogs.DialogAction.REMOVE)) {
-                tableStatus.getColumns().remove(column);
+                if (virtualReferenceStatus != null) {
+                  virtualReferenceStatus.setProcessingState(ProcessingState.TO_REMOVE);
+                }
+                updatedColumnStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_REMOVE);
+                column.setVirtualColumnStatus(updatedColumnStatus.getVirtualColumnStatus());
+                column.setVirtualReferenceStatus(updatedColumnStatus.getVirtualReferenceStatus());
+                collectionStatus.setNeedsToBeProcessed(true);
                 saveChanges(true);
               }
-              // updates cell table to reflect changes in case the column was removed or its name was changed
+              // updates cell table to reflect changes in case the column was removed or its
+              // name was changed
               cellTable.getDataProvider().setList(tableStatus.getColumns());
               cellTable.getDataProvider().refresh();
             }

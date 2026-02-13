@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.structure.ViewerCell;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -46,6 +45,7 @@ import com.databasepreservation.common.client.index.filter.SimpleFilterParameter
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -185,13 +185,14 @@ public class DatabaseRowsSolrManager {
       for (Map.Entry<String, ViewerCell> entry : row.getCells().entrySet()) {
         String fieldName = entry.getKey();
 
-        if (ViewerConstants.INDEX_ID.equals(fieldName) ||
-          ViewerConstants.SOLR_ROWS_TABLE_ID.equals(fieldName)) {
+        if (ViewerConstants.INDEX_ID.equals(fieldName) || ViewerConstants.SOLR_ROWS_TABLE_ID.equals(fieldName)) {
           continue;
         }
 
         if (entry.getValue() != null) {
           doc.addField(fieldName, SolrUtils.asValueUpdate(entry.getValue().getValue()));
+        } else {
+          doc.addField(fieldName, SolrUtils.asValueUpdate(null));
         }
       }
     }

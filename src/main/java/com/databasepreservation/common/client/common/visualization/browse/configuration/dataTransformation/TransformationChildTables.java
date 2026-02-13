@@ -14,6 +14,7 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
@@ -36,22 +37,25 @@ public class TransformationChildTables {
   private DenormalizeConfiguration denormalizeConfiguration;
   private TransformationTable rootTable;
   private ViewerTable childTable;
+  private TableStatus childTableStatus;
   private Map<Integer, Boolean> isLoading = new HashMap<>();
   private String uuid;
   List<Button> buttons;
 
   public static TransformationChildTables createInstance(TableNode childTable,
-    DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, List<Button> buttons) {
-    return new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, buttons);
+    DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, List<Button> buttons,
+    TableStatus childTableStatus) {
+    return new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, buttons, childTableStatus);
   }
 
   private TransformationChildTables(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration,
-    TransformationTable rootTable, List<Button> buttons) {
+    TransformationTable rootTable, List<Button> buttons, TableStatus childTableStatus) {
     this.denormalizeConfiguration = denormalizeConfiguration;
     this.rootTable = rootTable;
     this.childTable = childTable.getTable();
     this.uuid = childTable.getUuid();
     this.buttons = buttons;
+    this.childTableStatus = childTableStatus;
     preset();
   }
 
@@ -59,7 +63,9 @@ public class TransformationChildTables {
    *
    */
   private void preset() {
-    for (ViewerColumn columns : childTable.getColumns()) {
+    List<ViewerColumn> childTableColumns = DataTransformationUtils
+      .getViewerColumnsWithVirtualColumns(childTable.getColumns(), childTableStatus);
+    for (ViewerColumn columns : childTableColumns) {
       isLoading.put(columns.getColumnIndexInEnclosingTable(), true);
     }
   }
@@ -67,7 +73,11 @@ public class TransformationChildTables {
   public MultipleSelectionTablePanel<ViewerColumn> createTable() {
     MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel = new MultipleSelectionTablePanel<>();
     Label header = new Label("");
-    selectionTablePanel.createTable(header, new ArrayList<>(), childTable.getColumns().iterator(),
+
+    List<ViewerColumn> childTableColumns = DataTransformationUtils
+      .getViewerColumnsWithVirtualColumns(childTable.getColumns(), childTableStatus);
+
+    selectionTablePanel.createTable(header, new ArrayList<>(), childTableColumns.iterator(),
       createCheckbox(selectionTablePanel),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.columnName(), 7, new TextColumn<ViewerColumn>() {
         @Override

@@ -16,7 +16,11 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.stereotype.Component;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.controller.JobController;
 
 /**
@@ -29,30 +33,36 @@ public class JobListener implements JobExecutionListener {
   @Override
   public void beforeJob(JobExecution jobExecution) {
     String databaseUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM);
-    String tableUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
     try {
       JobController.editSolrBatchJob(jobExecution);
 
-      LOGGER.info("Job STARTED for " + databaseUUID + "/" + tableUUID);
+      LOGGER.info("Job STARTED for {}", databaseUUID);
     } catch (GenericException | NotFoundException e) {
-      LOGGER.error("Cannot update job on SOLR for " + databaseUUID + "/" + tableUUID, e);
+      LOGGER.error("Cannot update job on SOLR for {}", databaseUUID, e);
     }
   }
 
   @Override
   public void afterJob(JobExecution jobExecution) {
     String databaseUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM);
-    String tableUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
     try {
       JobController.editSolrBatchJob(jobExecution);
       if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-        LOGGER.info("Job FINISHED for " + databaseUUID + "/" + tableUUID);
+        try {
+          LOGGER.info("Job FINISHED for {}", databaseUUID);
+          CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
+            .getConfigurationCollection(databaseUUID, databaseUUID);
+          configurationCollection.setNeedsToBeProcessed(false);
+          ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, configurationCollection);
+        } catch (ViewerException | IllegalAccessException e) {
+          LOGGER.error("Cannot update collection status for {}", databaseUUID, e);
+        }
       } else {
-        LOGGER.error("Job FINISHED with ERROR for " + databaseUUID + "/" + tableUUID + ": "
-          + jobExecution.getExitStatus().getExitDescription());
+        LOGGER.error("Job FINISHED with ERROR for {}: {}", databaseUUID,
+          jobExecution.getExitStatus().getExitDescription());
       }
     } catch (NotFoundException | GenericException e) {
-      LOGGER.error("Cannot update job on SOLR for " + databaseUUID + "/" + tableUUID, e);
+      LOGGER.error("Cannot update job on SOLR for {}", databaseUUID, e);
     }
   }
 }

@@ -11,6 +11,7 @@ import com.databasepreservation.common.client.models.status.collection.ColumnSta
 import com.databasepreservation.common.client.models.status.collection.DetailsStatus;
 import com.databasepreservation.common.client.models.status.collection.ExportStatus;
 import com.databasepreservation.common.client.models.status.collection.ListStatus;
+import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.SearchStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
@@ -119,6 +120,7 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel {
     TemplateStatus sourceTemplateStatus = new TemplateStatus();
     sourceTemplateStatus.setTemplate(templateSourceColumns.getText());
     virtualColumnStatus.setSourceTemplateStatus(sourceTemplateStatus);
+    virtualColumnStatus.setProcessingState(ProcessingState.TO_PROCESS);
 
     return virtualColumnStatus;
   }

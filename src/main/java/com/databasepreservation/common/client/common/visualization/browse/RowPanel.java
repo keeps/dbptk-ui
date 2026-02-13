@@ -31,6 +31,7 @@ import com.databasepreservation.common.client.common.helpers.HelperExportTableDa
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.CrossCollectionInnerJoinFilterParameter;
@@ -229,7 +230,13 @@ public class RowPanel extends RightPanel {
     for (ColumnStatus columnStatus : status.getTableStatus(table.getUuid()).getColumns()) {
       if (columnStatus.getDetailsStatus().isShow()) {
         if (columnStatus.getNestedColumns() == null) {
-          ViewerColumn column = table.getColumnBySolrName(columnStatus.getId());
+          ViewerColumn column;
+          if (columnStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+            column = DataTransformationUtils.convertToViewerColumn(columnStatus);
+          } else {
+            column = table.getColumnBySolrName(columnStatus.getId());
+          }
+
           boolean isPrimaryKeyColumn = table.getPrimaryKey() != null
             && table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable());
           getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),

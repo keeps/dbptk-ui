@@ -85,11 +85,15 @@ public class DatabaseInformationPanel extends RightPanel {
   @UiField
   SimplePanel cardTitle;
 
+  @UiField
+  ConfigurationStatusPanel configurationStatusPanel;
+
   private DatabaseInformationPanel(ViewerDatabase database, CollectionStatus status) {
     this.database = database;
     this.status = status;
     initWidget(uiBinder.createAndBindUi(this));
 
+    configurationStatusPanel.setDatabase(database);
     init();
   }
 

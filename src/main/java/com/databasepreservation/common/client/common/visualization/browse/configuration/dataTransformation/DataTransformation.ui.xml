@@ -4,7 +4,7 @@
              xmlns:cp='urn:import:com.databasepreservation.common.client.common.visualization.browse.configuration'>
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
     <g:FlowPanel ui:field="content">
-        <cp:ConfigurationStatusPanel/>
+        <cp:ConfigurationStatusPanel ui:field="configurationStatusPanel"/>
         <g:SimplePanel ui:field="message" />
         <g:FlowPanel ui:field="toolBar" addStyleNames="data-transformation-toolbar sticky-flow" />
         <g:FlowPanel ui:field="rootTablePanel">

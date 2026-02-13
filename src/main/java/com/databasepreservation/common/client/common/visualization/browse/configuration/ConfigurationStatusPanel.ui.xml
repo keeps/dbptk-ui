@@ -11,11 +11,6 @@
                     <ui:text from='{messages.basicActionConfirm}'/>
                 </g:Button>
             </g:SimplePanel>
-            <g:SimplePanel addStyleNames="btn-item">
-                <g:Button ui:field="btnCancel" addStyleNames="btn btn-danger btn-times-circle">
-                    <ui:text from='{messages.basicActionCancel}'/>
-                </g:Button>
-            </g:SimplePanel>
         </g:FlowPanel>
     </a:Alert>
 

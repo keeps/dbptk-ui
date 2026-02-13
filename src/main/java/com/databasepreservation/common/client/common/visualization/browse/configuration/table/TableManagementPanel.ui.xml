@@ -3,7 +3,7 @@
              xmlns:cp='urn:import:com.databasepreservation.common.client.common.visualization.browse.configuration'>
 
     <g:FlowPanel addStyleNames="col_12 management" ui:field="content">
-        <cp:ConfigurationStatusPanel/>
+        <cp:ConfigurationStatusPanel ui:field="configurationStatusPanel"/>
         <g:FlowPanel addStyleNames="structure-header" ui:field="header" />
     </g:FlowPanel>
 </ui:UiBinder>
