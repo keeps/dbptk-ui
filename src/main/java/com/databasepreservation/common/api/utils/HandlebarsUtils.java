@@ -22,6 +22,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerType;
@@ -198,5 +199,31 @@ public class HandlebarsUtils {
     }
 
     return nestedValues;
+  }
+
+  public static String applyVirtualColumnTemplate(ViewerRow row, TableStatus tableStatus,
+    VirtualColumnStatus virtualColumnStatus) {
+    if (virtualColumnStatus.getSourceTemplateStatus() == null
+      || StringUtils.isBlank(virtualColumnStatus.getSourceTemplateStatus().getTemplate())) {
+      return null;
+    }
+
+    Map<String, String> map = new HashMap<>();
+    for (ColumnStatus column : tableStatus.getColumns()) {
+      ViewerCell cell = row.getCells().get(column.getId());
+      if (cell != null && cell.getValue() != null) {
+        map.put(ViewerStringUtils.replaceAllFor(column.getCustomName(), "\\s", "_"), cell.getValue());
+      }
+    }
+
+    Handlebars handlebars = new Handlebars();
+    try {
+      Template handlebarTemplate = handlebars
+        .compileInline(virtualColumnStatus.getSourceTemplateStatus().getTemplate());
+      return handlebarTemplate.apply(map);
+    } catch (IOException e) {
+      throw new RESTException(e);
+    }
+
   }
 }

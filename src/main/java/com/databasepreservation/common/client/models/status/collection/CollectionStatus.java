@@ -36,12 +36,14 @@ public class CollectionStatus implements Serializable {
   private List<TableStatus> tables;
   private List<SavedSearch> savedSearches;
   private Set<String> denormalizations;
+  private boolean needsToBeProcessed;
 
   public CollectionStatus() {
     tables = new ArrayList<>();
     savedSearches = new ArrayList<>();
     denormalizations = new HashSet<>();
     consolidateProperty = LargeObjectConsolidateProperty.CONSOLIDATED;
+    needsToBeProcessed = false;
   }
 
   public String getVersion() {
@@ -311,5 +313,13 @@ public class CollectionStatus implements Serializable {
   public void updateColumnTextExtractionPolicy(String tableUUID, String columnId, boolean extractAndIndexLobText) {
     getTableStatus(tableUUID).getColumnById(columnId).getLobTextExtractionPolicy()
       .setExtractAndIndexLobText(extractAndIndexLobText);
+  }
+
+  public boolean isNeedsToBeProcessed() {
+    return needsToBeProcessed;
+  }
+
+  public void setNeedsToBeProcessed(boolean needsToBeProcessed) {
+    this.needsToBeProcessed = needsToBeProcessed;
   }
 }

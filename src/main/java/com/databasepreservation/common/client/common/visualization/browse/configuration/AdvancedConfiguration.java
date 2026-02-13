@@ -51,6 +51,9 @@ public class AdvancedConfiguration extends ContentPanel {
   @UiField
   SimplePanel description;
 
+  @UiField
+  ConfigurationStatusPanel configurationStatusPanel;
+
   private static Map<String, AdvancedConfiguration> instances = new HashMap<>();
   private ViewerDatabase database;
 
@@ -61,6 +64,7 @@ public class AdvancedConfiguration extends ContentPanel {
   private AdvancedConfiguration(ViewerDatabase database) {
     initWidget(binder.createAndBindUi(this));
     this.database = database;
+    configurationStatusPanel.setDatabase(database);
 
     init();
   }

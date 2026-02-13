@@ -95,11 +95,8 @@ public class DenormalizeStepConfig {
 
     return new StepBuilder("tablePartitionerStep",
       jobRepository).<ViewerRow, DenormalizeStepProcessor.NestedDocumentWrapper> chunk(1000, transactionManager)
-      .reader(reader).processor(processor).writer(writer)
-
-      // Listeners
-      .listener((StepExecutionListener) progressListener).listener((ChunkListener) progressListener)
-      .listener(lifecycleListener).build();
+      .reader(reader).processor(processor).writer(writer).listener((StepExecutionListener) progressListener)
+      .listener((ChunkListener) progressListener).listener(lifecycleListener).build();
   }
 
   // Reader

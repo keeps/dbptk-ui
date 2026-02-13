@@ -7,8 +7,12 @@
  */
 package com.databasepreservation.common.client.common.visualization.browse.configuration.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.jetbrains.annotations.NotNull;
 
 import com.databasepreservation.common.api.v1.utils.JobResponse;
 import com.databasepreservation.common.client.ObserverManager;
@@ -28,6 +32,7 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
@@ -208,4 +213,47 @@ public class DataTransformationUtils {
     fieldsToReturn.add("originalRowUUID_t");
   }
 
+  // Virtual
+  @NotNull
+  public static List<ViewerColumn> getViewerColumnsWithVirtualColumns(List<ViewerColumn> originalColumns,
+    TableStatus tableStatus) {
+    List<ViewerColumn> allViewerColumns = new ArrayList<>(originalColumns);
+    List<ColumnStatus> virtualColumnStatus = tableStatus.getColumns().stream()
+      .filter(column -> column.getType().equals(ViewerType.dbTypes.VIRTUAL)).collect(Collectors.toList());
+
+    ArrayList<ViewerColumn> virtualViewerColumns = virtualColumnStatus.stream()
+      .map(DataTransformationUtils::convertToViewerColumn).collect(Collectors.toCollection(ArrayList::new));
+
+    allViewerColumns.addAll(virtualViewerColumns);
+    return allViewerColumns;
+  }
+
+  public static ViewerColumn convertToViewerColumn(ColumnStatus columnStatus) {
+    ViewerColumn viewerColumn = new ViewerColumn();
+
+    viewerColumn.setSolrName(columnStatus.getId());
+    viewerColumn.setDisplayName(columnStatus.getCustomName());
+    ViewerType viewerType = new ViewerType();
+    viewerType.setDbType(columnStatus.getType());
+    viewerType.setTypeName(columnStatus.getType().name());
+    viewerColumn.setType(viewerType);
+    viewerColumn.setDescription(columnStatus.getDescription());
+
+    // Extract column index from columnStatus.getId() (e.g., "col3v_s" -> 3)
+    String indexStr = columnStatus.getId().replaceAll("[^0-9]", "");
+    int columnIndex = Integer.parseInt(indexStr);
+
+    viewerColumn.setColumnIndexInEnclosingTable(columnIndex);
+    viewerColumn.setNillable(true);
+
+    return viewerColumn;
+  }
+
+  public static ViewerColumn getColumnBySolrName(List<ViewerColumn> columns, String solrName) {
+    for (ViewerColumn column : columns) {
+      if (column.getSolrName().equals(solrName))
+        return column;
+    }
+    return null;
+  }
 }

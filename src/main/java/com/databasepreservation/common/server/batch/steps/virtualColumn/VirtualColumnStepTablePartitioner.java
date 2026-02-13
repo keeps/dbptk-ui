@@ -10,13 +10,12 @@ import org.springframework.batch.item.ExecutionContext;
 
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.server.batch.steps.denormalize.DenormalizeStepTablePartitioner;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class VirtualColumnStepTablePartitioner implements Partitioner {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DenormalizeStepTablePartitioner.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(VirtualColumnStepTablePartitioner.class);
   private final CollectionStatus collectionStatus;
 
   public VirtualColumnStepTablePartitioner(CollectionStatus collectionStatus) {

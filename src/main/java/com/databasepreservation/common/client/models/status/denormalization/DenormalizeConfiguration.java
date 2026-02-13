@@ -15,6 +15,7 @@ import java.util.List;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.IsProcessable;
+import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 
@@ -32,6 +33,7 @@ public class DenormalizeConfiguration implements Serializable, IsProcessable {
   private String tableUUID;
   private String tableID;
   private List<RelatedTablesConfiguration> relatedTables;
+  private ProcessingState processingState;
   private Date lastUpdatedDate;
   private Date lastExecutionDate;
 
@@ -128,6 +130,15 @@ public class DenormalizeConfiguration implements Serializable, IsProcessable {
 
   public void setRelatedTables(List<RelatedTablesConfiguration> relatedTables) {
     this.relatedTables = relatedTables;
+  }
+
+  @Override
+  public ProcessingState getProcessingState() {
+    return processingState;
+  }
+
+  public void setProcessingState(ProcessingState processingState) {
+    this.processingState = processingState;
   }
 
   @Override

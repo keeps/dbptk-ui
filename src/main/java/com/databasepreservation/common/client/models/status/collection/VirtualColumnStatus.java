@@ -14,12 +14,21 @@ public class VirtualColumnStatus implements Serializable, IsProcessable {
   @Serial
   private static final long serialVersionUID = -4361681277573813148L;
 
+  private ProcessingState processingState;
   private List<String> sourceColumnsIds;
   private TemplateStatus sourceTemplateStatus;
   private Date lastUpdatedDate;
   private Date lastExecutionDate;
 
   public VirtualColumnStatus() {
+  }
+
+  public ProcessingState getProcessingState() {
+    return processingState;
+  }
+
+  public void setProcessingState(ProcessingState processingState) {
+    this.processingState = processingState;
   }
 
   public TemplateStatus getSourceTemplateStatus() {
