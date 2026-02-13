@@ -59,11 +59,10 @@ public class VirtualColumnStepConfig {
     CollectionStatus status) {
 
     return new StepBuilder("virtualColumnStep", jobRepository)
-      .partitioner("tablePartitionerStep", new VirtualColumnStepTablePartitioner(status))
+      .partitioner("virtualColumnsTablePartitionerStep", new VirtualColumnStepTablePartitioner(status))
       .step(virtualColumnsTablePartitionerStep).taskExecutor(new SyncTaskExecutor()).gridSize(1).build();
   }
 
-  // Step
   @Bean("virtualColumnsTablePartitionerStep")
   public Step virtualColumnsTablePartitionerStep(JobRepository jobRepository,
     PlatformTransactionManager transactionManager, @Qualifier("virtualColumnReader") SolrCursorItemReader reader,
@@ -72,15 +71,10 @@ public class VirtualColumnStepConfig {
 
     return new StepBuilder("virtualColumnsTablePartitionerStep", jobRepository)
       .<ViewerRow, ViewerRow> chunk(1000, transactionManager).reader(reader).processor(processor).writer(writer)
-
-      // Listeners
       .listener((StepExecutionListener) virtualColumnProgressListener)
       .listener((ChunkListener) virtualColumnProgressListener).build();
   }
 
-  // ==================================================================================
-  // 3. READER DINÂMICO (Lê apenas campos necessários da Tabela atual)
-  // ==================================================================================
   @Bean
   @StepScope
   public SolrCursorItemReader virtualColumnReader(@Value("#{stepExecutionContext['tableId']}") String tableId,
@@ -107,26 +101,17 @@ public class VirtualColumnStepConfig {
     }
 
     LOGGER.debug("Fetching fields for table {}: {}", tableId, fieldsToReturn);
-
-    // Agora usamos o objeto real tableStatus, garantindo que getId() não devolve
-    // null
     Filter filter = FilterUtils.filterByTable(new Filter(), tableStatus.getId());
 
     return new SolrCursorItemReader(solrManager, databaseUUID, filter, new ArrayList<>(fieldsToReturn));
   }
 
-  // ==================================================================================
-  // 4. PROCESSOR (Aplica a lógica da Coluna Virtual)
-  // ==================================================================================
   @Bean
   @StepScope
   public VirtualColumnStepProcessor virtualColumnProcessor() {
     return new VirtualColumnStepProcessor(collectionStatus);
   }
 
-  // ==================================================================================
-  // 5. WRITER (Persiste no Solr)
-  // ==================================================================================
   @Bean
   @StepScope
   public SolrItemWriter virtualColumnWriter(DatabaseRowsSolrManager solrManager,

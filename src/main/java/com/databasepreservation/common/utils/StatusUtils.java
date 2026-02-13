@@ -154,8 +154,7 @@ public class StatusUtils {
     return status;
   }
 
-
-private static ExportStatus getExportStatus() {
+  private static ExportStatus getExportStatus() {
     ExportStatus status = new ExportStatus();
     status.setTemplateStatus(getTemplateStatus());
 
@@ -208,7 +207,7 @@ private static ExportStatus getExportStatus() {
     status.setSiardVersion(database.getVersion());
     status.setValidationStatus(getValidationStatus(database));
     status.setSiardStatus(getSiardStatus(database));
-    if (database.getPermissions() != null && !database.getPermissions().isEmpty()){
+    if (database.getPermissions() != null && !database.getPermissions().isEmpty()) {
       status.setPermissions(database.getPermissions());
     }
 

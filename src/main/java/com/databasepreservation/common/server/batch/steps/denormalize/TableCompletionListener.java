@@ -14,13 +14,17 @@ import org.springframework.batch.core.StepExecutionListener;
 
 import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.ViewerFactory;
 
 /**
@@ -90,9 +94,17 @@ public class TableCompletionListener implements StepExecutionListener {
       List<String> typeName = new ArrayList<>();
       List<String> nullable = new ArrayList<>();
 
+      ViewerTable tableMetadata = database.getMetadata().getTable(relatedTable.getTableUUID());
+      CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
+        .getConfigurationCollection(databaseUUID, databaseUUID);
+      TableStatus tableStatus = collectionStatus.getTableStatusByTableId(tableMetadata.getId());
+
+      List<ViewerColumn> allViewerColumns = DataTransformationUtils
+        .getViewerColumnsWithVirtualColumns(tableMetadata.getColumns(), tableStatus);
+
       for (RelatedColumnConfiguration column : columnsIncluded) {
-        var tableMetadata = database.getMetadata().getTable(relatedTable.getTableUUID());
-        var columnBySolrName = tableMetadata.getColumnBySolrName(column.getSolrName());
+        ViewerColumn columnBySolrName = DataTransformationUtils.getColumnBySolrName(allViewerColumns,
+          column.getSolrName());
 
         nestedColumn.getNestedFields().add(column.getColumnName());
         nestedColumn.getNestedSolrNames().add(column.getSolrName());
