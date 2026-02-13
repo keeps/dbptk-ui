@@ -56,7 +56,8 @@ public class VirtualOptionsPanelUtils {
     syncButtonsWithText(targetInput, buttonMap, columnMap, columnIdsContainer);
   }
 
-  private static void syncButtonsWithText(TextBox input, Map<String, Button> buttonMap, Map<String, ColumnStatus> columnMap, List<String> container) {
+  private static void syncButtonsWithText(TextBox input, Map<String, Button> buttonMap,
+    Map<String, ColumnStatus> columnMap, List<String> container) {
     String text = input.getText();
     container.clear();
 
