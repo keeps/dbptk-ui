@@ -113,12 +113,13 @@ public class ContextResource implements ContextService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      findRequest = new FindRequest(ViewerDatabase.class.getName(), new Filter(), new Sorter(), null, null, false,
-        List.of(ViewerConstants.SOLR_DATABASES_METADATA, "uuid"));
       AuthorizationGroupsList authorizationGroupsList = ViewerConfiguration.getInstance()
         .getCollectionsAuthorizationGroupsWithDefault();
+      findRequest = new FindRequest(ViewerDatabase.class.getName(), new Filter(), new Sorter(), null, null, false,
+        List.of(ViewerConstants.SOLR_DATABASES_METADATA, "uuid"));
       try (IterableDatabaseResult<ViewerDatabase> allDatabases = solrManager.findAll(ViewerDatabase.class,
-        findRequest.filter, findRequest.sorter, findRequest.fieldsToReturn)) {
+        findRequest.filter, findRequest.sorter, findRequest.fieldsToReturn,
+        DatabaseResource.getDatabaseFindContentTypeFilterQueries())) {
         return ApiUtils.okResponse(
           new StreamResponse(new UsersCSVOutputStream(allDatabases, authorizationGroupsList, "users.csv", ',')));
       }
