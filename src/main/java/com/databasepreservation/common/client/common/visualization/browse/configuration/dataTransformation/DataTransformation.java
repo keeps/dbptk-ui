@@ -18,6 +18,7 @@ import com.databasepreservation.common.client.common.LoadingDiv;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
@@ -41,6 +42,7 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.BootstrapCard;
 import com.databasepreservation.common.client.widgets.SwitchBtn;
+import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -243,7 +245,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     btnRunAllConfiguration.setStyleName("btn btn-save");
     btnRunAllConfiguration.addClickHandler(clickEvent -> {
       for (Map.Entry<String, DenormalizeConfiguration> entry : denormalizeConfigurationList.entrySet()) {
-        DataTransformationUtils.saveConfiguration(database.getUuid(), entry.getValue(), collectionStatus);
+        saveConfiguration(database.getUuid(), entry.getValue(), collectionStatus);
         configurationStatusPanel.updateCollection(collectionStatus);
       }
     });
@@ -422,6 +424,20 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
       sidebar.updateControllerPanel(buttonsToSidebar);
     } else {
       sidebar.updateControllerPanel(null);
+    }
+  }
+
+  public void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration,
+    CollectionStatus collectionStatus) {
+    if (denormalizeConfiguration != null && denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
+      CollectionService.Util.call((Boolean result) -> {
+        Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
+          "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
+      }, errorMessage -> {
+        Dialogs.showErrors(messages.advancedConfigurationLabelForDataTransformation(), errorMessage,
+          messages.basicActionClose());
+      }).createDenormalizeConfigurationFile(databaseUUID, databaseUUID, denormalizeConfiguration.getTableUUID(),
+        denormalizeConfiguration);
     }
   }
 
