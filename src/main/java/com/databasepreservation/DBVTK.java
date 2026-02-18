@@ -8,7 +8,6 @@
 package com.databasepreservation;
 
 import java.io.IOException;
-import java.net.http.HttpClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,7 +24,9 @@ import org.springframework.boot.web.servlet.context.ServletWebServerInitializedE
 import org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.core.Ordered;
 import org.springframework.web.filter.RequestContextFilter;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -40,6 +41,8 @@ import com.databasepreservation.common.server.ViewerConfiguration;
 import jakarta.servlet.http.HttpServlet;
 
 @SpringBootApplication
+@ComponentScan(excludeFilters = {
+  @ComponentScan.Filter(type = FilterType.REGEX, pattern = "com.databasepreservation.common.server.batch.*") })
 public class DBVTK {
   public static void main(String[] args) {
     ViewerConfiguration.getInstance();
@@ -170,7 +173,8 @@ public class DBVTK {
     FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
     registrationBean.setFilter(new OnOffFilter());
     registrationBean.setName("CasAuthenticationFilter");
-    registrationBean.addInitParameter("inner-filter-class", "org.apereo.cas.client.authentication.AuthenticationFilter");
+    registrationBean.addInitParameter("inner-filter-class",
+      "org.apereo.cas.client.authentication.AuthenticationFilter");
     registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
     registrationBean.addInitParameter("casServerLoginUrl", "https://localhost:8443/cas/login");
     registrationBean.addUrlPatterns("/login");
@@ -261,8 +265,6 @@ public class DBVTK {
       }
     }
   }
-
-
 
   // @Bean
   // MultipartConfigElement multipartConfigElement() {
