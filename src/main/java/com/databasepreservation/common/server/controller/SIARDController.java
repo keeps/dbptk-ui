@@ -968,7 +968,9 @@ public class SIARDController {
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
 
     if (!database.getVersion().equals(ViewerConstants.SIARD_DK_1007)
-      && !database.getVersion().equals(ViewerConstants.SIARD_DK_128)) {
+      && !database.getVersion().equals(ViewerConstants.SIARD_DK_128)
+      && !database.getVersion().equals(ViewerConstants.SIARD_DK_1007_EXT)
+      && !database.getVersion().equals(ViewerConstants.SIARD_DK_128_EXT)) {
       if (ViewerFactory.getViewerConfiguration().getApplicationEnvironment()
         .equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
         String siardPath = database.getPath();
