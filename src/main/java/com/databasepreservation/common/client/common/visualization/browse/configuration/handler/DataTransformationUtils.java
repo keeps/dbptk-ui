@@ -43,8 +43,6 @@ import config.i18n.client.ClientMessages;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class DataTransformationUtils {
-  public static ClientMessages messages = GWT.create(ClientMessages.class);
-
   private DataTransformationUtils() {
   }
 
@@ -101,32 +99,6 @@ public class DataTransformationUtils {
     references.setReferencedTable(referencedColumnTable);
 
     return references;
-  }
-
-  public static void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration,
-    CollectionStatus collectionStatus) {
-    if (denormalizeConfiguration != null && denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
-      CollectionService.Util.call((Boolean result) -> {
-        Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
-          "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
-      }, errorMessage -> {
-        Dialogs.showErrors(messages.advancedConfigurationLabelForDataTransformation(), errorMessage,
-          messages.basicActionClose());
-      }).createDenormalizeConfigurationFile(databaseUUID, databaseUUID, denormalizeConfiguration.getTableUUID(),
-        denormalizeConfiguration);
-    }
-  }
-
-  public static void runConfigurations(String databaseUUID, CollectionStatus collectionStatus) {
-    final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
-    collectionObserver.setCollectionStatus(collectionStatus);
-    CollectionService.Util.call((JobResponse response) -> {
-      Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
-        "Apply configuration job started with success for database " + databaseUUID);
-    }, errorMessage -> {
-      Dialogs.showErrors(messages.advancedConfigurationLabelForDataTransformation(), errorMessage,
-        messages.basicActionClose());
-    }).run(databaseUUID, databaseUUID, null);
   }
 
   public static void removeRelatedTable(TableNode childNode, DenormalizeConfiguration denormalizeConfiguration) {
