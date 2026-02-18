@@ -83,7 +83,9 @@ public class ZipOutputStreamSingleRow extends ZipOutputStream {
         nestedOriginalRowsForThisRow.put(entry.getKey(), nestedRows);
       }
       if (getDatabase().getVersion().equals(ViewerConstants.SIARD_DK_1007)
-        || getDatabase().getVersion().equals(ViewerConstants.SIARD_DK_128)) {
+        || getDatabase().getVersion().equals(ViewerConstants.SIARD_DK_128)
+        || getDatabase().getVersion().equals(ViewerConstants.SIARD_DK_1007_EXT)
+        || getDatabase().getVersion().equals(ViewerConstants.SIARD_DK_128_EXT)) {
         writeToZipFile(null, zipArchiveOutputStream, row, nestedOriginalRowsForThisRow, binaryColumns,
           nestedBinaryColumnsMap, true);
       } else {
