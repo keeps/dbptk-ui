@@ -19,6 +19,7 @@ public class VirtualColumnStatus implements Serializable, IsProcessable {
   private TemplateStatus sourceTemplateStatus;
   private Date lastUpdatedDate;
   private Date lastExecutionDate;
+  private String executionStatus;
 
   public VirtualColumnStatus() {
   }
@@ -63,5 +64,9 @@ public class VirtualColumnStatus implements Serializable, IsProcessable {
 
   public void setLastExecutionDate(Date lastExecutionDate) {
     this.lastExecutionDate = lastExecutionDate;
+  }
+
+  public void setExecutionStatus(String executionStatus) {
+    this.executionStatus = executionStatus;
   }
 }
