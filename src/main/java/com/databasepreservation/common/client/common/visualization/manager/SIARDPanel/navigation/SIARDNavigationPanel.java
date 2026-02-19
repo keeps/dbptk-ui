@@ -68,7 +68,9 @@ public class SIARDNavigationPanel {
     btnEditMetadata.addStyleName("btn btn-outline-primary btn-edit");
     btnEditMetadata.addClickHandler(clickEvent -> {
       if (database.getVersion().equals(ViewerConstants.SIARD_DK_1007)
-        || database.getVersion().equals(ViewerConstants.SIARD_DK_128)) {
+        || database.getVersion().equals(ViewerConstants.SIARD_DK_128)
+        || database.getVersion().equals(ViewerConstants.SIARD_DK_1007_EXT)
+        || database.getVersion().equals(ViewerConstants.SIARD_DK_128_EXT)) {
         Dialogs.showInformationDialog(messages.SIARDHomePageButtonTitleEditMetadataNotAvailable(),
           messages.SIARDHomePageButtonTextEditMetadataNotAvailable(ViewerConstants.SIARD_V21),
           messages.basicActionUnderstood(), "btn btn-link");

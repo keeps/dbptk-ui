@@ -226,7 +226,9 @@ public class SIARDController {
 
     File f = new File(siardPath);
     if (f.exists()) {
-      if (siardVersion.equals(ViewerConstants.SIARD_DK_1007) || siardVersion.equals(ViewerConstants.SIARD_DK_128)) {
+      if (siardVersion.equals(ViewerConstants.SIARD_DK_1007) || siardVersion.equals(ViewerConstants.SIARD_DK_128)
+        || siardVersion.equals(ViewerConstants.SIARD_DK_1007_EXT)
+        || siardVersion.equals(ViewerConstants.SIARD_DK_128_EXT)) {
         if (f.isDirectory()) {
           // BUILD Import Module
           databaseMigration.importModuleParameter(SIARDDKModuleFactory.PARAMETER_FOLDER, siardPath);
@@ -1176,6 +1178,10 @@ public class SIARDController {
       moduleName = "siard-dk-128";
     } else if (version.equals(ViewerConstants.SIARD_DK_1007)) {
       moduleName = "siard-dk-1007";
+    } else if (version.equals(ViewerConstants.SIARD_DK_128_EXT)) {
+      moduleName = "siard-dk-128-ext";
+    } else if (version.equals(ViewerConstants.SIARD_DK_1007_EXT)) {
+      moduleName = "siard-dk-1007-ext";
     } else {
       moduleName = "";
     }
