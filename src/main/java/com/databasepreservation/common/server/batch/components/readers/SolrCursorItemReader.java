@@ -1,0 +1,98 @@
+package com.databasepreservation.common.server.batch.components.readers;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.solr.common.params.CursorMarkParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.item.ItemStreamException;
+import org.springframework.batch.item.ItemStreamReader;
+
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.sort.Sorter;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.utils.Pair;
+
+/**
+ * @author Gabriel Barros <gbarros@keep.pt>
+ */
+public class SolrCursorItemReader implements ItemStreamReader<ViewerRow> {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(SolrCursorItemReader.class);
+  private static final int PAGE_SIZE = 100;
+
+  private final DatabaseRowsSolrManager solrManager;
+  private final String databaseUUID;
+  private final Filter filter;
+  private final List<String> fieldsToReturn;
+
+  private String cursorMark = CursorMarkParams.CURSOR_MARK_START;
+  private Iterator<ViewerRow> currentBatchIterator;
+  private boolean isFinished = false;
+
+  public SolrCursorItemReader(DatabaseRowsSolrManager solrClient, String databaseUUID, Filter filter,
+    List<String> fieldsToReturn) {
+    this.solrManager = solrClient;
+    this.databaseUUID = databaseUUID;
+    this.filter = filter;
+    this.fieldsToReturn = fieldsToReturn;
+  }
+
+  @Override
+  public ViewerRow read() throws Exception {
+    if (currentBatchIterator != null && currentBatchIterator.hasNext()) {
+      return currentBatchIterator.next();
+    }
+
+    if (isFinished) {
+      return null;
+    }
+
+    fetchNextBatch();
+    return (currentBatchIterator != null && currentBatchIterator.hasNext()) ? currentBatchIterator.next() : null;
+  }
+
+  private void fetchNextBatch() throws Exception {
+    LOGGER.debug("[Reader@{} - ThreadId: {}] Querying Solr for filter: {}",
+      Integer.toHexString(System.identityHashCode(this)), Thread.currentThread().getName(), this.filter);
+
+    Pair<IndexResult<ViewerRow>, String> page = solrManager.findRows(databaseUUID, filter, new Sorter(), PAGE_SIZE,
+      cursorMark, fieldsToReturn, Collections.emptyMap());
+
+    IndexResult<ViewerRow> result = page.getFirst();
+    String nextCursorMark = page.getSecond();
+    List<ViewerRow> rows = result.getResults();
+
+    if (rows == null || rows.isEmpty() || cursorMark.equals(nextCursorMark)) {
+      isFinished = true;
+      currentBatchIterator = Collections.emptyIterator();
+      return;
+    }
+
+    this.currentBatchIterator = rows.iterator();
+    this.cursorMark = nextCursorMark;
+  }
+
+  public static int getChunkSize() {
+    return PAGE_SIZE;
+  }
+
+  @Override
+  public void open(ExecutionContext executionContext) throws ItemStreamException {
+    this.cursorMark = CursorMarkParams.CURSOR_MARK_START;
+    this.isFinished = false;
+  }
+
+  @Override
+  public void update(ExecutionContext executionContext) {
+  }
+
+  @Override
+  public void close() {
+  }
+}
