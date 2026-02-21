@@ -24,9 +24,7 @@ import org.springframework.boot.web.servlet.context.ServletWebServerInitializedE
 import org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.core.Ordered;
 import org.springframework.web.filter.RequestContextFilter;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -41,8 +39,6 @@ import com.databasepreservation.common.server.ViewerConfiguration;
 import jakarta.servlet.http.HttpServlet;
 
 @SpringBootApplication
-@ComponentScan(excludeFilters = {
-  @ComponentScan.Filter(type = FilterType.REGEX, pattern = "com.databasepreservation.common.server.batch.*") })
 public class DBVTK {
   public static void main(String[] args) {
     ViewerConfiguration.getInstance();
