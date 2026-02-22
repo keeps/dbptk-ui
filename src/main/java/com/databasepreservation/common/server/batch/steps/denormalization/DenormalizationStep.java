@@ -7,7 +7,6 @@ import org.roda.core.data.exceptions.NotFoundException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
 
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
@@ -15,17 +14,19 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.server.batch.context.JobContext;
-import com.databasepreservation.common.server.batch.core.AbstractStepDefinition;
+import com.databasepreservation.common.server.batch.core.AbstractIndexingStepDefinition;
+import com.databasepreservation.common.server.batch.core.PartitionableStep;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
 import com.databasepreservation.common.server.batch.steps.partition.PartitionStrategy;
 
 /**
- * @author Gabriel Barros <gbarros@keep.pt>
+ * Step responsible for denormalizing data across multiple tables. It is
+ * chunk-oriented and partitionable. * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Component
-public class DenormalizationStep
-  extends AbstractStepDefinition<ViewerRow, DenormalizationStepProcessor.NestedDocumentWrapper> {
+public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRow, ViewerRow>
+  implements PartitionableStep {
 
   @Override
   public String getName() {
@@ -43,16 +44,15 @@ public class DenormalizationStep
   }
 
   @Override
-  public ItemProcessor<ViewerRow, DenormalizationStepProcessor.NestedDocumentWrapper> createProcessor(
-    JobContext context, ExecutionContext stepContext) {
-    String entryID = stepContext.getString("denormalizeEntryID");
-    DenormalizeConfiguration config = context.getDenormalizeConfig(entryID);
-    return new DenormalizationStepProcessor(solrManager, config, context.getDatabaseUUID());
+  public long calculateWorkload(JobContext context) {
+    return calculatePartitionedWorkload(context);
   }
 
   @Override
-  public ItemWriter<DenormalizationStepProcessor.NestedDocumentWrapper> createWriter(JobContext context) {
-    return new DenormalizeStepWriter(solrManager, context.getDatabaseUUID());
+  public ItemProcessor<ViewerRow, ViewerRow> createProcessor(JobContext context, ExecutionContext stepContext) {
+    String entryID = stepContext.getString("denormalizeEntryID");
+    DenormalizeConfiguration config = context.getDenormalizeConfig(entryID);
+    return new DenormalizationStepProcessor(solrManager, config, context.getDatabaseUUID());
   }
 
   @Override
