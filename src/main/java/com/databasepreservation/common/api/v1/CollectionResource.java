@@ -453,7 +453,7 @@ public class CollectionResource implements CollectionService {
 
       JobController.addMinimalSolrBatchJob(jobParameters);
 
-      List<StepDefinition<?, ?>> steps = List.of(virtualColumnStep, denormalizationStep);
+      List<StepDefinition> steps = List.of(virtualColumnStep, denormalizationStep);
       Job job = orchestrator.buildJob(databaseUUID, steps);
 
       JobExecution jobExecution = jobLauncher.run(job, jobParameters);

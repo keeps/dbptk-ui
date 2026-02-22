@@ -177,30 +177,6 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void updateRow(String databaseUUID, ViewerRow row) throws ViewerException {
-    SolrInputDocument doc = new SolrInputDocument();
-    doc.addField(ViewerConstants.INDEX_ID, row.getUuid());
-
-    if (row.getCells() != null) {
-      for (Map.Entry<String, ViewerCell> entry : row.getCells().entrySet()) {
-        String fieldName = entry.getKey();
-
-        if (ViewerConstants.INDEX_ID.equals(fieldName) || ViewerConstants.SOLR_ROWS_TABLE_ID.equals(fieldName)) {
-          continue;
-        }
-
-        if (entry.getValue() != null) {
-          doc.addField(fieldName, SolrUtils.asValueUpdate(entry.getValue().getValue()));
-        } else {
-          doc.addField(fieldName, SolrUtils.asValueUpdate(null));
-        }
-      }
-    }
-
-    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
-    insertDocument(collection.getIndexName(), doc);
-  }
-
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
     return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,
@@ -633,60 +609,160 @@ public class DatabaseRowsSolrManager {
 
   }
 
-  public final void addDatabaseField(final String databaseUUID, final String documentUUID,
-    List<SolrInputDocument> nestedDocuments) {
-    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
-    SolrInputDocument doc = new SolrInputDocument();
-    doc.addField(ViewerConstants.INDEX_ID, documentUUID);
+  // Bulk processing methods
 
-    List<String> fields = new ArrayList<>();
-    for (SolrInputDocument nest : nestedDocuments) {
-      for (SolrInputField field : nest) {
-        fields.add((String) field.getValue());
+  /**
+   * Saves a collection of items to Solr using bulk processing. This is the entry
+   * point for StepWriters to perform Upserts.
+   */
+  public <T extends IsIndexed> void insertBatchDocuments(String databaseUUID, List<? extends T> items)
+    throws ViewerException {
+    if (items == null || items.isEmpty()) {
+      return;
+    }
+
+    Class<?> objClass = items.get(0).getClass();
+    List<SolrInputDocument> docs = new ArrayList<>(items.size());
+    String targetCollection;
+
+    if (ViewerRow.class.isAssignableFrom(objClass)) {
+      RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+      targetCollection = collection.getIndexName();
+
+      for (T item : items) {
+        docs.add(toAtomicSolrDoc((ViewerRow) item));
+      }
+    } else {
+      @SuppressWarnings("unchecked")
+      SolrCollection<T> solrCollection = SolrDefaultCollectionRegistry.get((Class<T>) objClass);
+      targetCollection = solrCollection.getIndexName();
+
+      for (T item : items) {
+        try {
+          docs.add(solrCollection.toSolrDocument(item));
+        } catch (Exception e) {
+          LOGGER.error("Failed to map item to Solr document: {}", item, e);
+        }
       }
     }
 
-    // add a non-stored field for search only
-    doc.addField("token" + ViewerConstants.SOLR_DYN_NEST_MULTI, fields);
-
-    doc.addField("type" + ViewerConstants.SOLR_DYN_TEXT_GENERAL, "parent");
-
-    // add nested documents to root document
-    doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.asValueUpdate(nestedDocuments));
-
-    try {
-      insertDocument(collection.getIndexName(), doc);
-    } catch (ViewerException e) {
-      LOGGER.error("Could not update database progress for {}", databaseUUID, e);
-    }
+    executeBulkUpdate(targetCollection, docs);
   }
 
-  public SolrInputDocument createNestedDocument(String uuid, String originalRowUUID, String tableRowUUID,
-    Map<String, ?> fields, String tableId, String nestedUUID) {
-    SolrInputDocument nestedDoc = new SolrInputDocument();
-    nestedDoc.addField(ViewerConstants.INDEX_ID, SolrUtils.randomUUID());
-    nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_UUID, nestedUUID);
-    nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID, tableId);
-    nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, tableRowUUID);
-    for (Map.Entry<String, ?> entry : fields.entrySet()) {
-      if (entry.getKey().equals(ViewerConstants.SOLR_ROWS_NESTED)) {
-        continue;
-      }
-      nestedDoc.addField(entry.getKey(), entry.getValue());
-    }
-
-    return nestedDoc;
-  }
-
-  public void deleteNestedDocuments(String databaseUUID, String documentUUID) {
-    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+  /**
+   * Maps a ViewerRow to an Atomic Update document to prevent data loss of fields
+   * not present in the current processing chunk.
+   */
+  private SolrInputDocument toAtomicSolrDoc(ViewerRow row) {
     SolrInputDocument doc = new SolrInputDocument();
-    doc.addField(ViewerConstants.INDEX_ID, documentUUID);
-    doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.asValueUpdate(null));
-    try {
-      insertDocument(collection.getIndexName(), doc);
-    } catch (ViewerException e) {
-      LOGGER.error("Could not delete nested document for {}", databaseUUID, e);
+    doc.addField(ViewerConstants.INDEX_ID, row.getUuid());
+
+    if (row.getCells() != null) {
+      for (Map.Entry<String, ViewerCell> entry : row.getCells().entrySet()) {
+        String fieldName = entry.getKey();
+
+        if (isSystemField(fieldName)) {
+          continue;
+        }
+
+        Object value = (entry.getValue() != null) ? entry.getValue().getValue() : null;
+        doc.addField(fieldName, SolrUtils.asValueUpdate(value));
+      }
     }
+
+    if (row.getNestedRowList() != null && !row.getNestedRowList().isEmpty()) {
+      addNestedSolrDocument(row, doc);
+    }
+
+    return doc;
+  }
+
+  /**
+   * Internal helper to identify fields that should not be updated atomically.
+   */
+  private boolean isSystemField(String fieldName) {
+    return ViewerConstants.INDEX_ID.equals(fieldName) || ViewerConstants.SOLR_ROWS_TABLE_ID.equals(fieldName);
+  }
+
+  /**
+   * Executes a high-performance bulk update to a Solr collection.
+   * <p>
+   * This method is specifically designed for Spring Batch or high-volume indexing operations.
+   * It implements a retry mechanism to handle transient Solr errors, such as
+   * "Collection Not Found (404)" errors that occur immediately after database ingestion starts.
+   * Unlike standard single updates, this method prioritizes fail-fast behavior for critical
+   * network or server failures to allow the Batch framework to manage retries according
+   * to the defined Step policy.
+   * </p>
+   *
+   * @param collection the target Solr collection name
+   * @param docs the list of Solr documents to be indexed in a single request
+   * @throws ViewerException if the update fails after the timeout limit or if a fatal IO error occurs
+   */
+  private void executeBulkUpdate(String collection, List<SolrInputDocument> docs) throws ViewerException {
+    long timeoutLimit = System.currentTimeMillis() + INSERT_DOCUMENT_TIMEOUT;
+    boolean insertedAllDocuments = false;
+
+    do {
+      try {
+        UpdateResponse response = client.add(collection, docs);
+        if (response.getStatus() == 0) {
+          insertedAllDocuments = true;
+        }
+      } catch (SolrException e) {
+        if (e.code() == 404) {
+          LOGGER.debug("Target collection {} not yet available. Retrying...", collection);
+        } else {
+          throw new ViewerException("Unexpected Solr error during bulk update", e);
+        }
+      } catch (SolrServerException | IOException e) {
+        throw new ViewerException("Connection failure while updating Solr", e);
+      }
+
+      if (!insertedAllDocuments) {
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+        }
+      }
+    } while (!insertedAllDocuments && System.currentTimeMillis() < timeoutLimit);
+
+    if (!insertedAllDocuments) {
+      throw new ViewerException("Bulk update timed out for collection: " + collection);
+    }
+  }
+
+  private static void addNestedSolrDocument(ViewerRow row, SolrInputDocument doc) {
+    List<SolrInputDocument> solrNestedDocs = new ArrayList<>();
+    List<String> searchTokens = new ArrayList<>();
+
+    for (ViewerRow nestedRow : row.getNestedRowList()) {
+      SolrInputDocument nestedDoc = new SolrInputDocument();
+
+      // Mandatory metadata of the nested document
+      nestedDoc.addField(ViewerConstants.INDEX_ID, SolrUtils.randomUUID());
+      nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_UUID, nestedRow.getNestedUUID());
+      nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID, nestedRow.getNestedTableId());
+      nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, nestedRow.getNestedOriginalUUID());
+
+      // Adds the cells of the nested document and generates search tokens
+      for (Map.Entry<String, ViewerCell> cellEntry : nestedRow.getCells().entrySet()) {
+        String key = cellEntry.getKey();
+        String value = cellEntry.getValue() != null ? cellEntry.getValue().getValue() : null;
+
+        nestedDoc.addField(key, value);
+        if (value != null) {
+          searchTokens.add(value);
+        }
+      }
+      solrNestedDocs.add(nestedDoc);
+    }
+
+    // Add the search tokens to the parent document for better searchability and the
+    // nested documents as a nested field
+    doc.addField("token" + ViewerConstants.SOLR_DYN_NEST_MULTI, SolrUtils.asValueUpdate(searchTokens));
+    doc.addField("type" + ViewerConstants.SOLR_DYN_TEXT_GENERAL, SolrUtils.asValueUpdate("parent"));
+    doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.asValueUpdate(solrNestedDocs));
   }
 }
