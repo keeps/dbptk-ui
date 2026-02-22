@@ -1,13 +1,18 @@
 package com.databasepreservation.common.server.batch.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ChunkListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.AbstractTaskletStepBuilder;
 import org.springframework.batch.core.step.builder.FaultTolerantStepBuilder;
 import org.springframework.batch.core.step.builder.SimpleStepBuilder;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.core.step.builder.TaskletStepBuilder;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -17,20 +22,25 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.server.batch.components.readers.SolrCursorItemReader;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.listeners.PartitionStatusListener;
 import com.databasepreservation.common.server.batch.listeners.SolrProgressFeedListener;
 import com.databasepreservation.common.server.batch.listeners.StepStatusListener;
 import com.databasepreservation.common.server.batch.policy.ErrorPolicy;
+import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
 /**
+ * Factory responsible for assembling Spring Batch Steps utilizing SOLID
+ * principles. It reads the capabilities (interfaces) of a StepDefinition to
+ * dynamically build Chunks, Tasklets, and Partitioned steps.
+ *
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Component
 public class StepFactory {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StepFactory.class);
 
   private final JobRepository jobRepository;
   private final PlatformTransactionManager transactionManager;
@@ -42,64 +52,160 @@ public class StepFactory {
   @Qualifier("batchTaskExecutor")
   private TaskExecutor taskExecutor;
 
+  // Framework proxies for @StepScope support
   @Autowired
-  private ItemReader<ViewerRow> frameworkReader;
+  private ItemReader<?> frameworkReader;
 
   @Autowired
-  private ItemProcessor<ViewerRow, ?> frameworkProcessor;
+  private ItemProcessor<?, ?> frameworkProcessor;
 
   @Autowired
   private ItemWriter<?> frameworkWriter;
+
+  @Autowired
+  private Tasklet frameworkTasklet;
 
   public StepFactory(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
     this.jobRepository = jobRepository;
     this.transactionManager = transactionManager;
   }
 
-  public <I, O> Step build(StepDefinition<I, O> definition, JobContext context) {
-    Step workerStep = buildWorkerStep(definition, context);
+  /**
+   * Orchestrates the building process using Pattern Matching to identify
+   * capabilities.
+   */
+  public Step build(StepDefinition definition, JobContext context) {
 
-    return new StepBuilder(definition.getName(), jobRepository)
-      .partitioner(workerStep.getName(), createPartitioner(definition, context)).step(workerStep)
-      .taskExecutor(taskExecutor).listener(new StepStatusListener(definition, context)).build();
+    ExecutionPolicy executionPolicy = definition.getExecutionPolicy();
+    String stepName = definition.getName();
+
+    // 1. Check if the step requires partitioning (How it scales)
+    boolean isPartitioned = definition instanceof PartitionableStep;
+    String workerName = isPartitioned ? stepName + "Worker" : stepName;
+
+    // 2. Build the core worker step (What it does: Chunk or Tasklet)
+    Step workerStep;
+    if (definition instanceof ChunkStepDefinition<?, ?> chunkDef) {
+      LOGGER.info("Building Chunk-oriented step for: {}", workerName);
+      workerStep = buildChunkStep(chunkDef, workerName, context, executionPolicy, isPartitioned);
+    } else if (definition instanceof TaskletStepDefinition taskletDef) {
+      LOGGER.info("Building Tasklet-oriented step for: {}", workerName);
+      workerStep = buildTaskletStep(taskletDef, workerName, context, isPartitioned);
+    } else {
+      throw new IllegalArgumentException("Unknown Step capability for: " + definition.getClass().getName());
+    }
+
+    // 3. Wrap in a partitioner if it implements PartitionableStep
+    if (isPartitioned) {
+      LOGGER.info("Wrapping step {} in a Partitioner (Master/Worker)", stepName);
+      return buildPartitionedStep((PartitionableStep) definition, workerStep, stepName, context, executionPolicy);
+    }
+
+    // Otherwise, return the simple step directly
+    return workerStep;
   }
 
+  /**
+   * Builds a Chunk-oriented step using the framework proxies.
+   */
   @SuppressWarnings("unchecked")
-  private <I, O> Step buildWorkerStep(StepDefinition<I, O> definition, JobContext context) {
-    String workerName = definition.getName() + "Worker";
+  private Step buildChunkStep(ChunkStepDefinition<?, ?> definition, String stepName, JobContext context,
+    ExecutionPolicy executionPolicy, boolean isPartitionedWorker) {
 
-    SimpleStepBuilder<I, O> simpleBuilder = new StepBuilder(workerName, jobRepository)
-      .<I, O> chunk(SolrCursorItemReader.getChunkSize(), transactionManager);
+    StepBuilder stepBuilder = new StepBuilder(stepName, jobRepository);
+    int chunkSize = executionPolicy.getChunkSize();
 
-    // Injeção dos componentes @StepScope
-    simpleBuilder.reader((ItemReader<I>) frameworkReader);
-    simpleBuilder.processor((ItemProcessor<I, O>) frameworkProcessor);
-    simpleBuilder.writer((ItemWriter<O>) frameworkWriter);
+    SimpleStepBuilder<?, ?> simpleBuilder = stepBuilder.chunk(chunkSize, transactionManager);
 
-    // Configuração de tolerância a falhas (Skip/Retry)
-    FaultTolerantStepBuilder<I, O> faultTolerantBuilder = simpleBuilder.faultTolerant();
+    // Bind @StepScope proxies
+    simpleBuilder.reader((ItemReader) frameworkReader);
+    simpleBuilder.processor((ItemProcessor) frameworkProcessor);
+    simpleBuilder.writer((ItemWriter) frameworkWriter);
+
+    FaultTolerantStepBuilder<?, ?> faultTolerantBuilder = simpleBuilder.faultTolerant();
     applyErrorPolicy(faultTolerantBuilder, definition.getErrorPolicy());
-
-    SolrProgressFeedListener progressListener = new SolrProgressFeedListener(solrManager,
-      context.getJobProgressAggregator());
-
-    faultTolerantBuilder.listener((StepExecutionListener) progressListener);
-    faultTolerantBuilder.listener((ChunkListener) progressListener);
-
-    // Placeholder para Listeners de progresso (SolrProgressFeedListener)
-    faultTolerantBuilder.listener(new PartitionStatusListener(definition, context));
+    applyListeners(faultTolerantBuilder, definition, context, isPartitionedWorker);
 
     return faultTolerantBuilder.build();
   }
 
-  private Partitioner createPartitioner(StepDefinition<?, ?> definition, JobContext context) {
-    return gridSize -> definition.getPartitionStrategy().mapPartitions(context);
+  /**
+   * Wraps a worker Step inside a partitioned Master Step.
+   */
+  private Step buildPartitionedStep(PartitionableStep partitionableDef, Step workerStep, String stepName,
+    JobContext context, ExecutionPolicy executionPolicy) {
+
+    StepBuilder masterBuilder = new StepBuilder(stepName, jobRepository);
+    Partitioner partitioner = gridSize -> partitionableDef.getPartitionStrategy().mapPartitions(context);
+
+    var partitionBuilder = masterBuilder.partitioner(workerStep.getName(), partitioner);
+    partitionBuilder.step(workerStep);
+    partitionBuilder.gridSize(executionPolicy.getConcurrencyLimit());
+    partitionBuilder.taskExecutor(taskExecutor);
+
+    // The master step gets the StepStatusListener to update global status
+    partitionBuilder.listener(new StepStatusListener((StepDefinition) partitionableDef, context));
+
+    return partitionBuilder.build();
   }
 
-  private <I, O> void applyErrorPolicy(FaultTolerantStepBuilder<I, O> builder, ErrorPolicy policy) {
+  /**
+   * Builds a Tasklet-oriented step using the framework proxy. Note: Tasklets are
+   * atomic and do not support chunk-based fault tolerance (skip/retry).
+   */
+  private Step buildTaskletStep(TaskletStepDefinition definition, String stepName, JobContext context,
+    boolean isPartitionedWorker) {
+
+    StepBuilder stepBuilder = new StepBuilder(stepName, jobRepository);
+    TaskletStepBuilder taskletBuilder = stepBuilder.tasklet(frameworkTasklet, transactionManager);
+
+    applyListeners(taskletBuilder, definition, context, isPartitionedWorker);
+
+    return taskletBuilder.build();
+  }
+
+  /**
+   * Applies Fault Tolerance (Retry and Skip) based on ErrorPolicy. This is ONLY
+   * called for Chunk-oriented steps.
+   */
+  private void applyErrorPolicy(FaultTolerantStepBuilder<?, ?> builder, ErrorPolicy policy) {
+    if (policy == null)
+      return;
+
     builder.skipLimit(policy.getSkipLimit());
-    policy.getSkippableExceptions().forEach(builder::skip);
+    for (Class<? extends Throwable> skippable : policy.getSkippableExceptions()) {
+      builder.skip(skippable);
+    }
+
     builder.retryLimit(policy.getRetryLimit());
-    policy.getRetryableExceptions().forEach(builder::retry);
+    for (Class<? extends Throwable> retryable : policy.getRetryableExceptions()) {
+      builder.retry(retryable);
+    }
+  }
+
+  /**
+   * Applies common listeners to track progress and state.
+   * 
+   */
+  @SuppressWarnings("rawtypes")
+  private void applyListeners(AbstractTaskletStepBuilder builder, StepDefinition definition, JobContext context,
+    boolean isPartitionedWorker) {
+
+    SolrProgressFeedListener progressListener = new SolrProgressFeedListener(solrManager,
+      context.getJobProgressAggregator());
+
+    builder.listener((StepExecutionListener) progressListener);
+    builder.listener((ChunkListener) progressListener);
+
+    // Partition status is always tracked at the worker level
+    if (definition instanceof PartitionableStep partitionable) {
+      builder.listener(new PartitionStatusListener(partitionable, context));
+    }
+
+    // If it is NOT a partitioned worker, it must update the global step status
+    // itself
+    if (!isPartitionedWorker) {
+      builder.listener(new StepStatusListener(definition, context));
+    }
   }
 }

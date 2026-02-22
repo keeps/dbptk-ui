@@ -3,24 +3,27 @@ package com.databasepreservation.common.server.batch.steps.virtual.column;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
 
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.server.batch.context.JobContext;
-import com.databasepreservation.common.server.batch.core.AbstractStepDefinition;
+import com.databasepreservation.common.server.batch.core.AbstractIndexingStepDefinition;
+import com.databasepreservation.common.server.batch.core.PartitionableStep;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
 import com.databasepreservation.common.server.batch.steps.partition.PartitionStrategy;
 import com.databasepreservation.common.server.batch.steps.partition.TablePartitionStrategy;
-import com.databasepreservation.common.server.batch.components.writers.SolrItemWriter;
 
 /**
+ * Step responsible for computing virtual columns. It is chunk-oriented and
+ * partitionable by table.
+ *
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Component
-public class VirtualColumnStep extends AbstractStepDefinition<ViewerRow, ViewerRow> {
+public class VirtualColumnStep extends AbstractIndexingStepDefinition<ViewerRow, ViewerRow>
+  implements PartitionableStep {
 
   @Override
   public String getName() {
@@ -38,13 +41,13 @@ public class VirtualColumnStep extends AbstractStepDefinition<ViewerRow, ViewerR
   }
 
   @Override
-  public ItemProcessor<ViewerRow, ViewerRow> createProcessor(JobContext context, ExecutionContext partitionContext) {
-    return new VirtualColumnStepProcessor(context, partitionContext.getString("tableId"));
+  public long calculateWorkload(JobContext context) {
+    return calculatePartitionedWorkload(context);
   }
 
   @Override
-  public ItemWriter<ViewerRow> createWriter(JobContext context) {
-    return new SolrItemWriter(solrManager, context.getDatabaseUUID());
+  public ItemProcessor<ViewerRow, ViewerRow> createProcessor(JobContext context, ExecutionContext partitionContext) {
+    return new VirtualColumnStepProcessor(context, partitionContext.getString("tableId"));
   }
 
   @Override
