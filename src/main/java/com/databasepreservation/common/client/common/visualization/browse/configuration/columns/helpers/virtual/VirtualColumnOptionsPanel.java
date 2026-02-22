@@ -2,9 +2,11 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.models.status.collection.AdvancedStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
@@ -85,9 +87,9 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel {
   }
 
   public ColumnStatus getColumnStatus() {
-    int columnIndex = tableStatus.getColumns().size();
+    String uuid = UUID.randomUUID().toString();
     ColumnStatus columnStatus = new ColumnStatus();
-    columnStatus.setId("col" + columnIndex + "v_s");
+    columnStatus.setId(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + "_virtual_" + uuid + ViewerConstants.SOLR_DYN_STRING);
     columnStatus.setType(ViewerType.dbTypes.VIRTUAL);
     columnStatus.setName(virtualColumnName.getText());
     columnStatus.setCustomName(virtualColumnName.getText());

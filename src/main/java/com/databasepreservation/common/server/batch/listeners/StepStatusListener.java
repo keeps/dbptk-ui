@@ -15,10 +15,10 @@ import com.databasepreservation.common.server.batch.core.StepDefinition;
 public class StepStatusListener implements StepExecutionListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(StepStatusListener.class);
 
-  private final StepDefinition<?, ?> definition;
+  private final StepDefinition definition;
   private final JobContext context;
 
-  public StepStatusListener(StepDefinition<?, ?> definition, JobContext context) {
+  public StepStatusListener(StepDefinition definition, JobContext context) {
     this.definition = definition;
     this.context = context;
   }

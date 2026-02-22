@@ -2,12 +2,9 @@ package com.databasepreservation.common.server.batch.steps.denormalization;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.springframework.batch.item.ItemProcessor;
@@ -34,11 +31,7 @@ import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DenormalizationStepProcessor
-  implements ItemProcessor<ViewerRow, DenormalizationStepProcessor.NestedDocumentWrapper> {
-
-  public record NestedDocumentWrapper(String parentUUID, List<SolrInputDocument> nestedDocuments) {
-  }
+public class DenormalizationStepProcessor implements ItemProcessor<ViewerRow, ViewerRow> {
 
   private final DatabaseRowsSolrManager solrManager;
   private final DenormalizeConfiguration config;
@@ -53,14 +46,14 @@ public class DenormalizationStepProcessor
   }
 
   @Override
-  public DenormalizationStepProcessor.NestedDocumentWrapper process(ViewerRow row) throws Exception {
+  public ViewerRow process(ViewerRow row) throws Exception {
     ensureMetadataIsLoaded();
 
-    List<SolrInputDocument> nestedDocuments = new ArrayList<>();
+    List<ViewerRow> results = new ArrayList<>();
 
     try {
       for (RelatedTablesConfiguration relatedTable : config.getRelatedTables()) {
-        processRelatedTableRecursively(row, relatedTable, nestedDocuments);
+        processRelatedTableRecursively(row, relatedTable, results);
       }
     } catch (SolrServerException | IOException e) {
       throw e;
@@ -68,8 +61,9 @@ public class DenormalizationStepProcessor
       throw new DataTransformationException("Error processing row " + row.getUuid() + " for denormalization", e);
     }
 
-    return nestedDocuments.isEmpty() ? null
-      : new DenormalizationStepProcessor.NestedDocumentWrapper(row.getUuid(), nestedDocuments);
+    row.setNestedRowList(results);
+
+    return results.isEmpty() ? null : row;
   }
 
   private void ensureMetadataIsLoaded() throws SolrServerException, IOException, BatchJobException {
@@ -90,7 +84,7 @@ public class DenormalizationStepProcessor
   }
 
   private void processRelatedTableRecursively(ViewerRow row, RelatedTablesConfiguration relatedTable,
-    List<SolrInputDocument> nestedDocuments) throws SolrServerException, IOException {
+    List<ViewerRow> collector) throws SolrServerException, IOException {
 
     Filter filter = buildJoinFilter(row, relatedTable);
     if (filter == null)
@@ -103,14 +97,17 @@ public class DenormalizationStepProcessor
     // loading everything into memory at once
     try (IterableIndexResult nestedRows = solrManager.findAllRows(databaseUUID, filter, null, fieldsToReturn)) {
       for (ViewerRow nestedRow : nestedRows) {
+
+        nestedRow.getNestedRowList().clear();
+
         // Process children first (Recursion - Depth-first)
         for (RelatedTablesConfiguration innerTable : relatedTable.getRelatedTables()) {
-          processRelatedTableRecursively(nestedRow, innerTable, nestedDocuments);
+          processRelatedTableRecursively(nestedRow, innerTable, collector);
         }
 
         // Create nested document for this table if there are configured columns
-        if (!columnsToDisplay.isEmpty()) {
-          addNestedDocument(nestedRow, nestedDocuments, relatedTable, columnsToDisplay);
+        if (!columnsToDisplay.isEmpty() || !nestedRow.getNestedRowList().isEmpty()) {
+          addNestedDocument(nestedRow, relatedTable, columnsToDisplay, collector);
         }
       }
     }
@@ -166,32 +163,34 @@ public class DenormalizationStepProcessor
     return names;
   }
 
-  private void addNestedDocument(ViewerRow row, List<SolrInputDocument> nestedDocuments,
-    RelatedTablesConfiguration relatedTable, List<String> columnsToDisplay) {
+  private void addNestedDocument(ViewerRow nestedRow, RelatedTablesConfiguration relatedTable,
+    List<String> columnsToDisplay, List<ViewerRow> collector) {
 
     ViewerTable tableMeta = database.getMetadata().getTable(relatedTable.getTableUUID());
     if (tableMeta == null)
       return;
 
-    Map<String, Object> fields = new HashMap<>();
+    ViewerRow nestedEntry = new ViewerRow();
+    nestedEntry.setNestedUUID(relatedTable.getUuid());
+    nestedEntry.setNestedTableId(nestedRow.getTableId());
+    nestedEntry.setNestedOriginalUUID(nestedRow.getUuid());
+
     for (ViewerColumn col : tableMeta.getColumns()) {
-      if (!columnsToDisplay.contains(col.getSolrName()))
-        continue;
+      if (columnsToDisplay.contains(col.getSolrName())) {
 
-      ViewerCell cell = row.getCells().get(col.getSolrName());
-      if (cell == null)
-        continue;
+        ViewerCell cell = nestedRow.getCells().get(col.getSolrName());
+        if (cell != null) {
 
-      String key = ViewerConstants.SOLR_ROWS_NESTED_COL + col.getSolrName();
-      fields.put(key, resolveFieldValue(col, cell, tableMeta, row));
+          String key = ViewerConstants.SOLR_ROWS_NESTED_COL + col.getSolrName();
+          ViewerCell newCell = new ViewerCell();
+          newCell.setValue(resolveFieldValue(col, cell, tableMeta, nestedRow).toString());
+          nestedEntry.getCells().put(key, newCell);
+        }
+
+      }
     }
 
-    if (!fields.isEmpty()) {
-      // Delegate to solrManager the creation of the nested document with the correct
-      // metadata
-      nestedDocuments.add(solrManager.createNestedDocument(row.getNestedUUID(), row.getUuid(),
-        row.getNestedOriginalUUID(), fields, row.getTableId(), row.getNestedUUID()));
-    }
+    collector.add(nestedEntry);
   }
 
   private Object resolveFieldValue(ViewerColumn col, ViewerCell cell, ViewerTable table, ViewerRow row) {
