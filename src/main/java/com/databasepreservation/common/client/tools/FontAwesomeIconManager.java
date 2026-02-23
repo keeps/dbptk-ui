@@ -83,6 +83,9 @@ public class FontAwesomeIconManager {
   public static final String HANDS_HELP = "hand-holding-heart";
   public static final String PAINT_BRUSH = "paint-brush";
   public static final String WIDTH = "arrows-alt-h";
+  public static final String CLOUD = "cloud";
+  public static final String PLUS_CIRCLE = "plus-circle";
+  public static final String MINUS_CIRCLE = "minus-circle";
 
   public static String getTag(String icon) {
     return "<i class=\"fa fa-" + icon + "\"></i>";

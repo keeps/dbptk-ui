@@ -3,7 +3,7 @@ package com.databasepreservation.common.server.batch.policy;
 import com.databasepreservation.common.server.batch.context.JobContext;
 
 /**
- * * Defines the execution strategy for a Step, including gatekeeping
+ * Defines the execution strategy for a Step, including gatekeeping
  * (shouldExecute) and performance tuning (chunk size and concurrency).
  *
  * @author Gabriel Barros <gbarros@keep.pt>

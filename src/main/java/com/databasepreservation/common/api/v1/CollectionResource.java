@@ -24,10 +24,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import com.databasepreservation.common.server.batch.steps.virtual.column.VirtualColumnStep;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -108,6 +108,7 @@ import com.databasepreservation.common.server.batch.core.JobOrchestrator;
 import com.databasepreservation.common.server.batch.core.StepDefinition;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.batch.steps.denormalization.DenormalizationStep;
+import com.databasepreservation.common.server.batch.steps.virtual.column.VirtualColumnStep;
 import com.databasepreservation.common.server.controller.JobController;
 import com.databasepreservation.common.server.controller.ReporterType;
 import com.databasepreservation.common.server.controller.SIARDController;
@@ -391,6 +392,41 @@ public class CollectionResource implements CollectionService {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
         ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
+    }
+    return true;
+  }
+
+  @Override
+  public synchronized Boolean createDenormalizeConfigurationFiles(String databaseUUID, String collectionUUID,
+    Map<String, DenormalizeConfiguration> configurations) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
+
+      for (Map.Entry<String, DenormalizeConfiguration> entry : configurations.entrySet()) {
+        String tableUUID = entry.getKey();
+        DenormalizeConfiguration configuration = entry.getValue();
+
+        if (configuration != null) {
+          ParameterSanitization.sanitizePath(tableUUID, "Invalid tableUUID");
+          configuration.setLastUpdatedDate(new Date());
+
+          ViewerFactory.getConfigurationManager().updateDenormalizationConfigurationFile(databaseUUID, configuration);
+          ViewerFactory.getConfigurationManager().addDenormalization(databaseUUID,
+            ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
+        }
+      }
+    } catch (GenericException | AuthorizationException | IllegalArgumentException | IllegalAccessException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
     }
     return true;
   }

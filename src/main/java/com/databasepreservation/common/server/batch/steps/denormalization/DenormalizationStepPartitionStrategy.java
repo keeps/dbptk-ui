@@ -51,14 +51,14 @@ public class DenormalizationStepPartitionStrategy implements PartitionStrategy {
             }
           }
 
-          ExecutionContext execContext = new ExecutionContext();
-          execContext.putString("denormalizeEntryID", entryID);
+          ExecutionContext partitionContext = new ExecutionContext();
+          partitionContext.putString("denormalizeEntryID", entryID);
 
-          execContext.put("databaseUUID", context.getDatabaseUUID());
-          execContext.put("filter", FilterUtils.filterByTable(new Filter(), config.getTableID()));
-          execContext.put("fields", new ArrayList<>(fieldsToReturn));
+          partitionContext.put("databaseUUID", context.getDatabaseUUID());
+          partitionContext.put("filter", FilterUtils.filterByTable(new Filter(), config.getTableID()));
+          partitionContext.put("fields", new ArrayList<>(fieldsToReturn));
 
-          partitions.put("partition-" + entryID, execContext);
+          partitions.put("partition-" + entryID, partitionContext);
         }
       }
     }
@@ -66,8 +66,8 @@ public class DenormalizationStepPartitionStrategy implements PartitionStrategy {
   }
 
   @Override
-  public long calculateWorkload(JobContext context, ExecutionContext stepContext) {
-    Filter filter = (Filter) stepContext.get("filter");
+  public long calculateWorkload(JobContext context, ExecutionContext partitionContext) {
+    Filter filter = (Filter) partitionContext.get("filter");
     try {
       return solrManager.countRows(context.getDatabaseUUID(), filter);
     } catch (GenericException | RequestNotValidException e) {

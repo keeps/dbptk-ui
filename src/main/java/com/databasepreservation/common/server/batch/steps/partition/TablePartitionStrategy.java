@@ -37,26 +37,26 @@ public class TablePartitionStrategy implements PartitionStrategy {
 
     if (context.getCollectionStatus().getTables() != null) {
       context.getCollectionStatus().getTables().stream().filter(tableFilter).forEach(table -> {
-        ExecutionContext v = new ExecutionContext();
-        v.putString("tableId", table.getId());
+        ExecutionContext partitionContext = new ExecutionContext();
+        partitionContext.putString("tableId", table.getId());
 
-        v.put("databaseUUID", context.getDatabaseUUID());
-        v.put("filter", FilterUtils.filterByTable(new Filter(), table.getId()));
-        v.put("fields", new ArrayList<String>());
+        partitionContext.put("databaseUUID", context.getDatabaseUUID());
+        partitionContext.put("filter", FilterUtils.filterByTable(new Filter(), table.getId()));
+        partitionContext.put("fields", new ArrayList<String>());
 
-        partitions.put("partition-" + table.getId(), v);
+        partitions.put("partition-" + table.getId(), partitionContext);
       });
     }
     return partitions;
   }
 
   @Override
-  public long calculateWorkload(JobContext context, ExecutionContext stepContext) {
-    Filter filter = (Filter) stepContext.get("filter");
+  public long calculateWorkload(JobContext context, ExecutionContext partitionContext) {
+    Filter filter = (Filter) partitionContext.get("filter");
     try {
       return solrManager.findRows(context.getDatabaseUUID(), filter, null, new Sublist(0, 0), null).getTotalCount();
     } catch (RequestNotValidException | GenericException e) {
-      LOGGER.error("Error calculating workload for table {}: {}", stepContext.getString("tableId"), e.getMessage());
+      LOGGER.error("Error calculating workload for table {}: {}", partitionContext.getString("tableId"), e.getMessage());
       return 0L;
     }
   }

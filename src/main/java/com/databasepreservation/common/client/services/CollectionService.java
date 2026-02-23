@@ -119,6 +119,12 @@ public interface CollectionService extends DirectRestService {
     @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID,
     @RequestBody DenormalizeConfiguration configuration);
 
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/denormalize/batch", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Creates multiple denormalization configuration files for tables within a database in a single request")
+  Boolean createDenormalizeConfigurationFiles(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID,
+    @RequestBody java.util.Map<String, DenormalizeConfiguration> configurations);
+
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Deletes the denormalization configuration file for a certain table within a database")
   Boolean deleteDenormalizeConfigurationFile(@PathVariable(name = "databaseUUID") String databaseUUID,
