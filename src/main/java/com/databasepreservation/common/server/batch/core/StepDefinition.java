@@ -33,9 +33,27 @@ public interface StepDefinition {
    */
   ErrorPolicy getErrorPolicy();
 
+  /**
+   * Estimates the volume of work for progress tracking.
+   * 
+   * @param context
+   *          The current job context.
+   * @return The total number of items or units of work (default 1).
+   */
   default long calculateWorkload(JobContext context) {
     return 1L;
   }
 
+  /**
+   * Lifecycle hook executed after the step finishes.
+   * 
+   * 
+   * @param context
+   *          The current job context.
+   * @param status
+   *          The resulting status of the step execution.
+   * @throws BatchJobException
+   *           if post-processing fails.
+   */
   void onStepCompleted(JobContext context, BatchStatus status) throws BatchJobException;
 }

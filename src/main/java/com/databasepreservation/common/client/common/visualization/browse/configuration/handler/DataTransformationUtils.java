@@ -211,11 +211,7 @@ public class DataTransformationUtils {
     viewerColumn.setType(viewerType);
     viewerColumn.setDescription(columnStatus.getDescription());
 
-    // Extract column index from columnStatus.getId() (e.g., "col3v_s" -> 3)
-    String indexStr = columnStatus.getId().replaceAll("[^0-9]", "");
-    int columnIndex = Integer.parseInt(indexStr);
-
-    viewerColumn.setColumnIndexInEnclosingTable(columnIndex);
+    viewerColumn.setColumnIndexInEnclosingTable(0);
     viewerColumn.setNillable(true);
 
     return viewerColumn;

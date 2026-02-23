@@ -314,8 +314,30 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
           public SafeHtml getValue(ColumnStatus column) {
             if (column.getType().equals(ViewerType.dbTypes.NESTED)) {
               return SafeHtmlUtils.fromSafeConstant(column.getNestedColumns().getPath());
+            } else if (column.getType().equals(ViewerType.dbTypes.VIRTUAL)){
+              SafeHtmlBuilder sb = new SafeHtmlBuilder();
+              ProcessingState state = null;
+              if (column.getVirtualColumnStatus() != null) {
+                state = column.getVirtualColumnStatus().getProcessingState();
+              }
+
+              if (ProcessingState.TO_REMOVE.equals(state)) {
+                sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.MINUS_CIRCLE));
+                sb.appendHtmlConstant("<span style='text-decoration: line-through; color: #6c757d; margin-left: 5px;'>");
+              } else if(ProcessingState.TO_PROCESS.equals(state)) {
+                sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.PLUS_CIRCLE));
+                sb.appendHtmlConstant("<span style='font-weight: bold; margin-left: 5px;'>");
+              } else {
+                sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.CLOUD));
+                sb.appendHtmlConstant("<span style='font-weight: bold; margin-left: 5px;'>");
+              }
+
+              sb.append(SafeHtmlUtils.fromString(column.getName()));
+              sb.appendHtmlConstant("</span>");
+              return sb.toSafeHtml();
+            } else {
+              return SafeHtmlUtils.fromString(column.getName());
             }
-            return SafeHtmlUtils.fromString(column.getName());
           }
         }),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderLabel(), 15, getLabelColumn()),

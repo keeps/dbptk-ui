@@ -40,7 +40,7 @@ public class StepComponentsConfig {
    */
   @Bean
   @StepScope
-  public ItemReader<?> frameworkReader(@Value("#{stepExecution.stepName}") String stepName,
+  public ItemReader<?> proxyReader(@Value("#{stepExecution.stepName}") String stepName,
     @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID,
     @Value("#{stepExecutionContext}") Map<String, Object> partitionCtx) {
 
@@ -53,7 +53,7 @@ public class StepComponentsConfig {
    */
   @Bean
   @StepScope
-  public ItemProcessor<?, ?> frameworkProcessor(@Value("#{stepExecution.stepName}") String stepName,
+  public ItemProcessor<?, ?> proxyProcessor(@Value("#{stepExecution.stepName}") String stepName,
     @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID,
     @Value("#{stepExecutionContext}") Map<String, Object> partitionCtx) {
 
@@ -66,7 +66,7 @@ public class StepComponentsConfig {
    */
   @Bean
   @StepScope
-  public ItemWriter<?> frameworkWriter(@Value("#{stepExecution.stepName}") String stepName,
+  public ItemWriter<?> proxyWriter(@Value("#{stepExecution.stepName}") String stepName,
     @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID) {
 
     JobContext ctx = contextRegistry.get(databaseUUID);
@@ -79,7 +79,7 @@ public class StepComponentsConfig {
    */
   @Bean
   @StepScope
-  public Tasklet frameworkTasklet(@Value("#{stepExecution.stepName}") String stepName,
+  public Tasklet proxyTasklet(@Value("#{stepExecution.stepName}") String stepName,
     @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID,
     @Value("#{stepExecutionContext}") Map<String, Object> partitionCtx) {
 
