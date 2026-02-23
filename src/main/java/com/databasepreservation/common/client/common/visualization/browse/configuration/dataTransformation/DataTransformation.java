@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -99,8 +100,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
   private DataTransformationSidebar sidebar;
   private CollectionStatus collectionStatus;
   private DenormalizeConfiguration denormalizeConfiguration;
-  private Button btnRunConfiguration = new Button();
-  private Button btnRunAllConfiguration = new Button();
+  private Button btnSaveConfiguration = new Button();
   private Button btnGotoTable = new Button();
   private Button btnCancel = new Button();
   private List<Button> buttons = new ArrayList<>();
@@ -159,7 +159,6 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
     FlowPanel panel = new FlowPanel();
     panel.addStyleName("data-transformation-toolbar-actions");
-    // panel.add(btnRunConfiguration);
     panel.add(btnGotoTable);
 
     toolBar.add(tablePanel);
@@ -229,30 +228,14 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     btnGotoTable.setStyleName("btn btn-table");
     btnGotoTable.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), tableId));
 
-    // btnRunConfiguration.setEnabled(false);
-    // btnRunConfiguration.setText(
-    // messages.dataTransformationBtnRunTable());
-    // btnRunConfiguration.setStyleName("btn btn-play");
-    // btnRunConfiguration.addClickHandler(clickEvent -> {
-    // DataTransformationUtils.saveConfiguration(database.getUuid(),
-    // denormalizeConfiguration, collectionStatus);
-    // DataTransformationUtils.runConfigurations(database.getUuid(),
-    // collectionStatus);
-    // HistoryManager.gotoJobs();
-    // });
-
-    btnRunAllConfiguration.setText(messages.basicActionSave());
-    btnRunAllConfiguration.setStyleName("btn btn-save");
-    btnRunAllConfiguration.addClickHandler(clickEvent -> {
-      for (Map.Entry<String, DenormalizeConfiguration> entry : denormalizeConfigurationList.entrySet()) {
-        saveConfiguration(database.getUuid(), entry.getValue(), collectionStatus);
-        configurationStatusPanel.updateCollection(collectionStatus);
-      }
+    btnSaveConfiguration.setText(messages.basicActionSave());
+    btnSaveConfiguration.setStyleName("btn btn-save");
+    btnSaveConfiguration.addClickHandler(clickEvent -> {
+      saveConfiguration(database.getUuid(), denormalizeConfigurationList.entrySet(), collectionStatus);
     });
 
     buttons.add(btnCancel);
-    // buttons.add(btnRunConfiguration);
-    buttons.add(btnRunAllConfiguration);
+    buttons.add(btnSaveConfiguration);
 
     updateControllerPanel();
   }
@@ -405,13 +388,13 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
   private void updateControllerPanel() {
     if (!isInformation) {
-      btnRunAllConfiguration.setEnabled(false);
+      btnSaveConfiguration.setEnabled(false);
       btnCancel.setEnabled(false);
       // btnClearConfiguration.setEnabled(false);
       if (!denormalizeConfigurationList.isEmpty()) {
         for (DenormalizeConfiguration value : denormalizeConfigurationList.values()) {
           if (value.getState() != null && value.getState().equals(ViewerJobStatus.NEW)) {
-            btnRunAllConfiguration.setEnabled(true);
+            btnSaveConfiguration.setEnabled(true);
             btnCancel.setEnabled(true);
             // btnClearConfiguration.setEnabled(true);
             break;
@@ -419,7 +402,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
         }
       }
       buttonsToSidebar.clear();
-      buttonsToSidebar.add(btnRunAllConfiguration);
+      buttonsToSidebar.add(btnSaveConfiguration);
       buttonsToSidebar.add(btnCancel);
       sidebar.updateControllerPanel(buttonsToSidebar);
     } else {
@@ -427,18 +410,33 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     }
   }
 
-  public void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration,
-    CollectionStatus collectionStatus) {
-    if (denormalizeConfiguration != null && denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
-      CollectionService.Util.call((Boolean result) -> {
-        Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
-          "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
-      }, errorMessage -> {
-        Dialogs.showErrors(messages.advancedConfigurationLabelForDataTransformation(), errorMessage,
-          messages.basicActionClose());
-      }).createDenormalizeConfigurationFile(databaseUUID, databaseUUID, denormalizeConfiguration.getTableUUID(),
-        denormalizeConfiguration);
+  public void saveConfiguration(String databaseUUID,
+    Set<Map.Entry<String, DenormalizeConfiguration>> denormalizeConfigurationSet, CollectionStatus collectionStatus) {
+
+    Map<String, DenormalizeConfiguration> configsToSave = new HashMap<>();
+    for (Map.Entry<String, DenormalizeConfiguration> entry : denormalizeConfigurationSet) {
+      DenormalizeConfiguration config = entry.getValue();
+      if (config != null && config.getState().equals(ViewerJobStatus.NEW)) {
+        configsToSave.put(entry.getKey(), config);
+      }
     }
+
+    if (configsToSave.isEmpty()) {
+      return;
+    }
+
+    CollectionService.Util.call((Boolean result) -> {
+      Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(), "Configurations saved successfully.");
+
+      CollectionService.Util.call((List<CollectionStatus> statusList) -> {
+        if (statusList != null && !statusList.isEmpty()) {
+          ObserverManager.getCollectionObserver().setCollectionStatus(statusList.get(0));
+        }
+      }).getCollectionConfiguration(databaseUUID, databaseUUID);
+
+    }, errorMessage -> {
+      Dialogs.showErrors("Error Saving Configurations", errorMessage, messages.basicActionClose());
+    }).createDenormalizeConfigurationFiles(databaseUUID, databaseUUID, configsToSave);
   }
 
   @Override

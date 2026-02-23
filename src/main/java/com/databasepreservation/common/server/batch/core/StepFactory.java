@@ -52,18 +52,18 @@ public class StepFactory {
   @Qualifier("batchTaskExecutor")
   private TaskExecutor taskExecutor;
 
-  // Framework proxies for @StepScope support
+  // proxies for @StepScope support
   @Autowired
-  private ItemReader<?> frameworkReader;
+  private ItemReader<?> proxyReader;
 
   @Autowired
-  private ItemProcessor<?, ?> frameworkProcessor;
+  private ItemProcessor<?, ?> proxyProcessor;
 
   @Autowired
-  private ItemWriter<?> frameworkWriter;
+  private ItemWriter<?> proxyWriter;
 
   @Autowired
-  private Tasklet frameworkTasklet;
+  private Tasklet proxyTasklet;
 
   public StepFactory(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
     this.jobRepository = jobRepository;
@@ -106,7 +106,7 @@ public class StepFactory {
   }
 
   /**
-   * Builds a Chunk-oriented step using the framework proxies.
+   * Builds a Chunk-oriented step using the stepScope proxies.
    */
   @SuppressWarnings("unchecked")
   private Step buildChunkStep(ChunkStepDefinition<?, ?> definition, String stepName, JobContext context,
@@ -118,9 +118,9 @@ public class StepFactory {
     SimpleStepBuilder<?, ?> simpleBuilder = stepBuilder.chunk(chunkSize, transactionManager);
 
     // Bind @StepScope proxies
-    simpleBuilder.reader((ItemReader) frameworkReader);
-    simpleBuilder.processor((ItemProcessor) frameworkProcessor);
-    simpleBuilder.writer((ItemWriter) frameworkWriter);
+    simpleBuilder.reader((ItemReader) proxyReader);
+    simpleBuilder.processor((ItemProcessor) proxyProcessor);
+    simpleBuilder.writer((ItemWriter) proxyWriter);
 
     FaultTolerantStepBuilder<?, ?> faultTolerantBuilder = simpleBuilder.faultTolerant();
     applyErrorPolicy(faultTolerantBuilder, definition.getErrorPolicy());
@@ -157,7 +157,7 @@ public class StepFactory {
     boolean isPartitionedWorker) {
 
     StepBuilder stepBuilder = new StepBuilder(stepName, jobRepository);
-    TaskletStepBuilder taskletBuilder = stepBuilder.tasklet(frameworkTasklet, transactionManager);
+    TaskletStepBuilder taskletBuilder = stepBuilder.tasklet(proxyTasklet, transactionManager);
 
     applyListeners(taskletBuilder, definition, context, isPartitionedWorker);
 

@@ -55,7 +55,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
   private JobList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable,
     boolean copiable) {
     super(filter, facets, summary, selectable, exportable, copiable, 15, 15);
-    autoUpdate(5000);
+    autoUpdate(2500);
   }
 
   @Override
