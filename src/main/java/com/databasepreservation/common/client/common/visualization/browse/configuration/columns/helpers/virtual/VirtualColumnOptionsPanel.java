@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidatableOptionsPanel;
 import com.databasepreservation.common.client.models.status.collection.AdvancedStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.DetailsStatus;
@@ -19,10 +20,12 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
 import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
 import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -31,7 +34,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class VirtualColumnOptionsPanel extends ColumnOptionsPanel {
+public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements ValidatableOptionsPanel {
 
   interface VirtualColumnOptionsPanelUiBinder extends UiBinder<Widget, VirtualColumnOptionsPanel> {
   }
@@ -39,14 +42,15 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel {
   private static VirtualColumnOptionsPanelUiBinder binder = GWT.create(VirtualColumnOptionsPanelUiBinder.class);
 
   private final TableStatus tableStatus;
+  private final ColumnStatus originalStatus;
   private List<String> sourceColumnsIds = new ArrayList<>();
 
   @UiField
-  ClientMessages messages = GWT.create(ClientMessages.class);
-
+  ClientMessages messages;
   @UiField
   TextBox virtualColumnName, virtualColumnDescription, templateSourceColumns;
-
+  @UiField
+  Label errorVirtualColumnName, errorTemplateSourceColumns;
   @UiField
   FlowPanel templateSourceColumnsHint;
 
@@ -57,17 +61,37 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel {
   private VirtualColumnOptionsPanel(TableStatus tableStatus, ColumnStatus columnStatus) {
     initWidget(binder.createAndBindUi(this));
     this.tableStatus = tableStatus;
+    this.originalStatus = columnStatus;
 
     VirtualOptionsPanelUtils.renderColumnTemplateButtons(tableStatus.getColumns(), templateSourceColumnsHint,
-      templateSourceColumns, sourceColumnsIds, messages);
+      templateSourceColumns, sourceColumnsIds, messages, false);
 
+    bindEvents();
     populateVirtualColumnFields(columnStatus);
   }
 
+  private void bindEvents() {
+    virtualColumnName.addKeyPressHandler(event -> {
+      if (event.getCharCode() == ' ') {
+        event.preventDefault();
+      }
+    });
+
+    virtualColumnName.addKeyUpHandler(event -> clearError(virtualColumnName, errorVirtualColumnName));
+
+    templateSourceColumns.addKeyUpHandler(event -> clearError(templateSourceColumns, errorTemplateSourceColumns));
+
+    virtualColumnName.addValueChangeHandler(event -> {
+      String val = virtualColumnName.getText();
+      if (val.contains(" ")) {
+        virtualColumnName.setText(val.replace(" ", "_"));
+      }
+    });
+  }
+
   private void populateVirtualColumnFields(ColumnStatus columnStatus) {
-    if (columnStatus.getName() != null) {
+    if (!ViewerStringUtils.isBlank(columnStatus.getName())) {
       virtualColumnName.setText(columnStatus.getName());
-      virtualColumnName.setEnabled(false);
     }
 
     if (columnStatus.getDescription() != null) {
@@ -79,40 +103,97 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel {
       if (virtualColumnStatus.getSourceColumnsIds() != null) {
         sourceColumnsIds = virtualColumnStatus.getSourceColumnsIds();
       }
-
       if (virtualColumnStatus.getSourceTemplateStatus() != null) {
         templateSourceColumns.setText(virtualColumnStatus.getSourceTemplateStatus().getTemplate());
       }
     }
   }
 
+  @Override
+  public boolean validate() {
+    boolean isValid = true;
+
+    clearError(virtualColumnName, errorVirtualColumnName);
+    clearError(templateSourceColumns, errorTemplateSourceColumns);
+
+    String nameValue = virtualColumnName.getText();
+
+    if (ViewerStringUtils.isBlank(nameValue)) {
+      showError(virtualColumnName, errorVirtualColumnName,
+        messages.columnManagementLabelForVirtualColumnName() + " is required.");
+      isValid = false;
+    } else if (nameValue.contains(" ")) {
+      showError(virtualColumnName, errorVirtualColumnName, "Column name cannot contain spaces.");
+      isValid = false;
+    } else if (!nameValue.matches("^[a-zA-Z0-9_]+$")) {
+      showError(virtualColumnName, errorVirtualColumnName, "Only letters, numbers and underscores are allowed.");
+      isValid = false;
+    }
+
+    if (ViewerStringUtils.isBlank(templateSourceColumns.getText())) {
+      showError(templateSourceColumns, errorTemplateSourceColumns,
+        messages.columnManagementLabelForSourceColumnsTemplate() + " is required.");
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  private void showError(Widget input, Label errorLabel, String message) {
+    input.addStyleName("dialog-input-error");
+    errorLabel.setText(message);
+    errorLabel.setVisible(true);
+  }
+
+  private void clearError(Widget input, Label errorLabel) {
+    input.removeStyleName("dialog-input-error");
+    errorLabel.setText("");
+    errorLabel.setVisible(false);
+  }
+
   public ColumnStatus getColumnStatus() {
-    String uuid = UUID.randomUUID().toString();
-    ColumnStatus columnStatus = new ColumnStatus();
-    columnStatus.setId(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + "_virtual_" + uuid + ViewerConstants.SOLR_DYN_STRING);
-    columnStatus.setType(ViewerType.dbTypes.VIRTUAL);
-    columnStatus.setName(virtualColumnName.getText());
-    columnStatus.setCustomName(virtualColumnName.getText());
-    columnStatus.setDescription(virtualColumnDescription.getText());
-    columnStatus.setCustomDescription(virtualColumnDescription.getText());
-    columnStatus.setOrder(tableStatus.getLastColumnOrder() + 1);
+    ColumnStatus statusToReturn = (originalStatus != null) ? originalStatus : new ColumnStatus();
 
-    columnStatus.setExportStatus(new ExportStatus());
-    columnStatus.getExportStatus().setTemplateStatus(new TemplateStatus());
+    if (ViewerStringUtils.isBlank(statusToReturn.getId())) {
+      String uuid = UUID.randomUUID().toString();
+      statusToReturn.setId(
+        ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + "_virtual_" + uuid + ViewerConstants.SOLR_DYN_STRING);
+      statusToReturn.setOrder(tableStatus.getLastColumnOrder() + 1);
+    }
 
-    columnStatus.setSearchStatus(new SearchStatus());
-    columnStatus.getSearchStatus().setAdvanced(new AdvancedStatus());
-    columnStatus.getSearchStatus().setList(new ListStatus());
-    columnStatus.getSearchStatus().getList().setShow(true);
-    columnStatus.getSearchStatus().getList().setTemplate(new TemplateStatus());
+    statusToReturn.setType(ViewerType.dbTypes.VIRTUAL);
+    statusToReturn.setName(virtualColumnName.getText());
+    statusToReturn.setCustomName(virtualColumnName.getText());
+    statusToReturn.setDescription(virtualColumnDescription.getText());
+    statusToReturn.setCustomDescription(virtualColumnDescription.getText());
 
-    columnStatus.setDetailsStatus(new DetailsStatus());
-    columnStatus.getDetailsStatus().setShow(true);
-    columnStatus.getDetailsStatus().setTemplateStatus(new TemplateStatus());
+    ensureStatusStructures(statusToReturn);
+    statusToReturn.setVirtualColumnStatus(getVirtualColumnStatus());
 
-    columnStatus.setVirtualColumnStatus(getVirtualColumnStatus());
+    return statusToReturn;
+  }
 
-    return columnStatus;
+  private void ensureStatusStructures(ColumnStatus status) {
+    if (status.getExportStatus() == null)
+      status.setExportStatus(new ExportStatus());
+    if (status.getExportStatus().getTemplateStatus() == null)
+      status.getExportStatus().setTemplateStatus(new TemplateStatus());
+    if (status.getSearchStatus() == null)
+      status.setSearchStatus(new SearchStatus());
+    if (status.getSearchStatus().getAdvanced() == null)
+      status.getSearchStatus().setAdvanced(new AdvancedStatus());
+    if (status.getSearchStatus().getList() == null) {
+      status.getSearchStatus().setList(new ListStatus());
+      status.getSearchStatus().getList().setShow(true);
+    }
+    if (status.getSearchStatus().getList().getTemplate() == null)
+      status.getSearchStatus().getList().setTemplate(new TemplateStatus());
+    if (status.getDetailsStatus() == null) {
+      status.setDetailsStatus(new DetailsStatus());
+      status.getDetailsStatus().setShow(true);
+    }
+    if (status.getDetailsStatus().getTemplateStatus() == null)
+      status.getDetailsStatus().setTemplateStatus(new TemplateStatus());
   }
 
   @NotNull
@@ -123,7 +204,6 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel {
     sourceTemplateStatus.setTemplate(templateSourceColumns.getText());
     virtualColumnStatus.setSourceTemplateStatus(sourceTemplateStatus);
     virtualColumnStatus.setProcessingState(ProcessingState.TO_PROCESS);
-
     return virtualColumnStatus;
   }
 
@@ -141,5 +221,4 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel {
   public TemplateStatus getExportTemplate() {
     return null;
   }
-
 }
