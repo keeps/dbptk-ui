@@ -2,15 +2,36 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:a="urn:import:com.databasepreservation.common.client.widgets">
 
-
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+
     <a:Alert ui:field="alertPanel" addStyleNames="configuration-bar-alert" visible="false">
-        <g:FlowPanel addStyleNames="navigation-panel-buttons">
-            <g:SimplePanel addStyleNames="btn-item">
-                <g:Button ui:field="btnApplyConfiguration" addStyleNames="btn btn-primary btn-play" >
-                    <ui:text from='{messages.basicActionConfirm}'/>
-                </g:Button>
-            </g:SimplePanel>
+        <g:FlowPanel addStyleNames="configuration-status-wrapper">
+
+            <g:FlowPanel ui:field="initialStatePanel" addStyleNames="config-initial-state">
+                <g:Label ui:field="messageLabel" addStyleNames="config-message"/>
+                <g:SimplePanel addStyleNames="btn-item">
+                    <g:Button ui:field="btnApplyConfiguration" addStyleNames="btn btn-primary btn-play">
+                        <ui:text from='{messages.basicActionRun}'/>
+                    </g:Button>
+                </g:SimplePanel>
+            </g:FlowPanel>
+
+            <g:FlowPanel ui:field="progressPanel" visible="false" addStyleNames="config-progress-state">
+                <g:FlowPanel addStyleNames="progress-header">
+                    <g:HTML ui:field="statusBadge" addStyleNames="status-badge"/>
+                    <g:Label ui:field="progressText" addStyleNames="progress-text"/>
+                    <g:SimplePanel addStyleNames="btn-item">
+                        <g:Button ui:field="btnGoToJobs" addStyleNames="btn btn-primary btn-play">
+                            <ui:text from='{messages.basicActionBrowse}'/>
+                        </g:Button>
+                    </g:SimplePanel>
+                </g:FlowPanel>
+
+                <g:HTMLPanel addStyleNames="progress">
+                    <g:HTMLPanel ui:field="progressBar" addStyleNames="progress-bar progress-bar-striped active"/>
+                </g:HTMLPanel>
+            </g:FlowPanel>
+
         </g:FlowPanel>
     </a:Alert>
 
