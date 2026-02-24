@@ -22,6 +22,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
+import org.apache.solr.client.solrj.impl.Http2SolrClient;
 import org.apache.solr.client.solrj.impl.ZkClientClusterStateProvider;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.CollectionAdminResponse;
@@ -74,7 +75,24 @@ public class CloudSolrClientFactory extends SolrClientFactory<CloudSolrClient> {
             zkChroot = Optional.empty();
         }
 
-        return new CloudSolrClient.Builder(zkHosts, zkChroot).build();
+        boolean basicAuthActive = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
+                ViewerConfiguration.PROPERTY_SOLR_BASIC_AUTH_ACTIVE);
+
+        if (basicAuthActive) {
+            LOGGER.info("Solr basic authentication is ENABLED. Configuring internal HTTP client.");
+            String solrUser = ViewerConfiguration.getInstance().getViewerConfigurationAsString("dbptk",
+                    ViewerConfiguration.PROPERTY_SOLR_BASIC_AUTH_USERNAME);
+            String solrPass = ViewerConfiguration.getInstance().getViewerConfigurationAsString("dbptk",
+                    ViewerConfiguration.PROPERTY_SOLR_BASIC_AUTH_PASSWORD);
+
+            Http2SolrClient.Builder http2ClientBuilder = new Http2SolrClient.Builder().withBasicAuthCredentials(solrUser,
+              solrPass);
+
+            return new CloudSolrClient.Builder(zkHosts, zkChroot).withInternalClientBuilder(http2ClientBuilder).build();
+        } else {
+            LOGGER.info("Solr basic authentication is DISABLED.");
+            return new CloudSolrClient.Builder(zkHosts, zkChroot).build();
+        }
     }
 
     protected void waitForSolrToInitialize() {
