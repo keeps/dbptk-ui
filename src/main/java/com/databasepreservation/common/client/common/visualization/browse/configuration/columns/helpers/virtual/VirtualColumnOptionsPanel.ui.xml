@@ -1,22 +1,25 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
-    <g:FlowPanel ui:field="content" addStyleNames="columns-customize-options">
+
+    <g:FlowPanel ui:field="content">
         <g:HTML addStyleNames="dialog-numeric-description" ui:field="description"/>
+
         <g:FlowPanel addStyleNames="dialog-customize-columns-options">
             <g:FlowPanel addStyleNames="dialog-customize-columns-option">
-                <!-- Metadata -->
+
                 <g:FlowPanel>
-                    <g:Label addStyleNames="form-separator">
+                    <g:Label addStyleNames="dialog-form-separator">
                         <ui:text from='{messages.columnManagementLabelForVirtualColumn}'/>
                     </g:Label>
                 </g:FlowPanel>
 
                 <g:FlowPanel>
-                    <g:Label addStyleNames="form-label">
+                    <g:HTML addStyleNames="form-label form-label-mandatory">
                         <ui:text from='{messages.columnManagementLabelForVirtualColumnName}'/>
-                    </g:Label>
+                    </g:HTML>
                     <g:TextBox addStyleNames="form-textbox" ui:field="virtualColumnName"/>
+                    <g:Label ui:field="errorVirtualColumnName" addStyleNames="dialog-input-error-text" visible="false"/>
                 </g:FlowPanel>
 
                 <g:FlowPanel>
@@ -26,13 +29,14 @@
                     <g:TextBox addStyleNames="form-textbox" ui:field="virtualColumnDescription"/>
                 </g:FlowPanel>
 
-                <!-- Source columns -->
                 <g:FlowPanel>
-                    <g:Label addStyleNames="form-label">
+                    <g:HTML addStyleNames="form-label form-label-mandatory">
                         <ui:text from='{messages.columnManagementLabelForSourceColumnsTemplate}'/>
-                    </g:Label>
+                    </g:HTML>
                     <g:TextBox addStyleNames="form-textbox" ui:field="templateSourceColumns"/>
                     <g:FlowPanel ui:field="templateSourceColumnsHint"/>
+                    <g:Label ui:field="errorTemplateSourceColumns" addStyleNames="dialog-input-error-text"
+                             visible="false"/>
                 </g:FlowPanel>
 
             </g:FlowPanel>

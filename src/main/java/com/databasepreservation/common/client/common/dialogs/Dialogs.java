@@ -17,6 +17,7 @@ import com.databasepreservation.common.client.common.helpers.HelperValidator;
 import com.databasepreservation.common.client.common.lists.columns.IndexedColumn;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidatableOptionsPanel;
 import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
@@ -591,8 +592,23 @@ public class Dialogs {
     }
 
     btnSave.addClickHandler(event -> {
-      dialogBox.hide();
-      callback.onSuccess(DialogAction.SAVE);
+
+      boolean allPanelsValid = true;
+
+      for (ColumnOptionsPanel panel : optionsPanels) {
+        if (panel instanceof ValidatableOptionsPanel) {
+          boolean isPanelValid = ((ValidatableOptionsPanel) panel).validate();
+
+          if (!isPanelValid) {
+            allPanelsValid = false;
+          }
+        }
+      }
+
+      if (allPanelsValid) {
+        dialogBox.hide();
+        callback.onSuccess(DialogAction.SAVE);
+      }
     });
     buttonPanel.add(CommonClientUtils.wrapOnDiv("btn-item", btnSave));
 

@@ -7,8 +7,6 @@
  */
 package com.databasepreservation.common.api.v1;
 
-import com.databasepreservation.common.api.v1.utils.StringResponse;
-import com.databasepreservation.common.server.controller.JobController;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -17,11 +15,12 @@ import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.databasepreservation.common.api.exceptions.RESTException;
-import com.databasepreservation.common.exceptions.AuthorizationException;
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
@@ -29,7 +28,9 @@ import com.databasepreservation.common.client.models.activity.logs.LogEntryState
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.JobService;
+import com.databasepreservation.common.exceptions.AuthorizationException;
 import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.controller.JobController;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.I18nUtility;
 
@@ -69,6 +70,26 @@ public class JobResource implements JobService {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILTER_PARAM,
         JsonUtils.getJsonFromObject(findRequest.filter));
+    }
+  }
+
+  @Override
+  public ViewerJob retrieve(@PathVariable("jobUUID") String jobUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+      // Retrieve job directly from SolrManager
+      return ViewerFactory.getSolrManager().retrieve(ViewerJob.class, jobUUID);
+    } catch (GenericException | AuthorizationException | NotFoundException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, jobUUID);
     }
   }
 

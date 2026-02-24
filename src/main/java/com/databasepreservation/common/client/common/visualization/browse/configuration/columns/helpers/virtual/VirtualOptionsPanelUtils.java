@@ -20,7 +20,7 @@ import config.i18n.client.ClientMessages;
  */
 public class VirtualOptionsPanelUtils {
   public static void renderColumnTemplateButtons(List<ColumnStatus> columns, FlowPanel hintPanel, TextBox targetInput,
-    List<String> columnIdsContainer, ClientMessages messages) {
+    List<String> columnIdsContainer, ClientMessages messages, boolean allowVirtualColumns) {
 
     hintPanel.clear();
     hintPanel.add(new Label(messages.columnManagementTextForPossibleFields()));
@@ -28,7 +28,7 @@ public class VirtualOptionsPanelUtils {
     final Map<String, Button> buttonMap = new HashMap<>();
     final Map<String, ColumnStatus> columnMap = new HashMap<>();
 
-    columns.stream().filter(VirtualOptionsPanelUtils::isSupportedColumnType).forEach(column -> {
+    columns.stream().filter(c -> isSupportedColumnType(c, allowVirtualColumns)).forEach(column -> {
       String columnName = column.getName();
       Button btn = new Button(columnName);
       btn.setStyleName("btn btn-primary btn-small");
@@ -76,10 +76,14 @@ public class VirtualOptionsPanelUtils {
     });
   }
 
-  public static boolean isSupportedColumnType(ColumnStatus column) {
+  public static boolean isSupportedColumnType(ColumnStatus column, boolean allowVirtualColumns) {
     ViewerType.dbTypes type = column.getType();
-    return !ViewerType.dbTypes.NESTED.equals(type) && !ViewerType.dbTypes.CLOB.equals(type)
-      && !ViewerType.dbTypes.BINARY.equals(type);
+    if (ViewerType.dbTypes.NESTED.equals(type) || ViewerType.dbTypes.CLOB.equals(type)
+      || ViewerType.dbTypes.BINARY.equals(type)) {
+      return false;
+    }
+
+    return allowVirtualColumns || !ViewerType.dbTypes.VIRTUAL.equals(type);
   }
 
   public static void selectListBoxValue(ListBox listBox, String value) {

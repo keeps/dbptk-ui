@@ -590,6 +590,8 @@ public interface ClientMessages extends Messages {
 
   String basicActionEditPermissions();
 
+  String basicActionRun();
+
   /*********************************************
    * Sidebar Menus
    ********************************************/
