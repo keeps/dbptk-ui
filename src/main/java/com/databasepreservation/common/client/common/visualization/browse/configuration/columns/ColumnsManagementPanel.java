@@ -220,7 +220,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 collectionStatus.setNeedsToBeProcessed(true);
                 cellTable.getDataProvider().getList().add(columnStatus);
                 cellTable.getDataProvider().refresh();
-                changes = true;
+                collectionStatus.setNeedsToBeProcessed(true);
+                saveChanges(true);
               }
             }
           });
@@ -312,32 +313,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         new Column<ColumnStatus, SafeHtml>(new SafeHtmlCell()) {
           @Override
           public SafeHtml getValue(ColumnStatus column) {
-            if (column.getType().equals(ViewerType.dbTypes.NESTED)) {
-              return SafeHtmlUtils.fromSafeConstant(column.getNestedColumns().getPath());
-            } else if (column.getType().equals(ViewerType.dbTypes.VIRTUAL)){
-              SafeHtmlBuilder sb = new SafeHtmlBuilder();
-              ProcessingState state = null;
-              if (column.getVirtualColumnStatus() != null) {
-                state = column.getVirtualColumnStatus().getProcessingState();
-              }
-
-              if (ProcessingState.TO_REMOVE.equals(state)) {
-                sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.MINUS_CIRCLE));
-                sb.appendHtmlConstant("<span style='text-decoration: line-through; color: #6c757d; margin-left: 5px;'>");
-              } else if(ProcessingState.TO_PROCESS.equals(state)) {
-                sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.PLUS_CIRCLE));
-                sb.appendHtmlConstant("<span style='font-weight: bold; margin-left: 5px;'>");
-              } else {
-                sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.CLOUD));
-                sb.appendHtmlConstant("<span style='font-weight: bold; margin-left: 5px;'>");
-              }
-
-              sb.append(SafeHtmlUtils.fromString(column.getName()));
-              sb.appendHtmlConstant("</span>");
-              return sb.toSafeHtml();
-            } else {
-              return SafeHtmlUtils.fromString(column.getName());
-            }
+            return renderColumnCell(column);
           }
         }),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderLabel(), 15, getLabelColumn()),
@@ -377,10 +353,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         new Column<ColumnStatus, SafeHtml>(new SafeHtmlCell()) {
           @Override
           public SafeHtml getValue(ColumnStatus column) {
-            if (column.getType().equals(ViewerType.dbTypes.NESTED)) {
-              return SafeHtmlUtils.fromSafeConstant(column.getNestedColumns().getPath());
-            }
-            return SafeHtmlUtils.fromString(column.getName());
+            return renderColumnCell(column);
           }
         }),
       new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
@@ -395,6 +368,47 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     });
 
     return tablePanel;
+  }
+
+  @NotNull
+  private static SafeHtml renderColumnCell(ColumnStatus column) {
+    if (column.getType().equals(ViewerType.dbTypes.NESTED)) {
+      return SafeHtmlUtils.fromSafeConstant(column.getNestedColumns().getPath());
+    } else if (column.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+      SafeHtmlBuilder sb = new SafeHtmlBuilder();
+      ProcessingState state = null;
+      if (column.getVirtualColumnStatus() != null) {
+        state = column.getVirtualColumnStatus().getProcessingState();
+      }
+
+      if (ProcessingState.TO_REMOVE.equals(state)) {
+        sb.appendHtmlConstant("<span style='color: #dc3545; margin-right: 5px;'>");
+        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.MINUS_CIRCLE));
+        sb.appendHtmlConstant("</span>");
+        sb.appendHtmlConstant("<span style='text-decoration: line-through; color: #6c757d;'>");
+      } else if (ProcessingState.TO_PROCESS.equals(state)) {
+        sb.appendHtmlConstant("<span style='color: #28a745; margin-right: 5px;'>");
+        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.PLUS_CIRCLE));
+        sb.appendHtmlConstant("</span>");
+        sb.appendHtmlConstant("<span>");
+      } else if (ProcessingState.PROCESSING.equals(state)) {
+        sb.appendHtmlConstant("<span style='color: #ffc107; margin-right: 5px;'>");
+        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.LOADING));
+        sb.appendHtmlConstant("</span>");
+        sb.appendHtmlConstant("<span>");
+      } else {
+        sb.appendHtmlConstant("<span style='color: #007bff; margin-right: 5px;'>");
+        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.CLOUD));
+        sb.appendHtmlConstant("</span>");
+        sb.appendHtmlConstant("<span>");
+      }
+
+      sb.append(SafeHtmlUtils.fromString(column.getName()));
+      sb.appendHtmlConstant("</span>");
+      return sb.toSafeHtml();
+    } else {
+      return SafeHtmlUtils.fromString(column.getName());
+    }
   }
 
   private Column<ColumnStatus, ColumnStatus> getOrderColumn() {

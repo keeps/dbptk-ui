@@ -9,16 +9,17 @@ package com.databasepreservation.common.client.services;
 
 import java.util.function.Consumer;
 
-import com.databasepreservation.common.api.v1.utils.StringResponse;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.index.FindRequest;
@@ -64,6 +65,10 @@ public interface JobService extends DirectRestService {
   IndexResult<ViewerJob> find(
     @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody FindRequest findRequest,
     @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+
+  @RequestMapping(path = "/{jobUUID}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Retrieves a specific job")
+  ViewerJob retrieve(@PathVariable(name = "jobUUID") String jobUUID);
 
   @RequestMapping(path = "/reindex", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Reindex all jobs")

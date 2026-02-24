@@ -2290,6 +2290,33 @@ html, body {
     /*padding: 5px 0px;*/
 }
 
+.dialog-input-error {
+    border: 1px solid #d9534f !important;
+    background-color: #fce4e4 !important;
+    box-shadow: 0 0 3px #d9534f;
+}
+
+.dialog-input-error-text {
+    color: #d9534f;
+    font-size: 0.85em;
+    margin-top: 4px;
+    font-weight: 600;
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dialog-form-separator {
+    color: #089de3;
+    font-size: 1.6rem;
+    font-weight: 300;
+    border-bottom 1px solid #089de3;
+}
+
 /**********************************************
 		         Dialog Information
 ***********************************************/
@@ -3145,23 +3172,6 @@ rgba(0, 0, 0, .125);
 }
 
 /************************************************
-* Configuration Status bar
- ************************************************/
-.apply-configuration-bar {
-
-}
-
-.configuration-bar-alert {
-  display: flex;
-  align-items: center;
-}
-
-.configuration-bar-alert .navigation-panel-buttons {
-    width: auto;
-    margin-left: auto;
-}
-
-/************************************************
 * Advanced Configuration
  ************************************************/
 .advanced-configuration {
@@ -3620,4 +3630,92 @@ rgba(0, 0, 0, .125);
     display: inline-block;
     vertical-align: top;
     margin-top: 30px;
+}
+
+/************************************************
+* Configuration Status bar
+ ************************************************/
+.configuration-bar-alert {
+    display: flex;
+    align-items: center;
+    min-height: 60px;
+    transition: all 0.3s ease-in-out;
+}
+
+.configuration-bar-alert .navigation-panel-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: row; /* Altera o reverse padrão para alinhar à esquerda */
+}
+
+/************************************************
+* Minimalist Alert with Bottom Progress
+************************************************/
+.configuration-bar-alert {
+    overflow: hidden;
+    animation: slideInBottom 0.3s ease-out;
+}
+
+.configuration-status-wrapper {
+    width: 100%;
+}
+
+/* Estado Inicial: Mensagem e Botão */
+.config-initial-state {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.config-initial-state .config-message {
+    font-size: 13px;
+    color: #444;
+    font-weight: 500;
+}
+
+.config-progress-state {
+    display: flex;
+    flex-direction: column;
+}
+
+.config-progress-state .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.config-progress-state .progress-text {
+    font-size: 11px;
+    font-weight: bold;
+    color: #888;
+}
+
+.config-progress-state .progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background-color: #f0f0f0;
+    border-radius: 0;
+    margin: 0;
+    border: none;
+}
+
+.config-progress-state .progress-bar {
+    height: 100%;
+    background-color: #089de3;
+    box-shadow: none;
+    transition: width 0.4s ease;
+}
+
+.config-progress-state .progress-bar.active {
+    background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    background-size: 20px 20px;
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes slideInBottom {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
