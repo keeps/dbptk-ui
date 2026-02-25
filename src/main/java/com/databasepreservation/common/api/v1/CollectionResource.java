@@ -14,6 +14,8 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -532,11 +534,22 @@ public class CollectionResource implements CollectionService {
       } else {
         CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
           .getConfigurationCollection(databaseUUID, databaseUUID);
-        return new StringResponse(
-          SIARDController.extractAndIndexTextFromSIARDTableLobs(database, collectionStatus, tableUUID));
+        if (database.getVersion().equals(ViewerConstants.SIARD_DK_1007)
+          || database.getVersion().equals(ViewerConstants.SIARD_DK_1007_EXT)
+          || database.getVersion().equals(ViewerConstants.SIARD_DK_128)
+          || database.getVersion().equals(ViewerConstants.SIARD_DK_128_EXT)) {
+          return new StringResponse(
+            SIARDController.extractAndIndexTextFromSIARDTableLobs(database, collectionStatus, tableUUID, null));
+        } else {
+          try (FileSystem siardZipFS = FileSystems.newFileSystem(Path.of(database.getPath()))) {
+            return new StringResponse(
+              SIARDController.extractAndIndexTextFromSIARDTableLobs(database, collectionStatus, tableUUID, siardZipFS));
+          }
+        }
+
       }
 
-    } catch (GenericException | NotFoundException | AuthorizationException e) {
+    } catch (GenericException | NotFoundException | AuthorizationException | IOException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

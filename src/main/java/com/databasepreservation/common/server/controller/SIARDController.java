@@ -853,16 +853,29 @@ public class SIARDController {
   }
 
   public static String extractAndIndexTextFromSIARDLobs(ViewerDatabase database) throws GenericException {
-    CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
-      .getConfigurationCollection(database.getUuid(), database.getUuid());
-    for (TableStatus tableStatus : collectionStatus.getTables()) {
-      extractAndIndexTextFromSIARDTableLobs(database, collectionStatus, tableStatus.getUuid());
+    try {
+      CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
+        .getConfigurationCollection(database.getUuid(), database.getUuid());
+      for (TableStatus tableStatus : collectionStatus.getTables()) {
+        if (database.getVersion().equals(ViewerConstants.SIARD_DK_1007)
+          || database.getVersion().equals(ViewerConstants.SIARD_DK_1007_EXT)
+          || database.getVersion().equals(ViewerConstants.SIARD_DK_128)
+          || database.getVersion().equals(ViewerConstants.SIARD_DK_128_EXT)) {
+          extractAndIndexTextFromSIARDTableLobs(database, collectionStatus, tableStatus.getUuid(), null);
+        } else {
+          try (FileSystem siardZipFS = FileSystems.newFileSystem(Path.of(database.getPath()))) {
+            extractAndIndexTextFromSIARDTableLobs(database, collectionStatus, tableStatus.getUuid(), siardZipFS);
+          }
+        }
+      }
+    } catch (IOException e) {
+      throw new GenericException(e);
     }
     return database.getUuid();
   }
 
   public static String extractAndIndexTextFromSIARDTableLobs(ViewerDatabase database, CollectionStatus collectionStatus,
-    String tableUUID) throws GenericException {
+    String tableUUID, FileSystem siardZipFS) throws GenericException {
 
     try {
       TableStatus tableStatus = collectionStatus.getTableStatus(tableUUID);
@@ -883,14 +896,15 @@ public class SIARDController {
           for (ColumnStatus lobColumn : lobColumns) {
             for (ViewerRow rowDocument : rows) {
               ViewerCell lobCell = rowDocument.getCells().get(lobColumn.getId());
-              extractAndIndexLobCell(database, collectionStatus, tableStatus, rowDocument, lobColumn, lobCell);
+              extractAndIndexLobCell(database, collectionStatus, tableStatus, siardZipFS, rowDocument, lobColumn,
+                lobCell);
             }
           }
         }
       }
       ViewerFactory.getConfigurationManager().updateCollectionStatus(collectionStatus.getDatabaseUUID(),
         collectionStatus);
-    } catch (GenericException | IOException | ViewerException | NotFoundException e) {
+    } catch (GenericException | IOException | ViewerException e) {
       throw new GenericException(e);
     }
 
@@ -898,8 +912,8 @@ public class SIARDController {
   }
 
   public static String extractAndIndexLobCell(ViewerDatabase database, CollectionStatus collectionStatus,
-    TableStatus tableStatus, ViewerRow row, ColumnStatus lobColumn, ViewerCell lobCell)
-    throws IOException, GenericException, NotFoundException {
+    TableStatus tableStatus, FileSystem siardZipFs, ViewerRow row, ColumnStatus lobColumn, ViewerCell lobCell)
+    throws IOException, GenericException {
     if (lobCell != null && lobCell.getValue() != null && !lobCell.getValue().isBlank()
       && !lobCell.getValue().startsWith(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX)) {
       Path completeLobPath;
@@ -919,10 +933,7 @@ public class SIARDController {
           String siardLobFolder = ViewerConstants.SIARD_LOB_FOLDER_PREFIX + (lobColumn.getColumnIndex() + 1);
           String zipFileEntry = "/content/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/"
             + lobCell.getValue();
-          Path databasePath = Paths.get(database.getPath());
-          try (FileSystem zipFs = FileSystems.newFileSystem(Path.of(database.getPath()))) {
-            completeLobPath = zipFs.getPath(zipFileEntry);
-          }
+          completeLobPath = siardZipFs.getPath(zipFileEntry);
         }
       }
       Set<Path> allLobFilePaths;
