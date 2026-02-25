@@ -19,6 +19,7 @@ import config.i18n.client.ClientMessages;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class VirtualOptionsPanelUtils {
+
   public static void renderColumnTemplateButtons(List<ColumnStatus> columns, FlowPanel hintPanel, TextBox targetInput,
     List<String> columnIdsContainer, ClientMessages messages, boolean allowVirtualColumns) {
 

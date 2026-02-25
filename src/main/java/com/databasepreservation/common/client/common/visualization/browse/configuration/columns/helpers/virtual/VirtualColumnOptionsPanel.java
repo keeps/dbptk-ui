@@ -103,8 +103,8 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
       if (virtualColumnStatus.getSourceColumnsIds() != null) {
         sourceColumnsIds = virtualColumnStatus.getSourceColumnsIds();
       }
-      if (virtualColumnStatus.getSourceTemplateStatus() != null) {
-        templateSourceColumns.setText(virtualColumnStatus.getSourceTemplateStatus().getTemplate());
+      if (virtualColumnStatus.getTemplateStatus() != null) {
+        templateSourceColumns.setText(virtualColumnStatus.getTemplateStatus().getTemplate());
       }
     }
   }
@@ -202,7 +202,7 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
     virtualColumnStatus.setSourceColumnsIds(sourceColumnsIds);
     TemplateStatus sourceTemplateStatus = new TemplateStatus();
     sourceTemplateStatus.setTemplate(templateSourceColumns.getText());
-    virtualColumnStatus.setSourceTemplateStatus(sourceTemplateStatus);
+    virtualColumnStatus.setTemplateStatus(sourceTemplateStatus);
     virtualColumnStatus.setProcessingState(ProcessingState.TO_PROCESS);
     return virtualColumnStatus;
   }

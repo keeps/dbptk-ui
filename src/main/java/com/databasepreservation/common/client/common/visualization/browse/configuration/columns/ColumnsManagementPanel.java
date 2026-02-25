@@ -49,9 +49,10 @@ import com.databasepreservation.common.client.configuration.observer.ICollection
 import com.databasepreservation.common.client.configuration.observer.ISaveButtonObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.collection.VirtualReferenceStatus;
+import com.databasepreservation.common.client.models.status.collection.VirtualForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.formatters.Formatter;
 import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -206,16 +207,13 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       public void onClick(ClickEvent clickEvent) {
         VirtualColumnOptionsPanel virtualColumnOptionsPanel = VirtualColumnOptionsPanel.createInstance(table,
           new ColumnStatus());
-        VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel
-          .createInstance(database, collectionStatus, table, new ColumnStatus());
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionAdd(),
-          messages.basicActionCancel(), Arrays.asList(virtualColumnOptionsPanel, virtualReferenceOptionsPanel),
+          messages.basicActionCancel(), Arrays.asList(virtualColumnOptionsPanel),
           new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
             public void onSuccess(Dialogs.DialogAction value) {
               if (value.equals(Dialogs.DialogAction.SAVE)) {
                 ColumnStatus columnStatus = virtualColumnOptionsPanel.getColumnStatus();
-                columnStatus.setVirtualReferenceStatus(virtualReferenceOptionsPanel.getVirtualReferenceStatus());
                 collectionStatus.getTableStatusByTableId(tableId).addColumnStatus(columnStatus);
                 collectionStatus.setNeedsToBeProcessed(true);
                 cellTable.getDataProvider().getList().add(columnStatus);
@@ -398,7 +396,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         sb.appendHtmlConstant("<span>");
       } else {
         sb.appendHtmlConstant("<span style='color: #007bff; margin-right: 5px;'>");
-        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.CLOUD));
+        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DRAFT));
         sb.appendHtmlConstant("</span>");
         sb.appendHtmlConstant("<span>");
       }
@@ -715,10 +713,17 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
     options.setFieldUpdater((index, columnStatus, value) -> {
       if (ViewerType.dbTypes.VIRTUAL.equals(columnStatus.getType())) {
+        // Virtual column
         VirtualColumnOptionsPanel virtualColumnOptionsPanel = VirtualColumnOptionsPanel
           .createInstance(collectionStatus.getTableStatusByTableId(tableId), columnStatus);
-        VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel
-          .createInstance(database, collectionStatus, collectionStatus.getTableStatusByTableId(tableId), columnStatus);
+
+        // Virtual foreign key column options
+        ForeignKeysStatus foreignKeysStatus = collectionStatus.getForeignKeyByTableAndColumnId(tableId,
+          columnStatus.getId());
+        VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel.createInstance(
+          database, collectionStatus, collectionStatus.getTableStatusByTableId(tableId), columnStatus,
+          foreignKeysStatus);
+
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
           messages.basicActionCancel(), messages.basicActionDelete(),
           Arrays.asList(virtualColumnOptionsPanel, virtualReferenceOptionsPanel),
@@ -729,27 +734,29 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
               ColumnStatus column = tableStatus.getColumnById(columnStatus.getId());
 
               ColumnStatus updatedColumnStatus = virtualColumnOptionsPanel.getColumnStatus();
-              VirtualReferenceStatus virtualReferenceStatus = virtualReferenceOptionsPanel.getVirtualReferenceStatus();
+              ForeignKeysStatus updatedForeignKeyStatus = virtualReferenceOptionsPanel.getVirtualReferenceStatus();
+              VirtualForeignKeysStatus virtualForeignKeysStatus = updatedForeignKeyStatus.getVirtualForeignKeysStatus();
 
               if (value.equals(Dialogs.DialogAction.SAVE)) {
-                if (virtualReferenceStatus != null) {
-                  virtualReferenceStatus.setProcessingState(ProcessingState.TO_PROCESS);
+                if (virtualForeignKeysStatus != null) {
+                  virtualForeignKeysStatus.setProcessingState(ProcessingState.TO_PROCESS);
                 }
-                updatedColumnStatus.setVirtualReferenceStatus(virtualReferenceStatus);
+                GWT.log("Adding new foreign key status to collection status");
+                tableStatus.addOrUpdateForeignKeyStatus(updatedForeignKeyStatus);
+
                 updatedColumnStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_PROCESS);
                 column.setDescription(updatedColumnStatus.getDescription());
                 column.setCustomDescription(updatedColumnStatus.getDescription());
                 column.setVirtualColumnStatus(updatedColumnStatus.getVirtualColumnStatus());
-                column.setVirtualReferenceStatus(updatedColumnStatus.getVirtualReferenceStatus());
+
                 collectionStatus.setNeedsToBeProcessed(true);
                 saveChanges(true);
               } else if (value.equals(Dialogs.DialogAction.REMOVE)) {
-                if (virtualReferenceStatus != null) {
-                  virtualReferenceStatus.setProcessingState(ProcessingState.TO_REMOVE);
+                if (virtualForeignKeysStatus != null) {
+                  virtualForeignKeysStatus.setProcessingState(ProcessingState.TO_REMOVE);
                 }
                 updatedColumnStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_REMOVE);
                 column.setVirtualColumnStatus(updatedColumnStatus.getVirtualColumnStatus());
-                column.setVirtualReferenceStatus(updatedColumnStatus.getVirtualReferenceStatus());
                 collectionStatus.setNeedsToBeProcessed(true);
                 saveChanges(true);
               }
@@ -849,17 +856,27 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
             }
           });
       } else {
+        TableStatus tableStatus = collectionStatus.getTableStatusByTableId(tableId);
+        ForeignKeysStatus foreignKeysStatus = collectionStatus.getForeignKeyByTableAndColumnId(tableStatus.getUuid(),
+          columnStatus.getId());
+
         VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel
-          .createInstance(database, collectionStatus, collectionStatus.getTableStatusByTableId(tableId), columnStatus);
+          .createInstance(database, collectionStatus, tableStatus, columnStatus, foreignKeysStatus);
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
-          messages.basicActionCancel(), virtualReferenceOptionsPanel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
+          messages.basicActionCancel(), messages.basicActionDelete(), Arrays.asList(virtualReferenceOptionsPanel),
+          new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
             public void onSuccess(Dialogs.DialogAction value) {
-              if (value.equals(Dialogs.DialogAction.SAVE)) {
-                columnStatus.setVirtualReferenceStatus(virtualReferenceOptionsPanel.getVirtualReferenceStatus());
-                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
-                  .setVirtualReferenceStatus(columnStatus.getVirtualReferenceStatus());
-                saveChanges(true);
+              ForeignKeysStatus updatedForeignKeyStatus = virtualReferenceOptionsPanel.getVirtualReferenceStatus();
+              if (updatedForeignKeyStatus != null) {
+                if (value.equals(Dialogs.DialogAction.SAVE)) {
+                  tableStatus.addOrUpdateForeignKeyStatus(updatedForeignKeyStatus);
+                  saveChanges(true);
+                } else if (value.equals(Dialogs.DialogAction.REMOVE)) {
+                  GWT.log("Removing foreign key status from collection status");
+                  tableStatus.removeForeignKeyStatusById(updatedForeignKeyStatus.getId());
+                  saveChanges(true);
+                }
               }
             }
           });

@@ -228,15 +228,12 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
       filter = new Filter(defaultFilter);
       filter.add(parameters);
       searchPreFilters.setVisible(!defaultFilter.getParameters().isEmpty());
-      GWT.log("Incremental filter: " + filter);
     } else if (parameters.isEmpty()) {
       filter = defaultFilter;
       searchPreFilters.setVisible(!defaultFilter.getParameters().isEmpty());
-      GWT.log("Default filter: " + filter);
     } else {
       filter = new Filter(parameters);
       searchPreFilters.setVisible(false);
-      GWT.log("New filter: " + filter);
     }
 
     return filter;
