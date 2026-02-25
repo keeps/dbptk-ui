@@ -1539,6 +1539,8 @@ public interface ClientMessages extends Messages {
 
   String dataTransformationTextForDescription();
 
+  String dataTransformationLabelForVirtualRelationship();
+
   /********************************************
    * Sponsors Panel
    *******************************************/

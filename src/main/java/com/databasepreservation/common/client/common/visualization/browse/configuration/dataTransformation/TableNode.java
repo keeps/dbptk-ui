@@ -12,12 +12,16 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerType;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -31,12 +35,15 @@ public class TableNode {
   private ViewerMetadata metadata;
   private ViewerTable table;
   private Boolean multiValue = false;
+  private CollectionStatus collectionStatus;
+  private Boolean isVirtual = false;
 
-  public TableNode(ViewerDatabase database, ViewerTable table) {
+  public TableNode(ViewerDatabase database, ViewerTable table, CollectionStatus collectionStatus) {
     this.children = new HashMap<>();
     this.database = database;
     this.metadata = database.getMetadata();
     this.table = table;
+    this.collectionStatus = collectionStatus;
   }
 
   /**
@@ -49,10 +56,27 @@ public class TableNode {
       ViewerTable viewerTable = metadata.getTable(foreignKey.getReferencedTableUUID());
       // avoid to add the same table in the same tree path
       if (this.searchTop(viewerTable) == null && viewerTable != null) {
-        TableNode childNode = new TableNode(database, viewerTable);
+        TableNode childNode = new TableNode(database, viewerTable, collectionStatus);
         childNode.uuid = generateUUID(foreignKey, viewerTable);
         childNode.multiValue = this.parentIsMultiValue(this);
         children.put(foreignKey, childNode);
+      }
+    }
+
+    // Virtual
+    for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(table.getUuid())) {
+      if (foreignKeysStatus.getType() != null && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+        ViewerForeignKey foreignKey = DataTransformationUtils.convertToViewerForeignKey(foreignKeysStatus,
+          collectionStatus, table.getUuid());
+        ViewerTable viewerTable = metadata.getTable(foreignKey.getReferencedTableUUID());
+        // avoid to add the same table in the same tree path
+        if (this.searchTop(viewerTable) == null && viewerTable != null) {
+          TableNode childNode = new TableNode(database, viewerTable, collectionStatus);
+          childNode.uuid = generateUUID(foreignKey, viewerTable);
+          childNode.multiValue = this.parentIsMultiValue(this);
+          childNode.isVirtual = true;
+          children.put(foreignKey, childNode);
+        }
       }
     }
 
@@ -61,17 +85,32 @@ public class TableNode {
       for (ViewerTable viewerTable : schema.getTables()) {
         for (ViewerForeignKey foreignKey : viewerTable.getForeignKeys()) {
           if (foreignKey.getReferencedTableUUID().equals(table.getUuid()) && this.searchTop(viewerTable) == null) {
-            TableNode childNode = new TableNode(database, viewerTable);
+            TableNode childNode = new TableNode(database, viewerTable, collectionStatus);
             childNode.uuid = generateUUID(foreignKey, viewerTable);
             childNode.multiValue = true;
             children.put(foreignKey, childNode);
+          }
+        }
+
+        // for virtual
+        for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(viewerTable.getUuid())) {
+          if (foreignKeysStatus.getType() != null && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+            ViewerForeignKey foreignKey = DataTransformationUtils.convertToViewerForeignKey(foreignKeysStatus,
+              collectionStatus, viewerTable.getUuid());
+            if (foreignKey.getReferencedTableUUID().equals(table.getUuid()) && this.searchTop(viewerTable) == null) {
+              TableNode childNode = new TableNode(database, viewerTable, collectionStatus);
+              childNode.uuid = generateUUID(foreignKey, viewerTable);
+              childNode.multiValue = true;
+              childNode.isVirtual = true;
+              children.put(foreignKey, childNode);
+            }
           }
         }
       }
     }
   }
 
-  private String generateUUID(ViewerForeignKey foreignKey, ViewerTable viewerTable){
+  private String generateUUID(ViewerForeignKey foreignKey, ViewerTable viewerTable) {
     StringBuilder uuid = new StringBuilder();
     uuid.append(this.uuid);
 
@@ -84,8 +123,8 @@ public class TableNode {
     return uuid.toString();
   }
 
-  public void convertTreePathToList(List<TableNode> list){
-    if(this.getParentNode() != null){
+  public void convertTreePathToList(List<TableNode> list) {
+    if (this.getParentNode() != null) {
       this.getParentNode().convertTreePathToList(list);
       list.add(this);
     }
@@ -106,14 +145,18 @@ public class TableNode {
   }
 
   public Boolean parentIsMultiValue(TableNode table) {
-    if(table == null){
+    if (table == null) {
       return false;
     }
-    if(table.multiValue){
+    if (table.multiValue) {
       return true;
     } else {
       return parentIsMultiValue(table.getParentNode());
     }
+  }
+
+  public Boolean getIsVirtual() {
+    return isVirtual;
   }
 
   public TableNode getParentNode() {

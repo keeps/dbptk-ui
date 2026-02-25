@@ -17,6 +17,7 @@ import com.databasepreservation.common.client.models.status.collection.ColumnSta
 import com.databasepreservation.common.client.models.status.collection.DetailsStatus;
 import com.databasepreservation.common.client.models.status.collection.ExportStatus;
 import com.databasepreservation.common.client.models.status.collection.FacetsStatus;
+import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.ListStatus;
 import com.databasepreservation.common.client.models.status.collection.LobTextExtractionPolicy;
 import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
@@ -24,6 +25,7 @@ import com.databasepreservation.common.client.models.status.collection.SearchSta
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
 import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.VirtualForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.status.database.Indicators;
 import com.databasepreservation.common.client.models.status.database.SiardStatus;
@@ -31,7 +33,9 @@ import com.databasepreservation.common.client.models.status.database.ValidationS
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.server.ViewerConfiguration;
@@ -82,9 +86,43 @@ public class StatusUtils {
     status.setDescription(table.getDescription());
     status.setCustomDescription(table.getDescription());
     status.setColumns(getColumnsStatus(table.getColumns()));
+    status.setForeignKeys(getForeignKeysStatus(metadata, table));
     status.setShow(show);
 
     return status;
+  }
+
+  private static List<ForeignKeysStatus> getForeignKeysStatus(ViewerMetadata metadata, ViewerTable table) {
+    List<ViewerForeignKey> foreignKeys = table.getForeignKeys();
+    ArrayList<ForeignKeysStatus> foreignKeysStatusList = new ArrayList<>();
+    for (ViewerForeignKey foreignKey : foreignKeys) {
+      ForeignKeysStatus status = new ForeignKeysStatus();
+      status.setId(foreignKey.getName());
+      status.setName(foreignKey.getName());
+      status.setReferencedTableUUID(foreignKey.getReferencedTableUUID());
+      status.setReferencedTableId(foreignKey.getReferencedTableId());
+
+      ArrayList<ForeignKeysStatus.ReferencedColumnStatus> referencedColumnStatusList = new ArrayList<>();
+      for (ViewerReference reference : foreignKey.getReferences()) {
+        ViewerColumn sourceColumn = table.getColumnByIndexInEnclosingTable(reference.getSourceColumnIndex());
+
+        ViewerTable referencedTable = metadata.getTable(foreignKey.getReferencedTableUUID());
+        ViewerColumn referencedColumn = referencedTable
+          .getColumnByIndexInEnclosingTable(reference.getReferencedColumnIndex());
+
+        ForeignKeysStatus.ReferencedColumnStatus referencedColumnStatus = new ForeignKeysStatus.ReferencedColumnStatus();
+        referencedColumnStatus.setSourceColumnId(sourceColumn.getSolrName());
+        referencedColumnStatus.setReferencedColumnId(referencedColumn.getSolrName());
+
+        referencedColumnStatusList.add(referencedColumnStatus);
+      }
+
+      status.setReferences(referencedColumnStatusList);
+      status.setType(null);
+      status.setVirtualForeignKeysStatus(new VirtualForeignKeysStatus());
+      foreignKeysStatusList.add(status);
+    }
+    return foreignKeysStatusList;
   }
 
   public static List<ColumnStatus> getColumnsStatus(List<ViewerColumn> viewerColumns) {

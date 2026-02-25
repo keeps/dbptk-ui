@@ -250,6 +250,29 @@ public class CollectionStatus implements Serializable {
     return null;
   }
 
+  public List<ForeignKeysStatus> getForeignKeysByTableUUID(String tableUUID) {
+    final TableStatus tableStatus = getTableStatus(tableUUID);
+    if (tableStatus != null) {
+      return tableStatus.getForeignKeys();
+    }
+    return null;
+  }
+
+  public ForeignKeysStatus getForeignKeyByTableAndColumnId(String tableUUID, String sourceColumnId) {
+    final TableStatus tableStatus = getTableStatus(tableUUID);
+    if (tableStatus != null) {
+      for (ForeignKeysStatus foreignKey : tableStatus.getForeignKeys()) {
+
+        for (ForeignKeysStatus.ReferencedColumnStatus reference : foreignKey.getReferences()) {
+          if (reference.getSourceColumnId().equals(sourceColumnId)) {
+            return foreignKey;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   public boolean showAdvancedSearch(String tableId, String columnId) {
     final TableStatus tableStatus = getTableStatus(tableId);
     if (tableStatus != null) {
