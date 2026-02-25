@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,6 +74,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabaseVal
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
+import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionResponse;
 import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameters;
@@ -849,28 +852,25 @@ public class SIARDController {
     }
   }
 
-  public static String extractAndIndexTextFromSIARDLobs(String databaseUUID) throws GenericException {
-    try {
-      CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
-        .getConfigurationCollection(databaseUUID, databaseUUID);
-      for (TableStatus tableStatus : collectionStatus.getTables()) {
-        extractAndIndexTextFromSIARDTableLobs(databaseUUID, tableStatus.getUuid());
-      }
-    } catch (GenericException e) {
-      throw new GenericException(e);
+  public static String extractAndIndexTextFromSIARDLobs(ViewerDatabase database) throws GenericException {
+    CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
+      .getConfigurationCollection(database.getUuid(), database.getUuid());
+    for (TableStatus tableStatus : collectionStatus.getTables()) {
+      extractAndIndexTextFromSIARDTableLobs(database, collectionStatus, tableStatus.getUuid());
     }
-    return databaseUUID;
+    return database.getUuid();
   }
 
-  public static String extractAndIndexTextFromSIARDTableLobs(String databaseUUID, String tableUUID)
-    throws GenericException {
+  public static String extractAndIndexTextFromSIARDTableLobs(ViewerDatabase database, CollectionStatus collectionStatus,
+    String tableUUID) throws GenericException {
 
     try {
-      CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
-        .getConfigurationCollection(databaseUUID, databaseUUID);
       TableStatus tableStatus = collectionStatus.getTableStatus(tableUUID);
-      List<ColumnStatus> lobColumns = tableStatus.getLobColumns().stream()
-        .filter(c -> c.getLobTextExtractionPolicy().getExtractAndIndexLobText()).toList();
+      List<ColumnStatus> lobColumns = tableStatus.getVisibleColumnsList().stream()
+        .filter(c -> (c.getType().equals(ViewerType.dbTypes.BINARY)
+          || (c.getType().equals(ViewerType.dbTypes.CLOB) && c.isExternalLob())
+            && c.getLobTextExtractionPolicy().getExtractAndIndexLobText()))
+        .toList();
       if (!lobColumns.isEmpty()) {
         Filter rowFilter = new Filter();
         rowFilter.add(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, tableStatus.getId()));
@@ -878,40 +878,70 @@ public class SIARDController {
         lobColumns.stream().map(ColumnStatus::getId).forEach(fieldsToReturn::add);
         fieldsToReturn.add(ViewerConstants.INDEX_ID);
 
-        try (IterableIndexResult rows = ViewerFactory.getSolrManager().findAllRows(databaseUUID, rowFilter,
-          new Sorter(), fieldsToReturn)) {
+        try (IterableIndexResult rows = ViewerFactory.getSolrManager().findAllRows(collectionStatus.getDatabaseUUID(),
+          rowFilter, new Sorter(), fieldsToReturn)) {
           for (ColumnStatus lobColumn : lobColumns) {
             for (ViewerRow rowDocument : rows) {
               ViewerCell lobCell = rowDocument.getCells().get(lobColumn.getId());
-              if (lobCell != null && lobCell.getValue() != null && !lobCell.getValue().isBlank()) {
-                String topLobPath = lobCell.getValue();
-                Set<String> allLobFilePaths;
-                try (Stream<Path> walkStream = Files.walk(Paths.get(topLobPath), FileVisitOption.FOLLOW_LINKS)) {
-                  allLobFilePaths = walkStream.filter(file -> !Files.isDirectory(file)).map(Path::toString)
-                    .collect(Collectors.toSet());
-                }
-
-                for (String lobFilePath : allLobFilePaths) {
-                  extractAndIndexLobText(databaseUUID, rowDocument.getUuid(), lobColumn.getId(), lobFilePath);
-                  LobTextExtractionStatus lobTextExtractionStatus = lobColumn.getLobTextExtractionStatus();
-                  lobTextExtractionStatus.setExtractedAndIndexedText(true);
-                  lobColumn.setLobTextExtractionStatus(lobTextExtractionStatus);
-                }
-              }
+              extractAndIndexLobCell(database, collectionStatus, tableStatus, rowDocument, lobColumn, lobCell);
             }
           }
         }
       }
-      ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, collectionStatus);
-    } catch (GenericException | IOException | ViewerException e) {
+      ViewerFactory.getConfigurationManager().updateCollectionStatus(collectionStatus.getDatabaseUUID(),
+        collectionStatus);
+    } catch (GenericException | IOException | ViewerException | NotFoundException e) {
       throw new GenericException(e);
     }
 
-    return databaseUUID;
+    return collectionStatus.getDatabaseUUID();
+  }
+
+  public static String extractAndIndexLobCell(ViewerDatabase database, CollectionStatus collectionStatus,
+    TableStatus tableStatus, ViewerRow row, ColumnStatus lobColumn, ViewerCell lobCell)
+    throws IOException, GenericException, NotFoundException {
+    if (lobCell != null && lobCell.getValue() != null && !lobCell.getValue().isBlank()
+      && !lobCell.getValue().startsWith(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX)) {
+      Path completeLobPath;
+      if (lobColumn.isExternalLob()) {
+        String lobLocation = lobCell.getValue();
+        Path lobPath = Paths.get(lobLocation);
+        completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
+      } else {
+        String version = database.getVersion();
+        if (version.equals(ViewerConstants.SIARD_DK_1007) || version.equals(ViewerConstants.SIARD_DK_1007_EXT)
+          || version.equals(ViewerConstants.SIARD_DK_128) || version.equals(ViewerConstants.SIARD_DK_128_EXT)) {
+          String lobLocation = lobCell.getValue();
+          completeLobPath = Paths.get(lobLocation);
+        } else {
+          String siardSchemaFolder = tableStatus.getSchemaFolder();
+          String siardTableFolder = tableStatus.getTableFolder();
+          String siardLobFolder = ViewerConstants.SIARD_LOB_FOLDER_PREFIX + (lobColumn.getColumnIndex() + 1);
+          String zipFileEntry = "/content/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/"
+            + lobCell.getValue();
+          Path databasePath = Paths.get(database.getPath());
+          try (FileSystem zipFs = FileSystems.newFileSystem(Path.of(database.getPath()))) {
+            completeLobPath = zipFs.getPath(zipFileEntry);
+          }
+        }
+      }
+      Set<Path> allLobFilePaths;
+      try (Stream<Path> walkStream = Files.walk(completeLobPath, FileVisitOption.FOLLOW_LINKS)) {
+        allLobFilePaths = walkStream.filter(file -> !Files.isDirectory(file)).collect(Collectors.toSet());
+      }
+
+      for (Path lobFilePath : allLobFilePaths) {
+        extractAndIndexLobText(collectionStatus.getDatabaseUUID(), row.getUuid(), lobColumn.getId(), lobFilePath);
+        LobTextExtractionStatus lobTextExtractionStatus = lobColumn.getLobTextExtractionStatus();
+        lobTextExtractionStatus.setExtractedAndIndexedText(true);
+        lobColumn.setLobTextExtractionStatus(lobTextExtractionStatus);
+      }
+    }
+    return collectionStatus.getDatabaseUUID();
   }
 
   public static String extractAndIndexLobText(String databaseUUID, String rowUUID, String lobFieldName,
-    String lobFilePath) throws GenericException {
+    Path lobFilePath) throws GenericException {
 
     DatabaseRowsSolrManager solr = ViewerFactory.getSolrManager();
     solr.clearExtractedLobTextField(databaseUUID, rowUUID, lobFieldName);
@@ -924,24 +954,23 @@ public class SIARDController {
     }
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(List.of(MediaType.TEXT_PLAIN));
-    Path lobPath = Paths.get(lobFilePath);
     String tikaVolumePathConfig = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
       ViewerConstants.PROPERTY_OCR_TIKA_VOLUME_PATH);
     ResponseEntity<String> tikaResponse;
-    if (tikaVolumePathConfig.equals(null) || tikaVolumePathConfig.isBlank()
-      || !lobPath.startsWith(tikaVolumePathConfig)) {
+    if (tikaVolumePathConfig == null || tikaVolumePathConfig.isBlank()
+      || lobFilePath.startsWith(tikaVolumePathConfig)) {
       // tika volume path is not configured or the lob file is outside of it, so we
       // need to send the file via HTTP
       headers.setContentType(MediaType.MULTIPART_FORM_DATA);
       MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
       body.add(ViewerConstants.TIKA_REQUEST_FILE_PARAMETER, new FileSystemResource(lobFilePath));
       HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
-      tikaResponse = tikaTemplate.exchange(tikaURL + ViewerConstants.TIKA_FORM_ENDPOINT, HttpMethod.PUT, entity,
+      tikaResponse = tikaTemplate.exchange(tikaURL + ViewerConstants.TIKA_FORM_ENDPOINT, HttpMethod.POST, entity,
         String.class);
     } else {
       Path tikaVolumePath = Paths.get(tikaVolumePathConfig);
       headers.add("fetcherName", "fsf");
-      headers.add("fetchKey", tikaVolumePath.relativize(lobPath).toString());
+      headers.add("fetchKey", tikaVolumePath.relativize(lobFilePath).toString());
       HttpEntity<Object> entity = new HttpEntity<>(null, headers);
       tikaResponse = tikaTemplate.exchange(tikaURL + ViewerConstants.TIKA_EXTRACT_ENDPOINT, HttpMethod.PUT, entity,
         String.class);
