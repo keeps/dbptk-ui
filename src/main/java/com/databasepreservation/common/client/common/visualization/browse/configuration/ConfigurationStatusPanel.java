@@ -186,6 +186,17 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
     progressBar.removeStyleName("active");
     progressText.setText("Completed (100%)");
     statusBadge.setHTML(LabelUtils.getJobStatus(ViewerJobStatus.COMPLETED));
+
+    refreshStatusFromServer();
+
+    Timer resetTimer = new Timer() {
+      @Override
+      public void run() {
+        jobFinishedSuccessfully = false;
+        updateVisualState();
+      }
+    };
+    resetTimer.schedule(5000);
   }
 
   private void handleJobFailure(ViewerJob job) {
@@ -234,6 +245,10 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   public void updateCollection(CollectionStatus newStatus) {
     if (database != null && newStatus != null && newStatus.getDatabaseUUID().equals(database.getUuid())) {
       this.collectionStatus = newStatus;
+
+      if (newStatus.isNeedsToBeProcessed()) {
+        jobFinishedSuccessfully = false;
+      }
 
       if (progressTimer == null && !jobFinishedSuccessfully) {
         updateVisualState();

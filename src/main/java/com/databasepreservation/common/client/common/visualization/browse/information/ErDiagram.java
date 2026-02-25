@@ -16,10 +16,13 @@ import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
@@ -47,10 +50,11 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path, null));
   }
 
-  public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path, CollectionStatus collectionStatus) {
+  public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path,
+    CollectionStatus collectionStatus) {
     String separator = "/";
     String code = database.getUuid() + separator + schema.getUuid() + separator + path;
-    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path, collectionStatus ));
+    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path, collectionStatus));
   }
 
   @Override
@@ -85,7 +89,8 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
   private final String databaseUUID;
 
-  private ErDiagram(final ViewerDatabase database, final ViewerSchema schema, String path, CollectionStatus collectionStatus) {
+  private ErDiagram(final ViewerDatabase database, final ViewerSchema schema, String path,
+    CollectionStatus collectionStatus) {
     databaseUUID = database.getUuid();
     this.collectionStatus = collectionStatus;
     initWidget(uiBinder.createAndBindUi(this));
@@ -131,7 +136,12 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
           && (viewerTable.isMaterializedView() || viewerTable.isCustomView())) {
           continue;
         }
-        VisNode visNode = new VisNode(viewerTable.getId(), viewerTable.getName(), collectionStatus);
+        TableStatus tableStatus = collectionStatus.getTableStatus(viewerTable.getUuid());
+        String tableName = viewerTable.getName();
+        if (tableStatus != null) {
+          tableName = tableStatus.getCustomName();
+        }
+        VisNode visNode = new VisNode(viewerTable.getId(), tableName, collectionStatus);
 
         if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
           visNode.description = viewerTable.getDescription();
@@ -208,7 +218,18 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
         visNodeList.add(visNode);
 
         for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-          jsniEdgeList.add(new JsniEdge(viewerTable.getId(), viewerForeignKey.getReferencedTableId()));
+          jsniEdgeList.add(new JsniEdge(viewerTable.getId(), viewerForeignKey.getReferencedTableId(), false));
+        }
+
+        if (collectionStatus != null) {
+          for (ForeignKeysStatus foreignKeysStatus : collectionStatus
+            .getForeignKeysByTableUUID(viewerTable.getUuid())) {
+            if (foreignKeysStatus.getType() != null && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+              JsniEdge virtualEdge = new JsniEdge(viewerTable.getId(), foreignKeysStatus.getReferencedTableId(), true);
+              jsniEdgeList.add(virtualEdge);
+            }
+          }
+
         }
       }
 
@@ -359,7 +380,7 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
     public void adjustBackgroundColor(double value) {
       // this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91);
-      if(collectionStatus != null && !collectionStatus.getTableStatusByTableId(id).isShow()){
+      if (collectionStatus != null && !collectionStatus.getTableStatusByTableId(id).isShow()) {
         this.color.background = "#" + hslToRgb(0, 0, 0.784);
       } else {
         this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91 - value);
@@ -480,11 +501,13 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     String to;
     String arrows;
     int length;
+    boolean dashes;
 
-    public JsniEdge(String from, String to) {
+    public JsniEdge(String from, String to, boolean dashes) {
       this.from = from;
       this.to = to;
       this.length = 100;
+      this.dashes = dashes;
     }
 
     public String getFrom() {
@@ -518,12 +541,21 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     public void setLength(int length) {
       this.length = length;
     }
+
+    public boolean isDashes() {
+      return dashes;
+    }
+
+    public void setDashes(boolean dashes) {
+      this.dashes = dashes;
+    }
   }
 
   public static native void loadDiagram(String dbuuid, String schemaUUID, String nodesJson, String edgesJson,
     String applicationType, String path)
   /*-{
     (function erdiagramload(){
+        console.log("JSON das Edges:", edgesJson);
         // network container
         var container = $wnd.document.getElementById('erdiagram-' + schemaUUID);
   

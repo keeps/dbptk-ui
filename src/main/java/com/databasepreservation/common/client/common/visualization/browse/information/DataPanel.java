@@ -98,10 +98,11 @@ public class DataPanel extends Composite implements ICollectionStatusObserver {
 
     if (schema.getDescription() != null) {
       schemaDescription.addStyleName("multi-schema-description");
-      schemaDescription.setWidget(CommonClientUtils.getPanelInformation(messages.description(), schema.getDescription(), "metadata-information-element-value"));
+      schemaDescription.setWidget(CommonClientUtils.getPanelInformation(messages.description(), schema.getDescription(),
+        "metadata-information-element-value"));
     }
 
-    contentItems.add(ErDiagram.getInstance(database, schema, HistoryManager.getCurrentHistoryPath().get(0)));
+    contentItems.add(ErDiagram.getInstance(database, schema, HistoryManager.getCurrentHistoryPath().get(0), status));
     initTableContent();
   }
 
@@ -121,14 +122,13 @@ public class DataPanel extends Composite implements ICollectionStatusObserver {
 
     List<ViewerTable> tables = new ArrayList<>(schema.getTables());
 
-/*    tables.sort((o1, o2) -> {
-      Long r1 = o1.getCountRows();
-      Long r2 = o2.getCountRows();
-      return r2.compareTo(r1);
-    });*/
+    /*
+     * tables.sort((o1, o2) -> { Long r1 = o1.getCountRows(); Long r2 =
+     * o2.getCountRows(); return r2.compareTo(r1); });
+     */
 
-    return new BasicTablePanel<ViewerTable>(new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML),
-      SafeHtmlUtils.EMPTY_SAFE_HTML, tables.iterator(),
+    return new BasicTablePanel<ViewerTable>(new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML), SafeHtmlUtils.EMPTY_SAFE_HTML,
+      tables.iterator(),
 
       new BasicTablePanel.ColumnInfo<>(messages.schema_tableName(), false, 17, new TextColumn<ViewerTable>() {
         @Override
@@ -166,12 +166,11 @@ public class DataPanel extends Composite implements ICollectionStatusObserver {
 
       new BasicTablePanel.ColumnInfo<>(messages.schema_numberOfColumns(), !advancedMode, 8,
         new TextColumn<ViewerTable>() {
-        @Override
-        public String getValue(ViewerTable table) {
-          return String.valueOf(table.getColumns().size());
-        }
-      }),
-
+          @Override
+          public String getValue(ViewerTable table) {
+            return String.valueOf(table.getColumns().size());
+          }
+        }),
 
       new BasicTablePanel.ColumnInfo<>(messages.schema_relationsOut(), !advancedMode, 7, new TextColumn<ViewerTable>() {
         @Override

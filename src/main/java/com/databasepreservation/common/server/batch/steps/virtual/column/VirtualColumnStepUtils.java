@@ -46,7 +46,7 @@ public class VirtualColumnStepUtils {
         VirtualColumnStatus vcs = c.getVirtualColumnStatus();
         vcs.setProcessingState(ProcessingState.PROCESSED);
         vcs.setLastExecutionDate(now);
-        vcs.setExecutionStatus(status.name());
+        recalculateVirtualColumnIndexes(tableStatus);
       });
   }
 
@@ -54,5 +54,15 @@ public class VirtualColumnStepUtils {
     List<ColumnStatus> activeColumns = tableStatus.getColumns().stream()
       .filter(c -> !(isVirtual(c) && isMarkedForRemoval(c.getVirtualColumnStatus()))).collect(Collectors.toList());
     tableStatus.setColumns(activeColumns);
+  }
+
+  private static void recalculateVirtualColumnIndexes(TableStatus tableStatus) {
+    int index = tableStatus.getColumns().stream().filter(c -> !isVirtual(c)).mapToInt(ColumnStatus::getColumnIndex)
+      .max().orElse(-1) + 1;
+    for (ColumnStatus column : tableStatus.getColumns()) {
+      if (isVirtual(column)) {
+        column.setColumnIndex(index++);
+      }
+    }
   }
 }

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,9 +38,11 @@ public class TableStatus implements Serializable {
   private String customDescription;
   private boolean show;
   private List<ColumnStatus> columns;
+  private List<ForeignKeysStatus> foreignKeys;
 
   public TableStatus() {
     columns = new ArrayList<>();
+    foreignKeys = new ArrayList<>();
   }
 
   public String getUuid() {
@@ -108,6 +109,14 @@ public class TableStatus implements Serializable {
     this.columns = columns;
   }
 
+  public List<ForeignKeysStatus> getForeignKeys() {
+    return foreignKeys;
+  }
+
+  public void setForeignKeys(List<ForeignKeysStatus> foreignKeys) {
+    this.foreignKeys = foreignKeys;
+  }
+
   public String getCustomName() {
     return customName;
   }
@@ -126,6 +135,15 @@ public class TableStatus implements Serializable {
 
   public void addColumnStatus(ColumnStatus status) {
     this.columns.add(status);
+  }
+
+  public void addOrUpdateForeignKeyStatus(ForeignKeysStatus status) {
+    this.foreignKeys.removeIf(fk -> fk.getId().equals(status.getId()));
+    this.foreignKeys.add(status);
+  }
+
+  public void removeForeignKeyStatusById(String id) {
+    this.foreignKeys.removeIf(fk -> fk.getId().equals(id));
   }
 
   @JsonIgnore
@@ -169,14 +187,14 @@ public class TableStatus implements Serializable {
     Map<ColumnStatus, ColumnStatus> ret = new HashMap<>();
     for (ColumnStatus column : getVisibleColumnsList()) {
       if (column.getType().equals(NESTED)) {
-        TableStatus nestedTable = collectionStatus.getTableStatusByTableId(column.getNestedColumns().getOriginalTable());
+        TableStatus nestedTable = collectionStatus
+          .getTableStatusByTableId(column.getNestedColumns().getOriginalTable());
         for (ColumnStatus nestedColumn : nestedTable.getLobColumns()) {
           if ((nestedColumn.getType().equals(ViewerType.dbTypes.BINARY)
-            || nestedColumn.getType().equals(
-              ViewerType.dbTypes.CLOB))
+            || nestedColumn.getType().equals(ViewerType.dbTypes.CLOB))
             && column.getNestedColumns().getNestedSolrNames().contains(nestedColumn.getId())) {
-              ret.put(column, nestedColumn);
-            }
+            ret.put(column, nestedColumn);
+          }
         }
       }
     }

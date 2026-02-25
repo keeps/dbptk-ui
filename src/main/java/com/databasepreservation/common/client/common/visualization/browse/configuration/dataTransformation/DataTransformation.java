@@ -27,6 +27,7 @@ import com.databasepreservation.common.client.common.visualization.browse.config
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
@@ -36,6 +37,7 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -197,7 +199,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     message.setWidget(alert);
 
     // root table
-    TableNode parentNode = new TableNode(database, table);
+    TableNode parentNode = new TableNode(database, table, collectionStatus);
     parentNode.setUuid(table.getUuid());
     parentNode.setupChildren();
     ViewerTable table = parentNode.getTable();
@@ -274,10 +276,15 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
     card.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
     card.setTitle(childTable.getName());
+
     card.setDescription(childTable.getDescription());
     card.addStyleName("card-disabled");
     card.addExtraContent(getInformationAboutRelashionship(childNode));
     card.getElement().setId(childNode.getUuid());
+
+    if (childNode.getIsVirtual()) {
+      card.addStyleName("card-virtual");
+    }
 
     FlowPanel container = new FlowPanel();
     TableStatus childTableStatus = collectionStatus.getTableStatusByTableId(childTable.getId());
@@ -292,7 +299,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
       if (switchBtn.getButton().getValue()) {
         card.removeStyleName("card-disabled");
         grandChild.add(expandLevel(childNode));
-        DataTransformationUtils.includeRelatedTable(childNode, denormalizeConfiguration);
+        DataTransformationUtils.includeRelatedTable(childNode, denormalizeConfiguration, collectionStatus);
         container.add(selectTable);
       } else {
         DataTransformationUtils.removeRelatedTable(childNode, denormalizeConfiguration);
@@ -353,26 +360,51 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     ViewerTable referencedTable = node.getParentNode().getTable();
     ViewerTable sourceTable = node.getTable();
 
+    List<ViewerColumn> allSourceColumns = DataTransformationUtils.getViewerColumnsWithVirtualColumns(
+      sourceTable.getColumns(), collectionStatus.getTableStatus(sourceTable.getUuid()));
+    List<ViewerColumn> allReferencedColumns = DataTransformationUtils.getViewerColumnsWithVirtualColumns(
+      referencedTable.getColumns(), collectionStatus.getTableStatus(referencedTable.getUuid()));
+
     for (ViewerReference reference : foreignKey.getReferences()) {
+      boolean isVirtual = false;
+
       if (foreignKey.getReferencedTableUUID().equals(referencedTable.getUuid())) {
-        ViewerColumn column = sourceTable.getColumns().get(reference.getSourceColumnIndex());
+
+        ViewerColumn column = allSourceColumns.get(reference.getSourceColumnIndex());
+        isVirtual = isIsVirtualRelationship(sourceTable, column, isVirtual);
+
         information.add(buildReferenceInformation(
-          messages.dataTransformationTextForIsRelatedTo(referencedTable.getId(), column.getDisplayName())));
+          messages.dataTransformationTextForIsRelatedTo(referencedTable.getId(), column.getDisplayName()), isVirtual));
       } else {
-        ViewerColumn column = referencedTable.getColumns().get(reference.getSourceColumnIndex());
+        ViewerColumn referencedColumn = allReferencedColumns.get(reference.getSourceColumnIndex());
+        ViewerColumn column = allSourceColumns.get(reference.getReferencedColumnIndex());
+        isVirtual = isIsVirtualRelationship(referencedTable, referencedColumn, isVirtual);
+
         information.add(buildReferenceInformation(
-          messages.dataTransformationTextForIsReferencedBy(referencedTable.getId(), column.getDisplayName())));
+          messages.dataTransformationTextForIsReferencedBy(referencedTable.getId(), column.getDisplayName()),
+          isVirtual));
       }
     }
 
     return information;
   }
 
+  private boolean isIsVirtualRelationship(ViewerTable sourceTable, ViewerColumn column, boolean isVirtual) {
+    ForeignKeysStatus foreignKeysStatus = collectionStatus.getForeignKeyByTableAndColumnId(sourceTable.getUuid(),
+      column.getSolrName());
+
+    if (foreignKeysStatus != null && foreignKeysStatus.getType() != null
+      && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+      isVirtual = true;
+    }
+    return isVirtual;
+  }
+
   /**
    * Create a reference information panel
    *
    */
-  private FlowPanel buildReferenceInformation(SafeHtml message) {
+  private FlowPanel buildReferenceInformation(SafeHtml message, boolean isVirtual) {
     FlowPanel referenceInformation = new FlowPanel();
     referenceInformation.setStyleName("reference-panel");
 
@@ -382,6 +414,15 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     referenceIcon.setStyleName("icon");
     referenceInformation.add(referenceIcon);
     referenceInformation.add(new HTML(message));
+
+    if (isVirtual) {
+      FlowPanel virtualLabel = new FlowPanel();
+      Label label = new Label(messages.dataTransformationLabelForVirtualRelationship());
+
+      label.addStyleName("label-info");
+      virtualLabel.add(label);
+      referenceInformation.add(virtualLabel);
+    }
 
     return referenceInformation;
   }
