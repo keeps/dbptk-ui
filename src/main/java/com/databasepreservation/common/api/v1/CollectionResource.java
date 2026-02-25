@@ -504,7 +504,7 @@ public class CollectionResource implements CollectionService {
       if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
         return new StringResponse(databaseUUID);
       } else {
-        return new StringResponse(SIARDController.extractAndIndexTextFromSIARDLobs(databaseUUID));
+        return new StringResponse(SIARDController.extractAndIndexTextFromSIARDLobs(database));
       }
 
     } catch (GenericException | NotFoundException | AuthorizationException e) {
@@ -530,7 +530,10 @@ public class CollectionResource implements CollectionService {
       if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
         return new StringResponse(databaseUUID);
       } else {
-        return new StringResponse(SIARDController.extractAndIndexTextFromSIARDTableLobs(databaseUUID, tableUUID));
+        CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
+          .getConfigurationCollection(databaseUUID, databaseUUID);
+        return new StringResponse(
+          SIARDController.extractAndIndexTextFromSIARDTableLobs(database, collectionStatus, tableUUID));
       }
 
     } catch (GenericException | NotFoundException | AuthorizationException e) {
@@ -888,10 +891,8 @@ public class CollectionResource implements CollectionService {
       .getConfigurationCollection(databaseUUID, databaseUUID);
 
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
-    return ApiUtils.okResponse(new ViewerStreamingOutput(
-      new ResultsCSVOutputStream(row, configTable, filename, exportDescriptions, ',', String.join(",", fieldsToReturn),
-        databaseUUID))
-      .toStreamResponse());
+    return ApiUtils.okResponse(new ViewerStreamingOutput(new ResultsCSVOutputStream(row, configTable, filename,
+      exportDescriptions, ',', String.join(",", fieldsToReturn), databaseUUID)).toStreamResponse());
   }
 
   private ResponseEntity<StreamingResponseBody> handleSingleCSVExportWithLOBs(CollectionStatus configurationCollection,
@@ -930,9 +931,9 @@ public class CollectionResource implements CollectionService {
       fields, findRequest.extraParameters);
     final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
       fields, findRequest.extraParameters);
-    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamMultiRow(configurationCollection, database,
-      configTable, allRows, clone, zipFilename, filename, findRequest.sublist, exportDescription, fieldsToHeader,
-      databaseUUID)));
+    return ApiUtils
+      .okResponse(new StreamResponse(new ZipOutputStreamMultiRow(configurationCollection, database, configTable,
+        allRows, clone, zipFilename, filename, findRequest.sublist, exportDescription, fieldsToHeader, databaseUUID)));
   }
 
   private Object[] appendValue(Object[] obj, Object newObj) {
