@@ -47,7 +47,6 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private LobTextExtractionStatus lobTextExtractionStatus;
   private LobTextExtractionPolicy lobTextExtractionPolicy;
   private VirtualColumnStatus virtualColumnStatus;
-  private VirtualReferenceStatus virtualReferenceStatus;
 
   public ColumnStatus() {
     externalLob = false;
@@ -229,14 +228,6 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
     this.virtualColumnStatus = virtualColumnStatus;
   }
 
-  public VirtualReferenceStatus getVirtualReferenceStatus() {
-    return virtualReferenceStatus;
-  }
-
-  public void setVirtualReferenceStatus(VirtualReferenceStatus virtualReferenceStatus) {
-    this.virtualReferenceStatus = virtualReferenceStatus;
-  }
-
   public void updateTableShowValue(boolean value) {
     this.getSearchStatus().getList().setShow(value);
   }
@@ -282,7 +273,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
       + ", applicationType='" + applicationType + '\'' + ", nestedColumns=" + nestedColumns + ", order=" + order
       + ", exportStatus=" + exportStatus + ", searchStatus=" + searchStatus + ", detailsStatus=" + detailsStatus
       + ", lobTextExtractionStatus=" + lobTextExtractionStatus + ", lobTextExtractionPolicy=" + lobTextExtractionPolicy
-      + ", virtualColumnStatus=" + virtualColumnStatus + ", virtualReferenceStatus=" + virtualReferenceStatus + '}';
+      + ", virtualColumnStatus=" + virtualColumnStatus + '}';
   }
 
   @Override

@@ -203,8 +203,8 @@ public class HandlebarsUtils {
 
   public static String applyVirtualColumnTemplate(ViewerRow row, TableStatus tableStatus,
     VirtualColumnStatus virtualColumnStatus) {
-    if (virtualColumnStatus.getSourceTemplateStatus() == null
-      || StringUtils.isBlank(virtualColumnStatus.getSourceTemplateStatus().getTemplate())) {
+    if (virtualColumnStatus.getTemplateStatus() == null
+      || StringUtils.isBlank(virtualColumnStatus.getTemplateStatus().getTemplate())) {
       return null;
     }
 
@@ -218,8 +218,7 @@ public class HandlebarsUtils {
 
     Handlebars handlebars = new Handlebars();
     try {
-      Template handlebarTemplate = handlebars
-        .compileInline(virtualColumnStatus.getSourceTemplateStatus().getTemplate());
+      Template handlebarTemplate = handlebars.compileInline(virtualColumnStatus.getTemplateStatus().getTemplate());
       return handlebarTemplate.apply(map);
     } catch (IOException e) {
       throw new RESTException(e);

@@ -16,7 +16,6 @@ import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.services.ContextService;
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
@@ -45,7 +44,6 @@ public class Main implements EntryPoint {
   @Override
   public void onModuleLoad() {
     ContextService.Util.call((StringResponse env) -> {
-      GWT.log("Recived");
       ApplicationType.setType(env.getValue());
       // Set uncaught exception handler
       ClientLogger.setUncaughtExceptionHandler();

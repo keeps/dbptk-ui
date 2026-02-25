@@ -3107,6 +3107,17 @@ rgba(0, 0, 0, .125);
     opacity: 0.5;
 }
 
+.card-virtual::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border: 4px solid transparent;
+    background: repeating-linear-gradient(45deg, #dbeafe, #dbeafe 10px, #eff6ff 10px, #eff6ff 20px) border-box;
+    mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
 /************************************************
 * Switch Button
  ************************************************/
@@ -3409,6 +3420,10 @@ rgba(0, 0, 0, .125);
 .reference-panel .icon {
     font-size: 15px;
     margin-right: 10px;
+}
+
+.reference-panel .label-info {
+    margin-left: 10px;
 }
 
 .form-textarea {

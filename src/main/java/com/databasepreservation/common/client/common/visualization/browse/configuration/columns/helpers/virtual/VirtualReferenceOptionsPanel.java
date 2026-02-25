@@ -2,20 +2,26 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.StringJoiner;
+import java.util.function.Consumer;
 
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidatableOptionsPanel;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
-import com.databasepreservation.common.client.models.status.collection.VirtualReferenceStatus;
+import com.databasepreservation.common.client.models.status.collection.VirtualForeignKeysStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -34,9 +40,10 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
   private static final VirtualReferenceOptionsPanelUiBinder binder = GWT
     .create(VirtualReferenceOptionsPanelUiBinder.class);
 
-  private final TableStatus currentTableStatus;
-  private final ViewerDatabase database;
   private final CollectionStatus collectionStatus;
+  private final TableStatus currentTableStatus;
+  private final ColumnStatus currentColumnStatus;
+  private final ViewerDatabase database;
   private List<String> targetColumnsIds = new ArrayList<>();
 
   @UiField
@@ -53,41 +60,54 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
   Label errorReferencedTable, errorTemplateReferencedColumns;
 
   public static VirtualReferenceOptionsPanel createInstance(ViewerDatabase database, CollectionStatus collectionStatus,
-    TableStatus tableStatus, ColumnStatus columnStatus) {
-    return new VirtualReferenceOptionsPanel(database, collectionStatus, tableStatus, columnStatus);
+    TableStatus tableStatus, ColumnStatus columnStatus, ForeignKeysStatus foreignKeysStatus) {
+    return new VirtualReferenceOptionsPanel(database, collectionStatus, tableStatus, columnStatus, foreignKeysStatus);
   }
 
   private VirtualReferenceOptionsPanel(ViewerDatabase database, CollectionStatus collectionStatus,
-    TableStatus tableStatus, ColumnStatus columnStatus) {
+    TableStatus tableStatus, ColumnStatus columnStatus, ForeignKeysStatus foreignKeysStatus) {
     initWidget(binder.createAndBindUi(this));
 
     this.database = database;
     this.collectionStatus = collectionStatus;
     this.currentTableStatus = tableStatus;
+    this.currentColumnStatus = columnStatus;
 
     setupReferenceTableDropdown();
     bindEvents();
-    populateVirtualReferenceFields(columnStatus);
+    populateVirtualReferenceFields(foreignKeysStatus);
   }
 
   private void setupReferenceTableDropdown() {
     referencedTableListBox.clear();
     referencedTableListBox.addItem("", "");
-    collectionStatus.getTables().forEach(table -> referencedTableListBox.addItem(table.getId(), table.getId()));
+    collectionStatus.getTables().forEach(new Consumer<TableStatus>() {
+      @Override
+      public void accept(TableStatus table) {
+        referencedTableListBox.addItem(table.getId(), table.getUuid());
+      }
+    });
   }
 
   private void bindEvents() {
-    referencedTableListBox.addChangeHandler(event -> {
-      clearError(referencedTableListBox, errorReferencedTable);
-      onReferencedTableChanged();
+    referencedTableListBox.addChangeHandler(new ChangeHandler() {
+      @Override
+      public void onChange(ChangeEvent event) {
+        VirtualReferenceOptionsPanel.this.clearError(referencedTableListBox, errorReferencedTable);
+        VirtualReferenceOptionsPanel.this.onReferencedTableChanged();
+      }
     });
 
-    templateReferencedColumns
-      .addKeyUpHandler(event -> clearError(templateReferencedColumns, errorTemplateReferencedColumns));
+    templateReferencedColumns.addKeyUpHandler(new KeyUpHandler() {
+      @Override
+      public void onKeyUp(KeyUpEvent event) {
+        VirtualReferenceOptionsPanel.this.clearError(templateReferencedColumns, errorTemplateReferencedColumns);
+      }
+    });
   }
 
   private void onReferencedTableChanged() {
-    String selectedTableId = referencedTableListBox.getSelectedValue();
+    String selectedTableId = referencedTableListBox.getSelectedItemText();
     if (selectedTableId.isEmpty()) {
       resetVirtualFields();
     } else {
@@ -141,18 +161,19 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
     errorLabel.setVisible(false);
   }
 
-  private void populateVirtualReferenceFields(ColumnStatus columnStatus) {
+  private void populateVirtualReferenceFields(ForeignKeysStatus foreignKeysStatus) {
     ViewerTable table = database.getMetadata().getTable(currentTableStatus.getUuid());
-    ViewerForeignKey fk = findForeignKey(table, columnStatus.getId());
 
-    if (fk != null) {
-      showFkInfo(fk, table);
+    if (foreignKeysStatus == null) {
+      showVirtualReferenceEditor(new ForeignKeysStatus());
+    } else if (foreignKeysStatus.getType() != null && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+      showVirtualReferenceEditor(foreignKeysStatus);
     } else {
-      showVirtualReferenceEditor(columnStatus.getVirtualReferenceStatus());
+      showFkInfo(foreignKeysStatus, table);
     }
   }
 
-  private void showFkInfo(ViewerForeignKey fk, ViewerTable sourceTable) {
+  private void showFkInfo(ForeignKeysStatus fk, ViewerTable sourceTable) {
     fkReferencePanel.setVisible(true);
     virtualReferencePanel.setVisible(false);
 
@@ -160,38 +181,35 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
     fkTableLabel.setText(targetTable != null ? targetTable.getId() : "Unknown Table");
 
     if (sourceTable.getColumns() != null) {
-      String columnNames = fk.getReferences().stream()
-        .map(ref -> sourceTable.getColumns().get(ref.getSourceColumnIndex()).getDisplayName())
-        .collect(Collectors.joining(", "));
+      StringJoiner joiner = new StringJoiner(", ");
+      for (ForeignKeysStatus.ReferencedColumnStatus ref : fk.getReferences()) {
+        String displayName = collectionStatus.getColumnByTableIdAndColumn(sourceTable.getId(), ref.getSourceColumnId())
+          .getCustomName();
+        joiner.add(displayName);
+      }
+      String columnNames = joiner.toString();
       fkColumnsLabel.setText(columnNames);
     }
   }
 
-  private void showVirtualReferenceEditor(VirtualReferenceStatus virtualStatus) {
+  private void showVirtualReferenceEditor(ForeignKeysStatus foreignKeysStatus) {
     fkReferencePanel.setVisible(false);
     virtualReferencePanel.setVisible(true);
 
+    VirtualForeignKeysStatus virtualStatus = foreignKeysStatus.getVirtualForeignKeysStatus();
     if (virtualStatus == null)
       return;
 
-    VirtualOptionsPanelUtils.selectListBoxValue(referencedTableListBox, virtualStatus.getReferencedTableUUID());
+    VirtualOptionsPanelUtils.selectListBoxValue(referencedTableListBox, foreignKeysStatus.getReferencedTableUUID());
 
-    // Trigger para carregar as colunas da tabela selecionada
     onReferencedTableChanged();
 
-    if (virtualStatus.getReferencedTemplateStatus() != null) {
-      templateReferencedColumns.setText(virtualStatus.getReferencedTemplateStatus().getTemplate());
-      this.targetColumnsIds = new ArrayList<>(virtualStatus.getReferencedColumnsIds());
+    if (virtualStatus.getTemplateStatus() != null) {
+      templateReferencedColumns.setText(virtualStatus.getTemplateStatus().getTemplate());
+      for (ForeignKeysStatus.ReferencedColumnStatus reference : foreignKeysStatus.getReferences()) {
+        targetColumnsIds.add(reference.getReferencedColumnId());
+      }
     }
-  }
-
-  private ViewerForeignKey findForeignKey(ViewerTable table, String columnSolrName) {
-    if (table == null || table.getForeignKeys() == null)
-      return null;
-    return table.getForeignKeys().stream()
-      .filter(fk -> fk.getReferences().stream()
-        .anyMatch(ref -> table.getColumns().get(ref.getSourceColumnIndex()).getSolrName().equals(columnSolrName)))
-      .findFirst().orElse(null);
   }
 
   private void resetVirtualFields() {
@@ -200,22 +218,36 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
     targetColumnsIds.clear();
   }
 
-  public VirtualReferenceStatus getVirtualReferenceStatus() {
-    String selectedTable = referencedTableListBox.getSelectedValue();
+  public ForeignKeysStatus getVirtualReferenceStatus() {
+    String selectedTableUUID = referencedTableListBox.getSelectedValue();
+    String selectedTable = referencedTableListBox.getSelectedItemText();
 
     if (fkReferencePanel.isVisible() || ViewerStringUtils.isBlank(selectedTable)) {
       return null;
     }
 
-    VirtualReferenceStatus status = new VirtualReferenceStatus();
-    status.setReferencedTableUUID(selectedTable);
-    status.setReferencedColumnsIds(targetColumnsIds);
+    ForeignKeysStatus foreignKeysStatus = new ForeignKeysStatus();
+    foreignKeysStatus.setType(ViewerType.dbTypes.VIRTUAL);
+    foreignKeysStatus.setId("virtual_fk_" + selectedTable);
+    foreignKeysStatus.setName("virtual_fk_" + selectedTable);
+    foreignKeysStatus.setReferencedTableId(selectedTable);
+    foreignKeysStatus.setReferencedTableUUID(selectedTableUUID);
 
+    for (String targetColumnsId : targetColumnsIds) {
+      ForeignKeysStatus.ReferencedColumnStatus viewerReference = new ForeignKeysStatus.ReferencedColumnStatus();
+      viewerReference.setReferencedColumnId(targetColumnsId);
+      viewerReference.setSourceColumnId(currentColumnStatus.getId());
+      foreignKeysStatus.getReferences().add(viewerReference);
+    }
+
+    VirtualForeignKeysStatus status = new VirtualForeignKeysStatus();
     TemplateStatus template = new TemplateStatus();
     template.setTemplate(templateReferencedColumns.getText());
-    status.setReferencedTemplateStatus(template);
+    status.setTemplateStatus(template);
 
-    return status;
+    foreignKeysStatus.setVirtualForeignKeysStatus(status);
+
+    return foreignKeysStatus;
   }
 
   @Override

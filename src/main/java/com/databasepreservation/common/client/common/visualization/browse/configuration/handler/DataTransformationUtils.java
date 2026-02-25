@@ -14,14 +14,11 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.databasepreservation.common.api.v1.utils.JobResponse;
-import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation.TableNode;
-import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
@@ -33,11 +30,6 @@ import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
-import com.databasepreservation.common.client.services.CollectionService;
-import com.databasepreservation.common.client.widgets.Toast;
-import com.google.gwt.core.client.GWT;
-
-import config.i18n.client.ClientMessages;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -46,7 +38,8 @@ public class DataTransformationUtils {
   private DataTransformationUtils() {
   }
 
-  public static void includeRelatedTable(TableNode childNode, DenormalizeConfiguration denormalizeConfiguration) {
+  public static void includeRelatedTable(TableNode childNode, DenormalizeConfiguration denormalizeConfiguration,
+    CollectionStatus collectionStatus) {
     TableNode parentNode = childNode.getParentNode();
     ViewerTable sourceTable = childNode.getTable();
     ViewerTable referencedTable = parentNode.getTable();
@@ -62,13 +55,18 @@ public class DataTransformationUtils {
     relatedTable.setReferencedTableUUID(referencedTable.getUuid());
     relatedTable.setReferencedTableID(referencedTable.getId());
 
+    List<ViewerColumn> allSourceColumns = getViewerColumnsWithVirtualColumns(sourceTable.getColumns(),
+      collectionStatus.getTableStatusByTableId(sourceTable.getId()));
+    List<ViewerColumn> allReferencedColumns = getViewerColumnsWithVirtualColumns(referencedTable.getColumns(),
+      collectionStatus.getTableStatusByTableId(referencedTable.getId()));
+
     for (ViewerReference reference : foreignKey.getReferences()) {
       if (foreignKey.getReferencedTableUUID().equals(referencedTable.getUuid())) {
-        sourceColumn = sourceTable.getColumns().get(reference.getSourceColumnIndex());
-        referencedColumn = referencedTable.getColumns().get(reference.getReferencedColumnIndex());
+        sourceColumn = allSourceColumns.get(reference.getSourceColumnIndex());
+        referencedColumn = allReferencedColumns.get(reference.getReferencedColumnIndex());
       } else {
-        sourceColumn = sourceTable.getColumns().get(reference.getReferencedColumnIndex());
-        referencedColumn = referencedTable.getColumns().get(reference.getSourceColumnIndex());
+        sourceColumn = allSourceColumns.get(reference.getReferencedColumnIndex());
+        referencedColumn = allReferencedColumns.get(reference.getSourceColumnIndex());
       }
       relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
     }
@@ -223,5 +221,38 @@ public class DataTransformationUtils {
         return column;
     }
     return null;
+  }
+
+  public static ViewerForeignKey convertToViewerForeignKey(ForeignKeysStatus foreignKeysStatus,
+    CollectionStatus collectionStatus, String sourceTableUUID) {
+    ViewerForeignKey foreignKey = new ViewerForeignKey();
+
+    foreignKey.setName(foreignKeysStatus.getName());
+    foreignKey.setReferencedTableUUID(foreignKeysStatus.getReferencedTableUUID());
+    foreignKey.setReferencedTableId(foreignKeysStatus.getReferencedTableId());
+
+    TableStatus sourceTableStatus = collectionStatus.getTableStatus(sourceTableUUID);
+    TableStatus referencedTableStatus = collectionStatus.getTableStatus(foreignKeysStatus.getReferencedTableUUID());
+
+    ArrayList<ViewerReference> viewerReferenceArrayList = new ArrayList<>();
+    for (ForeignKeysStatus.ReferencedColumnStatus reference : foreignKeysStatus.getReferences()) {
+      ViewerReference viewerReference = new ViewerReference();
+
+      ColumnStatus sourceColumn = sourceTableStatus.getColumnById(reference.getSourceColumnId());
+      ColumnStatus referencedColumn = referencedTableStatus.getColumnById(reference.getReferencedColumnId());
+
+      viewerReference.setSourceColumnIndex(sourceColumn.getColumnIndex());
+      viewerReference.setReferencedColumnIndex(referencedColumn.getColumnIndex());
+
+      viewerReferenceArrayList.add(viewerReference);
+    }
+
+    if (foreignKey.getReferences() == null) {
+      foreignKey.setReferences(new ArrayList<>());
+    }
+
+    foreignKey.getReferences().addAll(viewerReferenceArrayList);
+
+    return foreignKey;
   }
 }
