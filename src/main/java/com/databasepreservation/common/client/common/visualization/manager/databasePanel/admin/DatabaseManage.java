@@ -18,6 +18,7 @@ import com.databasepreservation.common.client.common.lists.CrossDatabaseList;
 import com.databasepreservation.common.client.common.lists.DatabaseList;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCellOptions;
 import com.databasepreservation.common.client.common.lists.utils.ListBuilder;
+import com.databasepreservation.common.client.common.search.DatabaseAdvancedSearchFields;
 import com.databasepreservation.common.client.common.search.SearchWrapper;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
@@ -117,7 +118,9 @@ public class DatabaseManage extends ContentPanel {
       return allDatabaseList;
     }, new AsyncTableCellOptions<>(ViewerDatabase.class, ViewerConstants.SEARCH_ALL_LIST_ID));
 
-    search = new SearchWrapper(true).createListAndSearchPanel(databaseMetadataList, false)
+    DatabaseAdvancedSearchFields metadataSearchFields = new DatabaseAdvancedSearchFields();
+
+    search = new SearchWrapper(true).createListAndSearchPanel(databaseMetadataList, false, metadataSearchFields)
       .createListAndSearchPanel(databaseSearchAll, true);
 
     initWidget(binder.createAndBindUi(this));

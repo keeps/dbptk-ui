@@ -104,7 +104,18 @@ public class DatabaseResource implements DatabaseService {
       } else {
         List<String> fieldsToReturn = new ArrayList<>();
         fieldsToReturn.add(ViewerConstants.INDEX_ID);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA); //deprecated
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_NAME);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_DESCRIPTION);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVER);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVER_CONTACT);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_DATA_OWNER);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_ORIGIN_TIMESPAN);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_PRODUCER_APPLICATION);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVAL_DATE);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_CLIENT_MACHINE);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_DATABASE_PRODUCT);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_DATABASE_USER);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
 
         FindRequest userFindRequest = new FindRequest(findRequest.classToReturn, findRequest.filter, findRequest.sorter,
@@ -224,7 +235,12 @@ public class DatabaseResource implements DatabaseService {
         List<String> fieldsToReturn = new ArrayList<>();
         fieldsToReturn.add(ViewerConstants.INDEX_ID);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA); //deprecated
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_NAME);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_DESCRIPTION);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_DATA_OWNER);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVAL_DATE);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_DATABASE_PRODUCT);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
         databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class, new Filter(), Sorter.NONE,
           fieldsToReturn, filterQueries);

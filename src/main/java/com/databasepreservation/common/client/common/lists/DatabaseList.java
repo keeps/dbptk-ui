@@ -8,6 +8,7 @@
 package com.databasepreservation.common.client.common.lists;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.user.User;
@@ -62,6 +64,18 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   private static final String OPEN_VALIDATED_SPAN = "<span>&#10004;</span>";
   private static final String OPEN_NOT_VALIDATED_SPAN = "<span>&#10006;</span>";
 
+  private Column<ViewerDatabase, SafeHtml> nameColumn;
+  private Column<ViewerDatabase, SafeHtml> descriptionColumn;
+  private Column<ViewerDatabase, SafeHtml> dbmsColumn;
+  private Column<ViewerDatabase, SafeHtml> dataOwnerColumn;
+  private Column<ViewerDatabase, SafeHtml> dataOriginTimespanColumn;
+  private Column<ViewerDatabase, String> locationColumn;
+  private Column<ViewerDatabase, SafeHtml> sizeColumn;
+  private Column<ViewerDatabase, SafeHtml> versionColumn;
+  private Column<ViewerDatabase, SafeHtml> validColumn;
+  private Column<ViewerDatabase, SafeHtml> statusColumn;
+  private Column<ViewerDatabase, String> openColumn;
+
   public DatabaseList() {
     this(new Filter(), null, null, false, false, false);
   }
@@ -76,7 +90,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   protected void configureDisplay(CellTable<ViewerDatabase> display) {
     display.setSelectionModel(display.getSelectionModel(), DefaultSelectionEventManager.createBlacklistManager(4, 10));
 
-    Column<ViewerDatabase, SafeHtml> nameColumn = new TooltipColumn<ViewerDatabase>() {
+    nameColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getName() != null
@@ -84,8 +98,9 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
           : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
+    nameColumn.setSortable(true);
 
-    Column<ViewerDatabase, SafeHtml> description = new TooltipColumn<ViewerDatabase>() {
+    descriptionColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getDescription() != null
@@ -93,8 +108,9 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
           : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
+    descriptionColumn.setSortable(true);
 
-    Column<ViewerDatabase, SafeHtml> dbmsColumn = new TooltipColumn<ViewerDatabase>() {
+    dbmsColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getDatabaseProduct() != null
@@ -102,8 +118,9 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
           : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
+    dbmsColumn.setSortable(true);
 
-    Column<ViewerDatabase, SafeHtml> dataOwnerColumn = new TooltipColumn<ViewerDatabase>() {
+    dataOwnerColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null && database.getMetadata().getDataOwner() != null
@@ -111,18 +128,20 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
           : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
+    dataOwnerColumn.setSortable(true);
 
-    Column<ViewerDatabase, SafeHtml> dataOriginTimespanColumn = new TooltipColumn<ViewerDatabase>() {
+    dataOriginTimespanColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null
           && database.getMetadata().getDataOriginTimespan() != null
             ? SafeHtmlUtils.fromString(database.getMetadata().getDataOriginTimespan())
-            : null;
+            : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
+    dataOriginTimespanColumn.setSortable(true);
 
-    Column<ViewerDatabase, String> locationColumn = new ButtonColumn<ViewerDatabase>() {
+    locationColumn = new ButtonColumn<ViewerDatabase>() {
       @Override
       public String getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null ? PathUtils.getFileName(database.getPath()) : null;
@@ -137,37 +156,43 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     });
 
-    Column<ViewerDatabase, SafeHtml> sizeColumn = new TooltipColumn<ViewerDatabase>() {
+    sizeColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null ? SafeHtmlUtils.fromString(Humanize.readableFileSize(database.getSize()))
           : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
+    sizeColumn.setSortable(true);
 
-    Column<ViewerDatabase, SafeHtml> versionColumn = new TooltipColumn<ViewerDatabase>() {
+    versionColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null ? SafeHtmlUtils.fromString(database.getVersion())
           : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
+    versionColumn.setSortable(true);
 
-    Column<ViewerDatabase, SafeHtml> validColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
+    validColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? LabelUtils.getSIARDValidationStatus(database.getValidationStatus()) : null;
+        return database != null ? LabelUtils.getSIARDValidationStatus(database.getValidationStatus())
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
+    validColumn.setSortable(true);
 
-    Column<ViewerDatabase, SafeHtml> statusColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
+    statusColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? LabelUtils.getDatabaseStatus(database.getStatus()) : null;
+        return database != null ? LabelUtils.getDatabaseStatus(database.getStatus())
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
     };
+    statusColumn.setSortable(true);
 
-    Column<ViewerDatabase, String> openColumn = new ButtonColumn<ViewerDatabase>() {
+    openColumn = new ButtonColumn<ViewerDatabase>() {
       @Override
       public String getValue(ViewerDatabase object) {
         return messages.basicActionOpen();
@@ -180,7 +205,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
         @Override
         public void onSuccess(User user) {
           addColumn(nameColumn, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 8);
-          addColumn(description, messages.managePageTableHeaderTextForDescription(), true, TextAlign.NONE, 15);
+          addColumn(descriptionColumn, messages.managePageTableHeaderTextForDescription(), true, TextAlign.NONE, 15);
           addColumn(dataOwnerColumn, messages.managePageTableHeaderTextForDataOwner(), true, TextAlign.NONE, 5);
           addColumn(dataOriginTimespanColumn, messages.managePageTableHeaderTextForDataOriginTimespan(), true,
             TextAlign.NONE, 7);
@@ -197,7 +222,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       });
     } else {
       addColumn(nameColumn, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 8);
-      addColumn(description, messages.managePageTableHeaderTextForDescription(), true, TextAlign.NONE, 15);
+      addColumn(descriptionColumn, messages.managePageTableHeaderTextForDescription(), true, TextAlign.NONE, 15);
       addColumn(dataOwnerColumn, messages.managePageTableHeaderTextForDataOwner(), true, TextAlign.NONE, 5);
       addColumn(dataOriginTimespanColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
       addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);
@@ -218,7 +243,43 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     MethodCallback<IndexResult<ViewerDatabase>> callback) {
     Filter filter = getFilter();
 
+    filter.add(
+      new SimpleFilterParameter(ViewerConstants.SOLR_CONTENT_TYPE, ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_ROOT));
+
     Map<Column<ViewerDatabase, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
+
+    if (nameColumn != null) {
+      columnSortingKeyMap.put(nameColumn, Collections.singletonList(ViewerConstants.SOLR_DATABASES_METADATA_NAME));
+    }
+    if (descriptionColumn != null) {
+      columnSortingKeyMap.put(descriptionColumn,
+        Collections.singletonList(ViewerConstants.SOLR_DATABASES_METADATA_DESCRIPTION));
+    }
+    if (dataOwnerColumn != null) {
+      columnSortingKeyMap.put(dataOwnerColumn,
+        Collections.singletonList(ViewerConstants.SOLR_DATABASES_METADATA_DATA_OWNER));
+    }
+    if (dataOriginTimespanColumn != null) {
+      columnSortingKeyMap.put(dataOriginTimespanColumn,
+        Collections.singletonList(ViewerConstants.SOLR_DATABASES_METADATA_ORIGIN_TIMESPAN));
+    }
+    if (dbmsColumn != null) {
+      columnSortingKeyMap.put(dbmsColumn,
+        Collections.singletonList(ViewerConstants.SOLR_DATABASES_METADATA_DATABASE_PRODUCT));
+    }
+    if (sizeColumn != null) {
+      columnSortingKeyMap.put(sizeColumn, Collections.singletonList(ViewerConstants.SOLR_DATABASES_SIARD_SIZE));
+    }
+    if (versionColumn != null) {
+      columnSortingKeyMap.put(versionColumn, Collections.singletonList(ViewerConstants.SOLR_DATABASES_SIARD_VERSION));
+    }
+    if (validColumn != null) {
+      columnSortingKeyMap.put(validColumn, Collections.singletonList(ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS));
+    }
+    if (statusColumn != null) {
+      columnSortingKeyMap.put(statusColumn, Collections.singletonList(ViewerConstants.SOLR_DATABASES_STATUS));
+    }
+
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);
 
     List<String> queryFields = List.of(ViewerConstants.INDEX_SEARCH);
