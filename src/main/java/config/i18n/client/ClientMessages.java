@@ -230,6 +230,10 @@ public interface ClientMessages extends Messages {
 
   String columnName();
 
+  String viewName();
+
+  String routineName();
+
   String typeName();
 
   String originalTypeName();
