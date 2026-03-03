@@ -154,6 +154,142 @@ public class ViewerConstants {
   public static final String SOLR_DATABASES_PERMISSIONS_EXPIRY = "expiry_date";
   public static final String SOLR_DATABASES_CONTENT_TYPE_ROOT = "database";
   public static final String SOLR_DATABASES_CONTENT_TYPE_PERMISSION = "permission";
+  // METADATA
+  public static final String SOLR_DATABASES_METADATA_NAME = "metadata_name";
+  public static final String SOLR_DATABASES_METADATA_DESCRIPTION = "metadata_description";
+  public static final String SOLR_DATABASES_METADATA_ARCHIVER = "metadata_archiver";
+  public static final String SOLR_DATABASES_METADATA_ARCHIVER_CONTACT = "metadata_archiver_contact";
+  public static final String SOLR_DATABASES_METADATA_DATA_OWNER = "metadata_data_owner";
+  public static final String SOLR_DATABASES_METADATA_ORIGIN_TIMESPAN = "metadata_origin_timespan";
+  public static final String SOLR_DATABASES_METADATA_LOB_FOLDER = "metadata_lob_folder";
+  public static final String SOLR_DATABASES_METADATA_PRODUCER_APPLICATION = "metadata_producer_application";
+  public static final String SOLR_DATABASES_METADATA_ARCHIVAL_DATE = "metadata_archival_date";
+  public static final String SOLR_DATABASES_METADATA_CLIENT_MACHINE = "metadata_client_machine";
+  public static final String SOLR_DATABASES_METADATA_DATABASE_PRODUCT = "metadata_database_product";
+  public static final String SOLR_DATABASES_METADATA_DATABASE_USER = "metadata_database_user";
+  // SCHEMAS
+  public static final String SOLR_DATABASES_CONTENT_TYPE_SCHEMAS = "schemas";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_SCHEMA = "schema";
+  public static final String SOLR_DATABASES_SCHEMA_UUID = "schema_uuid";
+  public static final String SOLR_DATABASES_SCHEMA_NAME = "schema_name";
+  public static final String SOLR_DATABASES_SCHEMA_DESCRIPTION = "schema_description";
+  public static final String SOLR_DATABASES_SCHEMA_FOLDER = "schema_folder";
+  // USERS
+  public static final String SOLR_DATABASES_CONTENT_TYPE_USERS = "users";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_USER = "user";
+  public static final String SOLR_DATABASES_USER_NAME = "user_name";
+  public static final String SOLR_DATABASES_USER_DESCRIPTION = "user_description";
+  // ROLES
+  public static final String SOLR_DATABASES_CONTENT_TYPE_ROLES = "roles";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_ROLE = "role";
+  public static final String SOLR_DATABASES_ROLE_NAME = "role_name";
+  public static final String SOLR_DATABASES_ROLE_ADMIN = "role_admin";
+  public static final String SOLR_DATABASES_ROLE_DESCRIPTION = "role_description";
+  // PRIVILEGES
+  public static final String SOLR_DATABASES_CONTENT_TYPE_PRIVILEGES = "privileges";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_PRIVILEGE = "privilege";
+  public static final String SOLR_DATABASES_PRIVILEGE_TYPE = "privilege_type";
+  public static final String SOLR_DATABASES_PRIVILEGE_GRANTOR = "privilege_grantor";
+  public static final String SOLR_DATABASES_PRIVILEGE_GRANTEE = "privilege_grantee";
+  public static final String SOLR_DATABASES_PRIVILEGE_OBJECT = "privilege_object";
+  public static final String SOLR_DATABASES_PRIVILEGE_OPTION = "privilege_option";
+  public static final String SOLR_DATABASES_PRIVILEGE_DESCRIPTION = "privilege_description";
+  // TABLES
+  public static final String SOLR_DATABASES_CONTENT_TYPE_TABLES = "tables";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_TABLE = "table";
+  public static final String SOLR_DATABASES_TABLE_UUID = "table_uuid";
+  public static final String SOLR_DATABASES_TABLE_ID = "table_id";
+  public static final String SOLR_DATABASES_TABLE_NAME = "table_name";
+  public static final String SOLR_DATABASES_TABLE_DESCRIPTION = "table_description";
+  public static final String SOLR_DATABASES_TABLE_FOLDER = "table_folder";
+  public static final String SOLR_DATABASES_TABLE_ROWS = "table_rows";
+  public static final String SOLR_DATABASES_TABLE_SCHEMA_UUID = "table_schema_uuid";
+  public static final String SOLR_DATABASES_TABLE_SCHEMA_NAME = "table_schema_name";
+  public static final String SOLR_DATABASES_TABLE_NAME_WITHOUT_PREFIX = "table_name_without_prefix";
+  public static final String SOLR_DATABASES_TABLE_CUSTOM_VIEW = "table_custom_view";
+  public static final String SOLR_DATABASES_TABLE_MATERIALIZED_VIEW = "table_materialized_view";
+  // VIEWS
+  public static final String SOLR_DATABASES_CONTENT_TYPE_VIEWS = "views";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_VIEW = "view";
+  public static final String SOLR_DATABASES_VIEW_UUID = "view_uuid";
+  public static final String SOLR_DATABASES_VIEW_NAME = "view_name";
+  public static final String SOLR_DATABASES_VIEW_DESCRIPTION = "view_description";
+  public static final String SOLR_DATABASES_VIEW_QUERY = "view_query";
+  public static final String SOLR_DATABASES_VIEW_QUERY_ORIGINAL = "view_query_original";
+  public static final String SOLR_DATABASES_VIEW_SCHEMA_UUID = "view_schema_uuid";
+  public static final String SOLR_DATABASES_VIEW_SCHEMA_NAME = "view_schema_name";
+  // COLUMNS
+  public static final String SOLR_DATABASES_CONTENT_TYPE_COLUMNS = "columns";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_COLUMN = "column";
+  public static final String SOLR_DATABASES_COLUMN_SOLR_NAME = "column_solr_name";
+  public static final String SOLR_DATABASES_COLUMN_NAME = "column_name";
+  public static final String SOLR_DATABASES_COLUMN_DESCRIPTION = "column_description";
+  public static final String SOLR_DATABASES_COLUMN_TYPE_ORIGINAL = "column_type_original";
+  public static final String SOLR_DATABASES_COLUMN_TYPE_NAME = "column_type_name";
+  public static final String SOLR_DATABASES_COLUMN_TYPE_DB = "column_type_db";
+  public static final String SOLR_DATABASES_COLUMN_DEFAULT_VALUE = "column_default_value";
+  public static final String SOLR_DATABASES_COLUMN_NILLABLE = "column_nillable";
+  public static final String SOLR_DATABASES_COLUMN_AUTO_INCREMENT = "column_auto_increment";
+  public static final String SOLR_DATABASES_COLUMN_INDEX = "column_index";
+
+  // PRIMARY KEYS
+  public static final String SOLR_DATABASES_CONTENT_TYPE_PRIMARY_KEYS = "primary_keys";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_PRIMARY_KEY = "primary_key";
+  public static final String SOLR_DATABASES_PK_NAME = "pk_name";
+  public static final String SOLR_DATABASES_PK_DESCRIPTION = "pk_description";
+  public static final String SOLR_DATABASES_PK_COLUMN_INDEXES = "pk_column_indexes";
+  // FOREIGN KEYS
+  public static final String SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEYS = "foreign_keys";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEY = "foreign_key";
+  public static final String SOLR_DATABASES_FK_NAME = "fk_name";
+  public static final String SOLR_DATABASES_FK_DESCRIPTION = "fk_description";
+  public static final String SOLR_DATABASES_FK_REFERENCED_TABLE_UUID = "fk_referenced_table_uuid";
+  public static final String SOLR_DATABASES_FK_REFERENCED_TABLE_ID = "fk_referenced_table_id";
+  public static final String SOLR_DATABASES_FK_MATCH_TYPE = "fk_match_type";
+  public static final String SOLR_DATABASES_FK_DELETE_ACTION = "fk_delete_action";
+  public static final String SOLR_DATABASES_FK_UPDATE_ACTION = "fk_update_action";
+  public static final String SOLR_DATABASES_FK_REFERENCE_SOURCE_IDX = "fk_reference_source_idx";
+  public static final String SOLR_DATABASES_FK_REFERENCE_REF_IDX = "fk_reference_ref_idx";
+  // CANDIDATE KEYS
+  public static final String SOLR_DATABASES_CONTENT_TYPE_CANDIDATE_KEYS = "candidate_keys";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_CANDIDATE_KEY = "candidate_key";
+  public static final String SOLR_DATABASES_CK_NAME = "ck_name";
+  public static final String SOLR_DATABASES_CK_DESCRIPTION = "ck_description";
+  public static final String SOLR_DATABASES_CK_COLUMN_INDEXES = "ck_column_indexes";
+  // CHECK CONSTRAINTS
+  public static final String SOLR_DATABASES_CONTENT_TYPE_CHECK_CONSTRAINTS = "check_constraints";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_CHECK_CONSTRAINT = "check_constraint";
+  public static final String SOLR_DATABASES_CHECK_NAME = "check_name";
+  public static final String SOLR_DATABASES_CHECK_DESCRIPTION = "check_description";
+  public static final String SOLR_DATABASES_CHECK_CONDITION = "check_condition";
+  // TRIGGERS
+  public static final String SOLR_DATABASES_CONTENT_TYPE_TRIGGERS = "triggers";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_TRIGGER = "trigger";
+  public static final String SOLR_DATABASES_TRIGGER_NAME = "trigger_name";
+  public static final String SOLR_DATABASES_TRIGGER_DESCRIPTION = "trigger_description";
+  public static final String SOLR_DATABASES_TRIGGER_ACTION_TIME = "trigger_action_time";
+  public static final String SOLR_DATABASES_TRIGGER_EVENT = "trigger_event";
+  public static final String SOLR_DATABASES_TRIGGER_ALIAS_LIST = "trigger_alias_list";
+  public static final String SOLR_DATABASES_TRIGGER_ACTION = "trigger_action";
+  // ROUTINES AND PARAMETERS
+  public static final String SOLR_DATABASES_CONTENT_TYPE_ROUTINES = "routines";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_ROUTINE = "routine";
+  public static final String SOLR_DATABASES_ROUTINE_UUID = "routine_uuid";
+  public static final String SOLR_DATABASES_ROUTINE_NAME = "routine_name";
+  public static final String SOLR_DATABASES_ROUTINE_DESCRIPTION = "routine_description";
+  public static final String SOLR_DATABASES_ROUTINE_SOURCE = "routine_source";
+  public static final String SOLR_DATABASES_ROUTINE_BODY = "routine_body";
+  public static final String SOLR_DATABASES_ROUTINE_CHARACTERISTIC = "routine_characteristic";
+  public static final String SOLR_DATABASES_ROUTINE_RETURN_TYPE = "routine_return_type";
+
+  public static final String SOLR_DATABASES_CONTENT_TYPE_PARAMETERS = "parameters";
+  public static final String SOLR_DATABASES_CONTENT_TYPE_PARAMETER = "parameter";
+  public static final String SOLR_DATABASES_PARAMETER_NAME = "parameter_name";
+  public static final String SOLR_DATABASES_PARAMETER_MODE = "parameter_mode";
+  public static final String SOLR_DATABASES_PARAMETER_DESCRIPTION = "parameter_description";
+  public static final String SOLR_DATABASES_PARAMETER_TYPE_ORIGINAL = "parameter_type_original";
+  public static final String SOLR_DATABASES_PARAMETER_TYPE_NAME = "parameter_type_name";
+  public static final String SOLR_DATABASES_PARAMETER_TYPE_DB = "parameter_type_db";
 
   /*
    * ACTIVITY LOG FIELDS

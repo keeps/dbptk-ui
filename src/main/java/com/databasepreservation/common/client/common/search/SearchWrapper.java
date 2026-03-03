@@ -64,6 +64,10 @@ public class SearchWrapper extends Composite {
   }
 
   public <T extends IsIndexed> SearchWrapper createListAndSearchPanel(ListBuilder<T> listBuilder, boolean isSearchAll) {
+    return createListAndSearchPanel(listBuilder, isSearchAll, null);
+  }
+
+  public <T extends IsIndexed> SearchWrapper createListAndSearchPanel(ListBuilder<T> listBuilder, boolean isSearchAll, FlowPanel advancedSearchPanel) {
     AsyncTableCell<T, Void> list = listBuilder.build();
 
     SearchPanelAbstract searchPanel;
@@ -89,15 +93,27 @@ public class SearchWrapper extends Composite {
 
     String dropdownValue = listBuilder.getOptions().getListId();
 
+    boolean showAdvanced = advancedSearchPanel != null;
+
     // create
+
     if (isSearchAll) {
       list.setVisible(false);
       searchPanel = new SearchPanelWithSearchAll(filter, metadataCopyField, null, messages.searchPlaceholder(),
         hasMultipleSearchPanels, false);
     } else {
       searchPanel = new SearchPanel(filter, metadataCopyField, null, messages.searchPlaceholder(),
-        hasMultipleSearchPanels, false);
+        hasMultipleSearchPanels, showAdvanced);
     }
+
+    if (showAdvanced) {
+      searchPanel.setFieldsPanel(advancedSearchPanel);
+      searchPanel.setVariables(filter, metadataCopyField, list, advancedSearchPanel);
+
+      searchPanel.setSearchAdvancedGoEnabled(true);
+      searchPanel.setClearSearchButtonEnabled(true);
+    }
+
     searchPanel.setList(list);
     searchPanel.setDefaultFilterIncremental(incremental);
     searchPanel.setSearchPanelSelectionDropdownWrapperVisible(hasMultipleSearchPanels);
