@@ -35,6 +35,11 @@ public class ViewerJob extends IsIndexed implements Serializable {
   private String exitDescription;
   private Long rowsToProcess;
   private Long processRows;
+  private String currentStepName;
+  private Long skipCount;
+  private Integer currentStepNumber;
+  private Integer totalSteps;
+
 
   @Override
   public void setUuid(String uuid) {
@@ -148,5 +153,37 @@ public class ViewerJob extends IsIndexed implements Serializable {
 
   public void setProcessRows(Long processRows) {
     this.processRows = processRows;
+  }
+
+  public String getCurrentStepName() {
+    return currentStepName;
+  }
+
+  public void setCurrentStepName(String currentStepName) {
+    this.currentStepName = currentStepName;
+  }
+
+  public Long getSkipCount() {
+    return skipCount;
+  }
+
+  public void setSkipCount(Long skipCount) {
+    this.skipCount = skipCount;
+  }
+
+  public Integer getTotalSteps() {
+    return totalSteps;
+  }
+
+  public void setTotalSteps(Integer totalSteps) {
+    this.totalSteps = totalSteps;
+  }
+
+  public Integer getCurrentStepNumber() {
+    return currentStepNumber;
+  }
+
+  public void setCurrentStepNumber(Integer currentStepNumber) {
+    this.currentStepNumber = currentStepNumber;
   }
 }

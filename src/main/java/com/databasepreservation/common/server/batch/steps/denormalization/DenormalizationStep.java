@@ -15,6 +15,7 @@ import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.AbstractIndexingStepDefinition;
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.PartitionableStep;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
@@ -29,8 +30,8 @@ public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRo
   implements PartitionableStep {
 
   @Override
-  public String getName() {
-    return "denormalizationStep";
+  public String getDisplayName() {
+    return "Data Denormalization";
   }
 
   @Override
@@ -50,7 +51,7 @@ public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRo
 
   @Override
   public ItemProcessor<ViewerRow, ViewerRow> createProcessor(JobContext context, ExecutionContext stepContext) {
-    String entryID = stepContext.getString("denormalizeEntryID");
+    String entryID = stepContext.getString(BatchConstants.DENORMALIZATION_ENTRY_ID_KEY);
     DenormalizeConfiguration config = context.getDenormalizeConfig(entryID);
     return new DenormalizationStepProcessor(solrManager, config, context.getDatabaseUUID());
   }
@@ -58,7 +59,7 @@ public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRo
   @Override
   public void onPartitionCompleted(JobContext jobContext, ExecutionContext stepContext, BatchStatus status) {
     if (status == BatchStatus.COMPLETED) {
-      String entryID = stepContext.getString("denormalizeEntryID");
+      String entryID = stepContext.getString(BatchConstants.DENORMALIZATION_ENTRY_ID_KEY);
       DenormalizeConfiguration config = jobContext.getDenormalizeConfig(entryID);
 
       if (config != null) {

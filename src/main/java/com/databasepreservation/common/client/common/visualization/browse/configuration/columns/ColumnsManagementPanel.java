@@ -218,7 +218,6 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 collectionStatus.setNeedsToBeProcessed(true);
                 cellTable.getDataProvider().getList().add(columnStatus);
                 cellTable.getDataProvider().refresh();
-                collectionStatus.setNeedsToBeProcessed(true);
                 saveChanges(true);
               }
             }
@@ -734,8 +733,11 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
               ColumnStatus column = tableStatus.getColumnById(columnStatus.getId());
 
               ColumnStatus updatedColumnStatus = virtualColumnOptionsPanel.getColumnStatus();
+              VirtualForeignKeysStatus virtualForeignKeysStatus = null;
               ForeignKeysStatus updatedForeignKeyStatus = virtualReferenceOptionsPanel.getVirtualReferenceStatus();
-              VirtualForeignKeysStatus virtualForeignKeysStatus = updatedForeignKeyStatus.getVirtualForeignKeysStatus();
+              if(updatedForeignKeyStatus != null) {
+                virtualForeignKeysStatus = updatedForeignKeyStatus.getVirtualForeignKeysStatus();
+              }
 
               if (value.equals(Dialogs.DialogAction.SAVE)) {
                 if (virtualForeignKeysStatus != null) {

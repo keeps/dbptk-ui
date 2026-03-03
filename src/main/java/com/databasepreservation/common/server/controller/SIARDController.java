@@ -64,6 +64,7 @@ import com.databasepreservation.common.client.models.parameters.SIARDUpdateParam
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
+import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
@@ -882,7 +883,7 @@ public class SIARDController {
       List<ColumnStatus> lobColumns = tableStatus.getVisibleColumnsList().stream()
         .filter(c -> (c.getType().equals(ViewerType.dbTypes.BINARY)
           || (c.getType().equals(ViewerType.dbTypes.CLOB) && c.isExternalLob())
-            && c.getLobTextExtractionPolicy().getExtractAndIndexLobText()))
+            && c.getLobTextExtractionStatus().getProcessingState().equals(ProcessingState.TO_PROCESS)))
         .toList();
       if (!lobColumns.isEmpty()) {
         Filter rowFilter = new Filter();

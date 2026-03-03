@@ -9,6 +9,8 @@ package com.databasepreservation.common.server.index.schema.collections;
 
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_COLLECTION_UUID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_CREATE_TIME;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_CURRENT_STEP_NAME;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_CURRENT_STEP_NUMBER;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_DATABASE_NAME;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_DATABASE_UUID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_END_TIME;
@@ -19,10 +21,12 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_ROWS_PROCESSED;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_ROWS_TO_PROCESS;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_SCHEMA_NAME;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_SKIP_COUNT;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_START_TIME;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_STATUS;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_TABLE_NAME;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_TABLE_UUID;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_TOTAL_STEPS;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,6 +92,10 @@ public class BatchJobsCollection extends AbstractSolrCollection<ViewerJob> {
     fields.add(new Field(SOLR_BATCH_JOB_EXIT_DESCRIPTION, Field.TYPE_STRING).setIndexed(true).setRequired(false));
     fields.add(new Field(SOLR_BATCH_JOB_ROWS_TO_PROCESS, Field.TYPE_LONG).setIndexed(true).setRequired(false));
     fields.add(new Field(SOLR_BATCH_JOB_ROWS_PROCESSED, Field.TYPE_LONG).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_CURRENT_STEP_NAME, Field.TYPE_STRING).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_SKIP_COUNT, Field.TYPE_LONG).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_CURRENT_STEP_NUMBER, Field.TYPE_INT).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_TOTAL_STEPS, Field.TYPE_INT).setIndexed(true).setRequired(false));
 
     return fields;
   }
@@ -110,6 +118,10 @@ public class BatchJobsCollection extends AbstractSolrCollection<ViewerJob> {
     doc.addField(SOLR_BATCH_JOB_EXIT_DESCRIPTION, viewerJob.getExitDescription());
     doc.addField(SOLR_BATCH_JOB_ROWS_TO_PROCESS, viewerJob.getRowsToProcess());
     doc.addField(SOLR_BATCH_JOB_ROWS_PROCESSED, viewerJob.getProcessRows());
+    doc.addField(SOLR_BATCH_JOB_CURRENT_STEP_NAME, viewerJob.getCurrentStepName());
+    doc.addField(SOLR_BATCH_JOB_SKIP_COUNT, viewerJob.getSkipCount());
+    doc.addField(SOLR_BATCH_JOB_CURRENT_STEP_NUMBER, viewerJob.getCurrentStepNumber());
+    doc.addField(SOLR_BATCH_JOB_TOTAL_STEPS, viewerJob.getCurrentStepNumber());
 
     return doc;
   }
@@ -132,6 +144,10 @@ public class BatchJobsCollection extends AbstractSolrCollection<ViewerJob> {
     viewerJob.setExitDescription(SolrUtils.objectToString(doc.get(SOLR_BATCH_JOB_EXIT_DESCRIPTION), null));
     viewerJob.setRowsToProcess(SolrUtils.objectToLong(doc.get(SOLR_BATCH_JOB_ROWS_TO_PROCESS), null));
     viewerJob.setProcessRows(SolrUtils.objectToLong(doc.get(SOLR_BATCH_JOB_ROWS_PROCESSED), null));
+    viewerJob.setCurrentStepName(SolrUtils.objectToString(doc.get(SOLR_BATCH_JOB_CURRENT_STEP_NAME), null));
+    viewerJob.setSkipCount(SolrUtils.objectToLong(doc.get(SOLR_BATCH_JOB_SKIP_COUNT), null));
+    viewerJob.setCurrentStepNumber(SolrUtils.objectToInteger(doc.get(SOLR_BATCH_JOB_CURRENT_STEP_NUMBER), null));
+    viewerJob.setTotalSteps(SolrUtils.objectToInteger(doc.get(SOLR_BATCH_JOB_TOTAL_STEPS), null));
 
     return viewerJob;
   }

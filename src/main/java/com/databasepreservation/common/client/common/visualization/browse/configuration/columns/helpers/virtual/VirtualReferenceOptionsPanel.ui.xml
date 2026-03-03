@@ -38,7 +38,7 @@
                     <ui:text from='{messages.columnManagementLabelForReferencedColumnsTemplate}'/>
                 </g:HTML>
                 <g:TextBox addStyleNames="form-textbox full-width" ui:field="templateReferencedColumns"/>
-                <g:FlowPanel ui:field="templateReferencedColumnsHint"/>
+                <g:FlowPanel ui:field="templateReferencedColumnsHint" addStyleNames="dialog-possible-fields-options" />
                 <g:Label ui:field="errorTemplateReferencedColumns" addStyleNames="dialog-input-error-text"
                          visible="false"/>
             </g:FlowPanel>

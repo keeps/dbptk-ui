@@ -188,6 +188,10 @@ public class ViewerConstants {
   public static final String SOLR_BATCH_JOB_EXIT_DESCRIPTION = "exitCodeDescription";
   public static final String SOLR_BATCH_JOB_ROWS_TO_PROCESS = "rowsToProcess";
   public static final String SOLR_BATCH_JOB_ROWS_PROCESSED = "rowsProcessed";
+  public static final String SOLR_BATCH_JOB_CURRENT_STEP_NAME = "currentStepName";
+  public static final String SOLR_BATCH_JOB_SKIP_COUNT = "skipCount";
+  public static final String SOLR_BATCH_JOB_CURRENT_STEP_NUMBER = "currentStepNumber";
+  public static final String SOLR_BATCH_JOB_TOTAL_STEPS = "totalSteps";
 
   public static final String ACTIVITY_LOG_PROPERTY = "activityLogEntry";
 

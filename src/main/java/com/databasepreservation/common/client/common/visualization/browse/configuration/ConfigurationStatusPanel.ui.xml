@@ -9,7 +9,7 @@
 
             <g:FlowPanel ui:field="initialStatePanel" addStyleNames="config-initial-state">
                 <g:Label ui:field="messageLabel" addStyleNames="config-message"/>
-                <g:SimplePanel addStyleNames="btn-item">
+                <g:SimplePanel>
                     <g:Button ui:field="btnApplyConfiguration" addStyleNames="btn btn-primary btn-play">
                         <ui:text from='{messages.basicActionRun}'/>
                     </g:Button>
@@ -18,13 +18,24 @@
 
             <g:FlowPanel ui:field="progressPanel" visible="false" addStyleNames="config-progress-state">
                 <g:FlowPanel addStyleNames="progress-header">
-                    <g:HTML ui:field="statusBadge" addStyleNames="status-badge"/>
-                    <g:Label ui:field="progressText" addStyleNames="progress-text"/>
-                    <g:SimplePanel addStyleNames="btn-item">
-                        <g:Button ui:field="btnGoToJobs" addStyleNames="btn btn-primary btn-play">
-                            <ui:text from='{messages.basicActionBrowse}'/>
+                    <g:FlowPanel addStyleNames="job-title-panel">
+                        <g:Label ui:field="jobNameLabel" addStyleNames="job-name-label"/>
+                        <g:HTML ui:field="statusBadge" addStyleNames="status-badge"/>
+                    </g:FlowPanel>
+                    <g:SimplePanel>
+                        <g:Button ui:field="btnGoToJobs" addStyleNames="btn btn-primary btn-jobs">
+                            <ui:text from='{messages.configurationStatusPanelLabelForJobsBtn}'/>
                         </g:Button>
                     </g:SimplePanel>
+                </g:FlowPanel>
+
+                <g:FlowPanel addStyleNames="step-info-panel">
+                    <g:Label ui:field="stepCountLabel" addStyleNames="step-count-label"/>
+                </g:FlowPanel>
+
+                <g:FlowPanel addStyleNames="progress-info-panel">
+                    <g:Label ui:field="stepNameProgressLabel" addStyleNames="step-name-progress-label"/>
+                    <g:Label ui:field="elapsedTimeLabel" addStyleNames="elapsed-time-label"/>
                 </g:FlowPanel>
 
                 <g:HTMLPanel addStyleNames="progress">
