@@ -1,5 +1,8 @@
 package com.databasepreservation.common.server.batch.listeners;
 
+import com.databasepreservation.common.server.batch.core.BatchConstants;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
@@ -8,6 +11,7 @@ import org.springframework.batch.core.StepExecutionListener;
 
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.StepDefinition;
+import com.databasepreservation.common.server.controller.JobController;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -25,7 +29,19 @@ public class StepStatusListener implements StepExecutionListener {
 
   @Override
   public void beforeStep(StepExecution stepExecution) {
-    LOGGER.info("Starting Step: {} for database: {}", definition.getName(), context.getDatabaseUUID());
+    try {
+
+      if (stepExecution.getStepName().contains(BatchConstants.PARTITION_PREFIX) || stepExecution.getStepName().contains(BatchConstants.PARTITION_WORKER_NAME)) {
+        return;
+      }
+      context.incrementStepNumber();
+      context.setCurrentStepName(definition.getDisplayName());
+
+      JobController.editSolrBatchJob(stepExecution.getJobExecution(), context);
+      LOGGER.info("Starting Step: {} for database: {}", definition.getName(), context.getDatabaseUUID());
+    } catch (GenericException | NotFoundException e) {
+      LOGGER.error("Cannot update Step on SOLR for {}", context.getDatabaseUUID(), e);
+    }
   }
 
   @Override

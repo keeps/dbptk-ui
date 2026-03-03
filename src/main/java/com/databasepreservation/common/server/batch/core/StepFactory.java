@@ -49,7 +49,7 @@ public class StepFactory {
   private DatabaseRowsSolrManager solrManager;
 
   @Autowired
-  @Qualifier("batchTaskExecutor")
+  @Qualifier(BatchConstants.TASK_EXECUTOR_BEAN_NAME)
   private TaskExecutor taskExecutor;
 
   // proxies for @StepScope support
@@ -81,7 +81,7 @@ public class StepFactory {
 
     // 1. Check if the step requires partitioning (How it scales)
     boolean isPartitioned = definition instanceof PartitionableStep;
-    String workerName = isPartitioned ? stepName + "Worker" : stepName;
+    String workerName = isPartitioned ? stepName + BatchConstants.PARTITION_WORKER_NAME : stepName;
 
     // 2. Build the core worker step (What it does: Chunk or Tasklet)
     Step workerStep;
@@ -191,8 +191,7 @@ public class StepFactory {
   private void applyListeners(AbstractTaskletStepBuilder builder, StepDefinition definition, JobContext context,
     boolean isPartitionedWorker) {
 
-    SolrProgressFeedListener progressListener = new SolrProgressFeedListener(solrManager,
-      context.getJobProgressAggregator());
+    SolrProgressFeedListener progressListener = new SolrProgressFeedListener(solrManager, context);
 
     builder.listener((StepExecutionListener) progressListener);
     builder.listener((ChunkListener) progressListener);

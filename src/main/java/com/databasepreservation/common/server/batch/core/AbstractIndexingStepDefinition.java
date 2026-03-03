@@ -43,8 +43,8 @@ public abstract class AbstractIndexingStepDefinition<I extends IsIndexed & Seria
   @Override
   @SuppressWarnings("unchecked")
   public ItemReader<I> createReader(JobContext context, ExecutionContext executionContext) {
-    Filter filter = (Filter) executionContext.get("filter");
-    List<String> fields = (List<String>) executionContext.get("fields");
+    Filter filter = (Filter) executionContext.get(BatchConstants.FILTER_KEY);
+    List<String> fields = (List<String>) executionContext.get(BatchConstants.FIELDS_KEY);
 
     return new SolrItemReader<>(solrManager, context.getDatabaseUUID(), filter, fields, incomingClass);
   }

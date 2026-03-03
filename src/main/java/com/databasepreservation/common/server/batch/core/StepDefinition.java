@@ -1,6 +1,8 @@
 package com.databasepreservation.common.server.batch.core;
 
 import org.springframework.batch.core.BatchStatus;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
@@ -14,8 +16,20 @@ public interface StepDefinition {
 
   /**
    * @return The unique name of the step, used for identification within the Job.
+   *         (must match the Spring Bean name)
    */
-  String getName();
+  default String getName() {
+    Class<?> realClass = ClassUtils.getUserClass(this.getClass());
+    return StringUtils.uncapitalize(realClass.getSimpleName());
+  }
+
+  /**
+   * The human-readable name of the step to be displayed in the UI. Default
+   * implementation returns the internal name if not overridden.
+   */
+  default String getDisplayName() {
+    return getName();
+  }
 
   /**
    * Defines how the step should be executed, including concurrency and chunk size
@@ -42,6 +56,9 @@ public interface StepDefinition {
    */
   default long calculateWorkload(JobContext context) {
     return 1L;
+  }
+
+  default void onStepStarted(JobContext context) throws BatchJobException {
   }
 
   /**

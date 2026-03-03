@@ -21,6 +21,10 @@ public class DefaultJobContext implements JobContext {
   private final JobProgressAggregator progressAggregator;
   private final Map<String, DenormalizeConfiguration> denormalizeConfigs;
 
+  private int currentStepNumber = 0;
+  private int totalSteps = 1;
+  private String currentStepName = "";
+
   public DefaultJobContext(String databaseUUID, CollectionStatus collectionStatus) throws BatchJobException {
     this.databaseUUID = databaseUUID;
     this.collectionStatus = collectionStatus;
@@ -66,5 +70,35 @@ public class DefaultJobContext implements JobContext {
   @Override
   public DenormalizeConfiguration getDenormalizeConfig(String entryID) {
     return denormalizeConfigs.get(entryID);
+  }
+
+  @Override
+  public int getCurrentStepNumber() {
+    return currentStepNumber;
+  }
+
+  @Override
+  public void incrementStepNumber() {
+    this.currentStepNumber++;
+  }
+
+  @Override
+  public int getTotalSteps() {
+    return totalSteps;
+  }
+
+  @Override
+  public void setTotalSteps(int totalSteps) {
+    this.totalSteps = totalSteps;
+  }
+
+  @Override
+  public String getCurrentStepName() {
+    return currentStepName;
+  }
+
+  @Override
+  public void setCurrentStepName(String currentStepName) {
+    this.currentStepName = currentStepName;
   }
 }

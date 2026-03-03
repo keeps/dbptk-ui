@@ -19,6 +19,7 @@ import com.databasepreservation.common.client.models.status.denormalization.Refe
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.server.batch.context.JobContext;
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.steps.partition.PartitionStrategy;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
@@ -52,13 +53,13 @@ public class DenormalizationStepPartitionStrategy implements PartitionStrategy {
           }
 
           ExecutionContext partitionContext = new ExecutionContext();
-          partitionContext.putString("denormalizeEntryID", entryID);
+          partitionContext.putString(BatchConstants.DENORMALIZATION_ENTRY_ID_KEY, entryID);
 
-          partitionContext.put("databaseUUID", context.getDatabaseUUID());
-          partitionContext.put("filter", FilterUtils.filterByTable(new Filter(), config.getTableID()));
-          partitionContext.put("fields", new ArrayList<>(fieldsToReturn));
+          partitionContext.put(BatchConstants.DATABASE_UUID_KEY, context.getDatabaseUUID());
+          partitionContext.put(BatchConstants.FILTER_KEY, FilterUtils.filterByTable(new Filter(), config.getTableID()));
+          partitionContext.put(BatchConstants.FIELDS_KEY, new ArrayList<>(fieldsToReturn));
 
-          partitions.put("partition-" + entryID, partitionContext);
+          partitions.put(BatchConstants.PARTITION_PREFIX + entryID, partitionContext);
         }
       }
     }
@@ -67,7 +68,7 @@ public class DenormalizationStepPartitionStrategy implements PartitionStrategy {
 
   @Override
   public long calculateWorkload(JobContext context, ExecutionContext partitionContext) {
-    Filter filter = (Filter) partitionContext.get("filter");
+    Filter filter = (Filter) partitionContext.get(BatchConstants.FILTER_KEY);
     try {
       return solrManager.countRows(context.getDatabaseUUID(), filter);
     } catch (GenericException | RequestNotValidException e) {

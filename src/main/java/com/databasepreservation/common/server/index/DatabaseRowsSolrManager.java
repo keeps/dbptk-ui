@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.structure.ViewerCell;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -58,6 +57,7 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.exceptions.SavedSearchException;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
@@ -306,11 +306,18 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void editBatchJob(String jobUUID, long countRows, long processedRows) {
+  public void editBatchJob(String jobUUID, long countRows, long processedRows, long skipCount, JobContext jobContext) {
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, jobUUID);
     doc.addField(ViewerConstants.SOLR_BATCH_JOB_ROWS_TO_PROCESS, SolrUtils.asValueUpdate(countRows));
     doc.addField(ViewerConstants.SOLR_BATCH_JOB_ROWS_PROCESSED, SolrUtils.asValueUpdate(processedRows));
+    doc.addField(ViewerConstants.SOLR_BATCH_JOB_SKIP_COUNT, SolrUtils.asValueUpdate(skipCount));
+
+    doc.addField(ViewerConstants.SOLR_BATCH_JOB_CURRENT_STEP_NAME,
+      SolrUtils.asValueUpdate(jobContext.getCurrentStepName()));
+    doc.addField(ViewerConstants.SOLR_BATCH_JOB_CURRENT_STEP_NUMBER,
+      SolrUtils.asValueUpdate(jobContext.getCurrentStepNumber()));
+    doc.addField(ViewerConstants.SOLR_BATCH_JOB_TOTAL_STEPS, SolrUtils.asValueUpdate(jobContext.getTotalSteps()));
     try {
       insertDocument(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, doc);
     } catch (ViewerException e) {
@@ -722,17 +729,22 @@ public class DatabaseRowsSolrManager {
   /**
    * Executes a high-performance bulk update to a Solr collection.
    * <p>
-   * This method is specifically designed for Spring Batch or high-volume indexing operations.
-   * It implements a retry mechanism to handle transient Solr errors, such as
-   * "Collection Not Found (404)" errors that occur immediately after database ingestion starts.
-   * Unlike standard single updates, this method prioritizes fail-fast behavior for critical
-   * network or server failures to allow the Batch framework to manage retries according
-   * to the defined Step policy.
+   * This method is specifically designed for Spring Batch or high-volume indexing
+   * operations. It implements a retry mechanism to handle transient Solr errors,
+   * such as "Collection Not Found (404)" errors that occur immediately after
+   * database ingestion starts. Unlike standard single updates, this method
+   * prioritizes fail-fast behavior for critical network or server failures to
+   * allow the Batch framework to manage retries according to the defined Step
+   * policy.
    * </p>
    *
-   * @param collection the target Solr collection name
-   * @param docs the list of Solr documents to be indexed in a single request
-   * @throws ViewerException if the update fails after the timeout limit or if a fatal IO error occurs
+   * @param collection
+   *          the target Solr collection name
+   * @param docs
+   *          the list of Solr documents to be indexed in a single request
+   * @throws ViewerException
+   *           if the update fails after the timeout limit or if a fatal IO error
+   *           occurs
    */
   private void executeBulkUpdate(String collection, List<SolrInputDocument> docs) throws ViewerException {
     long timeoutLimit = System.currentTimeMillis() + INSERT_DOCUMENT_TIMEOUT;

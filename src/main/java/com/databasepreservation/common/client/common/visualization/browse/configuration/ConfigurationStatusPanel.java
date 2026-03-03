@@ -1,23 +1,36 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.api.v1.utils.JobResponse;
 import com.databasepreservation.common.client.ObserverManager;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
+import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.services.JobService;
-import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -53,13 +66,21 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   FlowPanel progressPanel;
   @UiField
   HTMLPanel progressBar;
-  @UiField
-  Label progressText;
+
   @UiField
   HTML statusBadge;
+  @UiField
+  Label jobNameLabel;
+  @UiField
+  Label stepCountLabel;
+  @UiField
+  Label stepNameProgressLabel;
+  @UiField
+  Label elapsedTimeLabel;
 
   private Timer progressTimer;
   private boolean jobFinishedSuccessfully = false;
+  private boolean isStoppingPolling = false;
   private CollectionStatus collectionStatus;
   private ViewerDatabase database;
 
@@ -69,7 +90,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   private static ConfigurationStatusPanelUiBinder binder = GWT.create(ConfigurationStatusPanelUiBinder.class);
 
   public ConfigurationStatusPanel() {
-    alertPanel = new Alert(Alert.MessageAlertType.INFO, "", FontAwesomeIconManager.DATABASE_INFORMATION);
+    alertPanel = new Alert(Alert.MessageAlertType.INFO, "");
 
     initWidget(binder.createAndBindUi(this));
 
@@ -84,7 +105,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
   public void setDatabase(ViewerDatabase database) {
     this.database = database;
-    refreshStatusFromServer();
+    refreshStatusFromServer(true);
   }
 
   @Override
@@ -93,7 +114,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
     super.onDetach();
   }
 
-  private void refreshStatusFromServer() {
+  private void refreshStatusFromServer(boolean checkActiveJobs) {
     if (database == null)
       return;
 
@@ -102,6 +123,39 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
         updateCollection(statusList.get(0));
       }
     }).getCollectionConfiguration(database.getUuid(), database.getUuid());
+
+    if (checkActiveJobs) {
+      retrieveStatusFromLastJob();
+    }
+  }
+
+  private void retrieveStatusFromLastJob() {
+    ArrayList<FilterParameter> filterParameters = new ArrayList<>();
+    filterParameters.add(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_DATABASE_UUID, database.getUuid()));
+    ArrayList<FilterParameter> orFilterParameters = new ArrayList<>();
+
+    orFilterParameters
+      .add(new SimpleFilterParameter(ViewerConstants.SOLR_BATCH_JOB_STATUS, ViewerJobStatus.STARTING.name()));
+    orFilterParameters
+      .add(new SimpleFilterParameter(ViewerConstants.SOLR_BATCH_JOB_STATUS, ViewerJobStatus.STARTED.name()));
+
+    filterParameters.add(new OrFiltersParameters(orFilterParameters));
+
+    FindRequest findRequest = new FindRequest(ViewerJob.class.getName(), new Filter(filterParameters), new Sorter(),
+      new Sublist(), new Facets());
+
+    JobService.Util.call((IndexResult<ViewerJob> results) -> {
+      if (results != null && results.getResults() != null && !results.getResults().isEmpty()) {
+        ViewerJob latestJob = results.getResults().get(0);
+        ViewerJobStatus status = latestJob.getStatus();
+
+        if (status != ViewerJobStatus.COMPLETED && status != ViewerJobStatus.FAILED
+          && status != ViewerJobStatus.STOPPED) {
+
+          startPolling(latestJob.getUuid());
+        }
+      }
+    }).find(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
   private void initHandlers() {
@@ -114,7 +168,8 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
           runJob();
         }, errorMessage -> {
           btnApplyConfiguration.setEnabled(true);
-          Dialogs.showErrors("Error", errorMessage, messages.basicActionClose());
+          Dialogs.showErrors(messages.configurationStatusPanelDialogTitleForError(), errorMessage,
+            messages.basicActionClose());
         }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
       }
     });
@@ -131,11 +186,14 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
       btnGoToJobs.setVisible(true);
     }, errorMessage -> {
       btnApplyConfiguration.setEnabled(true);
-      Dialogs.showErrors("Error", errorMessage, messages.basicActionClose());
+      Dialogs.showErrors(messages.configurationStatusPanelDialogTitleForError(), errorMessage,
+        messages.basicActionClose());
     }).run(database.getUuid(), database.getUuid(), null);
   }
 
   private void startPolling(String jobUUID) {
+    isStoppingPolling = false;
+    alertPanel.setVisible(true);
     toggleProgressMode(true);
     updateProgressVisuals(null); // Reset visual
 
@@ -145,7 +203,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
         checkJobStatus(jobUUID);
       }
     };
-    progressTimer.scheduleRepeating(100);
+    progressTimer.scheduleRepeating(1000);
   }
 
   private void stopPolling() {
@@ -157,7 +215,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
   private void checkJobStatus(String jobUUID) {
     JobService.Util.call((ViewerJob job) -> {
-      if (job == null)
+      if (job == null || isStoppingPolling)
         return;
 
       updateProgressVisuals(job);
@@ -165,10 +223,12 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
       if (status == ViewerJobStatus.COMPLETED || status == ViewerJobStatus.FAILED
         || status == ViewerJobStatus.STOPPED) {
+
+        isStoppingPolling = true;
         stopPolling();
 
         if (status == ViewerJobStatus.COMPLETED) {
-          handleJobSuccess();
+          handleJobSuccess(job);
         } else {
           handleJobFailure(job);
         }
@@ -179,15 +239,36 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
     }).retrieve(jobUUID);
   }
 
-  private void handleJobSuccess() {
+  private void handleJobSuccess(ViewerJob job) {
     jobFinishedSuccessfully = true;
-    Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(), "Processing Completed");
 
-    progressBar.removeStyleName("active");
-    progressText.setText("Completed (100%)");
+    String stepName = (job != null && job.getCurrentStepName() != null) ? job.getCurrentStepName()
+      : messages.configurationStatusPanelTextForInitializing();
+
+    if (job != null && job.getSkipCount() != null && job.getSkipCount() > 0) {
+      Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
+        messages.configurationStatusPanelToastDescriptionForProcessingCompletedWithSkip(job.getSkipCount()));
+      progressBar.removeStyleName("progress-bar-striped");
+      progressBar.removeStyleName("active");
+      progressBar.getElement().getStyle().setBackgroundColor("#f0ad4e");
+      stepNameProgressLabel
+        .setText(messages.configurationStatusPanelDescriptionForStepFinishedWithSkip(stepName, job.getSkipCount()));
+      stepNameProgressLabel.getElement().getStyle().setColor("#c98114");
+    } else {
+      Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
+        messages.configurationStatusPanelToastDescriptionForProcessingCompleted());
+      progressBar.removeStyleName("active");
+      stepNameProgressLabel.setText(messages.configurationStatusPanelDescriptionForStepFinished(stepName));
+    }
+
+    progressBar.getElement().getStyle().setWidth(100, com.google.gwt.dom.client.Style.Unit.PCT);
     statusBadge.setHTML(LabelUtils.getJobStatus(ViewerJobStatus.COMPLETED));
 
-    refreshStatusFromServer();
+    if (job != null) {
+      elapsedTimeLabel.setText(messages.configurationStatusPanelTextForElapsedTime(calculateTotalTime(job)));
+    }
+
+    refreshStatusFromServer(false);
 
     Timer resetTimer = new Timer() {
       @Override
@@ -201,8 +282,10 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
   private void handleJobFailure(ViewerJob job) {
     jobFinishedSuccessfully = false;
-    String errorDetails = job.getExitDescription() != null ? job.getExitDescription() : "Job Failed";
-    Dialogs.showErrors("Job Failed", errorDetails, messages.basicActionClose());
+    String errorDetails = job.getExitDescription() != null ? job.getExitDescription()
+      : messages.configurationStatusPanelDialogTitleForError();
+    Dialogs.showErrors(messages.configurationStatusPanelDialogTitleForError(), errorDetails,
+      messages.basicActionClose());
 
     toggleProgressMode(false);
     btnApplyConfiguration.setEnabled(true);
@@ -210,30 +293,89 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
   private void updateProgressVisuals(ViewerJob job) {
     if (job == null) {
-      progressBar.getElement().getStyle().setWidth(0, com.google.gwt.dom.client.Style.Unit.PCT);
-      progressText.setText("Initializing...");
-      statusBadge.setHTML("");
+      if (!jobFinishedSuccessfully) {
+        progressBar.getElement().getStyle().setWidth(0, com.google.gwt.dom.client.Style.Unit.PCT);
+        statusBadge.setHTML("");
+        jobNameLabel.setText(messages.configurationStatusPanelTextForInitializing());
+        stepCountLabel.setText("");
+        stepNameProgressLabel.setText(messages.configurationStatusPanelTextForInitializing());
+        elapsedTimeLabel.setText("");
+        progressBar.getElement().getStyle().clearBackgroundColor();
+      }
       return;
     }
 
     int percent = 0;
-    String textInfo = "Processing...";
-    GWT.log("Processing..." + job.getProcessRows() + " of " + job.getRowsToProcess() + " - Status: " + job.getStatus());
 
-    if (job.getProcessRows() != null && job.getRowsToProcess() != null && job.getRowsToProcess() > 0) {
+    // Job Name
+    if (job.getName() != null && !job.getName().isEmpty()) {
+      jobNameLabel.setText(job.getName());
+    } else {
+      jobNameLabel.setText(messages.configurationStatusPanelTextForInitializing());
+    }
+
+    // Step Count
+    if (job.getCurrentStepNumber() != null && job.getTotalSteps() != null) {
+      stepCountLabel
+        .setText(messages.configurationStatusPanelTextForStepCount(job.getCurrentStepNumber(), job.getTotalSteps()));
+    } else {
+      stepCountLabel.setText(messages.configurationStatusPanelTextForInitializing());
+    }
+
+    // Elapsed Time
+    elapsedTimeLabel.setText(messages.configurationStatusPanelTextForElapsedTime(calculateTotalTime(job)));
+
+    // Final Status Handling
+    if (job.getStatus() == ViewerJobStatus.FAILED || job.getStatus() == ViewerJobStatus.STOPPED) {
+      return;
+    }
+
+    if (job.getStatus() == ViewerJobStatus.COMPLETED) {
+      progressBar.getElement().getStyle().setWidth(100, com.google.gwt.dom.client.Style.Unit.PCT);
+      statusBadge.setHTML(LabelUtils.getJobStatus(job.getStatus()));
+      return;
+    }
+
+    // Progress and Step Name Handling
+    String stepName = job.getCurrentStepName() != null ? job.getCurrentStepName()
+      : messages.configurationStatusPanelTextForProcessing();
+
+    if (job.getStatus() == ViewerJobStatus.STARTING) {
+      stepNameProgressLabel.setText(messages.configurationStatusPanelDescriptionForStepInitializing(stepName));
+    } else if (job.getProcessRows() != null && job.getRowsToProcess() != null && job.getRowsToProcess() > 0) {
       percent = new Double((job.getProcessRows() * 1.0D / job.getRowsToProcess()) * 100).intValue();
-      textInfo = percent + "% (" + job.getProcessRows() + " of " + job.getRowsToProcess() + ")";
-    } else if (job.getStatus() == ViewerJobStatus.COMPLETED) {
-      percent = 100;
-      textInfo = "100%";
+      stepNameProgressLabel.setText(messages.configurationStatusPanelTextForStepProgress(stepName, percent,
+        job.getProcessRows(), job.getRowsToProcess()));
+
+    } else {
+      stepNameProgressLabel.setText(messages.configurationStatusPanelTextForStepRunning(stepName));
     }
 
     progressBar.getElement().getStyle().setWidth(percent, com.google.gwt.dom.client.Style.Unit.PCT);
-    progressText.setText(textInfo);
 
     if (job.getStatus() != null) {
       statusBadge.setHTML(LabelUtils.getJobStatus(job.getStatus()));
     }
+  }
+
+  private String calculateTotalTime(ViewerJob job) {
+    if (job == null || job.getStartTime() == null)
+      return "";
+    Date end = job.getEndTime() != null ? job.getEndTime() : new Date();
+    long millis = end.getTime() - job.getStartTime().getTime();
+    return formatDuration(millis);
+  }
+
+  private String formatDuration(long millis) {
+    long seconds = (millis / 1000) % 60;
+    long minutes = (millis / (1000 * 60)) % 60;
+    long hours = (millis / (1000 * 60 * 60));
+
+    if (hours > 0)
+      return hours + "h " + minutes + "m " + seconds + "s";
+    if (minutes > 0)
+      return minutes + "m " + seconds + "s";
+    return seconds + "s";
   }
 
   private void toggleProgressMode(boolean showProgress) {
@@ -259,7 +401,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   @Override
   protected void onAttach() {
     super.onAttach();
-    refreshStatusFromServer();
+    refreshStatusFromServer(true);
   }
 
   private void updateVisualState() {
