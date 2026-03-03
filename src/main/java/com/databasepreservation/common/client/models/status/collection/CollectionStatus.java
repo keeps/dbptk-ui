@@ -333,11 +333,6 @@ public class CollectionStatus implements Serializable {
     columnStatus.getExportStatus().getTemplateStatus().setTemplate(template);
   }
 
-  public void updateColumnTextExtractionPolicy(String tableUUID, String columnId, boolean extractAndIndexLobText) {
-    getTableStatus(tableUUID).getColumnById(columnId).getLobTextExtractionPolicy()
-      .setExtractAndIndexLobText(extractAndIndexLobText);
-  }
-
   public boolean isNeedsToBeProcessed() {
     return needsToBeProcessed;
   }

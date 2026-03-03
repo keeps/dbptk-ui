@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -37,18 +38,8 @@ import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.sublist.Sublist;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -105,11 +96,8 @@ import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.batch.core.JobOrchestrator;
-import com.databasepreservation.common.server.batch.core.StepDefinition;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
-import com.databasepreservation.common.server.batch.steps.denormalization.DenormalizationStep;
-import com.databasepreservation.common.server.batch.steps.virtual.column.VirtualColumnStep;
-import com.databasepreservation.common.server.controller.JobController;
+import com.databasepreservation.common.server.batch.jobs.DataTransformationJob;
 import com.databasepreservation.common.server.controller.ReporterType;
 import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
@@ -137,17 +125,10 @@ public class CollectionResource implements CollectionService {
   private HttpServletRequest request;
 
   @Autowired
-  @Qualifier("customJobLauncher")
-  JobLauncher jobLauncher;
-
-  @Autowired
   private JobOrchestrator orchestrator;
 
   @Autowired
-  private VirtualColumnStep virtualColumnStep;
-
-  @Autowired
-  private DenormalizationStep denormalizationStep;
+  private DataTransformationJob dataTransformationJob;
 
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/report", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @Operation(summary = "Downloads the migration report for a specific database")
@@ -470,40 +451,11 @@ public class CollectionResource implements CollectionService {
     try {
       user = controllerAssistant.checkRoles(request);
 
-      // check if there is no job running on table
-      // for (JobExecution runningJobExecution :
-      // jobExplorer.findRunningJobExecutions("processWorkflowJob")) {
-      // if
-      // (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM)
-      // .equals(databaseUUID)) {
-      // throw new RESTException(new AlreadyExistsException("A job is already running
-      // on this database"));
-      // }
-      // }
-      //
-      String jobId = SolrUtils.randomUUID();
-      JobParametersBuilder jobBuilder = new JobParametersBuilder();
-      jobBuilder.addDate(ViewerConstants.SOLR_SEARCHES_DATE_ADDED, new Date());
-      jobBuilder.addString(ViewerConstants.INDEX_ID, jobId);
-      jobBuilder.addString(ViewerConstants.CONTROLLER_COLLECTION_ID_PARAM, collectionUUID);
-      jobBuilder.addString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
-      JobParameters jobParameters = jobBuilder.toJobParameters();
+      JobExecution jobExecution = orchestrator.launchJob(databaseUUID, collectionUUID, dataTransformationJob);
+      String jobId = jobExecution.getJobParameters().getString(BatchConstants.JOB_UUID_KEY);
 
-      JobController.addMinimalSolrBatchJob(jobParameters);
-
-      List<StepDefinition> steps = List.of(virtualColumnStep, denormalizationStep);
-      Job job = orchestrator.buildJob(databaseUUID, steps);
-
-      JobExecution jobExecution = jobLauncher.run(job, jobParameters);
-      JobController.editSolrBatchJob(jobExecution);
-
-      if (jobExecution.getStatus().equals(BatchStatus.FAILED)) {
-        JobController.setMessageToSolrBatchJob(jobExecution, "Queue is full, please try later");
-      }
       return new JobResponse(jobId, jobExecution.getStatus().toString(), jobExecution.getCreateTime().toString());
-    } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-      | JobParametersInvalidException | NotFoundException | GenericException | AuthorizationException
-      | BatchJobException e) {
+    } catch (AuthorizationException | BatchJobException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

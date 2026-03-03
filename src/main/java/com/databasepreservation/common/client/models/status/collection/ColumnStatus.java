@@ -22,8 +22,8 @@ import jakarta.ws.rs.core.MediaType;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "originalType", "typeName",
-  "nullable", "type", "columnIndex", "externalLob", "formatter", "applicationType", "nestedColumn", "order",
-  "export", "search", "details", "extractStatus", "extractPolicy", "virtualColumn"})
+  "nullable", "type", "columnIndex", "externalLob", "formatter", "applicationType", "nestedColumn", "order", "export",
+  "search", "details", "extractStatus", "virtualColumn"})
 public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String id;
   private String name;
@@ -45,7 +45,6 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private SearchStatus searchStatus;
   private DetailsStatus detailsStatus;
   private LobTextExtractionStatus lobTextExtractionStatus;
-  private LobTextExtractionPolicy lobTextExtractionPolicy;
   private VirtualColumnStatus virtualColumnStatus;
 
   public ColumnStatus() {
@@ -211,15 +210,6 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
     this.detailsStatus = detailsStatus;
   }
 
-  @JsonProperty("extractPolicy")
-  public LobTextExtractionPolicy getLobTextExtractionPolicy() {
-    return lobTextExtractionPolicy;
-  }
-
-  public void setLobTextExtractionPolicy(LobTextExtractionPolicy lobTextExtractionPolicy) {
-    this.lobTextExtractionPolicy = lobTextExtractionPolicy;
-  }
-
   public VirtualColumnStatus getVirtualColumnStatus() {
     return virtualColumnStatus;
   }
@@ -272,8 +262,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
       + ", columnIndex=" + columnIndex + ", externalLob=" + externalLob + ", formatter='" + formatter + '\''
       + ", applicationType='" + applicationType + '\'' + ", nestedColumns=" + nestedColumns + ", order=" + order
       + ", exportStatus=" + exportStatus + ", searchStatus=" + searchStatus + ", detailsStatus=" + detailsStatus
-      + ", lobTextExtractionStatus=" + lobTextExtractionStatus + ", lobTextExtractionPolicy=" + lobTextExtractionPolicy
-      + ", virtualColumnStatus=" + virtualColumnStatus + '}';
+      + ", lobTextExtractionStatus=" + lobTextExtractionStatus + ", virtualColumnStatus=" + virtualColumnStatus + '}';
   }
 
   @Override

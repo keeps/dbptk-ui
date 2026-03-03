@@ -8,13 +8,13 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.textExtraction;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -22,8 +22,13 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
+import com.databasepreservation.common.client.models.status.collection.ProcessingState;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
@@ -33,7 +38,6 @@ import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
-import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -65,10 +69,14 @@ public class TextExtractionPanel extends ContentPanel {
   @UiField
   FlowPanel content;
 
+  @UiField
+  ConfigurationStatusPanel configurationStatusPanel;
+
   private TextExtractionPanel(ViewerDatabase database, CollectionStatus collectionStatus) {
     initWidget(binder.createAndBindUi(this));
     this.database = database;
     this.collectionStatus = collectionStatus;
+    configurationStatusPanel.setDatabase(database);
 
     init();
   }
@@ -104,26 +112,51 @@ public class TextExtractionPanel extends ContentPanel {
     Button btnCancel = new Button();
     btnCancel.setText(messages.basicActionCancel());
     btnCancel.addStyleName("btn btn-danger btn-times-circle");
-    btnSave.setText(messages.basicActionConfirm());
+    btnSave.setText(messages.basicActionSave());
     btnSave.addStyleName("btn btn-primary btn-save");
 
     btnCancel.addClickHandler(event -> HistoryManager.gotoAdvancedConfiguration(database.getUuid()));
 
     btnSave.addClickHandler(clickEvent -> {
+      Date now = new Date();
+      boolean hasChanges = false;
+
       for (String tableUUID : initialLoading.keySet()) {
         SelectionModel<ViewerColumn> selectedColumns = tables.get(tableUUID).getSelectionModel();
+        TableStatus tableStatus = collectionStatus.getTableStatus(tableUUID);
+
         for (ViewerColumn lobColumn : database.getMetadata().getTable(tableUUID).getBinaryColumns()) {
-          collectionStatus.updateColumnTextExtractionPolicy(tableUUID, lobColumn.getSolrName(),
-            selectedColumns.isSelected(lobColumn));
+          boolean isSelected = selectedColumns.isSelected(lobColumn);
+          ColumnStatus colStatus = tableStatus.getColumnById(lobColumn.getSolrName());
+
+          LobTextExtractionStatus status = colStatus.getLobTextExtractionStatus();
+
+          boolean currentState = status != null && status.getExtractedAndIndexedText();
+
+          if (currentState != isSelected) {
+            hasChanges = true;
+            if (status == null) {
+              status = new LobTextExtractionStatus();
+              colStatus.setLobTextExtractionStatus(status);
+            }
+
+            status.setExtractedAndIndexedText(isSelected);
+            status.setLastUpdatedDate(now);
+
+            if (isSelected) {
+              status.setProcessingState(ProcessingState.TO_PROCESS);
+            } else {
+              status.setProcessingState(ProcessingState.TO_REMOVE);
+            }
+          }
         }
       }
+
+      collectionStatus.setNeedsToBeProcessed(true);
 
       CollectionService.Util.call((Boolean result) -> {
         final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
         collectionObserver.setCollectionStatus(collectionStatus);
-        CollectionService.Util.call((StringResponse response) -> {
-          Toast.showInfo(messages.textExtractionPageTitle(), messages.textExtractionPageToastDescription());
-        }).extractAndIndexDatabaseLobText(database.getUuid(), database.getUuid());
       }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
     });
 
@@ -173,8 +206,15 @@ public class TextExtractionPanel extends ContentPanel {
       public Boolean getValue(ViewerColumn viewerColumn) {
         if (!initialLoading.get(tableUUID).contains(viewerColumn.getSolrName())) {
           initialLoading.get(tableUUID).add(viewerColumn.getSolrName());
-          selectionTablePanel.getSelectionModel().setSelected(viewerColumn, collectionStatus.getTableStatus(tableUUID)
-            .getColumnById(viewerColumn.getSolrName()).getLobTextExtractionPolicy().getExtractAndIndexLobText());
+
+          ColumnStatus colStatus = collectionStatus.getTableStatus(tableUUID).getColumnById(viewerColumn.getSolrName());
+
+          boolean isExtractEnabled = false;
+          if (colStatus != null && colStatus.getLobTextExtractionStatus() != null) {
+            isExtractEnabled = colStatus.getLobTextExtractionStatus().getExtractedAndIndexedText();
+          }
+
+          selectionTablePanel.getSelectionModel().setSelected(viewerColumn, isExtractEnabled);
         }
 
         return selectionTablePanel.getSelectionModel().isSelected(viewerColumn);

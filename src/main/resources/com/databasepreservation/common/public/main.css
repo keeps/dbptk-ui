@@ -2023,6 +2023,10 @@ html, body {
     content: "\f12d";
 }
 
+.btn-jobs:after {
+    content: "\f6ff";
+}
+
 .btn-export {
     padding: 4px 8px 4px 8px;
     font-size: 11px;
@@ -2298,6 +2302,10 @@ html, body {
     font-weight: 600;
     display: block;
     animation: fadeIn 0.3s ease-in-out;
+}
+
+.dialog-possible-fields-options {
+    margin-bottom: 10px;
 }
 
 @keyframes fadeIn {
@@ -3723,6 +3731,45 @@ rgba(0, 0, 0, .125);
     background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
     background-size: 20px 20px;
     animation: progress-bar-stripes 1s linear infinite;
+}
+
+.job-title-panel {
+    display: flex;
+    align-items: center;
+}
+
+.job-name-label {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-right: 15px;
+    color: #333;
+}
+
+.step-info-panel {
+    margin-top: 15px;
+}
+
+.step-count-label {
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.progress-info-panel {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.step-name-progress-label {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.elapsed-time-label {
+    font-size: 1.2rem;
+    color: #666;
 }
 
 @keyframes slideInBottom {

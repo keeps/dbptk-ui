@@ -27,6 +27,12 @@ public class PartitionStatusListener implements StepExecutionListener {
   @Override
   public void beforeStep(StepExecution partitionExecution) {
     LOGGER.debug("[Worker] Starting partition for step: {}", partitionExecution.getStepName());
+    try {
+      definition.onPartitionStarted(context, partitionExecution.getExecutionContext());
+    } catch (Exception e) {
+      LOGGER.error("[Worker] Error during onPartitionStarted for step {}", partitionExecution.getStepName(), e);
+      throw new RuntimeException("Failed to start partition", e);
+    }
   }
 
   @Override

@@ -26,6 +26,25 @@ public interface PartitionableStep {
   PartitionStrategy getPartitionStrategy();
 
   /**
+   * Callback executed when an individual worker partition begins its execution.
+   * This method is ideal for initializing partition-specific resources, such as
+   * opening file systems or establishing localized database connections.
+   * 
+   * @param jobContext
+   *          The context of the overall job execution, providing access to
+   *          job-level information and configuration.
+   * 
+   * @param stepContext
+   *          The execution context specific to the starting partition, containing
+   *          parameters necessary for its execution (e.g., table name,
+   *          boundaries).
+   * @throws BatchJobException
+   *           if the partition initialization process fails.
+   */
+  default void onPartitionStarted(JobContext jobContext, ExecutionContext stepContext) throws BatchJobException {
+  }
+
+  /**
    * Callback executed when an individual worker partition completes.
    * 
    * @param jobContext
@@ -47,7 +66,9 @@ public interface PartitionableStep {
   /**
    * Calculates the total workload by summing all partition units.
    *
-   * @param context The current job context, which may be needed to determine the workload for each partition.
+   * @param context
+   *          The current job context, which may be needed to determine the
+   *          workload for each partition.
    * 
    * @return Total items across all mapped partitions.
    */

@@ -37,7 +37,7 @@ public class JobStatusListener implements JobExecutionListener {
   @Override
   public void beforeJob(JobExecution jobExecution) {
     try {
-      JobController.editSolrBatchJob(jobExecution);
+      JobController.editSolrBatchJob(jobExecution, jobContext);
       LOGGER.info("Job STARTED for database: {}", jobContext.getDatabaseUUID());
     } catch (GenericException | NotFoundException e) {
       LOGGER.error("Cannot update job on SOLR for {}", jobContext.getDatabaseUUID(), e);
@@ -49,7 +49,7 @@ public class JobStatusListener implements JobExecutionListener {
     String databaseUUID = jobContext.getDatabaseUUID();
 
     try {
-      JobController.editSolrBatchJob(jobExecution);
+      JobController.editSolrBatchJob(jobExecution, jobContext);
 
       if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
         persistJobChanges(databaseUUID);

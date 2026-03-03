@@ -1,5 +1,6 @@
 package com.databasepreservation.common.server.batch.steps.virtual.column;
 
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
@@ -26,8 +27,8 @@ public class VirtualColumnStep extends AbstractIndexingStepDefinition<ViewerRow,
   implements PartitionableStep {
 
   @Override
-  public String getName() {
-    return "virtualColumnStep";
+  public String getDisplayName() {
+    return "Virtual Columns Processing";
   }
 
   @Override
@@ -47,14 +48,14 @@ public class VirtualColumnStep extends AbstractIndexingStepDefinition<ViewerRow,
 
   @Override
   public ItemProcessor<ViewerRow, ViewerRow> createProcessor(JobContext context, ExecutionContext partitionContext) {
-    return new VirtualColumnStepProcessor(context, partitionContext.getString("tableId"));
+    return new VirtualColumnStepProcessor(context, partitionContext.getString(BatchConstants.TABLE_ID_KEY));
   }
 
   @Override
   public void onPartitionCompleted(JobContext jobContext, ExecutionContext partitionContext, BatchStatus status)
     throws BatchJobException {
     if (status == BatchStatus.COMPLETED) {
-      String tableId = partitionContext.getString("tableId");
+      String tableId = partitionContext.getString(BatchConstants.TABLE_ID_KEY);
       TableStatus tableStatus = VirtualColumnStepUtils.findTableStatus(jobContext, tableId);
 
       if (tableStatus != null) {

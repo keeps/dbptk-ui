@@ -126,7 +126,6 @@ public class AdvancedConfiguration extends ContentPanel {
     textExtraction.addToDescriptionPanel(messages.advancedConfigurationTextForTextExtraction());
     textExtraction.addButton(btnTextExtraction);
     content.add(textExtraction);
-
   }
 
   private void configureHeader() {

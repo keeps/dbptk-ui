@@ -10,6 +10,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
 /**
@@ -17,7 +18,7 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
  */
 @Configuration
 public class BatchJobConfig {
-  @Bean(name = "batchTaskExecutor")
+  @Bean(name = BatchConstants.TASK_EXECUTOR_BEAN_NAME)
   public TaskExecutor batchTaskExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
     executor.setCorePoolSize(ViewerConfiguration.getInstance().getViewerConfigurationAsInt(5,
@@ -27,12 +28,12 @@ public class BatchJobConfig {
     executor.setQueueCapacity(ViewerConfiguration.getInstance().getViewerConfigurationAsInt(Integer.MAX_VALUE,
       ViewerConfiguration.PROPERTY_BATCH_JOBS_QUEUE_SIZE));
 
-    executor.setThreadNamePrefix("Batch-Worker-");
+    executor.setThreadNamePrefix(BatchConstants.TASK_EXECUTOR_THREAD_NAME_PREFIX);
     executor.initialize();
     return executor;
   }
 
-  @Bean(name = "customJobLauncher")
+  @Bean(name = BatchConstants.JOB_LAUNCHER_BEAN_NAME)
   public JobLauncher jobLauncher(JobRepository jobRepository) throws Exception {
     TaskExecutorJobLauncher jobLauncher = new TaskExecutorJobLauncher();
     jobLauncher.setJobRepository(jobRepository);

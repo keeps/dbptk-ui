@@ -14,9 +14,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.context.JobContextRegistry;
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.ChunkStepDefinition;
 import com.databasepreservation.common.server.batch.core.TaskletStepDefinition;
 
@@ -41,7 +41,7 @@ public class StepComponentsConfig {
   @Bean
   @StepScope
   public ItemReader<?> proxyReader(@Value("#{stepExecution.stepName}") String stepName,
-    @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID,
+    @Value("#{jobParameters['" + BatchConstants.DATABASE_UUID_KEY + "']}") String databaseUUID,
     @Value("#{stepExecutionContext}") Map<String, Object> partitionCtx) {
 
     JobContext ctx = contextRegistry.get(databaseUUID);
@@ -54,7 +54,7 @@ public class StepComponentsConfig {
   @Bean
   @StepScope
   public ItemProcessor<?, ?> proxyProcessor(@Value("#{stepExecution.stepName}") String stepName,
-    @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID,
+    @Value("#{jobParameters['" + BatchConstants.DATABASE_UUID_KEY + "']}") String databaseUUID,
     @Value("#{stepExecutionContext}") Map<String, Object> partitionCtx) {
 
     JobContext ctx = contextRegistry.get(databaseUUID);
@@ -67,7 +67,7 @@ public class StepComponentsConfig {
   @Bean
   @StepScope
   public ItemWriter<?> proxyWriter(@Value("#{stepExecution.stepName}") String stepName,
-    @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID) {
+    @Value("#{jobParameters['" + BatchConstants.DATABASE_UUID_KEY + "']}") String databaseUUID) {
 
     JobContext ctx = contextRegistry.get(databaseUUID);
     return getChunkDefinition(stepName).createWriter(ctx);
@@ -80,7 +80,7 @@ public class StepComponentsConfig {
   @Bean
   @StepScope
   public Tasklet proxyTasklet(@Value("#{stepExecution.stepName}") String stepName,
-    @Value("#{jobParameters['" + ViewerConstants.CONTROLLER_DATABASE_ID_PARAM + "']}") String databaseUUID,
+    @Value("#{jobParameters['" + BatchConstants.DATABASE_UUID_KEY + "']}") String databaseUUID,
     @Value("#{stepExecutionContext}") Map<String, Object> partitionCtx) {
 
     JobContext ctx = contextRegistry.get(databaseUUID);
@@ -104,6 +104,6 @@ public class StepComponentsConfig {
    * Batch.
    */
   private String extractBeanName(String stepName) {
-    return stepName.split(":")[0].replace("Worker", "");
+    return stepName.split(":")[0].replace(BatchConstants.PARTITION_WORKER_NAME, "");
   }
 }

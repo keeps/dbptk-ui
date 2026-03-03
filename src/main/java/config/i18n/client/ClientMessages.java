@@ -1483,6 +1483,34 @@ public interface ClientMessages extends Messages {
    *******************************************/
   String configurationStatusPanelLabelForTitle();
 
+  String configurationStatusPanelLabelForJobsBtn();
+
+  String configurationStatusPanelTextForInitializing();
+
+  String configurationStatusPanelTextForProcessing();
+
+  String configurationStatusPanelDialogTitleForError();
+
+  String configurationStatusPanelToastDescriptionForProcessingCompleted();
+
+  String configurationStatusPanelToastDescriptionForProcessingCompletedWithSkip(Long skipCount);
+
+  String configurationStatusPanelDescriptionForStepInitializing(String stepName);
+
+  String configurationStatusPanelDescriptionForStepFinished(String stepName);
+
+  String configurationStatusPanelDescriptionForStepFinishedWithSkip(String stepName, Long skipCount);
+
+  String configurationStatusPanelDescriptionForStepFailed(String stepName);
+
+  String configurationStatusPanelTextForStepCount(int currentStep, int totalSteps);
+
+  String configurationStatusPanelTextForElapsedTime(String elapsedTime);
+
+  String configurationStatusPanelTextForStepRunning(String stepName);
+
+  String configurationStatusPanelTextForStepProgress(String stepName, int progress, Long processed, Long total);
+
   /********************************************
    * Advanced Configuration
    *******************************************/
