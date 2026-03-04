@@ -214,6 +214,11 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
             public void onSuccess(Dialogs.DialogAction value) {
               if (value.equals(Dialogs.DialogAction.SAVE)) {
                 ColumnStatus columnStatus = virtualColumnOptionsPanel.getColumnStatus();
+
+                int maxIndex = collectionStatus.getTableStatusByTableId(tableId).getColumns().stream()
+                  .mapToInt(ColumnStatus::getColumnIndex).max().orElse(-1);
+                columnStatus.setColumnIndex(maxIndex + 1);
+
                 collectionStatus.getTableStatusByTableId(tableId).addColumnStatus(columnStatus);
                 collectionStatus.setNeedsToBeProcessed(true);
                 cellTable.getDataProvider().getList().add(columnStatus);
@@ -378,30 +383,27 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         state = column.getVirtualColumnStatus().getProcessingState();
       }
 
-      if (ProcessingState.TO_REMOVE.equals(state)) {
-        sb.appendHtmlConstant("<span style='color: #dc3545; margin-right: 5px;'>");
-        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.MINUS_CIRCLE));
-        sb.appendHtmlConstant("</span>");
-        sb.appendHtmlConstant("<span style='text-decoration: line-through; color: #6c757d;'>");
-      } else if (ProcessingState.TO_PROCESS.equals(state)) {
-        sb.appendHtmlConstant("<span style='color: #28a745; margin-right: 5px;'>");
-        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.PLUS_CIRCLE));
-        sb.appendHtmlConstant("</span>");
-        sb.appendHtmlConstant("<span>");
-      } else if (ProcessingState.PROCESSING.equals(state)) {
-        sb.appendHtmlConstant("<span style='color: #ffc107; margin-right: 5px;'>");
-        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.LOADING));
-        sb.appendHtmlConstant("</span>");
-        sb.appendHtmlConstant("<span>");
-      } else {
-        sb.appendHtmlConstant("<span style='color: #007bff; margin-right: 5px;'>");
-        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DRAFT));
-        sb.appendHtmlConstant("</span>");
-        sb.appendHtmlConstant("<span>");
-      }
-
+      sb.appendHtmlConstant("<span>");
       sb.append(SafeHtmlUtils.fromString(column.getName()));
       sb.appendHtmlConstant("</span>");
+      if (ProcessingState.TO_REMOVE.equals(state)) {
+        sb.appendHtmlConstant("<span style='color: #dc3545; margin-left: 5px;'>");
+        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.MINUS_CIRCLE));
+        sb.appendHtmlConstant("</span>");
+      } else if (ProcessingState.TO_PROCESS.equals(state)) {
+        sb.appendHtmlConstant("<span style='color: #28a745; margin-left: 5px;'>");
+        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.PLUS_CIRCLE));
+        sb.appendHtmlConstant("</span>");
+      } else if (ProcessingState.PROCESSING.equals(state)) {
+        sb.appendHtmlConstant("<span style='color: #ffc107; margin-left: 5px;'>");
+        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.LOADING));
+        sb.appendHtmlConstant("</span>");
+      } else {
+        sb.appendHtmlConstant("<span style='color: #007bff; margin-left: 5px;'>");
+        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.CLONE));
+        sb.appendHtmlConstant("</span>");
+      }
+
       return sb.toSafeHtml();
     } else {
       return SafeHtmlUtils.fromString(column.getName());
@@ -712,16 +714,16 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
     options.setFieldUpdater((index, columnStatus, value) -> {
       if (ViewerType.dbTypes.VIRTUAL.equals(columnStatus.getType())) {
+        TableStatus tableStatus = collectionStatus.getTableStatusByTableId(tableId);
         // Virtual column
-        VirtualColumnOptionsPanel virtualColumnOptionsPanel = VirtualColumnOptionsPanel
-          .createInstance(collectionStatus.getTableStatusByTableId(tableId), columnStatus);
+        VirtualColumnOptionsPanel virtualColumnOptionsPanel = VirtualColumnOptionsPanel.createInstance(tableStatus,
+          columnStatus);
 
         // Virtual foreign key column options
-        ForeignKeysStatus foreignKeysStatus = collectionStatus.getForeignKeyByTableAndColumnId(tableId,
+        ForeignKeysStatus foreignKeysStatus = collectionStatus.getForeignKeyByTableAndColumnId(tableStatus.getUuid(),
           columnStatus.getId());
-        VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel.createInstance(
-          database, collectionStatus, collectionStatus.getTableStatusByTableId(tableId), columnStatus,
-          foreignKeysStatus);
+        VirtualReferenceOptionsPanel virtualReferenceOptionsPanel = VirtualReferenceOptionsPanel
+          .createInstance(database, collectionStatus, tableStatus, columnStatus, foreignKeysStatus);
 
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
           messages.basicActionCancel(), messages.basicActionDelete(),
@@ -729,13 +731,12 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
           new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
             public void onSuccess(Dialogs.DialogAction value) {
-              TableStatus tableStatus = collectionStatus.getTableStatusByTableId(tableId);
               ColumnStatus column = tableStatus.getColumnById(columnStatus.getId());
 
               ColumnStatus updatedColumnStatus = virtualColumnOptionsPanel.getColumnStatus();
               VirtualForeignKeysStatus virtualForeignKeysStatus = null;
               ForeignKeysStatus updatedForeignKeyStatus = virtualReferenceOptionsPanel.getVirtualReferenceStatus();
-              if(updatedForeignKeyStatus != null) {
+              if (updatedForeignKeyStatus != null) {
                 virtualForeignKeysStatus = updatedForeignKeyStatus.getVirtualForeignKeysStatus();
               }
 

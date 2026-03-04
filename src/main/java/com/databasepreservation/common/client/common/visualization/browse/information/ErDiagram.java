@@ -25,6 +25,7 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -32,6 +33,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -43,6 +45,13 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, ErDiagram> instances = new HashMap<>();
   private CollectionStatus collectionStatus;
+
+  @UiField
+  TextBox searchBox;
+  @UiField
+  AccessibleFocusPanel searchButton;
+  @UiField
+  AccessibleFocusPanel clearCrossButton;
 
   public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path) {
     String separator = "/";
@@ -88,10 +97,12 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
   FlowPanel contentItems;
 
   private final String databaseUUID;
+  private final String schemaUUID;
 
   private ErDiagram(final ViewerDatabase database, final ViewerSchema schema, String path,
     CollectionStatus collectionStatus) {
     databaseUUID = database.getUuid();
+    schemaUUID = schema.getUuid();
     this.collectionStatus = collectionStatus;
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -275,6 +286,39 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
       loadDiagram(databaseUUID, schema.getUuid(), nodes, edges, ApplicationType.getType(), path);
     });
     contentItems.add(diagram);
+
+    searchButton.addClickHandler(event -> executeSearch());
+
+    searchBox.addKeyUpHandler(event -> {
+      boolean hasText = !searchBox.getText().trim().isEmpty();
+      clearCrossButton.setVisible(hasText);
+
+      if (event.getNativeKeyCode() == com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER) {
+        executeSearch();
+      }
+    });
+
+    clearCrossButton.addClickHandler(event -> {
+      searchBox.setText("");
+      clearCrossButton.setVisible(false);
+      resetDiagramFocus(schema.getUuid());
+      searchBox.setFocus(true);
+    });
+  }
+
+  private void executeSearch() {
+    String query = searchBox.getText().trim();
+    if (query.isEmpty())
+      return;
+
+    // A função nativa retorna true se encontrar a tabela
+    boolean found = focusTable(schemaUUID, query);
+
+    if (found) {
+      searchBox.removeStyleName("dialog-input-error");
+    } else {
+      searchBox.addStyleName("dialog-input-error");
+    }
   }
 
   private Double getNormalizedValue(double value, double min, double max, double minNorm, double maxNorm) {
@@ -654,6 +698,9 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
         // initialize your network!
         var network = new $wnd.vis.Network(container, data, options);
   
+        // for search functionality
+        container.network = network;
+  
         network.on("selectNode", function (params) {
             //params.event = "[original event]";
             if(params.nodes.length === 1) {
@@ -682,4 +729,56 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
         });
     })();
   }-*/;
+
+  private native boolean focusTable(String schemaUUID, String tableName) /*-{
+    var container = $wnd.document.getElementById('erdiagram-' + schemaUUID);
+    var network = container.network;
+    if (!network) return false;
+
+    var foundNodeId = null;
+    var searchTerm = tableName.toLowerCase();
+    var nodes = network.body.data.nodes;
+
+    nodes.forEach(function(node) {
+        var label = (node.label || "").toLowerCase();
+        if (label === searchTerm) {
+            foundNodeId = node.id;
+        }
+    });
+
+    if (foundNodeId === null) {
+        nodes.forEach(function(node) {
+            if (foundNodeId === null) {
+                var label = (node.label || "").toLowerCase();
+                if (label.indexOf(searchTerm) !== -1) {
+                    foundNodeId = node.id;
+                }
+            }
+        });
+    }
+
+    if (foundNodeId) {
+        network.selectNodes([foundNodeId]);
+        network.focus(foundNodeId, {
+            scale: 0.9,
+            animation: { duration: 1000, easingFunction: "easeInOutQuad" }
+        });
+        return true;
+    }
+    return false;
+}-*/;
+
+  private native void resetDiagramFocus(String schemaUUID) /*-{
+    var container = $wnd.document.getElementById('erdiagram-' + schemaUUID);
+    var network = container.network;
+    if (network) {
+        network.unselectAll();
+        network.fit({
+            animation: {
+                duration: 1000,
+                easingFunction: "easeInOutQuad"
+            }
+        });
+    }
+}-*/;
 }

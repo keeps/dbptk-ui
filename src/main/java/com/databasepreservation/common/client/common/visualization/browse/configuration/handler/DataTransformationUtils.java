@@ -62,11 +62,11 @@ public class DataTransformationUtils {
 
     for (ViewerReference reference : foreignKey.getReferences()) {
       if (foreignKey.getReferencedTableUUID().equals(referencedTable.getUuid())) {
-        sourceColumn = allSourceColumns.get(reference.getSourceColumnIndex());
-        referencedColumn = allReferencedColumns.get(reference.getReferencedColumnIndex());
+        sourceColumn = getColumnByIndex(allSourceColumns, reference.getSourceColumnIndex());
+        referencedColumn = getColumnByIndex(allReferencedColumns, reference.getReferencedColumnIndex());
       } else {
-        sourceColumn = allSourceColumns.get(reference.getReferencedColumnIndex());
-        referencedColumn = allReferencedColumns.get(reference.getSourceColumnIndex());
+        sourceColumn = getColumnByIndex(allSourceColumns, reference.getReferencedColumnIndex());
+        referencedColumn = getColumnByIndex(allReferencedColumns, reference.getSourceColumnIndex());
       }
       relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
     }
@@ -209,7 +209,7 @@ public class DataTransformationUtils {
     viewerColumn.setType(viewerType);
     viewerColumn.setDescription(columnStatus.getDescription());
 
-    viewerColumn.setColumnIndexInEnclosingTable(0);
+    viewerColumn.setColumnIndexInEnclosingTable(columnStatus.getColumnIndex());
     viewerColumn.setNillable(true);
 
     return viewerColumn;
@@ -221,6 +221,10 @@ public class DataTransformationUtils {
         return column;
     }
     return null;
+  }
+
+  private static ViewerColumn getColumnByIndex(List<ViewerColumn> columns, int index) {
+    return columns.stream().filter(c -> c.getColumnIndexInEnclosingTable() == index).findFirst().orElse(null);
   }
 
   public static ViewerForeignKey convertToViewerForeignKey(ForeignKeysStatus foreignKeysStatus,

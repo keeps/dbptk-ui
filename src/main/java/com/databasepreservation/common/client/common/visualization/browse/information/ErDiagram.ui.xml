@@ -1,7 +1,35 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
->
+             xmlns:wcag="urn:import:com.databasepreservation.common.client.widgets.wcag">
 
-<g:FlowPanel ui:field="contentItems">
-</g:FlowPanel>
+    <g:FlowPanel ui:field="contentItems" styleName="erDiagramContent">
+        <g:FlowPanel styleName="searchPanel" ui:field="searchPanel">
+            <g:FlowPanel styleName="searchPanelLeft">
+                <g:FlowPanel styleName="searchPanelLeftInput">
+                    <g:TextBox ui:field="searchBox" addStyleNames="searchBox"/>
+                </g:FlowPanel>
+
+                <wcag:AccessibleFocusPanel styleName="searchPanelClearButton" ui:field="clearCrossButton"
+                                           visible="false">
+                    <g:HTML addStyleNames="searchButton-html">
+                        <span class="fa-stack">
+                            <i class="fa fa-times fa-stack-1x"></i>
+                        </span>
+                    </g:HTML>
+                </wcag:AccessibleFocusPanel>
+            </g:FlowPanel>
+
+            <g:FlowPanel styleName="searchPanelRight">
+                <wcag:AccessibleFocusPanel styleName="searchButton" ui:field="searchButton">
+                    <g:HTML addStyleNames="searchButton-html">
+                        <span class="fa-stack fa-lg">
+                            <i class="fa fa-search fa-stack-1x"></i>
+                        </span>
+                    </g:HTML>
+                </wcag:AccessibleFocusPanel>
+            </g:FlowPanel>
+        </g:FlowPanel>
+
+        <g:SimplePanel ui:field="diagramContainer"/>
+    </g:FlowPanel>
 </ui:UiBinder>

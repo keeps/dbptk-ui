@@ -881,6 +881,10 @@ p[data-value]:after {
     margin-bottom: 1rem;
 }
 
+.erDiagramContent .searchPanelClearButton {
+    margin-top: 10%;
+}
+
 /**********************************************
 	       DATABASE SEARCH PAGE
 ************************************************/
