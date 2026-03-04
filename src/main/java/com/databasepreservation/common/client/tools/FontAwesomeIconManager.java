@@ -87,6 +87,8 @@ public class FontAwesomeIconManager {
   public static final String PLUS_CIRCLE = "plus-circle";
   public static final String MINUS_CIRCLE = "minus-circle";
   public static final String DRAFT = "drafting-compass";
+  public static final String LINK = "link";
+  public static final String PAPERCLIP = "paperclip";
 
   public static String getTag(String icon) {
     return "<i class=\"fa fa-" + icon + "\"></i>";
