@@ -81,6 +81,9 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_SOLR_HEALTHCHECK_RETRIES = "solr.healthcheck.retries";
   public static final String PROPERTY_SOLR_HEALTHCHECK_TIMEOUT = "solr.healthcheck.timeout_ms";
   public static final String PROPERTY_SOLR_STEMMING_LANGUAGE = "solr.stemming.language";
+  public static final String PROPERTY_SOLR_BASIC_AUTH_ACTIVE = "solr.basic.auth.active";
+  public static final String PROPERTY_SOLR_BASIC_AUTH_USERNAME = "solr.basic.auth.username";
+  public static final String PROPERTY_SOLR_BASIC_AUTH_PASSWORD = "solr.basic.auth.password";
 
   public static final String RESOURCES_SOLR_CONFIG_PATH = "solr-config";
 
