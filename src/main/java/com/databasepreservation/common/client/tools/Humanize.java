@@ -10,14 +10,19 @@ package com.databasepreservation.common.client.tools;
 import java.util.Date;
 
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.formatters.NoFormatter;
+import com.databasepreservation.common.client.models.status.formatters.NumberFormatter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
-
 import com.google.gwt.i18n.client.TimeZone;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+
 import config.i18n.client.ClientMessages;
 
 /**
@@ -230,6 +235,34 @@ public class Humanize {
       return messages.durationDHMSShortSeconds(seconds);
     } else {
       return messages.durationDHMSShortMillis(millis);
+    }
+  }
+
+  public static SafeHtml formatCell(ColumnStatus columnStatus, String cellValue, boolean showInUTC) {
+    switch (columnStatus.getType()) {
+      case DATETIME:
+        return SafeHtmlUtils.fromString(formatDateTimeFromSolr(cellValue, "yyyy-MM-dd HH:mm:ss", showInUTC));
+      case DATETIME_JUST_DATE:
+        return SafeHtmlUtils.fromString(formatDateTimeFromSolr(cellValue, "yyyy-MM-dd"));
+      case DATETIME_JUST_TIME:
+        return SafeHtmlUtils.fromString(formatDateTimeFromSolr(cellValue, "HH:mm:ss"));
+      case NUMERIC_FLOATING_POINT:
+        if (columnStatus.getFormatter() instanceof NoFormatter) {
+          return SafeHtmlUtils.fromString(NumberFormatUtils.getFormattedValue(new NumberFormatter(), cellValue));
+        } else {
+          return SafeHtmlUtils
+            .fromString(NumberFormatUtils.getFormattedValue((NumberFormatter) columnStatus.getFormatter(), cellValue));
+        }
+      case BOOLEAN:
+      case ENUMERATION:
+      case TIME_INTERVAL:
+      case NUMERIC_INTEGER:
+      case COMPOSED_STRUCTURE:
+      case COMPOSED_ARRAY:
+      case STRING:
+      case CLOB:
+      default:
+        return SafeHtmlUtils.fromString(cellValue);
     }
   }
 }

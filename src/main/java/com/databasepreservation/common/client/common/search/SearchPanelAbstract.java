@@ -17,9 +17,11 @@ import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.search.panel.SearchFieldPanel;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.BoostedSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.EDismaxSimplerQueryFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -214,16 +216,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
 
     String basicQuery = searchInputBox.getText();
     if (basicQuery != null && !basicQuery.trim().isEmpty()) {
-      FilterParameter metadataSearchFilter = new BasicSearchFilterParameter(metadataCopyField, basicQuery);
-      if (extractedTextCopyField == null) {
-        parameters.add(metadataSearchFilter);
-      }
-      else {
-        FilterParameter extractedTextSearchFilter = new BoostedSearchFilterParameter(
-            new BasicSearchFilterParameter(extractedTextCopyField, basicQuery),
-            ClientConfigurationManager.getDouble(0.5, "ocr.index.weight").floatValue());
-        parameters.add(new OrFiltersParameters(List.of(metadataSearchFilter, extractedTextSearchFilter)));
-      }
+      parameters.add(new EDismaxSimplerQueryFilterParameter(basicQuery));
     }
 
 
