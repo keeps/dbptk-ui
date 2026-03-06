@@ -69,6 +69,7 @@ import com.databasepreservation.common.client.index.filter.BoostedSearchFilterPa
 import com.databasepreservation.common.client.index.filter.CrossCollectionInnerJoinFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateIntervalFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
+import com.databasepreservation.common.client.index.filter.EDismaxSimplerQueryFilterParameter;
 import com.databasepreservation.common.client.index.filter.EmptyKeyFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
@@ -136,12 +137,14 @@ public class SolrUtils {
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
     Sorter sorter, Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters)
     throws GenericException, RequestNotValidException {
-    return find(index, collection, filter, sorter, sublist, facets, fieldsToReturn, extraParameters, new ArrayList<>());
+    return find(index, collection, filter, sorter, sublist, facets, fieldsToReturn, extraParameters, new ArrayList<>(),
+      "lucene", List.of(), false, List.of());
   }
 
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
     Sorter sorter, Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters,
-    List<Filter> filterQueries) throws GenericException, RequestNotValidException {
+    List<Filter> filterQueries, String defType, List<String> queryFields, boolean highlighting,
+    List<String> highlightedFields) throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
@@ -167,6 +170,14 @@ public class SolrUtils {
     if (!fieldsToReturn.isEmpty()) {
       query.setFields(fieldsToReturn.toArray(new String[0]));
     }
+
+    query.setParam("defType", defType);
+    query.setParam("qf", String.join(" ", queryFields));
+    query.setParam("hl", highlighting);
+    query.setParam("hl.fl", String.join(" ", highlightedFields));
+    query.setParam("hl.tag.pre", "<b>");
+    query.setParam("hl.tag.post", "</b>");
+
     parseAndConfigureFacets(facets, query);
 
     try {
@@ -183,7 +194,8 @@ public class SolrUtils {
         final long limit = docList.size();
         final long totalCount = docList.getNumFound();
         final List<T> docs = new ArrayList<T>();
-        ret = new IndexResult<T>(offset, limit, totalCount, docs, facetResults);
+        final Map<String, Map<String, List<String>>> highlightingInfo = new HashMap<>();
+        ret = new IndexResult<T>(offset, limit, totalCount, docs, facetResults, highlightingInfo);
       } else {
         throw buildGenericException(e);
       }
@@ -228,7 +240,8 @@ public class SolrUtils {
         final long limit = docList.size();
         final long totalCount = docList.getNumFound();
         final List<T> docs = new ArrayList<T>();
-        ret = new IndexResult<T>(offset, limit, totalCount, docs, facetResults);
+        final Map<String, Map<String, List<String>>> highlighting = new HashMap<>();
+        ret = new IndexResult<T>(offset, limit, totalCount, docs, facetResults, highlighting);
       } else {
         throw buildGenericException(e);
       }
@@ -255,6 +268,14 @@ public class SolrUtils {
     throws GenericException, RequestNotValidException {
     return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets, fieldsToReturn,
       extraParameters);
+  }
+
+  public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
+    Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters, String defType,
+    Filter filterQuery, List<String> queryFields, boolean highlighting, List<String> highlightedFields)
+    throws GenericException, RequestNotValidException {
+    return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets, fieldsToReturn,
+      extraParameters, List.of(filterQuery), defType, queryFields, highlighting, highlightedFields);
   }
 
   public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, Filter filter,
@@ -502,6 +523,7 @@ public class SolrUtils {
     final long limit = docList.size();
     final long totalCount = docList.getNumFound();
     final List<T> docs = new ArrayList<>();
+    final Map<String, Map<String, List<String>>> highlightingInfo = response.getHighlighting();
 
     for (SolrDocument doc : docList) {
       T result;
@@ -513,7 +535,7 @@ public class SolrUtils {
       docs.add(result);
     }
 
-    return new IndexResult<>(offset, limit, totalCount, docs, facetResults);
+    return new IndexResult<>(offset, limit, totalCount, docs, facetResults, highlightingInfo);
   }
 
   private static List<FacetFieldResult> processFacetFields(Facets facets, List<FacetField> facetFields) {
@@ -639,6 +661,9 @@ public class SolrUtils {
     if (parameter instanceof SimpleFilterParameter) {
       SimpleFilterParameter simplePar = (SimpleFilterParameter) parameter;
       appendExactMatch(ret, simplePar.getName(), simplePar.getValue(), true, prefixWithANDOperatorIfBuilderNotEmpty);
+    } else if (parameter instanceof EDismaxSimplerQueryFilterParameter) {
+      EDismaxSimplerQueryFilterParameter eDismaxSimplePar = (EDismaxSimplerQueryFilterParameter) parameter;
+      appendEDismaxSearchTerm(ret, eDismaxSimplePar.getValue(), true, prefixWithANDOperatorIfBuilderNotEmpty);
     } else if (parameter instanceof OneOfManyFilterParameter) {
       OneOfManyFilterParameter param = (OneOfManyFilterParameter) parameter;
       appendValuesUsingOROperator(ret, param.getName(), param.getValues(), prefixWithANDOperatorIfBuilderNotEmpty);
@@ -891,7 +916,21 @@ public class SolrUtils {
   private static void appendExactMatch(StringBuilder ret, String key, String value, boolean appendDoubleQuotes,
     boolean prefixWithANDOperatorIfBuilderNotEmpty) {
     appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
-    ret.append("(").append(key).append(":");
+    ret.append("( ").append(key).append(":");
+    if (appendDoubleQuotes) {
+      ret.append("\"");
+    }
+    ret.append(value.replaceAll("(\")", "\\\\$1"));
+    if (appendDoubleQuotes) {
+      ret.append("\"");
+    }
+    ret.append(" )");
+  }
+
+  private static void appendEDismaxSearchTerm(StringBuilder ret, String value, boolean appendDoubleQuotes,
+    boolean prefixWithANDOperatorIfBuilderNotEmpty) {
+    appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
+    ret.append("(");
     if (appendDoubleQuotes) {
       ret.append("\"");
     }

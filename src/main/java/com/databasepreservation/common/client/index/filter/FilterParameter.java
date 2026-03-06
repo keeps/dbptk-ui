@@ -35,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
   @Type(value = CrossCollectionInnerJoinFilterParameter.class, name = "CrossCollectionInnerJoinFilterParameter"),
   @Type(value = BlockJoinParentFilterParameter.class, name = "BlockJoinParentFilterParameter"),
   @Type(value = OrFiltersParameters.class, name = "OrFiltersParameters"),
+  @Type(value = EDismaxSimplerQueryFilterParameter.class, name = "EDismaxSimplerQueryFilterParameter"),
   @Type(value = BoostedSearchFilterParameter.class, name = "BoostedSearchFilterParameter")})
 
 public abstract class FilterParameter implements Serializable {

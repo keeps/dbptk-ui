@@ -11,14 +11,13 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.api.exceptions.IllegalAccessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -97,7 +96,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
    */
   @Override
   public void handleStructure(DatabaseStructure structure) throws ModuleException {
-    solrManager.addDatabaseRowCollection(databaseUUID);
+    solrManager.addDatabaseRowCollection(collectionConfiguration);
   }
 
   /**
@@ -143,7 +142,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
    */
   @Override
   public void handleDataRow(Row row) throws ModuleException {
-    solrManager.addRow(retrieved.getUuid(), ToolkitStructure2ViewerStructure.getRow(collectionConfiguration,
+    solrManager.addRow(collectionConfiguration, ToolkitStructure2ViewerStructure.getRow(collectionConfiguration,
       currentTable, row, rowIndex++, retrieved.getPath(), retrieved.getVersion()));
 
     rowsProcessedByTableCounter++;

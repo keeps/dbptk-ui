@@ -8,16 +8,18 @@
 package com.databasepreservation.common.client.index;
 
 
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.client.index.facets.FacetFieldResult;
-import com.databasepreservation.common.client.models.structure.ViewerJob;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.index.facets.FacetFieldResult;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerJob;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -32,15 +34,18 @@ public class IndexResult<T extends Serializable> implements Serializable {
   private List<T> results;
   private List<FacetFieldResult> facetResults;
   private Date date;
+  private Map<String, Map<String, List<String>>> highlightingInfo;
 
   public IndexResult() {
     super();
     this.results = new ArrayList<>();
     this.facetResults = new ArrayList<>();
     date = new Date();
+    this.highlightingInfo = new HashMap<>();
   }
 
-  public IndexResult(long offset, long limit, long totalCount, List<T> results, List<FacetFieldResult> facetResults) {
+  public IndexResult(long offset, long limit, long totalCount, List<T> results, List<FacetFieldResult> facetResults,
+    Map<String, Map<String, List<String>>> highlightingInfo) {
     super();
     this.offset = offset;
     this.limit = limit;
@@ -48,6 +53,7 @@ public class IndexResult<T extends Serializable> implements Serializable {
     this.results = results;
     this.facetResults = facetResults;
     date = new Date();
+    this.highlightingInfo = highlightingInfo;
   }
 
   /**
@@ -110,9 +116,17 @@ public class IndexResult<T extends Serializable> implements Serializable {
     this.date = date;
   }
 
+  public Map<String, Map<String, List<String>>> getHighlightingInfo() {
+    return highlightingInfo;
+  }
+
+  public void setHighlightingInfo(Map<String, Map<String, List<String>>> highlightingInfo) {
+    this.highlightingInfo = highlightingInfo;
+  }
+
   @Override
   public String toString() {
     return "IndexResult [offset=" + offset + ", limit=" + limit + ", totalCount=" + totalCount + ", results=" + results
-        + ", facetResults=" + facetResults + ", date=" + date + "]";
+      + ", facetResults=" + facetResults + ", date=" + date + ", highlightingInfo=" + highlightingInfo + "]";
   }
 }

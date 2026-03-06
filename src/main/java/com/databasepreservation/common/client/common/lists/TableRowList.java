@@ -46,8 +46,6 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.formatters.NoFormatter;
-import com.databasepreservation.common.client.models.status.formatters.NumberFormatter;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -57,7 +55,6 @@ import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.JSOUtils;
-import com.databasepreservation.common.client.tools.NumberFormatUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -65,6 +62,7 @@ import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -72,7 +70,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 
@@ -208,6 +209,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     }
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(alert);
+    configureCellHighlightPopups();
 
     // define default sorting
     // display.getColumnSortList().push(new ColumnSortInfo(datesColumn, false));
@@ -216,6 +218,60 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     //
     // addStyleName("my-collections-table");
     // emptyInfo.addStyleName("my-collections-empty-info");
+  }
+
+  private void configureCellHighlightPopups() {
+    final PopupPanel popupPanel = new PopupPanel(true);
+    popupPanel.setStyleName("cell-highlight-popup");
+    display.addCellPreviewHandler(new CellPreviewEvent.Handler<ViewerRow>() {
+      private ViewerRow currentMouseOverRow;
+      private ColumnStatus currentMouseOverColumn;
+      private final Timer hideTimer = new Timer() {
+        @Override
+        public void run() {
+          currentMouseOverRow = null;
+          currentMouseOverColumn = null;
+          popupPanel.removeStyleName("cell-highlight-popup-visible");
+          popupPanel.addStyleName("cell-highlight-popup-hidden");
+        }
+      };
+
+      @Override
+      public void onCellPreview(CellPreviewEvent<ViewerRow> event) {
+        ViewerRow row = event.getValue();
+        int columnIndex = event.getContext().getColumn();
+        ColumnStatus configColumn = (ColumnStatus) configColumns.keySet().toArray()[columnIndex - 1];
+        if (columnIndex > 0) {
+          if (event.getNativeEvent().getType().equals("mouseover")) {
+            if (row != currentMouseOverRow || configColumn != currentMouseOverColumn) {
+              List<String> snippets = getCellHighlights(row, configColumn);
+              if (!snippets.isEmpty()) {
+                currentMouseOverRow = row;
+                currentMouseOverColumn = configColumn;
+                hideTimer.cancel();
+                popupPanel.setWidget(new HTML(SafeHtmlUtils.fromSafeConstant(String.join("\n", snippets))));
+                Element el = Element.as(event.getNativeEvent().getEventTarget());
+                popupPanel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
+                  @Override
+                  public void setPosition(int offsetWidth, int offsetHeight) {
+                    popupPanel.removeStyleName("cell-highlight-popup-hidden");
+                    popupPanel.addStyleName("cell-highlight-popup-visible");
+                    popupPanel.setPopupPosition(el.getAbsoluteLeft() - 15, el.getAbsoluteTop() - offsetHeight - 5);
+                  }
+                });
+              }
+            }
+            else {
+              hideTimer.cancel();
+            }
+          } else if (event.getNativeEvent().getType().equals("mouseout")) {
+            if (row == currentMouseOverRow && configColumn == currentMouseOverColumn) {
+              hideTimer.schedule(200);
+            }
+          }
+        }
+      }
+    });
   }
 
   private Column<ViewerRow, SafeHtml> buildTemplateColumn(ColumnStatus configColumn, ViewerTable nestedTable) {
@@ -377,39 +433,62 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           String value = row.getCells().get(configColumn.getId()).getValue();
 
           // if it exists in Solr, it is not null
-          switch (configColumn.getType()) {
-            case DATETIME:
-              ret = SafeHtmlUtils.fromString(Humanize.formatDateTimeFromSolr(value, "yyyy-MM-dd HH:mm:ss", showInUTC));
-              break;
-            case DATETIME_JUST_DATE:
-              ret = SafeHtmlUtils.fromString(Humanize.formatDateTimeFromSolr(value, "yyyy-MM-dd"));
-              break;
-            case DATETIME_JUST_TIME:
-              ret = SafeHtmlUtils.fromString(Humanize.formatDateTimeFromSolr(value, "HH:mm:ss"));
-              break;
-            case NUMERIC_FLOATING_POINT:
-              if (configColumn.getFormatter() instanceof NoFormatter) {
-                ret = SafeHtmlUtils.fromString(NumberFormatUtils.getFormattedValue(new NumberFormatter(), value));
-              } else {
-                ret = SafeHtmlUtils.fromString(
-                  NumberFormatUtils.getFormattedValue((NumberFormatter) configColumn.getFormatter(), value));
-              }
-              break;
-            case BOOLEAN:
-            case ENUMERATION:
-            case TIME_INTERVAL:
-            case NUMERIC_INTEGER:
-            case COMPOSED_STRUCTURE:
-            case COMPOSED_ARRAY:
-            case STRING:
-            case CLOB:
-            default:
-              ret = SafeHtmlUtils.fromString(value);
-          }
+          ret = Humanize.formatCell(configColumn, value, showInUTC);
         }
         return ret;
       }
+
+      @Override
+      public String getCellStyleNames(Cell.Context context, ViewerRow row) {
+        List<String> styleNames = new ArrayList<>();
+
+        if (!getCellHighlights(row, configColumn).isEmpty()) {
+          styleNames.add("highlighted-cell");
+        }
+
+        return String.join(" ", styleNames);
+      }
     };
+  }
+
+  /**
+   * Gets this cell's highlighted text snippets from the last search's results
+   * 
+   * @param row
+   *          The cell's row
+   * @param configColumn
+   *          The cell's column status
+   * @return This cell's highlighted snippets, or an empty list if none exist
+   */
+  private List<String> getCellHighlights(ViewerRow row, ColumnStatus configColumn) {
+    Map<String, List<String>> rowHighlights = getResult().getHighlightingInfo().get(row.getUuid());
+    if (rowHighlights != null) {
+      String columnHighlightedName;
+      switch (configColumn.getType()) {
+        case NESTED:
+          // TODO: Support highlighting for nested fields
+          columnHighlightedName = configColumn.getId();
+          break;
+        case BINARY:
+        case CLOB:
+          columnHighlightedName = "ocr_" + configColumn.getId() + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX;
+          break;
+        case DATETIME:
+        case DATETIME_JUST_DATE:
+        case DATETIME_JUST_TIME:
+          columnHighlightedName = configColumn.getId().replace(ViewerConstants.SOLR_DYN_DATE,
+            ViewerConstants.SOLR_DYN_TEXT_GENERAL);
+          break;
+        default:
+          columnHighlightedName = configColumn.getId();
+          break;
+      }
+      List<String> cellHighlights = rowHighlights.get(columnHighlightedName);
+      if (cellHighlights != null && !cellHighlights.isEmpty()) {
+        return cellHighlights;
+      }
+    }
+    return List.of();
   }
 
   private Column<ViewerRow, SafeHtml> buildDownloadColumn(ColumnStatus configColumn, ViewerDatabase database,
@@ -449,6 +528,17 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           }
         }
         return ret;
+      }
+
+      @Override
+      public String getCellStyleNames(Cell.Context context, ViewerRow row) {
+        List<String> styleNames = new ArrayList<>();
+
+        if (!getCellHighlights(row, configColumn).isEmpty()) {
+          styleNames.add("highlighted-cell");
+        }
+
+        return String.join(" ", styleNames);
       }
     };
   }
@@ -492,6 +582,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     CollectionStatus status = wrapper.getStatus();
     Map<String, String> extraParameters = new HashMap<>();
     List<String> fieldsToReturn = new ArrayList<>();
+    List<String> highlightFields = new ArrayList<>();
+    List<String> queryFields = new ArrayList<>();
     fieldsToReturn.add(ViewerConstants.INDEX_ID);
     Filter filter = getFilter();
     boolean hasNested = false;
@@ -501,12 +593,27 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         hasNested = true;
       } else {
         fieldsToReturn.add(column.getId());
+        highlightFields.add(column.getId());
+        queryFields.add(column.getId());
+        if (column.getId().endsWith(ViewerConstants.SOLR_DYN_DATE)) {
+          String dateStringId = column.getId().replace(ViewerConstants.SOLR_DYN_DATE,
+            ViewerConstants.SOLR_DYN_TEXT_GENERAL);
+          fieldsToReturn.add(dateStringId);
+          highlightFields.add(dateStringId);
+          queryFields.add(dateStringId);
+        } else if (column.getId().matches("lob.+_s")) {
+          String ocrStringId = "ocr_" + column.getId() + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX;
+          fieldsToReturn.add(ocrStringId);
+          highlightFields.add(ocrStringId);
+          queryFields.add(ocrStringId);
+        }
       }
     }
 
     if (hasNested) {
       DataTransformationUtils.buildNestedFieldsToReturn(wrapper.getTable(), wrapper.getStatus(), extraParameters,
         fieldsToReturn);
+      queryFields.add("token_nst");
     }
     currentSubList = sublist;
 
@@ -523,12 +630,16 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     currentSorter = createSorter(columnSortList, columnSortingKeyMap);
 
-    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
-      getFacets(), false, fieldsToReturn, extraParameters);
-
-    if (!wrapper.isNested()) {
-      FilterUtils.filterByTable(filter, table.getSchemaName() + "." + table.getName());
+    Filter tableFilterQuery;
+    if (Boolean.FALSE.equals(wrapper.isNested())) {
+      tableFilterQuery = FilterUtils.getTableFilter(table.getId());
+    } else {
+      tableFilterQuery = new Filter();
     }
+
+    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
+      getFacets(), false, fieldsToReturn, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery,
+      queryFields, true, highlightFields);
 
     CollectionService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(),
       table.getSchemaName(), table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
@@ -615,12 +726,16 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         fieldsToReturn);
     }
 
-    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), rowsFilter, currentSorter, sublist,
-      getFacets(), false, fieldsToReturn, extraParameters);
-
+    Filter tableFilterQuery;
     if (Boolean.FALSE.equals(wrapper.isNested())) {
-      FilterUtils.filterByTable(rowsFilter, table.getSchemaName() + "." + table.getName());
+      tableFilterQuery = FilterUtils.getTableFilter(table.getId());
+    } else {
+      tableFilterQuery = new Filter();
     }
+
+    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), rowsFilter, currentSorter, sublist,
+      getFacets(), false, fieldsToReturn, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery,
+      fieldsToReturn, false, List.of());
 
     CollectionService.Util.call(new MethodCallback<IndexResult<ViewerRow>>() {
       @Override
@@ -813,12 +928,16 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       sublist = null;
     }
 
-    FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
-      Facets.NONE, false, fieldsToSolr, extraParameters);
-
+    Filter tableFilterQuery;
     if (!nested && !wrapper.isNested()) {
-      FilterUtils.filterByTable(findRequest.filter, table.getSchemaName() + "." + table.getName());
+      tableFilterQuery = FilterUtils.getTableFilter(table.getId());
+    } else {
+      tableFilterQuery = new Filter();
     }
+
+    FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
+      Facets.NONE, false, fieldsToSolr, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery, fieldsToSolr,
+      false, List.of());
 
     return RestUtils.createExportTableUri(database.getUuid(), table.getSchemaName(), table.getName(), findRequest,
       zipFilename, filename, description, exportLobs, fieldsToHeader);

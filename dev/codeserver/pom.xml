@@ -23,7 +23,7 @@
         <projectPath>../../</projectPath>
         <version.java>21</version.java>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gwt.version>2.11.0</gwt.version>
+        <gwt.version>2.13.0</gwt.version>
         <roda.version>5.4.0</roda.version>
         <version.dbptk>3.0.0</version.dbptk>
 

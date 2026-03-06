@@ -49,4 +49,8 @@ public class FilterUtils {
 
     return filter;
   }
+
+  public static Filter getTableFilter(String tableId) {
+    return new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, tableId));
+  }
 }

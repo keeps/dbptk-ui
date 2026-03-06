@@ -362,6 +362,28 @@ p[data-value]:after {
     margin-top: 0;
 }
 
+.highlighted-cell {
+    color: hsl(35deg 98% 23.19%);
+    background-color: hsl(35 98% 92% / 1);
+    border-radius: 4px;
+}
+
+.cell-highlight-popup {
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px #00000088;
+    padding: 8px;
+    transition: opacity 0.075s ease-in-out;
+}
+
+.cell-highlight-popup-hidden {
+    opacity: 0;
+}
+
+.cell-highlight-popup-visible {
+    opacity: 1;
+}
+
 /***********************************************
    BrowseContent (based on ViewRepresentation)
 ************************************************/

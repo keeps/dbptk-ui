@@ -43,8 +43,8 @@ public abstract class AbstractSolrCollection<M extends IsIndexed> implements Sol
 
     ret.add(new DynamicField("*" + ViewerConstants.SOLR_DYN_TEXT_MULTI, Field.TYPE_TEXT).setIndexed(true)
       .setStored(true).setMultiValued(true));
-    ret.add(new DynamicField("*" + ViewerConstants.SOLR_DYN_NEST_MULTI, Field.TYPE_TEXT).setIndexed(false)
-      .setStored(false).setMultiValued(true));
+    ret.add(new DynamicField("*" + ViewerConstants.SOLR_DYN_NEST_MULTI, Field.TYPE_TEXT).setIndexed(true)
+      .setStored(true).setMultiValued(true));
 
     return ret;
   }

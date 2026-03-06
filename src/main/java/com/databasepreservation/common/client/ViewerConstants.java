@@ -229,6 +229,12 @@ public class ViewerConstants {
   public static final String SOLR_SEARCHES_SEARCH_INFO_JSON = "search_info_json";
 
   /*
+   * SOLR QUERY PARSERS
+   */
+  public static final String SOLR_LUCENE = "lucene";
+  public static final String SOLR_EDISMAX = "edismax";
+
+  /*
    * ROW FIELDS
    */
   public static final String SOLR_ROWS_DATABASE_UUID = "databaseUUID";

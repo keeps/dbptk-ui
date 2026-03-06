@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -102,10 +103,10 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void addDatabaseRowCollection(final String databaseUUID) throws ViewerException {
-    updateValidationFields(databaseUUID,
+  public void addDatabaseRowCollection(final CollectionStatus collectionStatus) throws ViewerException {
+    updateValidationFields(collectionStatus.getDatabaseUUID(),
       Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.INGESTING.toString()));
-    RowsCollection collection = new RowsCollection(databaseUUID);
+    RowsCollection collection = new RowsCollection(collectionStatus);
     collection.createRowsCollection();
   }
 
@@ -158,8 +159,8 @@ public class DatabaseRowsSolrManager {
   public void addTable(String databaseUUID, ViewerTable table) throws ViewerException {
   }
 
-  public void addRow(String databaseUUID, ViewerRow row) throws ViewerException {
-    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+  public void addRow(CollectionStatus collectionStatus, ViewerRow row) throws ViewerException {
+    RowsCollection collection = SolrRowsCollectionRegistry.get(collectionStatus.getDatabaseUUID());
 
     try {
       insertDocument(collection.getIndexName(), collection.toSolrDocument(row));
@@ -188,7 +189,7 @@ public class DatabaseRowsSolrManager {
     Sublist sublist, Facets facets, List<String> fieldsToReturn, List<Filter> filterQueries)
     throws GenericException, RequestNotValidException {
     return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,
-      fieldsToReturn, new HashMap<>(), filterQueries);
+      fieldsToReturn, new HashMap<>(), filterQueries, "lucene", List.of(), false, List.of());
   }
 
   public <T extends IsIndexed> IndexResult<T> findHits(Class<T> classToReturn, String alias, Filter filter,
@@ -233,6 +234,14 @@ public class DatabaseRowsSolrManager {
     throws GenericException, RequestNotValidException {
     return SolrUtils.findRows(client, databaseUUID, filter, sorter, pageSize, cursorMark, fieldsToReturn,
       extraParameters);
+  }
+
+  public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
+    Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters, String defType, Filter filterQuery,
+    List<String> queryFields, boolean highlighing, List<String> highlightedFields)
+    throws GenericException, RequestNotValidException {
+    return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets, fieldsToReturn, extraParameters,
+      defType, filterQuery, queryFields, highlighing, highlightedFields);
   }
 
   public IterableIndexResult findAllRows(String databaseUUID, final Filter filter, final Sorter sorter,
