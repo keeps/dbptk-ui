@@ -7,16 +7,17 @@
  */
 package com.databasepreservation.common.client.common.visualization.browse.information;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
@@ -120,7 +121,10 @@ public class DataPanel extends Composite implements ICollectionStatusObserver {
   private BasicTablePanel<ViewerTable> getBasicTablePanelForTableInfo(final ViewerMetadata metadata,
     final ViewerSchema schema) {
 
-    List<ViewerTable> tables = new ArrayList<>(schema.getTables());
+    List<ViewerTable> tables = schema.getTables().stream().filter(table -> {
+      TableStatus tableStatus = status.getTableStatusByTableId(table.getId());
+      return tableStatus == null || tableStatus.isShow();
+    }).collect(Collectors.toList());
 
     /*
      * tables.sort((o1, o2) -> { Long r1 = o1.getCountRows(); Long r2 =
