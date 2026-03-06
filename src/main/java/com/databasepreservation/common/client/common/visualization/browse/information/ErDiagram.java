@@ -147,14 +147,21 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
           && (viewerTable.isMaterializedView() || viewerTable.isCustomView())) {
           continue;
         }
+
         TableStatus tableStatus = collectionStatus.getTableStatus(viewerTable.getUuid());
+        if (tableStatus != null && !tableStatus.isShow()) {
+          continue;
+        }
+
         String tableName = viewerTable.getName();
         if (tableStatus != null) {
           tableName = tableStatus.getCustomName();
         }
         VisNode visNode = new VisNode(viewerTable.getId(), tableName, collectionStatus);
 
-        if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
+        if (tableStatus != null) {
+          visNode.description = tableStatus.getCustomDescription();
+        } else if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
           visNode.description = viewerTable.getDescription();
         } else {
           visNode.description = "";
@@ -216,10 +223,12 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
         // create tooltip with table information
         StringBuilder tooltip = new StringBuilder();
-        if (ViewerStringUtils.isNotBlank(viewerTable.getName())) {
+        if (tableStatus != null) {
+          tooltip.append(tableStatus.getCustomName()).append("<br/>");
+        } else if (ViewerStringUtils.isNotBlank(viewerTable.getName())) {
           tooltip.append(viewerTable.getName()).append("<br/>");
         }
-        tooltip.append(visNode.description).append(" ");
+
         tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
           .append(messages.diagram_columns(visNode.numColumns)).append(", ")
           .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
@@ -311,7 +320,6 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     if (query.isEmpty())
       return;
 
-    // A função nativa retorna true se encontrar a tabela
     boolean found = focusTable(schemaUUID, query);
 
     if (found) {
@@ -423,12 +431,7 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     }
 
     public void adjustBackgroundColor(double value) {
-      // this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91);
-      if (collectionStatus != null && !collectionStatus.getTableStatusByTableId(id).isShow()) {
-        this.color.background = "#" + hslToRgb(0, 0, 0.784);
-      } else {
-        this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91 - value);
-      }
+      this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91 - value);
     }
 
     /**
