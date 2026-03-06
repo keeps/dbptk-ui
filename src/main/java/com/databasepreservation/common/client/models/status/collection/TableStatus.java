@@ -39,6 +39,7 @@ public class TableStatus implements Serializable {
   private boolean show;
   private List<ColumnStatus> columns;
   private List<ForeignKeysStatus> foreignKeys;
+  private VirtualTableStatus virtualTableStatus;
 
   public TableStatus() {
     columns = new ArrayList<>();
@@ -144,6 +145,14 @@ public class TableStatus implements Serializable {
 
   public void removeForeignKeyStatusById(String id) {
     this.foreignKeys.removeIf(fk -> fk.getId().equals(id));
+  }
+
+  public VirtualTableStatus getVirtualTableStatus() {
+    return virtualTableStatus;
+  }
+
+  public void setVirtualTableStatus(VirtualTableStatus virtualTableStatus) {
+    this.virtualTableStatus = virtualTableStatus;
   }
 
   @JsonIgnore
