@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
 import com.databasepreservation.common.client.models.structure.ViewerMimeType;
@@ -49,14 +51,14 @@ import com.databasepreservation.common.server.index.utils.SolrUtils;
 public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   private static final Logger LOGGER = LoggerFactory.getLogger(RowsCollection.class);
 
-  private String databaseUUID;
+  private CollectionStatus collectionStatus;
 
-  public RowsCollection(String databaseUUID) {
-    this.databaseUUID = databaseUUID;
+  public RowsCollection(CollectionStatus collectionStatus) {
+    this.collectionStatus = collectionStatus;
   }
 
   public String getDatabaseUUID() {
-    return this.databaseUUID;
+    return this.collectionStatus.getDatabaseUUID();
   }
 
   @Override
@@ -66,7 +68,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
 
   @Override
   public String getIndexName() {
-    return SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
+    return SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + getDatabaseUUID();
   }
 
   @Override
@@ -105,6 +107,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   public SolrInputDocument toSolrDocument(ViewerRow row) throws ViewerException, RequestNotValidException,
     GenericException, NotFoundException, AuthorizationDeniedException {
 
+
     SolrInputDocument doc = super.toSolrDocument(row);
 
     doc.setField(ViewerConstants.SOLR_ROWS_DATABASE_UUID, row.getDatabaseUUID());
@@ -112,11 +115,16 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     doc.setField(SOLR_ROWS_TABLE_UUID, row.getTableUUID());
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
       String solrColumnName = cellEntry.getKey();
+      ColumnStatus columnStatus = collectionStatus.getColumnByTableIdAndColumn(row.getTableId(), solrColumnName);
       if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_STRING_MULTI)) {
         doc.addField(solrColumnName, cellEntry.getValue().getListValue());
       } else {
         String cellValue = cellEntry.getValue().getValue();
         doc.addField(solrColumnName, cellValue);
+      }
+      if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_DATE)) {
+        doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_DATE, ViewerConstants.SOLR_DYN_TEXT_GENERAL),
+          cellEntry.getValue().getValue());
       }
     }
 

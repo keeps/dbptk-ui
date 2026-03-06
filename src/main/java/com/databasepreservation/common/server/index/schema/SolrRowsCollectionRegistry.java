@@ -27,9 +27,11 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
 
 public final class SolrRowsCollectionRegistry {
   private static final Logger LOGGER = LoggerFactory.getLogger(SolrRowsCollectionRegistry.class);
@@ -50,7 +52,13 @@ public final class SolrRowsCollectionRegistry {
     existingCollections.stream().filter(c -> c.startsWith(SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX)).forEach(index -> {
       String databaseUUID = index.substring(SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX.length());
       if (StringUtils.isNotBlank(databaseUUID)) {
-        register(new RowsCollection(databaseUUID));
+        try {
+          CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
+            .getConfigurationCollection(databaseUUID, databaseUUID);
+          register(new RowsCollection(collectionStatus));
+        } catch (GenericException e) {
+          LOGGER.error("Solr bootstrap failed", e);
+        }
       }
     });
   }
