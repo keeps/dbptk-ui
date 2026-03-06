@@ -21,6 +21,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
+import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -61,6 +62,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     private double widthEM;
     private boolean hide;
     private SafeHtml header;
+    private Header customHeader;
 
     public ColumnInfo(SafeHtml header, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
       this.header = header;
@@ -88,6 +90,27 @@ public class MultipleSelectionTablePanel<C> extends Composite {
 
     public ColumnInfo(String header, boolean hide, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
       this(SafeHtmlUtils.fromString(header), hide, widthEM, column, addCellStyleNames);
+    }
+
+    public ColumnInfo(Header<?> customHeader, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
+      this.customHeader = customHeader;
+      this.widthEM = widthEM;
+      this.column = column;
+      this.hide = false;
+      for (String addCellStyleName : addCellStyleNames) {
+        this.column.setCellStyleNames(addCellStyleName);
+      }
+    }
+
+    public ColumnInfo(Header<?> customHeader, boolean hide, double widthEM, Column<C, ?> column,
+      String... addCellStyleNames) {
+      this.customHeader = customHeader;
+      this.widthEM = widthEM;
+      this.column = column;
+      this.hide = hide;
+      for (String addCellStyleName : addCellStyleNames) {
+        this.column.setCellStyleNames(addCellStyleName);
+      }
     }
   }
 
@@ -224,7 +247,11 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     // add columns
     for (ColumnInfo<C> column : columns) {
       if (!column.hide) {
-        cellTable.addColumn(column.column, column.header);
+        if (column.customHeader != null) {
+          cellTable.addColumn(column.column, column.customHeader);
+        } else {
+          cellTable.addColumn(column.column, column.header);
+        }
         if (column.widthEM > 0) {
           cellTable.setColumnWidth(column.column, column.widthEM, Style.Unit.EM);
         }
@@ -240,6 +267,10 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     }
 
     return cellTable;
+  }
+
+  public void addRow(C rowItem) {
+    dataProvider.getList().add(rowItem);
   }
 
   public MultiSelectionModel<C> getSelectionModel() {

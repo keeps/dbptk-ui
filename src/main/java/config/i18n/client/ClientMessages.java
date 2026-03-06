@@ -1629,6 +1629,16 @@ public interface ClientMessages extends Messages {
 
   String tableManagementPageDialogUniqueError();
 
+  String tableManagementButtonTextForAddVirtualTable();
+
+  String tableManagementLabelForVirtualTableName();
+
+  String tableManagementLabelForVirtualTableDescription();
+
+  String tableManagementLabelForSourceTable();
+
+  String tableManagementLabelForSourceColumnsTemplate();
+
   /********************************************
    * Column Management Panel
    *******************************************/
@@ -1691,6 +1701,8 @@ public interface ClientMessages extends Messages {
   SafeHtml columnManagementNumericFormatterTextForPreviewDescription();
 
   SafeHtml columnManagementCustomizeColumnTextForWidthDescription(String link);
+
+  String columnManagementButtonTextForAddVirtualColumn();
 
   String columnManagementLabelForVirtualColumn();
 

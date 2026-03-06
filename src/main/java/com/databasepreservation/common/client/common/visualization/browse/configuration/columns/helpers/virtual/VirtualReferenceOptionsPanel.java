@@ -3,7 +3,6 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
-import java.util.function.Consumer;
 
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidatableOptionsPanel;
@@ -81,12 +80,7 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
   private void setupReferenceTableDropdown() {
     referencedTableListBox.clear();
     referencedTableListBox.addItem("", "");
-    collectionStatus.getTables().forEach(new Consumer<TableStatus>() {
-      @Override
-      public void accept(TableStatus table) {
-        referencedTableListBox.addItem(table.getId(), table.getUuid());
-      }
-    });
+    collectionStatus.getTables().forEach(table -> referencedTableListBox.addItem(table.getId(), table.getUuid()));
   }
 
   private void bindEvents() {

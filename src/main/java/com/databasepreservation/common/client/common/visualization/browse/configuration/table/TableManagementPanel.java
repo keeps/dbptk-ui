@@ -31,6 +31,7 @@ import com.databasepreservation.common.client.common.visualization.browse.config
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
@@ -44,6 +45,8 @@ import com.databasepreservation.common.client.widgets.ConfigurationCellTableReso
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -160,8 +163,56 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
       }
     });
 
+    Button btnAddVirtualTable = new Button();
+    btnAddVirtualTable.setText(messages.tableManagementButtonTextForAddVirtualTable());
+    btnAddVirtualTable.addStyleName("btn btn-primary btn-plus");
+
+    btnAddVirtualTable.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+
+        VirtualTableOptionsPanel virtualTableOptionsPanel = VirtualTableOptionsPanel.createInstance(database,
+          collectionStatus);
+
+        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionAdd(),
+          messages.basicActionCancel(), Arrays.asList(virtualTableOptionsPanel),
+          new DefaultAsyncCallback<Dialogs.DialogAction>() {
+            @Override
+            public void onSuccess(Dialogs.DialogAction value) {
+              if (value.equals(Dialogs.DialogAction.SAVE)) {
+                TableStatus tableStatusToInclude = virtualTableOptionsPanel.getTableStatus();
+                ViewerTable simpleViewerTable = virtualTableOptionsPanel
+                  .getSimpleViewerTable(tableStatusToInclude.getUuid());
+                if (tableStatusToInclude != null) {
+                  collectionStatus.getTables().add(tableStatusToInclude);
+                  collectionStatus.setNeedsToBeProcessed(true);
+
+                  collectionStatus.updateTableShowCondition(simpleViewerTable.getUuid(), true);
+                  initialLoading.put(simpleViewerTable.getUuid(), false);
+
+                  String schemaId = simpleViewerTable.getSchemaUUID();
+
+                  if (schemaId == null || !tables.containsKey(schemaId)) {
+                    schemaId = tables.keySet().iterator().next();
+                  }
+
+                  database.getMetadata().getSchema(schemaId).getTables().add(simpleViewerTable);
+
+                  MultipleSelectionTablePanel<ViewerTable> schemaTablePanel = tables.get(schemaId);
+                  if (schemaTablePanel != null) {
+                    schemaTablePanel.addRow(simpleViewerTable);
+                    schemaTablePanel.getSelectionModel().setSelected(simpleViewerTable, true);
+                  }
+                }
+              }
+            }
+          });
+      }
+    });
+
     content.add(CommonClientUtils.wrapOnDiv("navigation-panel-buttons",
-      CommonClientUtils.wrapOnDiv("btn-item", btnSave), CommonClientUtils.wrapOnDiv("btn-item", btnCancel)));
+      CommonClientUtils.wrapOnDiv("btn-item", btnSave), CommonClientUtils.wrapOnDiv("btn-item", btnCancel),
+      CommonClientUtils.wrapOnDiv("btn-item", btnAddVirtualTable)));
   }
 
   private void configureHeader() {
