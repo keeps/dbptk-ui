@@ -1,0 +1,44 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+
+    <g:FlowPanel ui:field="content">
+        <g:HTML addStyleNames="dialog-numeric-description" ui:field="description"/>
+
+        <g:FlowPanel addStyleNames="dialog-customize-columns-options">
+            <g:FlowPanel addStyleNames="dialog-customize-columns-option">
+
+                <g:FlowPanel>
+                    <g:HTML addStyleNames="form-label form-label-mandatory">
+                        <ui:text from='{messages.tableManagementLabelForVirtualTableName}'/>
+                    </g:HTML>
+                    <g:TextBox addStyleNames="form-textbox" ui:field="virtualTableName"/>
+                    <g:Label ui:field="errorVirtualTableName" addStyleNames="dialog-input-error-text" visible="false"/>
+                </g:FlowPanel>
+
+                <g:FlowPanel>
+                    <g:Label addStyleNames="form-label">
+                        <ui:text from='{messages.tableManagementLabelForVirtualTableDescription}'/>
+                    </g:Label>
+                    <g:TextBox addStyleNames="form-textbox" ui:field="virtualTableDescription"/>
+                </g:FlowPanel>
+
+                <g:FlowPanel>
+                    <g:HTML addStyleNames="form-label">
+                        <ui:text from='{messages.tableManagementLabelForSourceTable}'/>
+                    </g:HTML>
+                    <g:ListBox ui:field="sourceTableListBox" addStyleNames="form-control"/>
+                    <g:Label ui:field="errorSourceTable" addStyleNames="dialog-input-error-text" visible="false"/>
+                </g:FlowPanel>
+
+                <g:FlowPanel>
+                    <g:HTML addStyleNames="form-label">
+                        <ui:text from='{messages.tableManagementLabelForSourceColumnsTemplate}'/>
+                    </g:HTML>
+                    <g:FlowPanel ui:field="templateSourceColumns" addStyleNames="scrollable-panel"/>
+                </g:FlowPanel>
+
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

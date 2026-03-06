@@ -199,7 +199,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   @NotNull
   private Button getBtnAddVirtualColumn(TableStatus table) {
     Button btnAddVirtualColumn = new Button();
-    btnAddVirtualColumn.setText("Add virtual column");
+    btnAddVirtualColumn.setText(messages.columnManagementButtonTextForAddVirtualColumn());
     btnAddVirtualColumn.addStyleName("btn btn-primary btn-plus");
 
     btnAddVirtualColumn.addClickHandler(new ClickHandler() {
