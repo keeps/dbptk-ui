@@ -8,6 +8,7 @@
 package com.databasepreservation.common.client.services;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.fusesource.restygwt.client.DirectRestService;
@@ -66,6 +67,10 @@ public interface CollectionService extends DirectRestService {
     public static <T> CollectionService call(Consumer<T> callback, Consumer<String> errorHandler) {
       return REST.withCallback(DefaultMethodCallback.get(callback, errorHandler)).call(get());
     }
+
+    public static <T> CollectionService callDetailed(Consumer<T> callback, Consumer<Map<String, String>> errorHandler) {
+      return REST.withCallback(DefaultMethodCallback.getDetailed(callback, errorHandler)).call(get());
+    }
   }
 
   /*******************************************************************************
@@ -73,7 +78,7 @@ public interface CollectionService extends DirectRestService {
    *******************************************************************************/
   @RequestMapping(path = "/{databaseUUID}/collection", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Creates a collection for a database")
-  StringResponse createCollection(@PathVariable(name = "databaseUUID" ) String databaseUUID);
+  StringResponse createCollection(@PathVariable(name = "databaseUUID") String databaseUUID);
 
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/status", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the progress data associated with an action done in the database")
@@ -148,7 +153,7 @@ public interface CollectionService extends DirectRestService {
   StringResponse extractAndIndexTableLobText(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID);
 
-   /*******************************************************************************
+  /*******************************************************************************
    * Collection Resource - Config Sub-resource - Virtual columns
    ******************************************************************************/
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}/virtualColumn", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
