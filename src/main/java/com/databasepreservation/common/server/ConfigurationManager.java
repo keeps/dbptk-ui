@@ -43,6 +43,8 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabaseSta
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.models.validation.ConfigurationIntegrityValidator;
+import com.databasepreservation.common.exceptions.DependencyViolationException;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
@@ -59,6 +61,8 @@ public class ConfigurationManager {
   private static final Object collectionStatusFileLock = new Object();
   private static final Object denormalizeStatusFileLock = new Object();
   private long entryLogLineNumber = -1;
+
+  private final ConfigurationIntegrityValidator integrityValidator = new ConfigurationIntegrityValidator(this);
 
   public ConfigurationManager() {
   }
@@ -455,12 +459,21 @@ public class ConfigurationManager {
     }
   }
 
-  public void updateCollectionStatus(String databaseUUID, CollectionStatus status)
+  public void updateCollectionStatus(String databaseUUID, CollectionStatus updatedStatus)
     throws ViewerException, IllegalAccessException {
     synchronized (collectionStatusFileLock) {
-      Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
+
+      try {
+        CollectionStatus oldStatus = getCollectionStatus(databaseUUID, updatedStatus.getId());
+        integrityValidator.validateStateTransitions(databaseUUID, updatedStatus, oldStatus);
+      } catch (GenericException | DependencyViolationException e) {
+        throw new ViewerException(
+          "Failed to validate the collection status update due to integrity violation: " + e.getMessage(), e);
+      }
+
+      Path statusFile = getCollectionStatusPath(databaseUUID, updatedStatus.getId());
       ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
-      JsonTransformer.writeObjectToFile(status, statusFile);
+      JsonTransformer.writeObjectToFile(updatedStatus, statusFile);
     }
   }
 
