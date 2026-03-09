@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.jetbrains.annotations.Nullable;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
@@ -607,9 +608,10 @@ public class RowPanel extends RightPanel {
           // names)
           // get column indexes from fk source
           for (ViewerReference viewerReference : foreignKey.getReferences()) {
-            String solrColumnName = allOtherTableColumns.get(viewerReference.getReferencedColumnIndex()).getSolrName();
+            String solrColumnName = getSolrNameByColumnIndex(allOtherTableColumns,
+              viewerReference.getReferencedColumnIndex());
             Integer columnIndexToGetValue = viewerReference.getSourceColumnIndex();
-            String solrColumnNameToGetValue = allCurrentTableColumns.get(columnIndexToGetValue).getSolrName();
+            String solrColumnNameToGetValue = getSolrNameByColumnIndex(allCurrentTableColumns, columnIndexToGetValue);
             foreignSolrColumnToRowSolrColumn.put(solrColumnName, solrColumnNameToGetValue);
           }
         } else {
@@ -619,13 +621,20 @@ public class RowPanel extends RightPanel {
           // get column names from source (use otherTable to map indexes to names)
           // get column indexes from fk target
           for (ViewerReference viewerReference : foreignKey.getReferences()) {
-            String solrColumnName = allOtherTableColumns.get(viewerReference.getSourceColumnIndex()).getSolrName();
+            String solrColumnName = getSolrNameByColumnIndex(allOtherTableColumns,
+              viewerReference.getReferencedColumnIndex());
             Integer columnIndexToGetValue = viewerReference.getReferencedColumnIndex();
-            String solrColumnNameToGetValue = allCurrentTableColumns.get(columnIndexToGetValue).getSolrName();
+            String solrColumnNameToGetValue = getSolrNameByColumnIndex(allCurrentTableColumns, columnIndexToGetValue);
             foreignSolrColumnToRowSolrColumn.put(solrColumnName, solrColumnNameToGetValue);
           }
         }
       }
+    }
+
+    @Nullable
+    private static String getSolrNameByColumnIndex(List<ViewerColumn> viewerColumns, Integer index) {
+      return viewerColumns.stream().filter(c -> c.getColumnIndexInEnclosingTable() == index)
+        .map(ViewerColumn::getSolrName).findFirst().orElse(null);
     }
 
     public List<String> getColumnNamesAndValues(ViewerRow row) {

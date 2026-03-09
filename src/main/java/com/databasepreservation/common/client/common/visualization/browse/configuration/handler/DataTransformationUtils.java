@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation.TableNode;
@@ -183,7 +184,13 @@ public class DataTransformationUtils {
     fieldsToReturn.add("originalRowUUID_t");
   }
 
+  @Nullable
+  public static ViewerColumn getColumnByIndex(List<ViewerColumn> viewerColumns, Integer index) {
+    return viewerColumns.stream().filter(c -> c.getColumnIndexInEnclosingTable() == index).findFirst().orElse(null);
+  }
+
   // Virtual
+
   @NotNull
   public static List<ViewerColumn> getViewerColumnsWithVirtualColumns(List<ViewerColumn> originalColumns,
     TableStatus tableStatus) {
@@ -221,10 +228,6 @@ public class DataTransformationUtils {
         return column;
     }
     return null;
-  }
-
-  private static ViewerColumn getColumnByIndex(List<ViewerColumn> columns, int index) {
-    return columns.stream().filter(c -> c.getColumnIndexInEnclosingTable() == index).findFirst().orElse(null);
   }
 
   public static ViewerForeignKey convertToViewerForeignKey(ForeignKeysStatus foreignKeysStatus,

@@ -17,6 +17,7 @@ import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.batch.exceptions.DataTransformationException;
+import com.databasepreservation.common.server.batch.steps.virtual.VirtualEntityStepUtils;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -27,8 +28,8 @@ public class VirtualColumnStepProcessor implements ItemProcessor<ViewerRow, View
   private final Map<String, VirtualColumnStatus> virtualColumns;
   private final TableStatus tableStatus;
 
-  public VirtualColumnStepProcessor(JobContext context, String tableId) {
-    this.tableStatus = context.getCollectionStatus().getTables().stream().filter(t -> t.getId().equals(tableId))
+  public VirtualColumnStepProcessor(JobContext context, String tableID) {
+    this.tableStatus = context.getCollectionStatus().getTables().stream().filter(t -> t.getId().equals(tableID))
       .findFirst().orElse(null);
 
     if (tableStatus != null) {
@@ -63,15 +64,15 @@ public class VirtualColumnStepProcessor implements ItemProcessor<ViewerRow, View
       String columnId = entry.getKey();
       VirtualColumnStatus vcs = entry.getValue();
 
-      if (VirtualColumnStepUtils.isMarkedForRemoval(vcs)) {
+      if (VirtualEntityStepUtils.isMarkedForRemoval(vcs)) {
         cells.put(columnId, null);
       } else {
-        renderVirtualColumn(row, columnId, vcs, cells);
+        applyTemplateToVirtualColumn(row, columnId, vcs, cells);
       }
     }
   }
 
-  private void renderVirtualColumn(ViewerRow row, String columnId, VirtualColumnStatus vcs,
+  private void applyTemplateToVirtualColumn(ViewerRow row, String columnId, VirtualColumnStatus vcs,
     Map<String, ViewerCell> cells) {
     String processedValue = HandlebarsUtils.applyVirtualColumnTemplate(row, tableStatus, vcs);
 

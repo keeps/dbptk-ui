@@ -652,46 +652,6 @@ public class DatabaseRowsSolrManager {
 
   }
 
-  // Bulk processing methods
-
-  /**
-   * Saves a collection of items to Solr using bulk processing. This is the entry
-   * point for StepWriters to perform Upserts.
-   */
-  public <T extends IsIndexed> void insertBatchDocuments(String databaseUUID, List<? extends T> items)
-    throws ViewerException {
-    if (items == null || items.isEmpty()) {
-      return;
-    }
-
-    Class<?> objClass = items.get(0).getClass();
-    List<SolrInputDocument> docs = new ArrayList<>(items.size());
-    String targetCollection;
-
-    if (ViewerRow.class.isAssignableFrom(objClass)) {
-      RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
-      targetCollection = collection.getIndexName();
-
-      for (T item : items) {
-        docs.add(toAtomicSolrDoc((ViewerRow) item));
-      }
-    } else {
-      @SuppressWarnings("unchecked")
-      SolrCollection<T> solrCollection = SolrDefaultCollectionRegistry.get((Class<T>) objClass);
-      targetCollection = solrCollection.getIndexName();
-
-      for (T item : items) {
-        try {
-          docs.add(solrCollection.toSolrDocument(item));
-        } catch (Exception e) {
-          LOGGER.error("Failed to map item to Solr document: {}", item, e);
-        }
-      }
-    }
-
-    executeBulkUpdate(targetCollection, docs);
-  }
-
   public final void clearExtractedLobTextField(final String databaseUUID, final String documentUUID,
     final String lobFieldName) {
 
@@ -724,6 +684,57 @@ public class DatabaseRowsSolrManager {
     } catch (ViewerException e) {
       LOGGER.error("Could not update row {} for database {}", documentUUID, databaseUUID, e);
     }
+  }
+
+  // Bulk processing methods
+  public enum WriteMode {
+    UPDATE, INSERT
+  }
+
+  /**
+   * Saves a collection of items to Solr using bulk processing. This is the entry
+   * point for StepWriters to perform Upserts.
+   */
+  public <T extends IsIndexed> void insertBatchDocuments(String databaseUUID, List<? extends T> items, WriteMode mode)
+    throws ViewerException {
+    if (items == null || items.isEmpty()) {
+      return;
+    }
+
+    Class<?> objClass = items.get(0).getClass();
+    List<SolrInputDocument> docs = new ArrayList<>(items.size());
+    String targetCollection;
+
+    if (ViewerRow.class.isAssignableFrom(objClass)) {
+      RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+      targetCollection = collection.getIndexName();
+
+      for (T item : items) {
+        if (mode.equals(WriteMode.UPDATE)) {
+          docs.add(toAtomicSolrDoc((ViewerRow) item));
+        } else {
+          try {
+            docs.add(collection.toSolrDocument((ViewerRow) item));
+          } catch (Exception e) {
+            LOGGER.error("Failed to map item to Solr document: {}", item, e);
+          }
+        }
+      }
+    } else {
+      @SuppressWarnings("unchecked")
+      SolrCollection<T> solrCollection = SolrDefaultCollectionRegistry.get((Class<T>) objClass);
+      targetCollection = solrCollection.getIndexName();
+
+      for (T item : items) {
+        try {
+          docs.add(solrCollection.toSolrDocument(item));
+        } catch (Exception e) {
+          LOGGER.error("Failed to map item to Solr document: {}", item, e);
+        }
+      }
+    }
+
+    executeBulkUpdate(targetCollection, docs);
   }
 
   /**

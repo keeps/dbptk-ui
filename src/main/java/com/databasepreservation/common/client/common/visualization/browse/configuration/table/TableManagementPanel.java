@@ -25,6 +25,7 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.cells.RequiredEditableCell;
 import com.databasepreservation.common.client.common.lists.cells.TextAreaInputCell;
+import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
@@ -43,10 +44,12 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
 import com.databasepreservation.common.client.widgets.Toast;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -172,7 +175,7 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
       public void onClick(ClickEvent clickEvent) {
 
         VirtualTableOptionsPanel virtualTableOptionsPanel = VirtualTableOptionsPanel.createInstance(database,
-          collectionStatus);
+          collectionStatus, null);
 
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionAdd(),
           messages.basicActionCancel(), Arrays.asList(virtualTableOptionsPanel),
@@ -261,7 +264,55 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForLabel(), 20,
         getLabelColumn()),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForDescription(), 0,
-        getDescriptionColumn()));
+        getDescriptionColumn()),
+      new MultipleSelectionTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+        .getTagWithStyleName(FontAwesomeIconManager.COG, messages.basicTableHeaderOptions(), "fa-fw")), 4,
+        getOptionsColumn()));
+
+  }
+
+  private Column<ViewerTable, String> getOptionsColumn() {
+    Column<ViewerTable, String> options = new ButtonColumn<ViewerTable>() {
+      @Override
+      public void render(Cell.Context context, ViewerTable viewerTable, SafeHtmlBuilder sb) {
+        if (isAnOptionColumn(collectionStatus.getTableStatusByTableId(viewerTable.getId()))) {
+          sb.appendHtmlConstant(
+            "<div class=\"center-cell\"><button class=\"btn btn-cell-action\" type=\"button\" tabindex=\"-1\"><i class=\"fa fa-cog\"></i></button></div>");
+        } else {
+          sb.appendHtmlConstant(
+            "<div class=\"center-cell\"><button class=\"btn btn-cell-action\" type=\"button\" tabindex=\"-1\" disabled><i class=\"fa fa-cog\"></i></button></div>");
+        }
+      }
+
+      @Override
+      public String getValue(ViewerTable viewerTable) {
+        return messages.basicActionOpen();
+      }
+    };
+
+    options.setFieldUpdater((index, viewerTable, value) -> {
+      TableStatus tableStatus = collectionStatus.getTableStatusByTableId(viewerTable.getId());
+      if (tableStatus != null) {
+        VirtualTableOptionsPanel optionsPanel = VirtualTableOptionsPanel.createInstance(database, collectionStatus,
+          tableStatus);
+        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
+          messages.basicActionCancel(), messages.basicActionDelete(), Arrays.asList(optionsPanel),
+          new DefaultAsyncCallback<Dialogs.DialogAction>() {
+            @Override
+            public void onSuccess(Dialogs.DialogAction value) {
+              if (value.equals(Dialogs.DialogAction.SAVE)) {
+
+              }
+            }
+          });
+      }
+    });
+
+    return options;
+  }
+
+  private boolean isAnOptionColumn(TableStatus tableStatus) {
+    return tableStatus != null && tableStatus.getVirtualTableStatus() != null;
   }
 
   private Column<ViewerTable, Boolean> getCheckboxColumn(MultipleSelectionTablePanel<ViewerTable> selectionTablePanel) {
