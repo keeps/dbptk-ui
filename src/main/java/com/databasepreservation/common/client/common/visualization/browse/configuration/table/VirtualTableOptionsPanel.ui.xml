@@ -31,13 +31,20 @@
                     <g:Label ui:field="errorSourceTable" addStyleNames="dialog-input-error-text" visible="false"/>
                 </g:FlowPanel>
 
-                <g:FlowPanel>
+                <g:FlowPanel ui:field="sourceColumnsOptionsPanel" visible="false">
                     <g:HTML addStyleNames="form-label">
-                        <ui:text from='{messages.tableManagementLabelForSourceColumnsTemplate}'/>
+                        <ui:text from='{messages.tableManagementLabelForSourceColumnsTable}'/>
                     </g:HTML>
-                    <g:FlowPanel ui:field="templateSourceColumns" addStyleNames="scrollable-panel"/>
-                </g:FlowPanel>
+                    <g:FlowPanel ui:field="sourceColumnsTable" addStyleNames="scrollable-panel"/>
 
+
+                    <g:CheckBox ui:field="includeSourceForeignKeys" addStyleNames="form-checkbox" value="true">
+                        <ui:text from='{messages.tableManagementLabelForSourceColumnsForeignKey}'/>
+                    </g:CheckBox>
+                    <g:Label addStyleNames="column-description">
+                        <ui:text from='{messages.tableManagementLabelForSourceColumnsForeignKeyDescription}'/>
+                    </g:Label>
+                </g:FlowPanel>
             </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>

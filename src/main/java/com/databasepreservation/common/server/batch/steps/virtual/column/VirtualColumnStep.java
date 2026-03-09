@@ -1,6 +1,5 @@
 package com.databasepreservation.common.server.batch.steps.virtual.column;
 
-import com.databasepreservation.common.server.batch.core.BatchConstants;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
@@ -10,11 +9,13 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.AbstractIndexingStepDefinition;
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.PartitionableStep;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
 import com.databasepreservation.common.server.batch.steps.partition.PartitionStrategy;
 import com.databasepreservation.common.server.batch.steps.partition.TablePartitionStrategy;
+import com.databasepreservation.common.server.batch.steps.virtual.VirtualEntityStepUtils;
 
 /**
  * Step responsible for computing virtual columns. It is chunk-oriented and
@@ -38,7 +39,8 @@ public class VirtualColumnStep extends AbstractIndexingStepDefinition<ViewerRow,
 
   @Override
   public PartitionStrategy getPartitionStrategy() {
-    return new TablePartitionStrategy(solrManager, VirtualColumnStepUtils::hasVirtualColumnsToProcess);
+    return new TablePartitionStrategy(solrManager, VirtualEntityStepUtils::hasVirtualColumnsToProcess,
+      VirtualEntityStepUtils::enrichVirtualColumnPartitionContext);
   }
 
   @Override
@@ -56,10 +58,10 @@ public class VirtualColumnStep extends AbstractIndexingStepDefinition<ViewerRow,
     throws BatchJobException {
     if (status == BatchStatus.COMPLETED) {
       String tableId = partitionContext.getString(BatchConstants.TABLE_ID_KEY);
-      TableStatus tableStatus = VirtualColumnStepUtils.findTableStatus(jobContext, tableId);
+      TableStatus tableStatus = VirtualEntityStepUtils.findTableStatus(jobContext, tableId);
 
       if (tableStatus != null) {
-        VirtualColumnStepUtils.updateProcessedColumnsStateInMemory(tableStatus, status);
+        VirtualEntityStepUtils.updateProcessedColumnsStateInMemory(tableStatus, status);
       }
 
     }
@@ -69,7 +71,7 @@ public class VirtualColumnStep extends AbstractIndexingStepDefinition<ViewerRow,
   public void onStepCompleted(JobContext jobContext, BatchStatus status) throws BatchJobException {
     if (status == BatchStatus.COMPLETED) {
       for (TableStatus tableStatus : jobContext.getCollectionStatus().getTables()) {
-        VirtualColumnStepUtils.removeMarkedVirtualColumnsInMemory(tableStatus);
+        VirtualEntityStepUtils.removeMarkedVirtualColumnsInMemory(tableStatus);
       }
     }
   }

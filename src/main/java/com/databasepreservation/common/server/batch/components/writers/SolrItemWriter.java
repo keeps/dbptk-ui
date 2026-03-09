@@ -14,10 +14,13 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 public class SolrItemWriter<T extends IsIndexed> implements ItemWriter<T> {
   private final DatabaseRowsSolrManager solrManager;
   private final String databaseUUID;
+  private final DatabaseRowsSolrManager.WriteMode mode;
 
-  public SolrItemWriter(DatabaseRowsSolrManager solrManager, String databaseUUID) {
+  public SolrItemWriter(DatabaseRowsSolrManager solrManager, String databaseUUID,
+    DatabaseRowsSolrManager.WriteMode mode) {
     this.solrManager = solrManager;
     this.databaseUUID = databaseUUID;
+    this.mode = mode;
   }
 
   @Override
@@ -27,6 +30,6 @@ public class SolrItemWriter<T extends IsIndexed> implements ItemWriter<T> {
     }
 
     List<? extends T> items = chunk.getItems();
-    solrManager.insertBatchDocuments(databaseUUID, items);
+    solrManager.insertBatchDocuments(databaseUUID, items, mode);
   }
 }
