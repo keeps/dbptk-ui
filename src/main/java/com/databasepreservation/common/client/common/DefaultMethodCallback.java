@@ -7,6 +7,8 @@
  */
 package com.databasepreservation.common.client.common;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.fusesource.restygwt.client.Method;
@@ -21,6 +23,7 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -34,6 +37,8 @@ import config.i18n.client.ClientMessages;
  */
 public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  public static final String MESSAGE_KEY = "message";
+  public static final String DETAILS_KEY = "details";
 
   public static <T> MethodCallback<T> get(final Consumer<T> consumer) {
     return new DefaultMethodCallback<T>() {
@@ -49,9 +54,41 @@ public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
       @Override
       public void onFailure(Method method, Throwable throwable) {
         final JSONValue parse = JSONParser.parseStrict(method.getResponse().getText());
-        String message = parse.isObject().get("message").isString().stringValue();
+        String message = parse.isObject().get(MESSAGE_KEY).isString().stringValue();
         new ClientLogger(AsyncCallbackUtils.class.getName()).error("AsyncCallback error - " + message);
         errorHandler.accept(message);
+      }
+
+      @Override
+      public void onSuccess(Method method, T t) {
+        consumer.accept(t);
+      }
+    };
+  }
+
+  public static <T> MethodCallback<T> getDetailed(final Consumer<T> consumer,
+    final Consumer<Map<String, String>> errorHandler) {
+    return new MethodCallback<T>() {
+      @Override
+      public void onFailure(Method method, Throwable throwable) {
+        HashMap<String, String> errorResponse = new HashMap<>();
+        final JSONValue parse = JSONParser.parseStrict(method.getResponse().getText());
+        JSONObject obj = parse.isObject();
+
+        String message = obj.containsKey(MESSAGE_KEY) && obj.get(MESSAGE_KEY).isString() != null
+          ? obj.get(MESSAGE_KEY).isString().stringValue()
+          : "Unknown error";
+        String details = obj.containsKey(DETAILS_KEY) && obj.get(DETAILS_KEY).isString() != null
+          ? obj.get(DETAILS_KEY).isString().stringValue()
+          : "";
+
+        errorResponse.put(MESSAGE_KEY, message);
+        errorResponse.put(DETAILS_KEY, details);
+
+        new ClientLogger(AsyncCallbackUtils.class.getName())
+          .error("AsyncCallback error - " + message + " - " + details);
+
+        errorHandler.accept(errorResponse);
       }
 
       @Override
@@ -68,7 +105,7 @@ public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
       message = throwable.getMessage();
     } else {
       final JSONValue parse = JSONParser.parseStrict(method.getResponse().getText());
-      message = parse.isObject().get("message").isString().stringValue();
+      message = parse.isObject().get(MESSAGE_KEY).isString().stringValue();
     }
 
     // TODO resolve specific exceptions

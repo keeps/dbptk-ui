@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -962,10 +963,13 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       public void onSuccess(User user) {
         AuthenticationService.Util.call((Boolean authenticationIsEnabled) -> {
           if (!authenticationIsEnabled || user.isAdmin()) {
-            CollectionService.Util.call((Boolean result) -> {
+            CollectionService.Util.callDetailed((Boolean result) -> {
               ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
               changes = value;
               Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
+            }, errorMessage -> {
+              Dialogs.showConfigurationDependencyErrors(errorMessage.get(DefaultMethodCallback.MESSAGE_KEY),
+                errorMessage.get(DefaultMethodCallback.DETAILS_KEY), messages.basicActionClose());
             }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
           } else {
             CollectionService.Util.call((Boolean result) -> {

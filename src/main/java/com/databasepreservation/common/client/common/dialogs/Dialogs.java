@@ -91,6 +91,35 @@ public class Dialogs {
     dialogBox.show();
   }
 
+  public static void showConfigurationDependencyErrors(String title, String message, String closeButtonText) {
+    final DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setText(title);
+
+    FlowPanel layout = new FlowPanel();
+    Button btnClose = new Button(closeButtonText);
+    FlowPanel footer = new FlowPanel();
+
+    layout.add(new HTML(SafeHtmlUtils.fromSafeConstant(message)));
+    layout.add(footer);
+    footer.add(btnClose);
+
+    dialogBox.setWidget(layout);
+
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+    dialogBox.setWidth("400px");
+
+    btnClose.addClickHandler(event -> dialogBox.hide());
+
+    dialogBox.addStyleName("dialog-persist-errors");
+    layout.addStyleName("dialog-persist-errors-layout");
+    footer.addStyleName("dialog-persist-errors-layout-footer");
+    btnClose.addStyleName(BTN_LINK_STYLE);
+
+    dialogBox.center();
+    dialogBox.show();
+  }
+
   public static DialogBox showWaitResponse(String title, String message) {
     final DialogBox dialogBox = createDialogBoxSkeleton(false, true, true, false, title, "dialog-persist-information");
     FlowPanel layout = new FlowPanel();
