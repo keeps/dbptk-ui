@@ -744,7 +744,6 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 if (virtualForeignKeysStatus != null) {
                   virtualForeignKeysStatus.setProcessingState(ProcessingState.TO_PROCESS);
                 }
-                GWT.log("Adding new foreign key status to collection status");
                 tableStatus.addOrUpdateForeignKeyStatus(updatedForeignKeyStatus);
 
                 updatedColumnStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_PROCESS);

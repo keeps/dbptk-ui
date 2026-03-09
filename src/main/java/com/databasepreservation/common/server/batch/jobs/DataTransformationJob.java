@@ -9,6 +9,7 @@ import com.databasepreservation.common.server.batch.core.StepDefinition;
 import com.databasepreservation.common.server.batch.steps.denormalization.DenormalizationStep;
 import com.databasepreservation.common.server.batch.steps.extraction.LobTextExtractionStep;
 import com.databasepreservation.common.server.batch.steps.virtual.column.VirtualColumnStep;
+import com.databasepreservation.common.server.batch.steps.virtual.table.VirtualTableStep;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -16,12 +17,14 @@ import com.databasepreservation.common.server.batch.steps.virtual.column.Virtual
 @Component
 public class DataTransformationJob implements JobDefinition {
   private final VirtualColumnStep virtualColumnStep;
+  private final VirtualTableStep virtualTableStep;
   private final LobTextExtractionStep lobTextExtractionStep;
   private final DenormalizationStep denormalizationStep;
 
-  public DataTransformationJob(VirtualColumnStep virtualColumnStep, LobTextExtractionStep lobTextExtractionStep,
-    DenormalizationStep denormalizationStep) {
+  public DataTransformationJob(VirtualColumnStep virtualColumnStep, VirtualTableStep virtualTableStep,
+    LobTextExtractionStep lobTextExtractionStep, DenormalizationStep denormalizationStep) {
     this.virtualColumnStep = virtualColumnStep;
+    this.virtualTableStep = virtualTableStep;
     this.lobTextExtractionStep = lobTextExtractionStep;
     this.denormalizationStep = denormalizationStep;
   }
@@ -33,6 +36,6 @@ public class DataTransformationJob implements JobDefinition {
 
   @Override
   public List<StepDefinition> getSteps() {
-    return List.of(virtualColumnStep, lobTextExtractionStep, denormalizationStep);
+    return List.of(virtualColumnStep, virtualTableStep, lobTextExtractionStep, denormalizationStep);
   }
 }

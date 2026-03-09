@@ -1,13 +1,19 @@
 package com.databasepreservation.common.server.batch.steps.extraction;
 
+import java.util.ArrayList;
 import java.util.Date;
 
+import org.springframework.batch.item.ExecutionContext;
+
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.tools.FilterUtils;
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -57,5 +63,10 @@ public class LobTextExtractionStepUtils {
   public static boolean isDKVersion(String version) {
     return version.equals(ViewerConstants.SIARD_DK_1007) || version.equals(ViewerConstants.SIARD_DK_1007_EXT)
       || version.equals(ViewerConstants.SIARD_DK_128) || version.equals(ViewerConstants.SIARD_DK_128_EXT);
+  }
+
+  public static void enrichPartitionContext(ExecutionContext partitionContext, TableStatus tableStatus) {
+    partitionContext.put(BatchConstants.FILTER_KEY, FilterUtils.filterByTable(new Filter(), tableStatus.getId()));
+    partitionContext.put(BatchConstants.FIELDS_KEY, new ArrayList<String>());
   }
 }

@@ -370,14 +370,17 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
       if (foreignKey.getReferencedTableUUID().equals(referencedTable.getUuid())) {
 
-        ViewerColumn column = allSourceColumns.get(reference.getSourceColumnIndex());
+        ViewerColumn column = DataTransformationUtils.getColumnByIndex(allSourceColumns,
+          reference.getSourceColumnIndex());
         isVirtual = isIsVirtualRelationship(sourceTable, column, isVirtual);
 
         information.add(buildReferenceInformation(
           messages.dataTransformationTextForIsRelatedTo(referencedTable.getId(), column.getDisplayName()), isVirtual));
       } else {
-        ViewerColumn referencedColumn = allReferencedColumns.get(reference.getSourceColumnIndex());
-        ViewerColumn column = allSourceColumns.get(reference.getReferencedColumnIndex());
+        ViewerColumn referencedColumn = DataTransformationUtils.getColumnByIndex(allReferencedColumns,
+          reference.getSourceColumnIndex());
+        ViewerColumn column = DataTransformationUtils.getColumnByIndex(allSourceColumns,
+          reference.getReferencedColumnIndex());
         isVirtual = isIsVirtualRelationship(referencedTable, referencedColumn, isVirtual);
 
         information.add(buildReferenceInformation(

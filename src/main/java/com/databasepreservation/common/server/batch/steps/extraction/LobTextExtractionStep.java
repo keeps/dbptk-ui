@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.databasepreservation.common.server.batch.core.BatchConstants;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
@@ -25,6 +24,7 @@ import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.server.batch.components.readers.SolrItemReader;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.AbstractIndexingStepDefinition;
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.PartitionableStep;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
@@ -52,7 +52,8 @@ public class LobTextExtractionStep extends AbstractIndexingStepDefinition<Viewer
 
   @Override
   public PartitionStrategy getPartitionStrategy() {
-    return new TablePartitionStrategy(solrManager, LobTextExtractionStepUtils::hasLobsToProcess);
+    return new TablePartitionStrategy(solrManager, LobTextExtractionStepUtils::hasLobsToProcess,
+      LobTextExtractionStepUtils::enrichPartitionContext);
   }
 
   @Override

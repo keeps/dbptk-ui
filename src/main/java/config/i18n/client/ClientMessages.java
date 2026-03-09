@@ -1637,7 +1637,11 @@ public interface ClientMessages extends Messages {
 
   String tableManagementLabelForSourceTable();
 
-  String tableManagementLabelForSourceColumnsTemplate();
+  String tableManagementLabelForSourceColumnsTable();
+
+  String tableManagementLabelForSourceColumnsForeignKey();
+
+  String tableManagementLabelForSourceColumnsForeignKeyDescription();
 
   /********************************************
    * Column Management Panel
@@ -1757,4 +1761,3 @@ public interface ClientMessages extends Messages {
    *******************************************/
   String configErrorTextForMissingProperty(String property);
 }
-

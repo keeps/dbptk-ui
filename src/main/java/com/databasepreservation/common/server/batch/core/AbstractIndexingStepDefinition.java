@@ -51,7 +51,11 @@ public abstract class AbstractIndexingStepDefinition<I extends IsIndexed & Seria
 
   @Override
   public ItemWriter<O> createWriter(JobContext context) {
-    return new SolrItemWriter<>(solrManager, context.getDatabaseUUID());
+    return new SolrItemWriter<>(solrManager, context.getDatabaseUUID(), getWriteSolrMode());
+  }
+
+  public DatabaseRowsSolrManager.WriteMode getWriteSolrMode() {
+    return DatabaseRowsSolrManager.WriteMode.UPDATE;
   }
 
   @Override
