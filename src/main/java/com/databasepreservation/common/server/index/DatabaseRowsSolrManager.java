@@ -181,6 +181,15 @@ public class DatabaseRowsSolrManager {
     }
   }
 
+  public void deleteRowsByQuery(String databaseUUID, Filter filter) throws ViewerException {
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+    try {
+      SolrUtils.delete(client, collection, filter);
+    } catch (GenericException | RequestNotValidException e) {
+      throw new ViewerException(e);
+    }
+  }
+
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
     return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,

@@ -743,7 +743,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
               if (value.equals(Dialogs.DialogAction.SAVE)) {
                 if (virtualForeignKeysStatus != null) {
-                  virtualForeignKeysStatus.setProcessingState(ProcessingState.TO_PROCESS);
+                  // TODO: need to create a step for this
+                  virtualForeignKeysStatus.setProcessingState(ProcessingState.PROCESSED);
                 }
                 tableStatus.addOrUpdateForeignKeyStatus(updatedForeignKeyStatus);
 
@@ -756,6 +757,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 saveChanges(true);
               } else if (value.equals(Dialogs.DialogAction.REMOVE)) {
                 if (virtualForeignKeysStatus != null) {
+                  // TODO: need to create a step for this
                   virtualForeignKeysStatus.setProcessingState(ProcessingState.TO_REMOVE);
                 }
                 updatedColumnStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_REMOVE);

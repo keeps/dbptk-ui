@@ -237,6 +237,16 @@ public class ConfigurationIntegrityValidator {
         : ProcessingState.PROCESSED;
       graph.addNode(fk.getId(), state);
 
+      // The FK depends on its own source table
+      if (table.getUuid() != null) {
+        graph.addDependencyEdge(table.getUuid(), fk.getId());
+      }
+
+      // The FK depends on the Virtual Table it is referencing
+      if (fk.getReferencedTableUUID() != null) {
+        graph.addDependencyEdge(fk.getReferencedTableUUID(), fk.getId());
+      }
+
       if (fk.getReferences() != null) {
         for (ForeignKeysStatus.ReferencedColumnStatus ref : fk.getReferences()) {
           graph.addDependencyEdge(ref.getSourceColumnId(), fk.getId());

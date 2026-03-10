@@ -17,8 +17,10 @@ import java.util.Set;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.ContentPanel;
+import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
@@ -154,9 +156,12 @@ public class TextExtractionPanel extends ContentPanel {
 
       collectionStatus.setNeedsToBeProcessed(true);
 
-      CollectionService.Util.call((Boolean result) -> {
+      CollectionService.Util.callDetailed((Boolean result) -> {
         final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
         collectionObserver.setCollectionStatus(collectionStatus);
+      }, errorMessage -> {
+        Dialogs.showConfigurationDependencyErrors(errorMessage.get(DefaultMethodCallback.MESSAGE_KEY),
+          errorMessage.get(DefaultMethodCallback.DETAILS_KEY), messages.basicActionClose());
       }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
     });
 
