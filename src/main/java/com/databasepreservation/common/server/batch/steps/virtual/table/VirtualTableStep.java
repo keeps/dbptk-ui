@@ -10,6 +10,8 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -17,6 +19,8 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.tools.FilterUtils;
+import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.AbstractIndexingStepDefinition;
 import com.databasepreservation.common.server.batch.core.BatchConstants;
@@ -64,20 +68,32 @@ public class VirtualTableStep extends AbstractIndexingStepDefinition<ViewerRow, 
       String tableId = partitionContext.getString(BatchConstants.TABLE_ID_KEY);
       TableStatus tableStatus = VirtualEntityStepUtils.findTableStatus(jobContext, tableId);
 
-      if (tableStatus != null) {
-        VirtualEntityStepUtils.updateProcessedTableStateInMemory(tableStatus, status);
-      }
-
       try {
         if (tableStatus != null && tableStatus.getVirtualTableStatus() != null) {
+          ProcessingState state = tableStatus.getVirtualTableStatus().getProcessingState();
           ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, jobContext.getDatabaseUUID());
           ViewerMetadata metadata = database.getMetadata();
-          ViewerTable originalTable = metadata.getTable(tableStatus.getVirtualTableStatus().getSourceTableUUID());
 
-          ViewerTable virtualViewerTable = buildVirtualViewerTable(tableStatus, originalTable);
-          metadata.getSchema(virtualViewerTable.getSchemaUUID()).getTables().add(virtualViewerTable);
+          if (state == ProcessingState.TO_REMOVE) {
+            Filter filter = FilterUtils.filterByTableUUID(new Filter(), tableStatus.getUuid());
+            try {
+              solrManager.deleteRowsByQuery(jobContext.getDatabaseUUID(), filter);
+            } catch (ViewerException e) {
+              throw new BatchJobException("Failed to delete rows from Solr for virtual table with ID: " + tableId, e);
+            }
+            ViewerTable viewerTable = metadata.getTable(tableStatus.getUuid());
+            metadata.getSchema(viewerTable.getSchemaUUID()).getTables()
+              .removeIf(t -> t.getUuid().equals(tableStatus.getUuid()));
+            solrManager.updateDatabaseMetadata(database.getUuid(), metadata);
+          } else {
+            ViewerTable originalTable = metadata.getTable(tableStatus.getVirtualTableStatus().getSourceTableUUID());
 
-          solrManager.updateDatabaseMetadata(database.getUuid(), metadata);
+            ViewerTable virtualViewerTable = buildVirtualViewerTable(tableStatus, originalTable);
+            metadata.getSchema(virtualViewerTable.getSchemaUUID()).getTables().add(virtualViewerTable);
+
+            solrManager.updateDatabaseMetadata(database.getUuid(), metadata);
+            VirtualEntityStepUtils.updateProcessedTableStateInMemory(tableStatus, status);
+          }
         }
 
       } catch (NotFoundException | GenericException e) {
@@ -91,9 +107,7 @@ public class VirtualTableStep extends AbstractIndexingStepDefinition<ViewerRow, 
   @Override
   public void onStepCompleted(JobContext jobContext, BatchStatus status) throws BatchJobException {
     if (status == BatchStatus.COMPLETED) {
-      for (TableStatus tableStatus : jobContext.getCollectionStatus().getTables()) {
-        VirtualEntityStepUtils.removeMarkedVirtualTableInMemory(tableStatus);
-      }
+      VirtualEntityStepUtils.removeMarkedVirtualTableInMemory(jobContext.getCollectionStatus());
     }
   }
 

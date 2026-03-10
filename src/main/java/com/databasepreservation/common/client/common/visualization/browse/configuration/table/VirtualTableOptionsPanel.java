@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.lists.cells.DisableableCheckboxCell;
 import com.databasepreservation.common.client.common.lists.cells.helper.CheckboxData;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
@@ -167,7 +166,11 @@ public class VirtualTableOptionsPanel extends ColumnOptionsPanel implements Vali
   private void setSourceTablesDropdown() {
     sourceTableListBox.clear();
     sourceTableListBox.addItem("");
-    collectionStatus.getTables().forEach(table -> sourceTableListBox.addItem(table.getName(), table.getUuid()));
+    for (TableStatus table : collectionStatus.getTables()) {
+      if (table.getVirtualTableStatus() == null) {
+        sourceTableListBox.addItem(table.getName(), table.getUuid());
+      }
+    }
   }
 
   private void onSourceTableChanged() {
@@ -349,10 +352,10 @@ public class VirtualTableOptionsPanel extends ColumnOptionsPanel implements Vali
   }
 
   public TableStatus getTableStatus() {
-    TableStatus statusToReturn = new TableStatus();
+    TableStatus statusToReturn = (originalStatus != null) ? originalStatus : new TableStatus();
 
-    if (ViewerStringUtils.isBlank(statusToReturn.getId())) {
-      String uuid = "table_virtual_" + UUID.randomUUID().toString() + ViewerConstants.SOLR_DYN_STRING;
+    if (ViewerStringUtils.isBlank(statusToReturn.getUuid())) {
+      String uuid = "table_virtual_" + UUID.randomUUID().toString();
       statusToReturn.setUuid(uuid);
     }
 
