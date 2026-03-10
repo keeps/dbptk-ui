@@ -273,6 +273,10 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     dataProvider.getList().add(rowItem);
   }
 
+  public List<C> getList() {
+    return dataProvider.getList();
+  }
+
   public MultiSelectionModel<C> getSelectionModel() {
     return selectionModel;
   }

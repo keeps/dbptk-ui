@@ -9,6 +9,7 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import com.databasepreservation.common.api.v1.utils.JobResponse;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
@@ -164,12 +165,13 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
         btnApplyConfiguration.setEnabled(false);
         collectionStatus.setNeedsToBeProcessed(false);
 
-        CollectionService.Util.call((Boolean updateSuccess) -> {
+        CollectionService.Util.callDetailed((Boolean updateSuccess) -> {
           runJob();
         }, errorMessage -> {
           btnApplyConfiguration.setEnabled(true);
-          Dialogs.showErrors(messages.configurationStatusPanelDialogTitleForError(), errorMessage,
-            messages.basicActionClose());
+          Dialogs.showConfigurationDependencyErrors(errorMessage.get(DefaultMethodCallback.MESSAGE_KEY),
+            errorMessage.get(DefaultMethodCallback.DETAILS_KEY), messages.basicActionClose());
+
         }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
       }
     });

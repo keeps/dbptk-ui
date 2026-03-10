@@ -9,6 +9,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
 
 import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -98,10 +99,11 @@ public class VirtualEntityStepUtils {
     virtualTableStatus.setProcessingState(ProcessingState.PROCESSED);
   }
 
-  public static void removeMarkedVirtualTableInMemory(TableStatus tableStatus) {
-    if (tableStatus.getVirtualTableStatus() != null
-      && tableStatus.getVirtualTableStatus().getProcessingState() == ProcessingState.TO_REMOVE) {
-      tableStatus.setVirtualTableStatus(null);
-    }
+  public static void removeMarkedVirtualTableInMemory(CollectionStatus collectionStatus) {
+    List<TableStatus> activeTables = collectionStatus.getTables().stream()
+      .filter(t -> !(t.getVirtualTableStatus() != null
+        && t.getVirtualTableStatus().getProcessingState() == ProcessingState.TO_REMOVE))
+      .collect(Collectors.toList());
+    collectionStatus.setTables(activeTables);
   }
 }

@@ -15,9 +15,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
@@ -32,6 +35,7 @@ import com.databasepreservation.common.client.common.visualization.browse.config
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -46,15 +50,16 @@ import com.databasepreservation.common.client.widgets.ConfigurationCellTableReso
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -146,12 +151,7 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
               }
             }
 
-            CollectionService.Util.call((Boolean result) -> {
-              final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
-              collectionObserver.setCollectionStatus(collectionStatus);
-              Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
-              changes = false;
-            }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+            updateCollectionStatus(collectionStatus);
           } else {
             Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogUniqueError(),
               messages.basicActionClose());
@@ -182,31 +182,8 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
           new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
             public void onSuccess(Dialogs.DialogAction value) {
-              if (value.equals(Dialogs.DialogAction.SAVE)) {
-                TableStatus tableStatusToInclude = virtualTableOptionsPanel.getTableStatus();
-                ViewerTable simpleViewerTable = virtualTableOptionsPanel
-                  .getSimpleViewerTable(tableStatusToInclude.getUuid());
-                if (tableStatusToInclude != null) {
-                  collectionStatus.getTables().add(tableStatusToInclude);
-                  collectionStatus.setNeedsToBeProcessed(true);
-
-                  collectionStatus.updateTableShowCondition(simpleViewerTable.getUuid(), true);
-                  initialLoading.put(simpleViewerTable.getUuid(), false);
-
-                  String schemaId = simpleViewerTable.getSchemaUUID();
-
-                  if (schemaId == null || !tables.containsKey(schemaId)) {
-                    schemaId = tables.keySet().iterator().next();
-                  }
-
-                  database.getMetadata().getSchema(schemaId).getTables().add(simpleViewerTable);
-
-                  MultipleSelectionTablePanel<ViewerTable> schemaTablePanel = tables.get(schemaId);
-                  if (schemaTablePanel != null) {
-                    schemaTablePanel.addRow(simpleViewerTable);
-                    schemaTablePanel.getSelectionModel().setSelected(simpleViewerTable, true);
-                  }
-                }
+              if (value != Dialogs.DialogAction.CANCEL) {
+                addVirtualTable(virtualTableOptionsPanel, value);
               }
             }
           });
@@ -216,6 +193,55 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
     content.add(CommonClientUtils.wrapOnDiv("navigation-panel-buttons",
       CommonClientUtils.wrapOnDiv("btn-item", btnSave), CommonClientUtils.wrapOnDiv("btn-item", btnCancel),
       CommonClientUtils.wrapOnDiv("btn-item", btnAddVirtualTable)));
+  }
+
+  private void updateCollectionStatus(CollectionStatus collectionStatus) {
+    CollectionService.Util.callDetailed((Boolean result) -> {
+      final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
+      collectionObserver.setCollectionStatus(collectionStatus);
+      Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
+      changes = false;
+    }, errorMessage -> {
+      Dialogs.showConfigurationDependencyErrors(errorMessage.get(DefaultMethodCallback.MESSAGE_KEY),
+        errorMessage.get(DefaultMethodCallback.DETAILS_KEY), messages.basicActionClose());
+    }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+  }
+
+  private void addVirtualTable(VirtualTableOptionsPanel optionsPanel, Dialogs.DialogAction action) {
+    TableStatus tableStatus = optionsPanel.getTableStatus();
+    ViewerTable simpleViewerTable = optionsPanel.getSimpleViewerTable(tableStatus.getUuid());
+
+    if (action == Dialogs.DialogAction.SAVE) {
+      tableStatus.getVirtualTableStatus().setProcessingState(ProcessingState.TO_PROCESS);
+    } else {
+      tableStatus.getVirtualTableStatus().setProcessingState(ProcessingState.TO_REMOVE);
+    }
+
+    collectionStatus.getTables().removeIf(t -> t.getId().equals(tableStatus.getId()));
+    collectionStatus.getTables().add(tableStatus);
+    collectionStatus.setNeedsToBeProcessed(true);
+    collectionStatus.updateTableShowCondition(simpleViewerTable.getUuid(), true);
+
+    updateCollectionStatus(collectionStatus);
+
+    initialLoading.put(simpleViewerTable.getUuid(), false);
+
+    String schemaId = simpleViewerTable.getSchemaUUID();
+
+    if (schemaId == null || !tables.containsKey(schemaId)) {
+      schemaId = tables.keySet().iterator().next();
+    }
+
+    database.getMetadata().getSchema(schemaId).getTables()
+      .removeIf(t -> t.getUuid().equals(simpleViewerTable.getUuid()));
+    database.getMetadata().getSchema(schemaId).getTables().add(simpleViewerTable);
+
+    MultipleSelectionTablePanel<ViewerTable> schemaTablePanel = tables.get(schemaId);
+    if (schemaTablePanel != null) {
+      schemaTablePanel.getList().removeIf(t -> t.getUuid().equals(simpleViewerTable.getUuid()));
+      schemaTablePanel.addRow(simpleViewerTable);
+      schemaTablePanel.getSelectionModel().setSelected(simpleViewerTable, true);
+    }
   }
 
   private void configureHeader() {
@@ -254,13 +280,7 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
     selectionTablePanel.createTable(new FlowPanel(), Arrays.asList(1, 2), viewerSchema.getTables().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForShow(), 4,
         getCheckboxColumn(selectionTablePanel)),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 15,
-        new TextColumn<ViewerTable>() {
-          @Override
-          public String getValue(ViewerTable table) {
-            return table.getName();
-          }
-        }),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 15, getTextColumn()),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForLabel(), 20,
         getLabelColumn()),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForDescription(), 0,
@@ -268,7 +288,42 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
       new MultipleSelectionTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
         .getTagWithStyleName(FontAwesomeIconManager.COG, messages.basicTableHeaderOptions(), "fa-fw")), 4,
         getOptionsColumn()));
+  }
 
+  @NotNull
+  private Column<ViewerTable, SafeHtml> getTextColumn() {
+    return new Column<ViewerTable, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public SafeHtml getValue(ViewerTable table) {
+        TableStatus tableStatus = collectionStatus.getTableStatus(table.getUuid());
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+
+        sb.appendHtmlConstant("<span>");
+        sb.append(SafeHtmlUtils.fromString(table.getName()));
+        sb.appendHtmlConstant("</span>");
+        if (tableStatus.getVirtualTableStatus() != null) {
+          ProcessingState state = tableStatus.getVirtualTableStatus().getProcessingState();
+          if (ProcessingState.TO_REMOVE.equals(state)) {
+            sb.appendHtmlConstant("<span style='color: #dc3545; margin-left: 5px;'>");
+            sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.MINUS_CIRCLE));
+            sb.appendHtmlConstant("</span>");
+          } else if (ProcessingState.TO_PROCESS.equals(state)) {
+            sb.appendHtmlConstant("<span style='color: #28a745; margin-left: 5px;'>");
+            sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.PLUS_CIRCLE));
+            sb.appendHtmlConstant("</span>");
+          } else if (ProcessingState.PROCESSING.equals(state)) {
+            sb.appendHtmlConstant("<span style='color: #ffc107; margin-left: 5px;'>");
+            sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.LOADING));
+            sb.appendHtmlConstant("</span>");
+          } else {
+            sb.appendHtmlConstant("<span style='color: #007bff; margin-left: 5px;'>");
+            sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.CLONE));
+            sb.appendHtmlConstant("</span>");
+          }
+        }
+        return sb.toSafeHtml();
+      }
+    };
   }
 
   private Column<ViewerTable, String> getOptionsColumn() {
@@ -300,8 +355,8 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
           new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
             public void onSuccess(Dialogs.DialogAction value) {
-              if (value.equals(Dialogs.DialogAction.SAVE)) {
-
+              if (value != Dialogs.DialogAction.CANCEL) {
+                addVirtualTable(optionsPanel, value);
               }
             }
           });
