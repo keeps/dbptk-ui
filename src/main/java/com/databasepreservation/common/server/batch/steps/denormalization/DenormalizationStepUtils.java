@@ -127,7 +127,7 @@ public class DenormalizationStepUtils {
     status.getSearchStatus().getList().getTemplate().setTemplate(template);
   }
 
-  private static void removeDenormalizationColumns(TableStatus table) {
+  public static void removeDenormalizationColumns(TableStatus table) {
     List<ColumnStatus> columns = table.getColumns();
     if (columns != null) {
       columns.removeIf(c -> ViewerType.dbTypes.NESTED.equals(c.getType()) || c.getNestedColumns() != null);

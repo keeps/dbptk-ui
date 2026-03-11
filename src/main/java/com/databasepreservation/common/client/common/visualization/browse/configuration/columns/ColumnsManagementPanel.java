@@ -742,11 +742,13 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
               }
 
               if (value.equals(Dialogs.DialogAction.SAVE)) {
-                if (virtualForeignKeysStatus != null) {
-                  // TODO: need to create a step for this
-                  virtualForeignKeysStatus.setProcessingState(ProcessingState.PROCESSED);
+                if (updatedForeignKeyStatus != null) {
+                  if (virtualForeignKeysStatus != null) {
+                    // TODO: need to create a step for this
+                    virtualForeignKeysStatus.setProcessingState(ProcessingState.PROCESSED);
+                  }
+                  tableStatus.addOrUpdateForeignKeyStatus(updatedForeignKeyStatus);
                 }
-                tableStatus.addOrUpdateForeignKeyStatus(updatedForeignKeyStatus);
 
                 updatedColumnStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_PROCESS);
                 column.setDescription(updatedColumnStatus.getDescription());

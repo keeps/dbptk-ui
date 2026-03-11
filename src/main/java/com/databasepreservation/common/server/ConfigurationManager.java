@@ -32,7 +32,9 @@ import com.databasepreservation.common.client.models.activity.logs.ActivityLogEn
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
@@ -43,9 +45,9 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabaseSta
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerType;
-import com.databasepreservation.common.client.models.validation.ConfigurationIntegrityValidator;
 import com.databasepreservation.common.exceptions.DependencyViolationException;
 import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.configuration.validation.ConfigurationIntegrityValidator;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
 import com.databasepreservation.common.utils.StatusUtils;
@@ -465,7 +467,7 @@ public class ConfigurationManager {
 
       try {
         CollectionStatus oldStatus = getCollectionStatus(databaseUUID, updatedStatus.getId());
-        integrityValidator.validateStateTransitions(databaseUUID, updatedStatus, oldStatus);
+        integrityValidator.validateStateTransitions(databaseUUID, oldStatus, updatedStatus);
       } catch (GenericException | DependencyViolationException e) {
         throw new ViewerException(
           "Failed to validate the collection status update due to integrity violation: " + e.getMessage(), e);
@@ -474,6 +476,75 @@ public class ConfigurationManager {
       Path statusFile = getCollectionStatusPath(databaseUUID, updatedStatus.getId());
       ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
       JsonTransformer.writeObjectToFile(updatedStatus, statusFile);
+    }
+  }
+
+  /**
+   * Resets the structural configuration by marking all virtual transformations
+   * (Virtual Tables, Columns, FKs, and Denormalizations) as TO_REMOVE for the
+   * Spring Batch cleanup jobs. Visual customizations (names, descriptions) remain
+   * untouched.
+   */
+  public CollectionStatus resetCollectionConfiguration(String databaseUUID, String collectionUUID)
+    throws GenericException, ViewerException, IllegalAccessException {
+
+    synchronized (collectionStatusFileLock) {
+      CollectionStatus currentStatus = getCollectionStatus(databaseUUID,
+        ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + collectionUUID);
+      boolean needsBatchProcessing = false;
+
+      if (currentStatus.getTables() != null) {
+        for (TableStatus table : currentStatus.getTables()) {
+
+          // 1. Mark Virtual Tables for removal
+          if (table.getVirtualTableStatus() != null) {
+            table.getVirtualTableStatus().setProcessingState(ProcessingState.TO_REMOVE);
+            needsBatchProcessing = true;
+          }
+
+          if (table.getColumns() != null) {
+            for (ColumnStatus col : table.getColumns()) {
+              // 2. Mark Virtual Columns for removal
+              if (col.getVirtualColumnStatus() != null) {
+                col.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_REMOVE);
+                needsBatchProcessing = true;
+              }
+            }
+          }
+
+          // 3. Mark Virtual Foreign Keys for removal
+          if (table.getForeignKeys() != null) {
+            for (ForeignKeysStatus fk : table.getForeignKeys()) {
+              if (fk.getVirtualForeignKeysStatus() != null) {
+                fk.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_REMOVE);
+                needsBatchProcessing = true;
+              }
+            }
+          }
+        }
+      }
+
+      // 4. Mark Denormalizations for removal
+      if (currentStatus.getDenormalizations() != null) {
+        for (String denormId : currentStatus.getDenormalizations()) {
+          DenormalizeConfiguration denormConfig = getDenormalizeConfigurationFromCollectionStatusEntry(databaseUUID,
+            denormId);
+          if (denormConfig != null) {
+            denormConfig.setProcessingState(ProcessingState.TO_REMOVE);
+            updateDenormalizationConfigurationFile(databaseUUID, denormConfig);
+            needsBatchProcessing = true;
+          }
+        }
+      }
+
+      currentStatus.setNeedsToBeProcessed(needsBatchProcessing);
+
+      // Save to disk
+      Path statusFile = getCollectionStatusPath(databaseUUID, currentStatus.getId());
+      ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
+      JsonTransformer.writeObjectToFile(currentStatus, statusFile);
+
+      return currentStatus;
     }
   }
 

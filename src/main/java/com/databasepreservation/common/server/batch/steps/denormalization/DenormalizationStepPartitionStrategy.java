@@ -69,6 +69,11 @@ public class DenormalizationStepPartitionStrategy implements PartitionStrategy {
   @Override
   public long calculateWorkload(JobContext context, ExecutionContext partitionContext) {
     Filter filter = (Filter) partitionContext.get(BatchConstants.FILTER_KEY);
+
+    if (filter == null) {
+      return 0L;
+    }
+
     try {
       return solrManager.countRows(context.getDatabaseUUID(), filter);
     } catch (GenericException | RequestNotValidException e) {

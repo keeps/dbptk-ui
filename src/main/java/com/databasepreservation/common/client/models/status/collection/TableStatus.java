@@ -139,6 +139,9 @@ public class TableStatus implements Serializable {
   }
 
   public void addOrUpdateForeignKeyStatus(ForeignKeysStatus status) {
+    if (status == null || status.getId() == null) {
+      return;
+    }
     this.foreignKeys.removeIf(fk -> fk.getId().equals(status.getId()));
     this.foreignKeys.add(status);
   }

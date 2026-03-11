@@ -62,6 +62,11 @@ public class VirtualTableStep extends AbstractIndexingStepDefinition<ViewerRow, 
   }
 
   @Override
+  public long calculateWorkload(JobContext context) {
+    return calculatePartitionedWorkload(context);
+  }
+
+  @Override
   public void onPartitionCompleted(JobContext jobContext, ExecutionContext partitionContext, BatchStatus status)
     throws BatchJobException {
     if (status == BatchStatus.COMPLETED) {
@@ -82,8 +87,11 @@ public class VirtualTableStep extends AbstractIndexingStepDefinition<ViewerRow, 
               throw new BatchJobException("Failed to delete rows from Solr for virtual table with ID: " + tableId, e);
             }
             ViewerTable viewerTable = metadata.getTable(tableStatus.getUuid());
-            metadata.getSchema(viewerTable.getSchemaUUID()).getTables()
-              .removeIf(t -> t.getUuid().equals(tableStatus.getUuid()));
+            if (viewerTable != null) {
+              metadata.getSchema(viewerTable.getSchemaUUID()).getTables()
+                .removeIf(t -> t.getUuid().equals(tableStatus.getUuid()));
+              solrManager.updateDatabaseMetadata(database.getUuid(), metadata);
+            }
             solrManager.updateDatabaseMetadata(database.getUuid(), metadata);
           } else {
             ViewerTable originalTable = metadata.getTable(tableStatus.getVirtualTableStatus().getSourceTableUUID());

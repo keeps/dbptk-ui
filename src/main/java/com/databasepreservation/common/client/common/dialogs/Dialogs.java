@@ -107,7 +107,7 @@ public class Dialogs {
 
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
-    dialogBox.setWidth("400px");
+    dialogBox.setWidth("600px");
 
     btnClose.addClickHandler(event -> dialogBox.hide());
 
