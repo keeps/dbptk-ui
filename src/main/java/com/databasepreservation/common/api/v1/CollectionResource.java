@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import com.databasepreservation.common.server.batch.core.BatchConstants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -95,6 +94,7 @@ import com.databasepreservation.common.exceptions.SavedSearchException;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.JobOrchestrator;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.batch.jobs.DataTransformationJob;
@@ -297,6 +297,28 @@ public class CollectionResource implements CollectionService {
     }
 
     return true;
+  }
+
+  @Override
+  public CollectionStatus resetCollectionConfiguration(String databaseUUID, String collectionUUID) {
+
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
+
+      return ViewerFactory.getConfigurationManager().resetCollectionConfiguration(databaseUUID, collectionUUID);
+
+    } catch (ViewerException | AuthorizationException | IllegalArgumentException | GenericException
+      | IllegalAccessException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+    }
   }
 
   @Override

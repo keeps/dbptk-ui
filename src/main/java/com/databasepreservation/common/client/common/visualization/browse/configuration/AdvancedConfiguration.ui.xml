@@ -4,8 +4,17 @@
 
     <g:FlowPanel ui:field="mainPanel" addStyleNames="col_12">
         <cp:ConfigurationStatusPanel ui:field="configurationStatusPanel"/>
-        <g:FlowPanel addStyleNames="structure-header" ui:field="header" />
+        <g:FlowPanel addStyleNames="structure-header" ui:field="header"/>
         <g:SimplePanel ui:field="description" addStyleNames="table-row-description"/>
         <g:FlowPanel addStyleNames="navigation-panels" ui:field="content"/>
+
+        <g:FlowPanel addStyleNames="clearfix"/>
+
+        <g:FlowPanel addStyleNames="navigation-panel-buttons">
+            <g:SimplePanel addStyleNames="btn-item">
+                <g:Button ui:field="btnReset" addStyleNames="btn btn-danger btn-delete"/>
+            </g:SimplePanel>
+        </g:FlowPanel>
+
     </g:FlowPanel>
 </ui:UiBinder>
