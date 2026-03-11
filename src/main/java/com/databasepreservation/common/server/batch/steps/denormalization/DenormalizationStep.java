@@ -1,5 +1,8 @@
 package com.databasepreservation.common.server.batch.steps.denormalization;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.roda.core.data.exceptions.GenericException;
@@ -9,10 +12,18 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.models.status.collection.ProcessingState;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.AbstractIndexingStepDefinition;
 import com.databasepreservation.common.server.batch.core.BatchConstants;
@@ -74,10 +85,19 @@ public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRo
     if (status == BatchStatus.COMPLETED) {
       try {
         ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, jobContext.getDatabaseUUID());
-        Set<String> entries = jobContext.getCollectionStatus().getDenormalizations();
+
+        Set<String> entries = new HashSet<>(jobContext.getCollectionStatus().getDenormalizations());
 
         for (String entryID : entries) {
           DenormalizeConfiguration config = jobContext.getDenormalizeConfig(entryID);
+          if (config != null) {
+            if (config.getProcessingState() == ProcessingState.TO_REMOVE) {
+              removeDenormalizeConfiguration(jobContext, entryID, config);
+            } else if (config.getState() == ViewerJobStatus.COMPLETED) {
+              DenormalizationStepUtils.updateCollectionStatusInMemory(jobContext.getCollectionStatus(), config,
+                database);
+            }
+          }
           if (config != null && config.getState() == ViewerJobStatus.COMPLETED) {
             DenormalizationStepUtils.updateCollectionStatusInMemory(jobContext.getCollectionStatus(), config, database);
           }
@@ -85,6 +105,42 @@ public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRo
       } catch (NotFoundException | GenericException e) {
         throw new BatchJobException("Error updating metadata for " + jobContext.getDatabaseUUID(), e);
       }
+    }
+  }
+
+  private void removeDenormalizeConfiguration(JobContext jobContext, String entryID, DenormalizeConfiguration config)
+    throws BatchJobException, GenericException {
+    deleteNestedRowsForConfig(jobContext.getDatabaseUUID(), config);
+    ViewerFactory.getConfigurationManager().deleteDenormalizationFromCollection(jobContext.getDatabaseUUID(), entryID);
+    jobContext.getCollectionStatus().getDenormalizations().remove(entryID);
+    TableStatus targetTable = jobContext.getCollectionStatus().getTableStatus(config.getTableUUID());
+    if (targetTable != null) {
+      DenormalizationStepUtils.removeDenormalizationColumns(targetTable);
+    }
+  }
+
+  private void deleteNestedRowsForConfig(String databaseUUID, DenormalizeConfiguration config)
+    throws BatchJobException {
+    try {
+      List<RelatedTablesConfiguration> allRelated = new ArrayList<>();
+      collectAllRelatedTables(config.getRelatedTables(), allRelated);
+
+      for (RelatedTablesConfiguration related : allRelated) {
+        Filter filter = new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_NESTED_UUID, related.getUuid()));
+        solrManager.deleteRowsByQuery(databaseUUID, filter);
+      }
+    } catch (ViewerException e) {
+      throw new BatchJobException("Failed to delete nested rows from Solr for denormalization: " + config.getId(), e);
+    }
+  }
+
+  private void collectAllRelatedTables(List<RelatedTablesConfiguration> relatedTables,
+    List<RelatedTablesConfiguration> collector) {
+    if (relatedTables == null)
+      return;
+    for (RelatedTablesConfiguration rt : relatedTables) {
+      collector.add(rt);
+      collectAllRelatedTables(rt.getRelatedTables(), collector);
     }
   }
 }

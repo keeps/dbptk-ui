@@ -158,6 +158,8 @@ public interface ClientMessages extends Messages {
 
   String diagram_relations(@PluralCount int itemCount);
 
+  String diagram_virtualTable();
+
   String references_relation();
 
   String references_relatedTable();

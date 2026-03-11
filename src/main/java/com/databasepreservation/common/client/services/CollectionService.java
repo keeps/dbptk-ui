@@ -104,6 +104,12 @@ public interface CollectionService extends DirectRestService {
     @PathVariable(name = "collectionUUID") String collectionUUID,
     @Parameter(name = "collectionStatus", required = true) @RequestBody CollectionStatus status);
 
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/reset", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Resets all configurations to default and marks structural transformations for removal")
+  CollectionStatus resetCollectionConfiguration(
+    @Parameter(name = "The database unique identifier", required = true) @PathVariable(name = "databaseUUID") String databaseUUID,
+    @Parameter(name = "The collection unique identifier", required = true) @PathVariable(name = "collectionUUID") String collectionUUID);
+
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/customize", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Updates the internal collection configuration's customization properties")
   Boolean updateCollectionCustomizeProperties(@PathVariable(name = "databaseUUID") String databaseUUID,

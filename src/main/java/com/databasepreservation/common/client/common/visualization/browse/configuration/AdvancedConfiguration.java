@@ -11,19 +11,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.NavigationPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -53,6 +60,9 @@ public class AdvancedConfiguration extends ContentPanel {
 
   @UiField
   ConfigurationStatusPanel configurationStatusPanel;
+
+  @UiField
+  Button btnReset;
 
   private static Map<String, AdvancedConfiguration> instances = new HashMap<>();
   private ViewerDatabase database;
@@ -126,6 +136,8 @@ public class AdvancedConfiguration extends ContentPanel {
     textExtraction.addToDescriptionPanel(messages.advancedConfigurationTextForTextExtraction());
     textExtraction.addButton(btnTextExtraction);
     content.add(textExtraction);
+
+    setupFooterButtons();
   }
 
   private void configureHeader() {
@@ -136,6 +148,30 @@ public class AdvancedConfiguration extends ContentPanel {
     html.addStyleName("font-size-description advanced-configuration-description");
 
     description.setWidget(html);
+  }
+
+  private void setupFooterButtons() {
+    btnReset.setText("Reset Configuration");
+
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+      btnReset.addClickHandler(event -> {
+        CommonDialogs.showConfirmDialog("Reset Configuration", SafeHtmlUtils.fromString(
+          "Are you sure you want to reset all structural configurations? This will mark all Virtual Tables, Columns, and Denormalizations for removal. Custom names and descriptions will be kept. This action cannot be undone."),
+          "Cancel", "Reset", CommonDialogs.Level.DANGER, "550px", new DefaultAsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean confirmed) {
+              if (confirmed) {
+                CollectionService.Util.call((CollectionStatus updatedStatus) -> {
+                  final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
+                  collectionObserver.setCollectionStatus(updatedStatus);
+                }).resetCollectionConfiguration(database.getUuid(), database.getUuid());
+              }
+            }
+          });
+      });
+    } else {
+      btnReset.setEnabled(false);
+    }
   }
 
   @Override

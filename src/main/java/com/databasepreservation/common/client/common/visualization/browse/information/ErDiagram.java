@@ -229,6 +229,13 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
           tooltip.append(viewerTable.getName()).append("<br/>");
         }
 
+        boolean isVirtualTable = tableStatus != null && tableStatus.getVirtualTableStatus() != null;
+        if (isVirtualTable) {
+          visNode.setBorderWidth(1);
+          visNode.setShapeProperties(new VisNode.VisNodeShapeProperties(new int[] {5, 5}));
+          tooltip.append(messages.diagram_virtualTable()).append("<br/>");
+        }
+
         tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
           .append(messages.diagram_columns(visNode.numColumns)).append(", ")
           .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
@@ -238,7 +245,7 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
         visNodeList.add(visNode);
 
         for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-          jsniEdgeList.add(new JsniEdge(viewerTable.getId(), viewerForeignKey.getReferencedTableId(), false));
+          jsniEdgeList.add(new JsniEdge(viewerTable.getId(), viewerForeignKey.getReferencedTableId(), isVirtualTable));
         }
 
         if (collectionStatus != null) {
@@ -351,6 +358,8 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     int size;
     String title;
     VisNodeColor color;
+    Integer borderWidth;
+    VisNodeShapeProperties shapeProperties;
 
     String description;
     int numRows;
@@ -432,6 +441,22 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
     public void adjustBackgroundColor(double value) {
       this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91 - value);
+    }
+
+    public Integer getBorderWidth() {
+      return borderWidth;
+    }
+
+    public void setBorderWidth(Integer borderWidth) {
+      this.borderWidth = borderWidth;
+    }
+
+    public VisNodeShapeProperties getShapeProperties() {
+      return shapeProperties;
+    }
+
+    public void setShapeProperties(VisNodeShapeProperties shapeProperties) {
+      this.shapeProperties = shapeProperties;
     }
 
     /**
@@ -536,6 +561,25 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
       public void setBorder(String border) {
         this.border = border;
+      }
+    }
+
+    static class VisNodeShapeProperties {
+      int[] borderDashes;
+
+      public VisNodeShapeProperties() {
+      }
+
+      public VisNodeShapeProperties(int[] borderDashes) {
+        this.borderDashes = borderDashes;
+      }
+
+      public int[] getBorderDashes() {
+        return borderDashes;
+      }
+
+      public void setBorderDashes(int[] borderDashes) {
+        this.borderDashes = borderDashes;
       }
     }
   }

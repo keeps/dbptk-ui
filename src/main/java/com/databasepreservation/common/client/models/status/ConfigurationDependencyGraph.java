@@ -21,6 +21,7 @@ public class ConfigurationDependencyGraph {
 
   private final Map<String, Set<String>> adjacencyList = new HashMap<>();
   private final Map<String, ProcessingState> nodeStates = new HashMap<>();
+  private final Map<String, String> nodeLabels = new HashMap<>();
 
   /**
    * Registers a node in the graph with its current processing state. If the state
@@ -30,11 +31,30 @@ public class ConfigurationDependencyGraph {
    *          The unique identifier of the entity (UUID or ID).
    * @param state
    *          The current processing state of the entity.
+   * @param label
+   *          A human-readable label for the entity (e.g., "Virtual Column
+   *          'col_name'")
    */
-  public void addNode(String id, ProcessingState state) {
+  public void addNode(String id, ProcessingState state, String label) {
     if (id != null) {
       adjacencyList.putIfAbsent(id, new HashSet<>());
       nodeStates.put(id, state != null ? state : ProcessingState.PROCESSED);
+      nodeLabels.put(id, label != null ? label : id);
+    }
+  }
+
+  /*
+   * Updates the processing state of an existing node. This is crucial for
+   * reflecting intended changes (e.g., marking a node as TO_REMOVE) before
+   * evaluating dependencies.
+   *
+   * @param id The unique identifier of the entity to update.
+   * 
+   * @param state The new processing state to assign to the entity.
+   */
+  public void updateNodeState(String id, ProcessingState state) {
+    if (id != null && nodeStates.containsKey(id) && state != null) {
+      nodeStates.put(id, state);
     }
   }
 
@@ -54,16 +74,14 @@ public class ConfigurationDependencyGraph {
   }
 
   /**
-   * Performs a Breadth-First Search (BFS) to find ALL direct and indirect
-   * dependents that are still active. * The 'visited' set guarantees that cyclic
-   * dependencies will not cause infinite loops.
-   *
+   * Performs a BFS traversal to find all active dependents of a given node.
+   * Active dependents are those that are not marked for removal (i.e., their
+   * state is not TO_REMOVE).
+   * 
    * @param startNodeId
-   *          The ID of the node being checked for removal or modification.
-   * @return A set of IDs representing downstream entities that actively depend on
-   *         the start node.
+   * @return
    */
-  public Set<String> getActiveDependents(String startNodeId) {
+  public Set<String> getActiveDependentLabels(String startNodeId) {
     Set<String> activeDependents = new HashSet<>();
     Set<String> visited = new HashSet<>();
     Queue<String> queue = new LinkedList<>();
@@ -78,14 +96,12 @@ public class ConfigurationDependencyGraph {
       Set<String> directDependents = adjacencyList.getOrDefault(current, Collections.emptySet());
 
       for (String dependent : directDependents) {
-        // The visited check prevents infinite loops in cyclic references
         if (!visited.contains(dependent)) {
           visited.add(dependent);
           queue.add(dependent);
 
-          // If the dependent is NOT marked for removal, it acts as an active blocker
           if (nodeStates.getOrDefault(dependent, ProcessingState.PROCESSED) != ProcessingState.TO_REMOVE) {
-            activeDependents.add(dependent);
+            activeDependents.add(nodeLabels.getOrDefault(dependent, dependent));
           }
         }
       }
