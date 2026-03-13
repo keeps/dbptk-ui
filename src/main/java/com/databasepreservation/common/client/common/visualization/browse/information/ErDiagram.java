@@ -53,6 +53,15 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
   @UiField
   AccessibleFocusPanel clearCrossButton;
 
+  @UiField
+  FlowPanel contentItems;
+
+  private final String databaseUUID;
+  private final String schemaUUID;
+  private final ViewerDatabase database;
+  private final ViewerSchema schema;
+  private final String path;
+
   public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path) {
     String separator = "/";
     String code = database.getUuid() + separator + schema.getUuid() + separator + path;
@@ -69,7 +78,11 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
   @Override
   public void updateCollection(CollectionStatus collectionStatus) {
     this.collectionStatus = collectionStatus;
-    instances.keySet().removeIf(p -> p.startsWith(collectionStatus.getDatabaseUUID()));
+
+    // If the widget is currently visible on the DOM, force a re-render
+    if (this.isAttached()) {
+      renderDiagram();
+    }
   }
 
   interface ErDiagramUiBinder extends UiBinder<Widget, ErDiagram> {
@@ -93,14 +106,11 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
   private VisEdgeMapper visEdgeMapper = GWT.create(VisEdgeMapper.class);
 
-  @UiField
-  FlowPanel contentItems;
-
-  private final String databaseUUID;
-  private final String schemaUUID;
-
   private ErDiagram(final ViewerDatabase database, final ViewerSchema schema, String path,
     CollectionStatus collectionStatus) {
+    this.database = database;
+    this.schema = schema;
+    this.path = path;
     databaseUUID = database.getUuid();
     schemaUUID = schema.getUuid();
     this.collectionStatus = collectionStatus;
@@ -120,186 +130,9 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     diagram.addStyleName("erdiagram");
     diagram.getElement().setId("erdiagram-" + schema.getUuid());
     diagram.addAttachHandler(event -> {
-      // avoid setting up the diagram more than once
-      if (diagram.getStyleName().contains("initialized-erdiagram")) {
-        return;
+      if (event.isAttached()) {
+        renderDiagram();
       }
-
-      List<VisNode> visNodeList = new ArrayList<>();
-      List<JsniEdge> jsniEdgeList = new ArrayList<>();
-
-      int maxRows = 0;
-      int maxRelationsIn = 0;
-      int maxRelationsOut = 0;
-      int maxRelationsTotal = 0;
-      int maxColumns = 0;
-      int maxColumnsAndRows = 0;
-
-      int minRows = Integer.MAX_VALUE;
-      int minRelationsIn = Integer.MAX_VALUE;
-      int minRelationsOut = Integer.MAX_VALUE;
-      int minRelationsTotal = Integer.MAX_VALUE;
-      int minColumns = Integer.MAX_VALUE;
-      int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
-
-      for (ViewerTable viewerTable : schema.getTables()) {
-        if (path.equals(HistoryManager.ROUTE_DATA_TRANSFORMATION)
-          && (viewerTable.isMaterializedView() || viewerTable.isCustomView())) {
-          continue;
-        }
-
-        TableStatus tableStatus = collectionStatus.getTableStatus(viewerTable.getUuid());
-        if (tableStatus != null && !tableStatus.isShow()) {
-          continue;
-        }
-
-        String tableName = viewerTable.getName();
-        if (tableStatus != null) {
-          tableName = tableStatus.getCustomName();
-        }
-        VisNode visNode = new VisNode(viewerTable.getId(), tableName, collectionStatus);
-
-        if (tableStatus != null) {
-          visNode.description = tableStatus.getCustomDescription();
-        } else if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
-          visNode.description = viewerTable.getDescription();
-        } else {
-          visNode.description = "";
-        }
-        visNode.numColumns = viewerTable.getColumns().size();
-        visNode.numRows = new Long(viewerTable.getCountRows()).intValue();
-        visNode.numRelationsOut = viewerTable.getForeignKeys().size();
-        int inboundForeignKeys = 0;
-        for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
-          for (ViewerTable table : viewerSchema.getTables()) {
-            for (ViewerForeignKey viewerForeignKey : table.getForeignKeys()) {
-              if (viewerForeignKey.getReferencedTableUUID().equals(viewerTable.getUuid())) {
-                inboundForeignKeys++;
-              }
-            }
-          }
-        }
-        visNode.numRelationsIn = inboundForeignKeys;
-        visNode.numRelationsTotal = visNode.numRelationsIn + visNode.numRelationsOut;
-        visNode.numColumnsAndRows = visNode.numColumns * visNode.numRows;
-
-        if (maxColumns < visNode.numColumns) {
-          maxColumns = visNode.numColumns;
-        }
-        if (maxRows < visNode.numRows) {
-          maxRows = visNode.numRows;
-        }
-        if (maxRelationsOut < visNode.numRelationsOut) {
-          maxRelationsOut = visNode.numRelationsOut;
-        }
-        if (maxRelationsIn < visNode.numRelationsIn) {
-          maxRelationsIn = visNode.numRelationsIn;
-        }
-        if (maxRelationsTotal < visNode.numRelationsTotal) {
-          maxRelationsTotal = visNode.numRelationsTotal;
-        }
-        if (maxColumnsAndRows < visNode.numColumnsAndRows) {
-          maxColumnsAndRows = visNode.numColumnsAndRows;
-        }
-
-        if (minColumns > visNode.numColumns) {
-          minColumns = visNode.numColumns;
-        }
-        if (minRows > visNode.numRows) {
-          minRows = visNode.numRows;
-        }
-        if (minRelationsOut > visNode.numRelationsOut) {
-          minRelationsOut = visNode.numRelationsOut;
-        }
-        if (minRelationsIn > visNode.numRelationsIn) {
-          minRelationsIn = visNode.numRelationsIn;
-        }
-        if (minRelationsTotal > visNode.numRelationsTotal) {
-          minRelationsTotal = visNode.numRelationsTotal;
-        }
-        if (minColumnsAndRowsBiggerThanZero > visNode.numColumnsAndRows && visNode.numColumnsAndRows > 0) {
-          minColumnsAndRowsBiggerThanZero = visNode.numColumnsAndRows;
-        }
-
-        // create tooltip with table information
-        StringBuilder tooltip = new StringBuilder();
-        if (tableStatus != null) {
-          tooltip.append(tableStatus.getCustomName()).append("<br/>");
-        } else if (ViewerStringUtils.isNotBlank(viewerTable.getName())) {
-          tooltip.append(viewerTable.getName()).append("<br/>");
-        }
-
-        boolean isVirtualTable = tableStatus != null && tableStatus.getVirtualTableStatus() != null;
-        if (isVirtualTable) {
-          visNode.setBorderWidth(1);
-          visNode.setShapeProperties(new VisNode.VisNodeShapeProperties(new int[] {5, 5}));
-          tooltip.append(messages.diagram_virtualTable()).append("<br/>");
-        }
-
-        tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
-          .append(messages.diagram_columns(visNode.numColumns)).append(", ")
-          .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
-
-        visNode.setTitle(tooltip.toString());
-
-        visNodeList.add(visNode);
-
-        for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-          jsniEdgeList.add(new JsniEdge(viewerTable.getId(), viewerForeignKey.getReferencedTableId(), isVirtualTable));
-        }
-
-        if (collectionStatus != null) {
-          for (ForeignKeysStatus foreignKeysStatus : collectionStatus
-            .getForeignKeysByTableUUID(viewerTable.getUuid())) {
-            if (foreignKeysStatus.getType() != null && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
-              JsniEdge virtualEdge = new JsniEdge(viewerTable.getId(), foreignKeysStatus.getReferencedTableId(), true);
-              jsniEdgeList.add(virtualEdge);
-            }
-          }
-
-        }
-      }
-
-      Double normMinColumnsAndRows = 0.0;
-      Double normMaxColumnsAndRows = 2.0; // N
-
-      for (VisNode visNode : visNodeList) {
-        // visNode
-        // .adjustSize(getNormalizedValue(visNode.numRelationsTotal,
-        // minRelationsTotal, maxRelationsTotal, 10, 50));
-
-        visNode.adjustBackgroundColor(
-          getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal, maxRelationsTotal, 0.01, 0.70));
-
-        if (visNode.numColumnsAndRows == 0) {
-          visNode.adjustSize(20);
-        } else {
-          Double normNumColumnsAndRows = getNormalizedValue(visNode.numColumnsAndRows, minColumnsAndRowsBiggerThanZero,
-            maxColumnsAndRows, normMinColumnsAndRows, normMaxColumnsAndRows);
-
-          double normResult = Math.asin(normNumColumnsAndRows - 1) + 1.5;
-
-          visNode.adjustSize(getNormalizedValue(normResult, 0, 3, 40, 150).intValue());
-        }
-
-        // Double logColumnsAndRows = Math.log(visNode.numColumnsAndRows);
-        // if (logColumnsAndRows.isInfinite() || logColumnsAndRows.isNaN()) {
-        // logColumnsAndRows = 0.0;
-        // }
-        // visNode
-        // .adjustSize(getNormalizedValue(visNode.numColumnsAndRows,
-        // minColumnsAndRows,
-        // maxColumnsAndRows, 20, 150));
-
-        // visNode.adjustBackgroundColor(((double)
-        // getNormalizedValue(logColumnsAndRows, logMinColumnsAndRows,
-        // logMaxColumnsAndRows, 1, 70)) / 100);
-      }
-
-      String nodes = visNodeMapper.write(visNodeList);
-      String edges = visEdgeMapper.write(jsniEdgeList);
-
-      loadDiagram(databaseUUID, schema.getUuid(), nodes, edges, ApplicationType.getType(), path);
     });
     contentItems.add(diagram);
 
@@ -320,6 +153,190 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
       resetDiagramFocus(schema.getUuid());
       searchBox.setFocus(true);
     });
+  }
+
+  /**
+   * Processes the collection status and forces the vis.js network to render the
+   * nodes and edges.
+   */
+  private void renderDiagram() {
+    if (this.collectionStatus == null) {
+      return;
+    }
+
+    List<VisNode> visNodeList = new ArrayList<>();
+    List<JsniEdge> jsniEdgeList = new ArrayList<>();
+
+    int maxRows = 0;
+    int maxRelationsIn = 0;
+    int maxRelationsOut = 0;
+    int maxRelationsTotal = 0;
+    int maxColumns = 0;
+    int maxColumnsAndRows = 0;
+
+    int minRows = Integer.MAX_VALUE;
+    int minRelationsIn = Integer.MAX_VALUE;
+    int minRelationsOut = Integer.MAX_VALUE;
+    int minRelationsTotal = Integer.MAX_VALUE;
+    int minColumns = Integer.MAX_VALUE;
+    int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
+
+    for (ViewerTable viewerTable : schema.getTables()) {
+      if (path.equals(HistoryManager.ROUTE_DATA_TRANSFORMATION)
+        && (viewerTable.isMaterializedView() || viewerTable.isCustomView())) {
+        continue;
+      }
+
+      TableStatus tableStatus = collectionStatus.getTableStatus(viewerTable.getUuid());
+      if (tableStatus != null && !tableStatus.isShow()) {
+        continue;
+      }
+
+      String tableName = viewerTable.getName();
+      if (tableStatus != null) {
+        tableName = tableStatus.getCustomName();
+      }
+      VisNode visNode = new VisNode(viewerTable.getId(), tableName, collectionStatus);
+
+      if (tableStatus != null) {
+        visNode.description = tableStatus.getCustomDescription();
+      } else if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
+        visNode.description = viewerTable.getDescription();
+      } else {
+        visNode.description = "";
+      }
+      visNode.numColumns = viewerTable.getColumns().size();
+      visNode.numRows = new Long(viewerTable.getCountRows()).intValue();
+      visNode.numRelationsOut = viewerTable.getForeignKeys().size();
+      int inboundForeignKeys = 0;
+      for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
+        for (ViewerTable table : viewerSchema.getTables()) {
+          for (ViewerForeignKey viewerForeignKey : table.getForeignKeys()) {
+            if (viewerForeignKey.getReferencedTableUUID().equals(viewerTable.getUuid())) {
+              inboundForeignKeys++;
+            }
+          }
+        }
+      }
+      visNode.numRelationsIn = inboundForeignKeys;
+      visNode.numRelationsTotal = visNode.numRelationsIn + visNode.numRelationsOut;
+      visNode.numColumnsAndRows = visNode.numColumns * visNode.numRows;
+
+      if (maxColumns < visNode.numColumns) {
+        maxColumns = visNode.numColumns;
+      }
+      if (maxRows < visNode.numRows) {
+        maxRows = visNode.numRows;
+      }
+      if (maxRelationsOut < visNode.numRelationsOut) {
+        maxRelationsOut = visNode.numRelationsOut;
+      }
+      if (maxRelationsIn < visNode.numRelationsIn) {
+        maxRelationsIn = visNode.numRelationsIn;
+      }
+      if (maxRelationsTotal < visNode.numRelationsTotal) {
+        maxRelationsTotal = visNode.numRelationsTotal;
+      }
+      if (maxColumnsAndRows < visNode.numColumnsAndRows) {
+        maxColumnsAndRows = visNode.numColumnsAndRows;
+      }
+
+      if (minColumns > visNode.numColumns) {
+        minColumns = visNode.numColumns;
+      }
+      if (minRows > visNode.numRows) {
+        minRows = visNode.numRows;
+      }
+      if (minRelationsOut > visNode.numRelationsOut) {
+        minRelationsOut = visNode.numRelationsOut;
+      }
+      if (minRelationsIn > visNode.numRelationsIn) {
+        minRelationsIn = visNode.numRelationsIn;
+      }
+      if (minRelationsTotal > visNode.numRelationsTotal) {
+        minRelationsTotal = visNode.numRelationsTotal;
+      }
+      if (minColumnsAndRowsBiggerThanZero > visNode.numColumnsAndRows && visNode.numColumnsAndRows > 0) {
+        minColumnsAndRowsBiggerThanZero = visNode.numColumnsAndRows;
+      }
+
+      // create tooltip with table information
+      StringBuilder tooltip = new StringBuilder();
+      if (tableStatus != null) {
+        tooltip.append(tableStatus.getCustomName()).append("<br/>");
+      } else if (ViewerStringUtils.isNotBlank(viewerTable.getName())) {
+        tooltip.append(viewerTable.getName()).append("<br/>");
+      }
+
+      boolean isVirtualTable = tableStatus != null && tableStatus.getVirtualTableStatus() != null;
+      if (isVirtualTable) {
+        visNode.setBorderWidth(1);
+        visNode.setShapeProperties(new VisNode.VisNodeShapeProperties(new int[] {5, 5}));
+        tooltip.append(messages.diagram_virtualTable()).append("<br/>");
+      }
+
+      tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
+        .append(messages.diagram_columns(visNode.numColumns)).append(", ")
+        .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
+
+      visNode.setTitle(tooltip.toString());
+
+      visNodeList.add(visNode);
+
+      for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
+        jsniEdgeList.add(new JsniEdge(viewerTable.getId(), viewerForeignKey.getReferencedTableId(), isVirtualTable));
+      }
+
+      if (collectionStatus != null) {
+        for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(viewerTable.getUuid())) {
+          if (foreignKeysStatus.getType() != null && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+            JsniEdge virtualEdge = new JsniEdge(viewerTable.getId(), foreignKeysStatus.getReferencedTableId(), true);
+            jsniEdgeList.add(virtualEdge);
+          }
+        }
+      }
+    }
+
+    Double normMinColumnsAndRows = 0.0;
+    Double normMaxColumnsAndRows = 2.0; // N
+
+    for (VisNode visNode : visNodeList) {
+      // visNode
+      // .adjustSize(getNormalizedValue(visNode.numRelationsTotal,
+      // minRelationsTotal, maxRelationsTotal, 10, 50));
+
+      visNode.adjustBackgroundColor(
+        getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal, maxRelationsTotal, 0.01, 0.70));
+
+      if (visNode.numColumnsAndRows == 0) {
+        visNode.adjustSize(20);
+      } else {
+        Double normNumColumnsAndRows = getNormalizedValue(visNode.numColumnsAndRows, minColumnsAndRowsBiggerThanZero,
+          maxColumnsAndRows, normMinColumnsAndRows, normMaxColumnsAndRows);
+
+        double normResult = Math.asin(normNumColumnsAndRows - 1) + 1.5;
+
+        visNode.adjustSize(getNormalizedValue(normResult, 0, 3, 40, 150).intValue());
+      }
+
+      // Double logColumnsAndRows = Math.log(visNode.numColumnsAndRows);
+      // if (logColumnsAndRows.isInfinite() || logColumnsAndRows.isNaN()) {
+      // logColumnsAndRows = 0.0;
+      // }
+      // visNode
+      // .adjustSize(getNormalizedValue(visNode.numColumnsAndRows,
+      // minColumnsAndRows,
+      // maxColumnsAndRows, 20, 150));
+
+      // visNode.adjustBackgroundColor(((double)
+      // getNormalizedValue(logColumnsAndRows, logMinColumnsAndRows,
+      // logMaxColumnsAndRows, 1, 70)) / 100);
+    }
+
+    String nodes = visNodeMapper.write(visNodeList);
+    String edges = visEdgeMapper.write(jsniEdgeList);
+
+    loadDiagram(databaseUUID, schema.getUuid(), nodes, edges, ApplicationType.getType(), path);
   }
 
   private void executeSearch() {
@@ -649,9 +666,12 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
         console.log("JSON das Edges:", edgesJson);
         // network container
         var container = $wnd.document.getElementById('erdiagram-' + schemaUUID);
-  
-        // avoid setting up the diagram more than once
-        container.className += ' initialized-erdiagram';
+        
+        // Destroy the previous graph instance to avoid overlap
+        if (container && container.network) {
+            container.network.destroy();
+            container.network = null;
+        }
   
         // create an array with nodes
         var rawNodes = eval(nodesJson);
@@ -663,8 +683,6 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
             }
         }
         var nodes = new $wnd.vis.DataSet(rawNodes);
-  
-  
   
         // create an array with edges
         var edges = new $wnd.vis.DataSet(eval(edgesJson));

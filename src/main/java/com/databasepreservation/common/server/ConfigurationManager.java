@@ -515,7 +515,7 @@ public class ConfigurationManager {
           // 3. Mark Virtual Foreign Keys for removal
           if (table.getForeignKeys() != null) {
             for (ForeignKeysStatus fk : table.getForeignKeys()) {
-              if (fk.getVirtualForeignKeysStatus() != null) {
+              if (ViewerType.dbTypes.VIRTUAL.equals(fk.getType()) && fk.getVirtualForeignKeysStatus() != null) {
                 fk.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_REMOVE);
                 needsBatchProcessing = true;
               }

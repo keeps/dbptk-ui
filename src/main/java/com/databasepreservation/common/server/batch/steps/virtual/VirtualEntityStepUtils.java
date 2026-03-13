@@ -24,7 +24,12 @@ import com.databasepreservation.common.server.batch.core.BatchConstants;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class VirtualEntityStepUtils {
-  static public boolean hasVirtualColumnsToProcess(TableStatus table) {
+  public static boolean hasVirtualReferencesToProcess(TableStatus table) {
+    return table.getForeignKeys().stream()
+      .anyMatch(fk -> fk.getVirtualForeignKeysStatus() != null && fk.getVirtualForeignKeysStatus().shouldProcess());
+  }
+
+  public static boolean hasVirtualColumnsToProcess(TableStatus table) {
     return table.getColumns().stream().anyMatch(VirtualEntityStepUtils::shouldProcess);
   }
 
