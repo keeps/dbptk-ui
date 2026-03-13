@@ -155,6 +155,23 @@ public class VirtualTableOptionsPanel extends ColumnOptionsPanel implements Vali
       isValid = false;
     }
 
+    boolean isDuplicate = false;
+    for (TableStatus tableStatus : collectionStatus.getTables()) {
+      if (originalStatus != null && tableStatus.getUuid().equals(originalStatus.getUuid())) {
+        continue;
+      }
+
+      if (nameValue.equalsIgnoreCase(tableStatus.getName())) {
+        isDuplicate = true;
+        break;
+      }
+    }
+
+    if (isDuplicate) {
+      showError(virtualTableName, errorVirtualTableName, messages.tableManagementLabelForUniqueVirtualTableName());
+      isValid = false;
+    }
+
     if (sourceTableListBox.getSelectedIndex() == 0) {
       showError(sourceTableListBox, errorSourceTable, messages.tableManagementLabelForSourceTable() + " is required.");
       isValid = false;
@@ -168,7 +185,7 @@ public class VirtualTableOptionsPanel extends ColumnOptionsPanel implements Vali
     sourceTableListBox.addItem("");
     for (TableStatus table : collectionStatus.getTables()) {
       if (table.getVirtualTableStatus() == null) {
-        sourceTableListBox.addItem(table.getName(), table.getUuid());
+        sourceTableListBox.addItem(table.getId(), table.getUuid());
       }
     }
   }
@@ -344,6 +361,16 @@ public class VirtualTableOptionsPanel extends ColumnOptionsPanel implements Vali
   public ViewerTable getSimpleViewerTable(String uuid) {
     ViewerTable viewerTable = new ViewerTable();
     viewerTable.setUuid(uuid);
+    if (originalStatus != null && ViewerStringUtils.isNotBlank(originalStatus.getId())) {
+      viewerTable.setId(originalStatus.getId());
+    } else {
+      ViewerTable sourceViewerTable = database.getMetadata().getTable(sourceTableListBox.getSelectedValue());
+      if (ViewerStringUtils.isNotBlank(sourceViewerTable.getSchemaName())) {
+        viewerTable.setId(sourceViewerTable.getSchemaName() + "." + virtualTableName.getText());
+      } else {
+        viewerTable.setId(virtualTableName.getText());
+      }
+    }
     viewerTable.setName(virtualTableName.getText());
     viewerTable.setDescription(virtualTableDescription.getText());
     ViewerTable sourceViewerTable = database.getMetadata().getTable(sourceTableListBox.getSelectedValue());
@@ -354,34 +381,53 @@ public class VirtualTableOptionsPanel extends ColumnOptionsPanel implements Vali
   public TableStatus getTableStatus() {
     TableStatus statusToReturn = (originalStatus != null) ? originalStatus : new TableStatus();
 
+    // Preserve the UUID if we are editing an existing virtual table
     if (ViewerStringUtils.isBlank(statusToReturn.getUuid())) {
       String uuid = "table_virtual_" + UUID.randomUUID().toString();
       statusToReturn.setUuid(uuid);
     }
 
     ViewerTable sourceViewerTable = database.getMetadata().getTable(sourceTableListBox.getSelectedValue());
-    if (ViewerStringUtils.isNotBlank(sourceViewerTable.getSchemaName())) {
-      statusToReturn.setId(sourceViewerTable.getSchemaName() + "." + virtualTableName.getText());
-    } else {
-      statusToReturn.setId(virtualTableName.getText());
+
+    // Preserve the internal ID if editing, otherwise generate a new one
+    if (ViewerStringUtils.isBlank(statusToReturn.getId())) {
+      if (ViewerStringUtils.isNotBlank(sourceViewerTable.getSchemaName())) {
+        statusToReturn.setId(sourceViewerTable.getSchemaName() + "." + virtualTableName.getText());
+      } else {
+        statusToReturn.setId(virtualTableName.getText());
+      }
     }
 
-    statusToReturn.setName(virtualTableName.getText());
-    statusToReturn.setCustomName(virtualTableName.getText());
-    statusToReturn.setDescription(virtualTableDescription.getText());
-    statusToReturn.setCustomDescription(virtualTableDescription.getText());
+    // Only update the core names if they changed, to avoid overwriting "custom"
+    // edits unintentionally
+    if (originalStatus == null || !virtualTableName.getText().equals(originalStatus.getName())) {
+      statusToReturn.setName(virtualTableName.getText());
+      statusToReturn.setCustomName(virtualTableName.getText());
+    }
 
+    if (originalStatus == null || !virtualTableDescription.getText().equals(originalStatus.getDescription())) {
+      statusToReturn.setDescription(virtualTableDescription.getText());
+      statusToReturn.setCustomDescription(virtualTableDescription.getText());
+    }
+
+    // Update Columns safely
     ArrayList<ColumnStatus> columnStatuses = new ArrayList<>();
     for (ViewerColumn viewerColumn : columnsToInclude) {
       ColumnStatus columnStatus = collectionStatus.getColumnByTableAndColumn(sourceTableListBox.getSelectedValue(),
         viewerColumn.getSolrName());
       columnStatuses.add(columnStatus);
     }
-
     statusToReturn.setColumns(columnStatuses);
 
-    VirtualTableStatus virtualTableStatus = new VirtualTableStatus();
+    // Update Virtual Status
+    VirtualTableStatus virtualTableStatus = statusToReturn.getVirtualTableStatus();
+    if (virtualTableStatus == null) {
+      virtualTableStatus = new VirtualTableStatus();
+    }
+
+    // We always flag it to process if it's being saved from the modal
     virtualTableStatus.setProcessingState(ProcessingState.TO_PROCESS);
+    virtualTableStatus.setLastUpdatedDate(new java.util.Date());
     virtualTableStatus.setSourceTableUUID(sourceTableListBox.getSelectedValue());
     virtualTableStatus.setUseSourceTableForeignKeys(includeSourceForeignKeys.getValue());
 
