@@ -99,7 +99,6 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
     alertPanel.setVisible(false);
     toggleProgressMode(false);
-
     ObserverManager.getCollectionObserver().addObserver(this);
     initHandlers();
   }
@@ -228,6 +227,11 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
         isStoppingPolling = true;
         stopPolling();
+        CollectionService.Util.call((List<CollectionStatus> statusList) -> {
+          if (statusList != null && !statusList.isEmpty()) {
+            ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
+          }
+        }).getCollectionConfiguration(database.getUuid(), database.getUuid());
 
         if (status == ViewerJobStatus.COMPLETED) {
           handleJobSuccess(job);

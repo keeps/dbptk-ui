@@ -10,6 +10,7 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -744,8 +745,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
               if (value.equals(Dialogs.DialogAction.SAVE)) {
                 if (updatedForeignKeyStatus != null) {
                   if (virtualForeignKeysStatus != null) {
-                    // TODO: need to create a step for this
-                    virtualForeignKeysStatus.setProcessingState(ProcessingState.PROCESSED);
+                    virtualForeignKeysStatus.setProcessingState(ProcessingState.TO_PROCESS);
+                    virtualForeignKeysStatus.setLastUpdatedDate(new Date());
                   }
                   tableStatus.addOrUpdateForeignKeyStatus(updatedForeignKeyStatus);
                 }
@@ -759,8 +760,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 saveChanges(true);
               } else if (value.equals(Dialogs.DialogAction.REMOVE)) {
                 if (virtualForeignKeysStatus != null) {
-                  // TODO: need to create a step for this
                   virtualForeignKeysStatus.setProcessingState(ProcessingState.TO_REMOVE);
+                  virtualForeignKeysStatus.setLastUpdatedDate(new Date());
                 }
                 updatedColumnStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_REMOVE);
                 column.setVirtualColumnStatus(updatedColumnStatus.getVirtualColumnStatus());
@@ -877,11 +878,16 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
               ForeignKeysStatus updatedForeignKeyStatus = virtualReferenceOptionsPanel.getVirtualReferenceStatus();
               if (updatedForeignKeyStatus != null) {
                 if (value.equals(Dialogs.DialogAction.SAVE)) {
+                  updatedForeignKeyStatus.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_PROCESS);
+                  updatedForeignKeyStatus.getVirtualForeignKeysStatus().setLastUpdatedDate(new Date());
+
                   tableStatus.addOrUpdateForeignKeyStatus(updatedForeignKeyStatus);
+                  collectionStatus.setNeedsToBeProcessed(true);
                   saveChanges(true);
                 } else if (value.equals(Dialogs.DialogAction.REMOVE)) {
                   GWT.log("Removing foreign key status from collection status");
                   tableStatus.removeForeignKeyStatusById(updatedForeignKeyStatus.getId());
+                  collectionStatus.setNeedsToBeProcessed(true);
                   saveChanges(true);
                 }
               }

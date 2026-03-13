@@ -1637,6 +1637,8 @@ public interface ClientMessages extends Messages {
 
   String tableManagementLabelForVirtualTableDescription();
 
+  String tableManagementLabelForUniqueVirtualTableName();
+
   String tableManagementLabelForSourceTable();
 
   String tableManagementLabelForSourceColumnsTable();
