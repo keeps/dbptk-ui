@@ -40,6 +40,7 @@ public class DenormalizationStepPartitionStrategy implements PartitionStrategy {
     Set<String> entries = context.getCollectionStatus().getDenormalizations();
 
     if (entries != null) {
+      int partitionIndex = 0;
       for (String entryID : entries) {
         DenormalizeConfiguration config = context.getDenormalizeConfig(entryID);
         if (config != null && config.shouldProcess()) {
@@ -59,7 +60,8 @@ public class DenormalizationStepPartitionStrategy implements PartitionStrategy {
           partitionContext.put(BatchConstants.FILTER_KEY, FilterUtils.filterByTable(new Filter(), config.getTableID()));
           partitionContext.put(BatchConstants.FIELDS_KEY, new ArrayList<>(fieldsToReturn));
 
-          partitions.put(BatchConstants.PARTITION_PREFIX + entryID, partitionContext);
+          String partitionName = (partitionIndex++) + "-" + config.getTableID();
+          partitions.put(BatchConstants.PARTITION_PREFIX + partitionName, partitionContext);
         }
       }
     }
