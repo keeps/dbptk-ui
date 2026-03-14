@@ -19,6 +19,7 @@ import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.context.JobContextRegistry;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.controller.JobController;
+import org.springframework.batch.core.repository.JobRepository;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -28,10 +29,12 @@ public class JobStatusListener implements JobExecutionListener {
 
   private final JobContext jobContext;
   private final JobContextRegistry registry;
+  private final JobRepository jobRepository;
 
-  public JobStatusListener(JobContext jobContext, JobContextRegistry registry) {
+  public JobStatusListener(JobContext jobContext, JobContextRegistry registry, JobRepository jobRepository) {
     this.jobContext = jobContext;
     this.registry = registry;
+    this.jobRepository = jobRepository;
   }
 
   @Override
@@ -61,6 +64,8 @@ public class JobStatusListener implements JobExecutionListener {
     } catch (BatchJobException e) {
       LOGGER.error("Failed to persist job changes for {}", databaseUUID, e);
       jobExecution.setStatus(BatchStatus.FAILED);
+      jobExecution.addFailureException(e);
+      jobRepository.update(jobExecution);
     } finally {
       registry.unregister(databaseUUID);
       LOGGER.debug("JobContext unregistered for database: {}", databaseUUID);

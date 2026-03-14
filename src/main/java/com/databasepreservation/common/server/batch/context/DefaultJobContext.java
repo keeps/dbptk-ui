@@ -3,6 +3,7 @@ package com.databasepreservation.common.server.batch.context;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.roda.core.data.exceptions.GenericException;
 
@@ -21,9 +22,9 @@ public class DefaultJobContext implements JobContext {
   private final JobProgressAggregator progressAggregator;
   private final Map<String, DenormalizeConfiguration> denormalizeConfigs;
 
-  private int currentStepNumber = 0;
-  private int totalSteps = 1;
-  private String currentStepName = "";
+  private final AtomicInteger currentStepNumber = new AtomicInteger(0);
+  private final AtomicInteger totalSteps = new AtomicInteger(1);
+  private volatile String currentStepName = "";
 
   public DefaultJobContext(String databaseUUID, CollectionStatus collectionStatus) throws BatchJobException {
     this.databaseUUID = databaseUUID;
@@ -74,22 +75,22 @@ public class DefaultJobContext implements JobContext {
 
   @Override
   public int getCurrentStepNumber() {
-    return currentStepNumber;
+    return currentStepNumber.get();
   }
 
   @Override
   public void incrementStepNumber() {
-    this.currentStepNumber++;
+    this.currentStepNumber.incrementAndGet();
   }
 
   @Override
   public int getTotalSteps() {
-    return totalSteps;
+    return totalSteps.get();
   }
 
   @Override
   public void setTotalSteps(int totalSteps) {
-    this.totalSteps = totalSteps;
+    this.totalSteps.set(totalSteps);
   }
 
   @Override

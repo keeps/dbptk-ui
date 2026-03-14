@@ -1,18 +1,16 @@
-package com.databasepreservation.comonn.client.models.validation;
+package com.databasepreservation.common.client.models.validation;
 
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
-import org.junit.Before;
-import org.junit.Test;
 
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
@@ -27,6 +25,8 @@ import com.databasepreservation.common.client.models.status.denormalization.Deno
 import com.databasepreservation.common.exceptions.DependencyViolationException;
 import com.databasepreservation.common.server.ConfigurationManager;
 import com.databasepreservation.common.server.configuration.validation.ConfigurationIntegrityValidator;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -42,7 +42,7 @@ public class ConfigurationIntegrityValidatorTest {
   private ConfigurationIntegrityValidator validator;
   private static final String DATABASE_UUID = "test-db-uuid";
 
-  @Before
+  @BeforeEach
   public void setUp() {
     configManagerMock = mock(ConfigurationManager.class);
     validator = new ConfigurationIntegrityValidator(configManagerMock);
