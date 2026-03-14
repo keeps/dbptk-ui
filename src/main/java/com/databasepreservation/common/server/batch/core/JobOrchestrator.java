@@ -1,21 +1,23 @@
 package com.databasepreservation.common.server.batch.core;
 
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.builder.SimpleJobBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.stereotype.Component;
 
 import com.databasepreservation.common.server.batch.context.ContextResolver;
@@ -38,14 +40,16 @@ public class JobOrchestrator {
   private static final Logger LOGGER = LoggerFactory.getLogger(JobOrchestrator.class);
 
   private final JobRepository jobRepository;
+  private final JobExplorer jobExplorer;
   private final JobLauncher jobLauncher;
   private final StepFactory stepFactory;
   private final ContextResolver contextResolver;
   private final JobContextRegistry contextRegistry;
 
-  public JobOrchestrator(JobRepository jobRepository, StepFactory stepFactory, ContextResolver contextResolver,
+  public JobOrchestrator(JobRepository jobRepository, JobExplorer jobExplorer, StepFactory stepFactory, ContextResolver contextResolver,
     JobContextRegistry contextRegistry, @Qualifier(BatchConstants.JOB_LAUNCHER_BEAN_NAME) JobLauncher jobLauncher) {
     this.jobRepository = jobRepository;
+    this.jobExplorer = jobExplorer;
     this.stepFactory = stepFactory;
     this.contextResolver = contextResolver;
     this.contextRegistry = contextRegistry;
@@ -55,18 +59,17 @@ public class JobOrchestrator {
   public JobExecution launchJob(String databaseUUID, String collectionUUID, JobDefinition jobDefinition)
     throws BatchJobException {
     try {
-      // TODO: check if there is no job running for database
-      // for (JobExecution runningJobExecution :
-      // jobExplorer.findRunningJobExecutions("processWorkflowJob")) {
-      // if
-      // (runningJobExecution.getJobParameters().getString(BatchConstants.DATABASE_UUID_KEY)
-      // .equals(databaseUUID)) {
-      // throw new BatchJobException(new AlreadyExistsException("A job is already
-      // running
-      // on this database"));
-      // }
-      // }
-      //
+      String expectedJobName = jobDefinition.getName() + "-" + databaseUUID;
+
+      // Check if there is an active job for the same database by looking into the context registry
+      if (contextRegistry.get(databaseUUID) != null) {
+        throw new BatchJobException("A batch job is already actively modifying this database.");
+      }
+
+      Set<JobExecution> runningExecutions = jobExplorer.findRunningJobExecutions(expectedJobName);
+      if (!runningExecutions.isEmpty()) {
+        throw new BatchJobException("A job of type '" + jobDefinition.getDisplayName() + "' is already running on this database.");
+      }
 
       String jobUUID = SolrUtils.randomUUID();
       JobParametersBuilder jobBuilder = new JobParametersBuilder();
@@ -83,14 +86,16 @@ public class JobOrchestrator {
       JobExecution jobExecution = jobLauncher.run(job, jobParameters);
 
       JobController.editSolrBatchJob(jobExecution, null);
-      if (jobExecution.getStatus() == BatchStatus.FAILED) {
-        JobController.setMessageToSolrBatchJob(jobExecution, "Queue is full, please try later");
-      }
 
       return jobExecution;
-
+    } catch (BatchJobException e) {
+      throw e; // Re-throw to be handled by the controller
+    } catch (TaskRejectedException e) {
+      LOGGER.error("Job queue is full. Could not launch job {} for database {}", jobDefinition.getName(), databaseUUID);
+      throw new BatchJobException("Queue is full, please try later", e);
     } catch (Exception e) {
-      LOGGER.error("Failed to launch job {} for database {}: {}", jobDefinition.getName(), databaseUUID, e.getMessage(), e);
+      LOGGER.error("Failed to launch job {} for database {}: {}", jobDefinition.getName(), databaseUUID, e.getMessage(),
+        e);
       throw new BatchJobException("Failed to launch job " + jobDefinition.getName(), e);
     }
   }
@@ -110,7 +115,7 @@ public class JobOrchestrator {
 
     // Start building the Job
     JobBuilder jobBuilder = new JobBuilder(jobDefinition.getName() + "-" + databaseUUID, jobRepository);
-    jobBuilder.listener(new JobStatusListener(context, contextRegistry));
+    jobBuilder.listener(new JobStatusListener(context, contextRegistry, jobRepository));
 
     SimpleJobBuilder flowBuilder = null;
     int executableStepsCount = 0;
