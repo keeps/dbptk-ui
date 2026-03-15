@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
-import com.databasepreservation.common.server.batch.steps.virtual.VirtualEntityMetadataService;
+import com.databasepreservation.common.server.batch.steps.metadata.SchemaMetadataService;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
@@ -36,7 +36,7 @@ public abstract class AbstractIndexingStepDefinition<I extends IsIndexed & Seria
   protected DatabaseRowsSolrManager solrManager;
 
   @Autowired
-  protected VirtualEntityMetadataService metadataService;
+  protected SchemaMetadataService metadataService;
 
   private final Class<I> incomingClass;
 

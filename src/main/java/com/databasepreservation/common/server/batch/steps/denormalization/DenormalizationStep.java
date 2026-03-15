@@ -1,29 +1,18 @@
 package com.databasepreservation.common.server.batch.steps.denormalization;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.stereotype.Component;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-import com.databasepreservation.common.client.models.status.collection.ProcessingState;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
-import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.exceptions.ViewerException;
-import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.AbstractIndexingStepDefinition;
 import com.databasepreservation.common.server.batch.core.BatchConstants;
@@ -33,8 +22,21 @@ import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
 import com.databasepreservation.common.server.batch.steps.partition.PartitionStrategy;
 
 /**
- * Step responsible for denormalizing data across multiple tables. It is
- * chunk-oriented and partitionable. * @author Gabriel Barros <gbarros@keep.pt>
+ * Orchestrates the Data Denormalization step within the data transformation
+ * batch job.
+ * <p>
+ * This step is chunk-oriented and highly scalable due to its implementation of
+ * {@link PartitionableStep}. It relies on a specialized Bulk Fetching strategy
+ * (Prefetch Reader) to resolve relational data hierarchies efficiently,
+ * preventing the N+1 select problem against the Solr index.
+ * </p>
+ * <p>
+ * Note: Heavy I/O cleanup operations and metadata updates are purposefully
+ * excluded from this step's lifecycle hooks and are instead delegated to a
+ * dedicated cleanup tasklet (e.g., DenormalizationCleanupStep) to adhere to
+ * Spring Batch transaction boundaries and single-responsibility principles.
+ * </p>
+ * * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Component
 public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRow, ViewerRow>
@@ -60,13 +62,68 @@ public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRo
     return calculatePartitionedWorkload(context);
   }
 
+  /**
+   * Creates the specialized reader for this partition.
+   * <p>
+   * Overrides the default base reader by wrapping it inside a
+   * {@link DenormalizationPrefetchReader}. This allows the step to fetch
+   * relational child documents in bulk (chunk-level) rather than one-by-one,
+   * significantly reducing Solr query overhead.
+   * </p>
+   *
+   * @param context
+   *          The global job context.
+   * @param stepContext
+   *          The execution context specific to this partition.
+   * @return A reader capable of prefetching and assembling nested document
+   *         hierarchies.
+   */
   @Override
-  public ItemProcessor<ViewerRow, ViewerRow> createProcessor(JobContext context, ExecutionContext stepContext) {
+  @SuppressWarnings("unchecked")
+  public ItemReader<ViewerRow> createReader(JobContext context, ExecutionContext stepContext) {
+    // 1. Instantiate the default Solr reader provided by the abstract base class
+    ItemReader<ViewerRow> baseReader = super.createReader(context, stepContext);
+
+    // 2. Extract the specific denormalization configuration for this partition
     String entryID = stepContext.getString(BatchConstants.DENORMALIZATION_ENTRY_ID_KEY);
     DenormalizeConfiguration config = context.getDenormalizeConfig(entryID);
-    return new DenormalizationStepProcessor(solrManager, config, context.getDatabaseUUID());
+
+    // 3. Eagerly load the database metadata once per partition initialization
+    ViewerDatabase database;
+    try {
+      database = solrManager.retrieve(ViewerDatabase.class, context.getDatabaseUUID());
+    } catch (NotFoundException | GenericException e) {
+      throw new IllegalStateException("Critical Failure: Unable to load database metadata for UUID: "
+        + context.getDatabaseUUID() + ". Partition initialization aborted.", e);
+    }
+
+    // 4. Wrap the base reader in the PrefetchReader to enable chunk-aware
+    // relational fetching
+    int chunkSize = getExecutionPolicy().getChunkSize();
+    return new DenormalizationPrefetchReader((ItemStreamReader<ViewerRow>) baseReader, chunkSize, solrManager, config,
+      context.getDatabaseUUID(), database);
   }
 
+  /**
+   * Creates the processor for this partition.
+   * <p>
+   * Since the heavy lifting of resolving relations and building the hierarchical
+   * tree is now handled by the {@link DenormalizationPrefetchReader}, this
+   * processor acts merely as a pure filter, discarding rows that yielded no
+   * relational matches.
+   * </p>
+   */
+  @Override
+  public ItemProcessor<ViewerRow, ViewerRow> createProcessor(JobContext context, ExecutionContext stepContext) {
+    return new DenormalizationStepProcessor();
+  }
+
+  /**
+   * Callback executed when an individual worker partition completes.
+   * <p>
+   * Updates the in-memory execution state of the denormalization entry.
+   * </p>
+   */
   @Override
   public void onPartitionCompleted(JobContext jobContext, ExecutionContext stepContext, BatchStatus status) {
     if (status == BatchStatus.COMPLETED) {
@@ -74,73 +131,23 @@ public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRo
       DenormalizeConfiguration config = jobContext.getDenormalizeConfig(entryID);
 
       if (config != null) {
+        // Mark the specific denormalization target as completed
         config.setState(ViewerJobStatus.COMPLETED);
         config.setLastExecutionDate(new java.util.Date());
       }
     }
   }
 
+  /**
+   * Callback executed when the entire step (all partitions) finishes.
+   * <p>
+   * Left intentionally empty. Global metadata updates and Solr cleanup operations
+   * must be orchestrated via a subsequent Tasklet to ensure proper transaction
+   * isolation.
+   * </p>
+   */
   @Override
   public void onStepCompleted(JobContext jobContext, BatchStatus status) throws BatchJobException {
-    if (status == BatchStatus.COMPLETED) {
-      try {
-        ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, jobContext.getDatabaseUUID());
-
-        Set<String> entries = new HashSet<>(jobContext.getCollectionStatus().getDenormalizations());
-
-        for (String entryID : entries) {
-          DenormalizeConfiguration config = jobContext.getDenormalizeConfig(entryID);
-          if (config != null) {
-            if (config.getProcessingState() == ProcessingState.TO_REMOVE) {
-              removeDenormalizeConfiguration(jobContext, entryID, config);
-            } else if (config.getState() == ViewerJobStatus.COMPLETED) {
-              DenormalizationStepUtils.updateCollectionStatusInMemory(jobContext.getCollectionStatus(), config,
-                database);
-            }
-          }
-          if (config != null && config.getState() == ViewerJobStatus.COMPLETED) {
-            DenormalizationStepUtils.updateCollectionStatusInMemory(jobContext.getCollectionStatus(), config, database);
-          }
-        }
-      } catch (NotFoundException | GenericException e) {
-        throw new BatchJobException("Error updating metadata for " + jobContext.getDatabaseUUID(), e);
-      }
-    }
-  }
-
-  private void removeDenormalizeConfiguration(JobContext jobContext, String entryID, DenormalizeConfiguration config)
-    throws BatchJobException, GenericException {
-    deleteNestedRowsForConfig(jobContext.getDatabaseUUID(), config);
-    ViewerFactory.getConfigurationManager().deleteDenormalizationFromCollection(jobContext.getDatabaseUUID(), entryID);
-    jobContext.getCollectionStatus().getDenormalizations().remove(entryID);
-    TableStatus targetTable = jobContext.getCollectionStatus().getTableStatus(config.getTableUUID());
-    if (targetTable != null) {
-      DenormalizationStepUtils.removeDenormalizationColumns(targetTable);
-    }
-  }
-
-  private void deleteNestedRowsForConfig(String databaseUUID, DenormalizeConfiguration config)
-    throws BatchJobException {
-    try {
-      List<RelatedTablesConfiguration> allRelated = new ArrayList<>();
-      collectAllRelatedTables(config.getRelatedTables(), allRelated);
-
-      for (RelatedTablesConfiguration related : allRelated) {
-        Filter filter = new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_NESTED_UUID, related.getUuid()));
-        solrManager.deleteRowsByQuery(databaseUUID, filter);
-      }
-    } catch (ViewerException e) {
-      throw new BatchJobException("Failed to delete nested rows from Solr for denormalization: " + config.getId(), e);
-    }
-  }
-
-  private void collectAllRelatedTables(List<RelatedTablesConfiguration> relatedTables,
-    List<RelatedTablesConfiguration> collector) {
-    if (relatedTables == null)
-      return;
-    for (RelatedTablesConfiguration rt : relatedTables) {
-      collector.add(rt);
-      collectAllRelatedTables(rt.getRelatedTables(), collector);
-    }
+    // No operation required here. Delegated to DenormalizationCleanupStep.
   }
 }

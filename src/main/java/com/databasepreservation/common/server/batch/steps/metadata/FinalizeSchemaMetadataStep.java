@@ -1,4 +1,6 @@
-package com.databasepreservation.common.server.batch.steps.virtual;
+package com.databasepreservation.common.server.batch.steps.metadata;
+
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +12,11 @@ import org.springframework.stereotype.Component;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
+import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerSourceType;
@@ -21,33 +26,65 @@ import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.TaskletStepDefinition;
 import com.databasepreservation.common.server.batch.policy.ErrorPolicy;
 import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
+import com.databasepreservation.common.server.batch.steps.denormalization.DenormalizationStepUtils;
 
 /**
+ * The central and atomic synchronization point for all schema metadata
+ * alterations.
+ * <p>
+ * <b>Architectural Note:</b> To prevent "Split-Brain" inconsistencies between
+ * the Solr index and the physical JSON configuration files, this step acts as
+ * the <b>Single Source of Truth</b> for finalizing the database schema. It
+ * computes all pending schema mutations (such as new Virtual Tables, Virtual
+ * Columns, and Nested Denormalization columns) in memory, and persists them
+ * atomically in a single transaction.
+ * </p>
+ *
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Component
-public class FinalizeVirtualEntitiesMetadataStep implements TaskletStepDefinition {
-  private static final Logger LOGGER = LoggerFactory.getLogger(FinalizeVirtualEntitiesMetadataStep.class);
-  private final VirtualEntityMetadataService metadataService;
+public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
+  private static final Logger LOGGER = LoggerFactory.getLogger(FinalizeSchemaMetadataStep.class);
+  private final SchemaMetadataService metadataService;
 
-  public FinalizeVirtualEntitiesMetadataStep(VirtualEntityMetadataService metadataService) {
+  public FinalizeSchemaMetadataStep(SchemaMetadataService metadataService) {
     this.metadataService = metadataService;
   }
 
   @Override
   public String getDisplayName() {
-    return "Finalize Metadata Synchronization";
+    return "Finalize Schema Metadata Synchronization";
   }
 
+  /**
+   * Evaluates whether this metadata synchronization step needs to run.
+   * <p>
+   * It will trigger if the job processed ANY virtual entities OR if any
+   * denormalization configurations successfully reached the
+   * {@link ViewerJobStatus#COMPLETED} state.
+   * </p>
+   */
   @Override
   public ExecutionPolicy getExecutionPolicy() {
     return context -> {
-      if (context.getCollectionStatus().getTables() == null) {
-        return false;
+      boolean hasVirtuals = false;
+      if (context.getCollectionStatus().getTables() != null) {
+        hasVirtuals = context.getCollectionStatus().getTables().stream()
+          .anyMatch(table -> (table.getVirtualTableStatus() != null && table.getVirtualTableStatus().shouldProcess())
+            || (table.getColumns() != null && table.getColumns().stream().anyMatch(
+              c -> c.isVirtual() && c.getVirtualColumnStatus() != null && c.getVirtualColumnStatus().shouldProcess()))
+            || (table.getForeignKeys() != null && table.getForeignKeys().stream().anyMatch(fk -> fk.isVirtual()
+              && fk.getVirtualForeignKeysStatus() != null && fk.getVirtualForeignKeysStatus().shouldProcess())));
       }
-      return context.getCollectionStatus().getTables().stream().anyMatch(table -> table.getVirtualTableStatus() != null
-        || (table.getColumns() != null && table.getColumns().stream().anyMatch(ColumnStatus::isVirtual))
-        || (table.getForeignKeys() != null && table.getForeignKeys().stream().anyMatch(ForeignKeysStatus::isVirtual)));
+
+      boolean hasDenormalizations = false;
+      Set<String> denormEntries = context.getCollectionStatus().getDenormalizations();
+      if (denormEntries != null && !denormEntries.isEmpty()) {
+        hasDenormalizations = denormEntries.stream().map(context::getDenormalizeConfig)
+          .anyMatch(config -> config != null && config.shouldProcess());
+      }
+
+      return hasVirtuals || hasDenormalizations;
     };
   }
 
@@ -60,17 +97,16 @@ public class FinalizeVirtualEntitiesMetadataStep implements TaskletStepDefinitio
   public Tasklet createTasklet(JobContext context, ExecutionContext executionContext) {
     return (contribution, chunkContext) -> {
 
+      // The metadataService provides an atomic wrapper for Solr and Disk updates
       metadataService.updateAndPersistMetadata(context, metadata -> {
-        if (context.getCollectionStatus().getTables() != null) {
-          context.getCollectionStatus().getTables().forEach(table -> {
-            processVirtualTablesMetadata(table, metadata);
-            processVirtualColumnsMetadata(table, metadata);
-            processVirtualReferencesMetadata(table, metadata);
-          });
-        }
 
-        // Clean up memory state after everything is applied to Solr Metadata
-        context.getCollectionStatus().removeMarkedVirtualTables();
+        // 1. Process Virtual Entities Metadata (Tables, Columns, References)
+        processVirtualEntities(context, metadata);
+
+        // 2. Process Completed Denormalizations Metadata
+        processDenormalization(context, metadata);
+
+        // 3. Mark the overall collection status as fully processed
         context.getCollectionStatus().setNeedsToBeProcessed(false);
       });
 
@@ -80,7 +116,42 @@ public class FinalizeVirtualEntitiesMetadataStep implements TaskletStepDefinitio
 
   @Override
   public void onStepCompleted(JobContext context, BatchStatus status) {
-    // Intentionally empty.
+    // Intentionally left empty.
+  }
+
+  private void processVirtualEntities(JobContext context, ViewerMetadata metadata) {
+    if (context.getCollectionStatus().getTables() != null) {
+      context.getCollectionStatus().getTables().forEach(table -> {
+        processVirtualTablesMetadata(table, metadata);
+        processVirtualColumnsMetadata(table, metadata);
+        processVirtualReferencesMetadata(table, metadata);
+      });
+    }
+
+    // Clean up memory state for virtual tables after processing
+    context.getCollectionStatus().removeMarkedVirtualTables();
+  }
+
+  private static void processDenormalization(JobContext context, ViewerMetadata metadata) {
+    Set<String> entries = context.getCollectionStatus().getDenormalizations();
+    if (entries != null) {
+      // DenormalizationStepUtils requires a ViewerDatabase object to read the schema.
+      // Since the service exposes only the ViewerMetadata, we wrap it in a temporary
+      // object.
+      ViewerDatabase tempDatabaseWrapper = new ViewerDatabase();
+      tempDatabaseWrapper.setMetadata(metadata);
+
+      for (String entryID : entries) {
+        DenormalizeConfiguration config = context.getDenormalizeConfig(entryID);
+
+        if (config != null && config.getState() == ViewerJobStatus.COMPLETED) {
+          LOGGER.info("Injecting denormalized nested columns into the schema for: {}", entryID);
+          // Inject the nested columns dynamically into the CollectionStatus memory tree
+          DenormalizationStepUtils.updateCollectionStatusInMemory(context.getCollectionStatus(), config,
+            tempDatabaseWrapper);
+        }
+      }
+    }
   }
 
   private void processVirtualTablesMetadata(TableStatus tableStatus, ViewerMetadata metadata) {
