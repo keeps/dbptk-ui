@@ -63,9 +63,7 @@ public class TransformationChildTables {
    *
    */
   private void preset() {
-    List<ViewerColumn> childTableColumns = DataTransformationUtils
-      .getViewerColumnsWithVirtualColumns(childTable.getColumns(), childTableStatus);
-    for (ViewerColumn columns : childTableColumns) {
+    for (ViewerColumn columns : childTable.getColumns()) {
       isLoading.put(columns.getColumnIndexInEnclosingTable(), true);
     }
   }
@@ -74,10 +72,7 @@ public class TransformationChildTables {
     MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel = new MultipleSelectionTablePanel<>();
     Label header = new Label("");
 
-    List<ViewerColumn> childTableColumns = DataTransformationUtils
-      .getViewerColumnsWithVirtualColumns(childTable.getColumns(), childTableStatus);
-
-    selectionTablePanel.createTable(header, new ArrayList<>(), childTableColumns.iterator(),
+    selectionTablePanel.createTable(header, new ArrayList<>(), childTable.getColumns().iterator(),
       createCheckbox(selectionTablePanel),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.columnName(), 7, new TextColumn<ViewerColumn>() {
         @Override

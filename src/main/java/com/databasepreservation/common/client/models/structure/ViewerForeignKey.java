@@ -18,6 +18,7 @@ public class ViewerForeignKey implements Serializable {
   @Serial
   private static final long serialVersionUID = -3818870877712686996L;
   private String name;
+  private ViewerSourceType sourceType;
   private String referencedTableUUID;
   private String referencedTableId;
   private List<ViewerReference> references;
@@ -59,6 +60,14 @@ public class ViewerForeignKey implements Serializable {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public ViewerSourceType getSourceType() {
+    return sourceType;
+  }
+
+  public void setSourceType(ViewerSourceType sourceType) {
+    this.sourceType = sourceType;
   }
 
   public String getReferencedTableUUID() {

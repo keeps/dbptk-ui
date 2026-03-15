@@ -22,6 +22,7 @@ import com.databasepreservation.common.client.models.status.collection.TemplateS
 import com.databasepreservation.common.client.models.status.collection.VirtualTableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -361,6 +362,7 @@ public class VirtualTableOptionsPanel extends ColumnOptionsPanel implements Vali
   public ViewerTable getSimpleViewerTable(String uuid) {
     ViewerTable viewerTable = new ViewerTable();
     viewerTable.setUuid(uuid);
+    viewerTable.setSourceType(ViewerSourceType.VIRTUAL);
     if (originalStatus != null && ViewerStringUtils.isNotBlank(originalStatus.getId())) {
       viewerTable.setId(originalStatus.getId());
     } else {

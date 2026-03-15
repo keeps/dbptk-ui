@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -463,6 +464,7 @@ public class ToolkitStructure2ViewerStructure {
     ViewerTable result = new ViewerTable();
     result.setId(table.getId());
     result.setUuid(references.getTableUUID(table.getId()));
+    result.setSourceType(ViewerSourceType.NATIVE);
     result.setName(table.getName());
     result.setDescription(table.getDescription());
     result.setFolder(table.getFolder());
@@ -551,6 +553,7 @@ public class ToolkitStructure2ViewerStructure {
     ViewerForeignKey result = new ViewerForeignKey();
 
     result.setName(foreignKey.getName());
+    result.setSourceType(ViewerSourceType.NATIVE);
     result.setDescription(foreignKey.getDescription());
     result.setDeleteAction(foreignKey.getDeleteAction());
     result.setUpdateAction(foreignKey.getUpdateAction());
@@ -636,6 +639,7 @@ public class ToolkitStructure2ViewerStructure {
 
     ViewerType columnViewerType = getType(columnType);
     result.setType(columnViewerType);
+    result.setSourceType(ViewerSourceType.NATIVE);
     if (!simpleMetadata) {
       result.setSolrName(getColumnSolrName(index, columnType, columnViewerType, isPrimaryKey, isForeignKey));
       result.setColumnIndexInEnclosingTable(index);
