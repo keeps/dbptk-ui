@@ -77,6 +77,7 @@ import com.databasepreservation.common.client.models.activity.logs.LogEntryState
 import com.databasepreservation.common.client.models.progress.ProgressData;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
+import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
@@ -385,6 +386,25 @@ public class CollectionResource implements CollectionService {
 
       configuration.setLastUpdatedDate(new Date());
 
+      if (configuration.getRelatedTables() == null || configuration.getRelatedTables().isEmpty()) {
+
+        DenormalizeConfiguration oldConfig = ViewerFactory.getConfigurationManager()
+          .getDenormalizeConfiguration(databaseUUID, tableUUID);
+
+        if (oldConfig != null && oldConfig.getRelatedTables() != null && !oldConfig.getRelatedTables().isEmpty()) {
+          oldConfig.setProcessingState(ProcessingState.TO_REMOVE);
+          oldConfig.setLastUpdatedDate(new Date());
+          configuration = oldConfig;
+        } else {
+          configuration.setProcessingState(ProcessingState.TO_REMOVE);
+        }
+
+      } else {
+        if (configuration.getProcessingState() == ProcessingState.TO_REMOVE) {
+          configuration.setProcessingState(null);
+        }
+      }
+
       ViewerFactory.getConfigurationManager().updateDenormalizationConfigurationFile(databaseUUID, configuration);
       ViewerFactory.getConfigurationManager().addDenormalization(databaseUUID,
         ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
@@ -417,7 +437,27 @@ public class CollectionResource implements CollectionService {
 
         if (configuration != null) {
           ParameterSanitization.sanitizePath(tableUUID, "Invalid tableUUID");
+
           configuration.setLastUpdatedDate(new Date());
+
+          if (configuration.getRelatedTables() == null || configuration.getRelatedTables().isEmpty()) {
+
+            DenormalizeConfiguration oldConfig = ViewerFactory.getConfigurationManager()
+              .getDenormalizeConfiguration(databaseUUID, tableUUID);
+
+            if (oldConfig != null && oldConfig.getRelatedTables() != null && !oldConfig.getRelatedTables().isEmpty()) {
+              oldConfig.setProcessingState(ProcessingState.TO_REMOVE);
+              oldConfig.setLastUpdatedDate(new Date());
+              configuration = oldConfig;
+            } else {
+              configuration.setProcessingState(ProcessingState.TO_REMOVE);
+            }
+
+          } else {
+            if (configuration.getProcessingState() == ProcessingState.TO_REMOVE) {
+              configuration.setProcessingState(null);
+            }
+          }
 
           ViewerFactory.getConfigurationManager().updateDenormalizationConfigurationFile(databaseUUID, configuration);
           ViewerFactory.getConfigurationManager().addDenormalization(databaseUUID,
@@ -444,15 +484,14 @@ public class CollectionResource implements CollectionService {
     try {
       user = controllerAssistant.checkRoles(request);
       ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
-      ViewerFactory.getConfigurationManager().removeDenormalization(databaseUUID,
-        ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
-      Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
-        .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
-      ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), path);
-      if (Files.exists(path)) {
-        Files.delete(path);
+
+      DenormalizeConfiguration config = ViewerFactory.getConfigurationManager().getDenormalizeConfiguration(databaseUUID, tableUUID);
+      if (config != null) {
+        config.setProcessingState(ProcessingState.TO_REMOVE);
+        ViewerFactory.getConfigurationManager().updateDenormalizationConfigurationFile(databaseUUID, config);
       }
-    } catch (GenericException | IOException | AuthorizationException | IllegalArgumentException e) {
+
+    } catch (GenericException | AuthorizationException | IllegalArgumentException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

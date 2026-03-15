@@ -2,7 +2,6 @@ package com.databasepreservation.common.server.batch.steps.denormalization;
 
 import java.util.Set;
 
-import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
 
@@ -18,14 +17,7 @@ public class DenormalizationStepExecutionPolicy implements ExecutionPolicy {
       return false;
     }
 
-    for (String entryID : entries) {
-      DenormalizeConfiguration config = context.getDenormalizeConfig(entryID);
-
-      if (config != null && config.shouldProcess()) {
-        return true;
-      }
-    }
-
-    return false;
+    return entries.stream().map(context::getDenormalizeConfig)
+      .anyMatch(config -> config != null && config.shouldProcess() && !config.isMarkedForRemoval());
   }
 }
