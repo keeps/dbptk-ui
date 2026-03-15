@@ -1,4 +1,4 @@
-package com.databasepreservation.common.server.batch.steps.virtual;
+package com.databasepreservation.common.server.batch.steps.metadata;
 
 import java.util.function.Consumer;
 
@@ -17,11 +17,11 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Service
-public class VirtualEntityMetadataService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(VirtualEntityMetadataService.class);
+public class SchemaMetadataService {
+  private static final Logger LOGGER = LoggerFactory.getLogger(SchemaMetadataService.class);
   private final DatabaseRowsSolrManager solrManager;
 
-  public VirtualEntityMetadataService(DatabaseRowsSolrManager solrManager) {
+  public SchemaMetadataService(DatabaseRowsSolrManager solrManager) {
     this.solrManager = solrManager;
   }
 

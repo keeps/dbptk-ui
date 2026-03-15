@@ -43,7 +43,7 @@ public class DenormalizationStepPartitionStrategy implements PartitionStrategy {
       int partitionIndex = 0;
       for (String entryID : entries) {
         DenormalizeConfiguration config = context.getDenormalizeConfig(entryID);
-        if (config != null && config.shouldProcess()) {
+        if (config != null && config.shouldProcess() && !config.isMarkedForRemoval()) {
           List<String> fieldsToReturn = new ArrayList<>();
           fieldsToReturn.add(ViewerConstants.INDEX_ID);
 
