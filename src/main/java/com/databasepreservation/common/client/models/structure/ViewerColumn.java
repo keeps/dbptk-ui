@@ -18,6 +18,8 @@ public class ViewerColumn implements Serializable {
   private static final long serialVersionUID = 2946612686250666077L;
   private String solrName;
 
+  private ViewerSourceType sourceType;
+
   private String displayName;
 
   private ViewerType type;
@@ -41,6 +43,14 @@ public class ViewerColumn implements Serializable {
 
   public void setSolrName(String solrName) {
     this.solrName = solrName;
+  }
+
+  public ViewerSourceType getSourceType() {
+    return sourceType;
+  }
+
+  public void setSourceType(ViewerSourceType sourceType) {
+    this.sourceType = sourceType;
   }
 
   public String getDisplayName() {

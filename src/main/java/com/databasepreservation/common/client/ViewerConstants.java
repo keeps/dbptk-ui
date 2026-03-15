@@ -328,6 +328,7 @@ public class ViewerConstants {
   public static final String SOLR_BATCH_JOB_SKIP_COUNT = "skipCount";
   public static final String SOLR_BATCH_JOB_CURRENT_STEP_NUMBER = "currentStepNumber";
   public static final String SOLR_BATCH_JOB_TOTAL_STEPS = "totalSteps";
+  public static final String SOLR_BATCH_JOB_STEP_NAMES = "stepNames_ss";
 
   public static final String ACTIVITY_LOG_PROPERTY = "activityLogEntry";
 

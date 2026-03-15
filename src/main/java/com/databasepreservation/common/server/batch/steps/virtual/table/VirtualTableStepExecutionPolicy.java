@@ -1,9 +1,9 @@
 package com.databasepreservation.common.server.batch.steps.virtual.table;
 
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
-import com.databasepreservation.common.server.batch.steps.virtual.VirtualEntityStepUtils;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -18,6 +18,6 @@ public class VirtualTableStepExecutionPolicy implements ExecutionPolicy {
       return false;
     }
 
-    return status.getTables().stream().anyMatch(VirtualEntityStepUtils::hasVirtualTableToProcess);
+    return status.getTables().stream().anyMatch(TableStatus::hasVirtualTableToProcess);
   }
 }

@@ -26,11 +26,11 @@ public class PartitionStatusListener implements StepExecutionListener {
 
   @Override
   public void beforeStep(StepExecution partitionExecution) {
-    LOGGER.debug("[Worker] Starting partition for step: {}", partitionExecution.getStepName());
+    LOGGER.debug("[PARTITION] STARTED: {}", partitionExecution.getStepName());
     try {
       definition.onPartitionStarted(context, partitionExecution.getExecutionContext());
     } catch (Exception e) {
-      LOGGER.error("[Worker] Error during onPartitionStarted for step {}", partitionExecution.getStepName(), e);
+      LOGGER.error("[PARTITION] ERROR during onPartitionStarted for step {}", partitionExecution.getStepName(), e);
       throw new RuntimeException("Failed to start partition", e);
     }
   }
@@ -42,11 +42,11 @@ public class PartitionStatusListener implements StepExecutionListener {
         partitionExecution.getStatus());
 
       if (partitionExecution.getStatus() == BatchStatus.COMPLETED) {
-        LOGGER.info("[Worker] Partition for {} completed successfully", partitionExecution.getStepName());
+        LOGGER.debug("[PARTITION] COMPLETED successfully: {}", partitionExecution.getStepName());
       }
 
     } catch (Exception e) {
-      LOGGER.error("[Worker] Error during onPartitionCompleted for step {}", partitionExecution.getStepName(), e);
+      LOGGER.error("[PARTITION] FAILED during onPartitionCompleted for step {}", partitionExecution.getStepName(), e);
       partitionExecution.setStatus(BatchStatus.FAILED);
       partitionExecution.addFailureException(e);
       return ExitStatus.FAILED;

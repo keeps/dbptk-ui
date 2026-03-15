@@ -26,6 +26,8 @@ public class ViewerTable implements Serializable {
 
   private String id;
 
+  private ViewerSourceType sourceType;
+
   private String name;
 
   private String description;
@@ -68,6 +70,14 @@ public class ViewerTable implements Serializable {
 
   public void setUuid(String uuid) {
     this.uuid = uuid;
+  }
+
+  public ViewerSourceType getSourceType() {
+    return sourceType;
+  }
+
+  public void setSourceType(ViewerSourceType sourceType) {
+    this.sourceType = sourceType;
   }
 
   public String getName() {

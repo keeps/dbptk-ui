@@ -19,6 +19,7 @@ import com.databasepreservation.common.client.models.status.collection.SearchSta
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
 import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
@@ -89,22 +90,25 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
     });
   }
 
-  private void populateVirtualColumnFields(ColumnStatus columnStatus) {
-    if (!ViewerStringUtils.isBlank(columnStatus.getName())) {
-      virtualColumnName.setText(columnStatus.getName());
-    }
-
-    if (columnStatus.getDescription() != null) {
-      virtualColumnDescription.setText(columnStatus.getDescription());
-    }
-
-    if (columnStatus.getVirtualColumnStatus() != null) {
-      VirtualColumnStatus virtualColumnStatus = columnStatus.getVirtualColumnStatus();
-      if (virtualColumnStatus.getSourceColumnsIds() != null) {
-        sourceColumnsIds = virtualColumnStatus.getSourceColumnsIds();
+  private void populateVirtualColumnFields(ColumnStatus originalStatus) {
+    if (originalStatus != null) {
+      if (!ViewerStringUtils.isBlank(originalStatus.getName())) {
+        virtualColumnName.setText(originalStatus.getName());
+        virtualColumnName.setReadOnly(true);
       }
-      if (virtualColumnStatus.getTemplateStatus() != null) {
-        templateSourceColumns.setText(virtualColumnStatus.getTemplateStatus().getTemplate());
+
+      if (originalStatus.getDescription() != null) {
+        virtualColumnDescription.setText(originalStatus.getDescription());
+      }
+
+      if (originalStatus.getVirtualColumnStatus() != null) {
+        VirtualColumnStatus virtualColumnStatus = originalStatus.getVirtualColumnStatus();
+        if (virtualColumnStatus.getSourceColumnsIds() != null) {
+          sourceColumnsIds = virtualColumnStatus.getSourceColumnsIds();
+        }
+        if (virtualColumnStatus.getTemplateStatus() != null) {
+          templateSourceColumns.setText(virtualColumnStatus.getTemplateStatus().getTemplate());
+        }
       }
     }
   }
@@ -127,6 +131,20 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
       isValid = false;
     } else if (!nameValue.matches("^[a-zA-Z0-9_]+$")) {
       showError(virtualColumnName, errorVirtualColumnName, "Only letters, numbers and underscores are allowed.");
+      isValid = false;
+    }
+
+    boolean isDuplicate = false;
+    for (ColumnStatus column : tableStatus.getColumns()) {
+      if (column.getName().equals(nameValue)
+        && (originalStatus == null || !column.getId().equals(originalStatus.getId()))) {
+        isDuplicate = true;
+        break;
+      }
+    }
+
+    if (isDuplicate) {
+      showError(virtualColumnName, errorVirtualColumnName, "A column with this name already exists.");
       isValid = false;
     }
 
@@ -162,6 +180,7 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
     }
 
     statusToReturn.setType(ViewerType.dbTypes.VIRTUAL);
+    statusToReturn.setSourceType(ViewerSourceType.VIRTUAL);
     statusToReturn.setName(virtualColumnName.getText());
     statusToReturn.setCustomName(virtualColumnName.getText());
     statusToReturn.setDescription(virtualColumnDescription.getText());

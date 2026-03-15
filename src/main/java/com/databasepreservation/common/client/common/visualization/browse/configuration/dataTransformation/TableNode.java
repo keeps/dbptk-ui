@@ -20,8 +20,8 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.models.structure.ViewerType;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -65,7 +65,8 @@ public class TableNode {
 
     // Virtual
     for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(table.getUuid())) {
-      if (foreignKeysStatus.getType() != null && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+      if (foreignKeysStatus.getSourceType() != null
+        && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
         ViewerForeignKey foreignKey = DataTransformationUtils.convertToViewerForeignKey(foreignKeysStatus,
           collectionStatus, table.getUuid());
         ViewerTable viewerTable = metadata.getTable(foreignKey.getReferencedTableUUID());
@@ -94,7 +95,8 @@ public class TableNode {
 
         // for virtual
         for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(viewerTable.getUuid())) {
-          if (foreignKeysStatus.getType() != null && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+          if (foreignKeysStatus.getSourceType() != null
+            && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
             ViewerForeignKey foreignKey = DataTransformationUtils.convertToViewerForeignKey(foreignKeysStatus,
               collectionStatus, viewerTable.getUuid());
             if (foreignKey.getReferencedTableUUID().equals(table.getUuid()) && this.searchTop(viewerTable) == null) {

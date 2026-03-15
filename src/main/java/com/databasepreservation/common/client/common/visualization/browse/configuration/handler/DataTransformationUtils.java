@@ -56,18 +56,13 @@ public class DataTransformationUtils {
     relatedTable.setReferencedTableUUID(referencedTable.getUuid());
     relatedTable.setReferencedTableID(referencedTable.getId());
 
-    List<ViewerColumn> allSourceColumns = getViewerColumnsWithVirtualColumns(sourceTable.getColumns(),
-      collectionStatus.getTableStatusByTableId(sourceTable.getId()));
-    List<ViewerColumn> allReferencedColumns = getViewerColumnsWithVirtualColumns(referencedTable.getColumns(),
-      collectionStatus.getTableStatusByTableId(referencedTable.getId()));
-
     for (ViewerReference reference : foreignKey.getReferences()) {
       if (foreignKey.getReferencedTableUUID().equals(referencedTable.getUuid())) {
-        sourceColumn = getColumnByIndex(allSourceColumns, reference.getSourceColumnIndex());
-        referencedColumn = getColumnByIndex(allReferencedColumns, reference.getReferencedColumnIndex());
+        sourceColumn = getColumnByIndex(sourceTable.getColumns(), reference.getSourceColumnIndex());
+        referencedColumn = getColumnByIndex(referencedTable.getColumns(), reference.getReferencedColumnIndex());
       } else {
-        sourceColumn = getColumnByIndex(allSourceColumns, reference.getReferencedColumnIndex());
-        referencedColumn = getColumnByIndex(allReferencedColumns, reference.getSourceColumnIndex());
+        sourceColumn = getColumnByIndex(sourceTable.getColumns(), reference.getReferencedColumnIndex());
+        referencedColumn = getColumnByIndex(referencedTable.getColumns(), reference.getSourceColumnIndex());
       }
       relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
     }
@@ -190,38 +185,6 @@ public class DataTransformationUtils {
   }
 
   // Virtual
-
-  @NotNull
-  public static List<ViewerColumn> getViewerColumnsWithVirtualColumns(List<ViewerColumn> originalColumns,
-    TableStatus tableStatus) {
-    List<ViewerColumn> allViewerColumns = new ArrayList<>(originalColumns);
-    List<ColumnStatus> virtualColumnStatus = tableStatus.getColumns().stream()
-      .filter(column -> column.getType().equals(ViewerType.dbTypes.VIRTUAL)).collect(Collectors.toList());
-
-    ArrayList<ViewerColumn> virtualViewerColumns = virtualColumnStatus.stream()
-      .map(DataTransformationUtils::convertToViewerColumn).collect(Collectors.toCollection(ArrayList::new));
-
-    allViewerColumns.addAll(virtualViewerColumns);
-    return allViewerColumns;
-  }
-
-  public static ViewerColumn convertToViewerColumn(ColumnStatus columnStatus) {
-    ViewerColumn viewerColumn = new ViewerColumn();
-
-    viewerColumn.setSolrName(columnStatus.getId());
-    viewerColumn.setDisplayName(columnStatus.getCustomName());
-    ViewerType viewerType = new ViewerType();
-    viewerType.setDbType(columnStatus.getType());
-    viewerType.setTypeName(columnStatus.getType().name());
-    viewerColumn.setType(viewerType);
-    viewerColumn.setDescription(columnStatus.getDescription());
-
-    viewerColumn.setColumnIndexInEnclosingTable(columnStatus.getColumnIndex());
-    viewerColumn.setNillable(true);
-
-    return viewerColumn;
-  }
-
   public static ViewerColumn getColumnBySolrName(List<ViewerColumn> columns, String solrName) {
     for (ViewerColumn column : columns) {
       if (column.getSolrName().equals(solrName))

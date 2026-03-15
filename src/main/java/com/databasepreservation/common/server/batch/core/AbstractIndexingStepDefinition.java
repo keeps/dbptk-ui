@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
+import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
+import com.databasepreservation.common.server.batch.steps.virtual.VirtualEntityMetadataService;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -31,6 +34,9 @@ public abstract class AbstractIndexingStepDefinition<I extends IsIndexed & Seria
 
   @Autowired
   protected DatabaseRowsSolrManager solrManager;
+
+  @Autowired
+  protected VirtualEntityMetadataService metadataService;
 
   private final Class<I> incomingClass;
 
@@ -64,5 +70,10 @@ public abstract class AbstractIndexingStepDefinition<I extends IsIndexed & Seria
     policy.getRetryableExceptions().add(SolrServerException.class);
     policy.getRetryableExceptions().add(IOException.class);
     return policy;
+  }
+
+  @Override
+  public void onStepCompleted(JobContext context, BatchStatus status) throws BatchJobException {
+    // Default implementation does nothing, can be overridden by subclasses if needed
   }
 }

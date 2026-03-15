@@ -52,6 +52,7 @@ import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.services.CollectionService;
@@ -198,7 +199,7 @@ public class RowPanel extends RightPanel {
 
     // get virtual foreign keys where this column is source in foreign keys
     for (ForeignKeysStatus fkStatus : status.getForeignKeysByTableUUID(table.getUuid())) {
-      if (fkStatus.getType() != null && fkStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+      if (fkStatus.getSourceType() != null && fkStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
         ViewerForeignKey fk = DataTransformationUtils.convertToViewerForeignKey(fkStatus, status, table.getUuid());
 
         Ref ref = new Ref(table, metadata.getTable(fk.getReferencedTableUUID()), fk, status);
@@ -229,7 +230,7 @@ public class RowPanel extends RightPanel {
 
         // for virtual
         for (ForeignKeysStatus fkStatus : status.getForeignKeysByTableUUID(viewerTable.getUuid())) {
-          if (fkStatus.getType() != null && fkStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+          if (fkStatus.getSourceType() != null && fkStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
             ViewerForeignKey fk = DataTransformationUtils.convertToViewerForeignKey(fkStatus, status,
               viewerTable.getUuid());
 
@@ -265,13 +266,7 @@ public class RowPanel extends RightPanel {
     for (ColumnStatus columnStatus : status.getTableStatus(table.getUuid()).getColumns()) {
       if (columnStatus.getDetailsStatus().isShow()) {
         if (columnStatus.getNestedColumns() == null) {
-          ViewerColumn column;
-          if (columnStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
-            column = DataTransformationUtils.convertToViewerColumn(columnStatus);
-          } else {
-            column = table.getColumnBySolrName(columnStatus.getId());
-          }
-
+          ViewerColumn column = table.getColumnBySolrName(columnStatus.getId());
           boolean isPrimaryKeyColumn = table.getPrimaryKey() != null
             && table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable());
           getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
@@ -593,12 +588,6 @@ public class RowPanel extends RightPanel {
       foreignSolrColumnToRowSolrColumn = new TreeMap<>();
 
       if (otherTable != null) {
-        List<ViewerColumn> allCurrentTableColumns = DataTransformationUtils.getViewerColumnsWithVirtualColumns(
-          currentTable.getColumns(), status.getTableStatusByTableId(currentTable.getId()));
-
-        List<ViewerColumn> allOtherTableColumns = DataTransformationUtils.getViewerColumnsWithVirtualColumns(
-          otherTable.getColumns(), status.getTableStatusByTableId(otherTable.getId()));
-
         // tableUUID to use in URL is always otherTable.getUUID()
         if (foreignKey.getReferencedTableUUID().equals(otherTable.getUuid())) {
           // related to
@@ -608,10 +597,11 @@ public class RowPanel extends RightPanel {
           // names)
           // get column indexes from fk source
           for (ViewerReference viewerReference : foreignKey.getReferences()) {
-            String solrColumnName = getSolrNameByColumnIndex(allOtherTableColumns,
+            String solrColumnName = getSolrNameByColumnIndex(otherTable.getColumns(),
               viewerReference.getReferencedColumnIndex());
             Integer columnIndexToGetValue = viewerReference.getSourceColumnIndex();
-            String solrColumnNameToGetValue = getSolrNameByColumnIndex(allCurrentTableColumns, columnIndexToGetValue);
+            String solrColumnNameToGetValue = getSolrNameByColumnIndex(currentTable.getColumns(),
+              columnIndexToGetValue);
             foreignSolrColumnToRowSolrColumn.put(solrColumnName, solrColumnNameToGetValue);
           }
         } else {
@@ -621,10 +611,11 @@ public class RowPanel extends RightPanel {
           // get column names from source (use otherTable to map indexes to names)
           // get column indexes from fk target
           for (ViewerReference viewerReference : foreignKey.getReferences()) {
-            String solrColumnName = getSolrNameByColumnIndex(allOtherTableColumns,
+            String solrColumnName = getSolrNameByColumnIndex(otherTable.getColumns(),
               viewerReference.getReferencedColumnIndex());
             Integer columnIndexToGetValue = viewerReference.getReferencedColumnIndex();
-            String solrColumnNameToGetValue = getSolrNameByColumnIndex(allCurrentTableColumns, columnIndexToGetValue);
+            String solrColumnNameToGetValue = getSolrNameByColumnIndex(currentTable.getColumns(),
+              columnIndexToGetValue);
             foreignSolrColumnToRowSolrColumn.put(solrColumnName, solrColumnNameToGetValue);
           }
         }

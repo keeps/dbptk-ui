@@ -1,5 +1,6 @@
 package com.databasepreservation.common.server.batch.core;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +17,8 @@ import org.springframework.batch.core.job.builder.SimpleJobBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.stereotype.Component;
@@ -46,8 +49,9 @@ public class JobOrchestrator {
   private final ContextResolver contextResolver;
   private final JobContextRegistry contextRegistry;
 
-  public JobOrchestrator(JobRepository jobRepository, JobExplorer jobExplorer, StepFactory stepFactory, ContextResolver contextResolver,
-    JobContextRegistry contextRegistry, @Qualifier(BatchConstants.JOB_LAUNCHER_BEAN_NAME) JobLauncher jobLauncher) {
+  public JobOrchestrator(JobRepository jobRepository, JobExplorer jobExplorer, StepFactory stepFactory,
+    ContextResolver contextResolver, JobContextRegistry contextRegistry,
+    @Qualifier(BatchConstants.JOB_LAUNCHER_BEAN_NAME) JobLauncher jobLauncher) {
     this.jobRepository = jobRepository;
     this.jobExplorer = jobExplorer;
     this.stepFactory = stepFactory;
@@ -61,14 +65,16 @@ public class JobOrchestrator {
     try {
       String expectedJobName = jobDefinition.getName() + "-" + databaseUUID;
 
-      // Check if there is an active job for the same database by looking into the context registry
+      // Check if there is an active job for the same database by looking into the
+      // context registry
       if (contextRegistry.get(databaseUUID) != null) {
         throw new BatchJobException("A batch job is already actively modifying this database.");
       }
 
       Set<JobExecution> runningExecutions = jobExplorer.findRunningJobExecutions(expectedJobName);
       if (!runningExecutions.isEmpty()) {
-        throw new BatchJobException("A job of type '" + jobDefinition.getDisplayName() + "' is already running on this database.");
+        throw new BatchJobException(
+          "A job of type '" + jobDefinition.getDisplayName() + "' is already running on this database.");
       }
 
       String jobUUID = SolrUtils.randomUUID();
@@ -79,8 +85,7 @@ public class JobOrchestrator {
       jobBuilder.addString(BatchConstants.JOB_DISPLAY_NAME_KEY, jobDefinition.getDisplayName());
       JobParameters jobParameters = jobBuilder.toJobParameters();
 
-      JobController.addMinimalSolrBatchJob(jobParameters);
-
+      JobController.addMinimalSolrBatchJob(jobParameters, contextResolver.resolve(databaseUUID));
       Job job = buildJob(databaseUUID, jobDefinition);
 
       JobExecution jobExecution = jobLauncher.run(job, jobParameters);
@@ -113,16 +118,23 @@ public class JobOrchestrator {
     long totalWorkload = calculateTotalWorkload(jobDefinition.getSteps(), context);
     context.getJobProgressAggregator().setTotalItems(totalWorkload);
 
+    LOGGER.info("[ORCHESTRATOR] Building Job '{}' for database {}. Total Workload estimated: {}",
+      jobDefinition.getDisplayName(), databaseUUID, totalWorkload);
+
     // Start building the Job
     JobBuilder jobBuilder = new JobBuilder(jobDefinition.getName() + "-" + databaseUUID, jobRepository);
     jobBuilder.listener(new JobStatusListener(context, contextRegistry, jobRepository));
 
     SimpleJobBuilder flowBuilder = null;
+    List<String> includedStepNames = new ArrayList<>();
     int executableStepsCount = 0;
 
     // Add Steps that should be executed according to their policy
     for (StepDefinition definition : jobDefinition.getSteps()) {
       if (definition.getExecutionPolicy().shouldExecute(context)) {
+
+        LOGGER.info("[ORCHESTRATOR] [+] INCLUDED step: {}", definition.getDisplayName());
+        includedStepNames.add(definition.getDisplayName());
 
         Step step = stepFactory.build(definition, context);
         executableStepsCount++;
@@ -132,12 +144,18 @@ public class JobOrchestrator {
         } else {
           flowBuilder.next(step);
         }
+      } else {
+        LOGGER.info("[ORCHESTRATOR] [-] SKIPPED step: {} (ExecutionPolicy evaluated to false)",
+          definition.getDisplayName());
       }
     }
 
     // Set the dynamically calculated values back into the context
     context.setTotalSteps(executableStepsCount == 0 ? 1 : executableStepsCount);
+    context.setStepNames(includedStepNames);
     context.getJobProgressAggregator().setTotalItems(totalWorkload);
+
+    LOGGER.info("[ORCHESTRATOR] Job flow built with {} executable steps.", executableStepsCount);
 
     return (flowBuilder != null) ? flowBuilder.build() : jobBuilder.start(createNoOpStep()).build();
   }
@@ -161,8 +179,25 @@ public class JobOrchestrator {
     // No-op step in case there are no steps to execute. This ensures the Job can be
     // created even without Steps, avoiding configuration errors.
     return new StepBuilder("noOpStep", jobRepository)
-      .tasklet((contribution, chunkContext) -> org.springframework.batch.repeat.RepeatStatus.FINISHED,
-        new org.springframework.batch.support.transaction.ResourcelessTransactionManager())
-      .build();
+      .tasklet((contribution, chunkContext) -> RepeatStatus.FINISHED, new ResourcelessTransactionManager()).build();
+  }
+
+  public List<String> getJobPlan(String databaseUUID, JobDefinition jobDefinition) throws BatchJobException {
+    try {
+      JobContext context = contextResolver.resolve(databaseUUID);
+
+      List<String> plannedSteps = new ArrayList<>();
+
+      for (StepDefinition definition : jobDefinition.getSteps()) {
+        if (definition.getExecutionPolicy().shouldExecute(context)) {
+          plannedSteps.add(definition.getDisplayName());
+        }
+      }
+
+      return plannedSteps;
+    } catch (Exception e) {
+      LOGGER.error("Failed to generate job plan for database {}: {}", databaseUUID, e.getMessage(), e);
+      throw new BatchJobException("Failed to generate job plan", e);
+    }
   }
 }

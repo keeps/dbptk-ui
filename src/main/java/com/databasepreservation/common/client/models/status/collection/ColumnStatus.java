@@ -11,7 +11,9 @@ import java.io.Serializable;
 
 import com.databasepreservation.common.client.models.status.formatters.Formatter;
 import com.databasepreservation.common.client.models.status.formatters.NoFormatter;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -26,6 +28,7 @@ import jakarta.ws.rs.core.MediaType;
   "search", "details", "extractStatus", "virtualColumn"})
 public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String id;
+  private ViewerSourceType sourceType;
   private String name;
   private String customName;
   private String description;
@@ -59,6 +62,14 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public ViewerSourceType getSourceType() {
+    return sourceType;
+  }
+
+  public void setSourceType(ViewerSourceType sourceType) {
+    this.sourceType = sourceType;
   }
 
   public String getName() {
@@ -278,5 +289,15 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   @Override
   public int compareTo(ColumnStatus o) {
     return (this.getOrder() - o.getOrder());
+  }
+
+  @JsonIgnore
+  public boolean isVirtual() {
+    return ViewerSourceType.VIRTUAL.equals(this.sourceType);
+  }
+
+  @JsonIgnore
+  public boolean hasVirtualColumnToProcess() {
+    return this.isVirtual() && this.virtualColumnStatus != null && this.virtualColumnStatus.shouldProcess();
   }
 }

@@ -35,6 +35,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabaseVal
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.server.ViewerConfiguration;
@@ -117,7 +118,7 @@ public class StatusUtils {
       }
 
       status.setReferences(referencedColumnStatusList);
-      status.setType(null);
+      status.setSourceType(foreignKey.getSourceType());
       status.setVirtualForeignKeysStatus(new VirtualForeignKeysStatus());
       foreignKeysStatusList.add(status);
     }
@@ -182,6 +183,7 @@ public class StatusUtils {
     status.setId("col" + order + "v_s");
     status.setName("Virtual Column " + order);
     status.setType(ViewerType.dbTypes.VIRTUAL);
+    status.setSourceType(ViewerSourceType.VIRTUAL);
     status.setCustomName("Virtual Column " + order);
     status.setDescription("Virtual Column generated from relation");
     status.setCustomDescription("Virtual Column generated from relation");

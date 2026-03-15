@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -30,6 +31,7 @@ public class TableStatus implements Serializable {
 
   private String uuid;
   private String id;
+  private ViewerSourceType sourceType;
   private String schemaFolder;
   private String tableFolder;
   private String name;
@@ -60,6 +62,14 @@ public class TableStatus implements Serializable {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public ViewerSourceType getSourceType() {
+    return sourceType;
+  }
+
+  public void setSourceType(ViewerSourceType sourceType) {
+    this.sourceType = sourceType;
   }
 
   public String getSchemaFolder() {
@@ -240,5 +250,67 @@ public class TableStatus implements Serializable {
       }
     }
     return values;
+  }
+
+  @JsonIgnore
+  public boolean hasVirtualColumnsToProcess() {
+    if (this.columns == null)
+      return false;
+    return this.columns.stream().anyMatch(ColumnStatus::hasVirtualColumnToProcess);
+  }
+
+  @JsonIgnore
+  public boolean hasVirtualTableToProcess() {
+    return this.virtualTableStatus != null && this.virtualTableStatus.shouldProcess();
+  }
+
+  @JsonIgnore
+  public void updateProcessedVirtualColumnsState() {
+    if (this.columns == null)
+      return;
+
+    this.columns.stream().filter(ColumnStatus::isVirtual).filter(ColumnStatus::hasVirtualColumnToProcess)
+      .filter(c -> !c.getVirtualColumnStatus().isMarkedForRemoval())
+      .forEach(c -> c.getVirtualColumnStatus().markAsProcessed());
+
+    recalculateVirtualColumnIndexes();
+  }
+
+  @JsonIgnore
+  public void removeMarkedVirtualColumns() {
+    if (this.columns == null)
+      return;
+    this.columns.removeIf(
+      c -> c.isVirtual() && c.getVirtualColumnStatus() != null && c.getVirtualColumnStatus().isMarkedForRemoval());
+  }
+
+  @JsonIgnore
+  private void recalculateVirtualColumnIndexes() {
+    if (this.columns == null)
+      return;
+
+    int index = this.columns.stream().filter(c -> !c.isVirtual()).mapToInt(ColumnStatus::getColumnIndex).max()
+      .orElse(-1) + 1;
+
+    for (ColumnStatus column : this.columns) {
+      if (column.isVirtual()) {
+        column.setColumnIndex(index++);
+      }
+    }
+  }
+
+  @JsonIgnore
+  public void updateProcessedVirtualTableState() {
+    if (this.virtualTableStatus != null) {
+      this.virtualTableStatus.markAsProcessed();
+    }
+  }
+
+  @JsonIgnore
+  public boolean hasVirtualReferencesToProcess() {
+    if (this.foreignKeys == null)
+      return false;
+    return this.foreignKeys.stream().anyMatch(fk -> fk.isVirtual() && fk.getVirtualForeignKeysStatus() != null
+      && fk.getVirtualForeignKeysStatus().shouldProcess());
   }
 }

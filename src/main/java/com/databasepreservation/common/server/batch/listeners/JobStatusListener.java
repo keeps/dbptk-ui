@@ -41,9 +41,9 @@ public class JobStatusListener implements JobExecutionListener {
   public void beforeJob(JobExecution jobExecution) {
     try {
       JobController.editSolrBatchJob(jobExecution, jobContext);
-      LOGGER.info("Job STARTED for database: {}", jobContext.getDatabaseUUID());
+      LOGGER.info("[JOB] STARTED for database: {}", jobContext.getDatabaseUUID());
     } catch (GenericException | NotFoundException e) {
-      LOGGER.error("Cannot update job on SOLR for {}", jobContext.getDatabaseUUID(), e);
+      LOGGER.error("[JOB] ERROR: Cannot update job on SOLR for {}", jobContext.getDatabaseUUID(), e);
     }
   }
 
@@ -57,18 +57,18 @@ public class JobStatusListener implements JobExecutionListener {
       if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
         persistJobChanges(databaseUUID);
       } else {
-        LOGGER.error("Job FINISHED with status {} for database {}", jobExecution.getStatus(), databaseUUID);
+        LOGGER.error("[JOB] FAILED with status {} for database {}", jobExecution.getStatus(), databaseUUID);
       }
     } catch (GenericException | NotFoundException e) {
-      LOGGER.error("Cannot update job on SOLR for {}", databaseUUID, e);
+      LOGGER.error("[JOB] ERROR: Cannot update job on SOLR for {}", databaseUUID, e);
     } catch (BatchJobException e) {
-      LOGGER.error("Failed to persist job changes for {}", databaseUUID, e);
+      LOGGER.error("[JOB] CRITICAL: Failed to persist job changes for {}", databaseUUID, e);
       jobExecution.setStatus(BatchStatus.FAILED);
       jobExecution.addFailureException(e);
       jobRepository.update(jobExecution);
     } finally {
       registry.unregister(databaseUUID);
-      LOGGER.debug("JobContext unregistered for database: {}", databaseUUID);
+      LOGGER.debug("[JOB] Context unregistered for database: {}", databaseUUID);
     }
   }
 
@@ -87,7 +87,7 @@ public class JobStatusListener implements JobExecutionListener {
       }
 
       ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, jobContext.getCollectionStatus());
-      LOGGER.info("Job FINISHED and persisted successfully for {}", databaseUUID);
+      LOGGER.info("[JOB] FINISHED and persisted successfully for {}", databaseUUID);
     } catch (GenericException | ViewerException | IllegalAccessException e) {
       throw new BatchJobException("Failed to persist job changes for " + databaseUUID, e);
     }

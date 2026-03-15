@@ -146,6 +146,11 @@ public interface CollectionService extends DirectRestService {
   JobResponse run(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID);
 
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/plan", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Retrieves the pending execution plan for the data transformation job")
+  List<String> getPendingJobPlan(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID);
+
   /*******************************************************************************
    * Collection Resource - Text extraction Sub-resource
    *******************************************************************************/

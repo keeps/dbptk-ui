@@ -21,8 +21,8 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
@@ -289,7 +289,8 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
       if (collectionStatus != null) {
         for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(viewerTable.getUuid())) {
-          if (foreignKeysStatus.getType() != null && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+          if (foreignKeysStatus.getSourceType() != null
+            && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
             JsniEdge virtualEdge = new JsniEdge(viewerTable.getId(), foreignKeysStatus.getReferencedTableId(), true);
             jsniEdgeList.add(virtualEdge);
           }

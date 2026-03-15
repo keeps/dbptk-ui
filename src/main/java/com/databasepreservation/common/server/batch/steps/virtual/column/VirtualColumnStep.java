@@ -39,7 +39,7 @@ public class VirtualColumnStep extends AbstractIndexingStepDefinition<ViewerRow,
 
   @Override
   public PartitionStrategy getPartitionStrategy() {
-    return new TablePartitionStrategy(solrManager, VirtualEntityStepUtils::hasVirtualColumnsToProcess,
+    return new TablePartitionStrategy(solrManager, TableStatus::hasVirtualColumnsToProcess,
       VirtualEntityStepUtils::enrichVirtualColumnPartitionContext);
   }
 
@@ -58,20 +58,9 @@ public class VirtualColumnStep extends AbstractIndexingStepDefinition<ViewerRow,
     throws BatchJobException {
     if (status == BatchStatus.COMPLETED) {
       String tableId = partitionContext.getString(BatchConstants.TABLE_ID_KEY);
-      TableStatus tableStatus = VirtualEntityStepUtils.findTableStatus(jobContext, tableId);
-
+      TableStatus tableStatus = jobContext.getCollectionStatus().findTableStatusById(tableId);
       if (tableStatus != null) {
-        VirtualEntityStepUtils.updateProcessedColumnsStateInMemory(tableStatus, status);
-      }
-
-    }
-  }
-
-  @Override
-  public void onStepCompleted(JobContext jobContext, BatchStatus status) throws BatchJobException {
-    if (status == BatchStatus.COMPLETED) {
-      for (TableStatus tableStatus : jobContext.getCollectionStatus().getTables()) {
-        VirtualEntityStepUtils.removeMarkedVirtualColumnsInMemory(tableStatus);
+        tableStatus.updateProcessedVirtualColumnsState();
       }
     }
   }

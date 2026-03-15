@@ -14,9 +14,7 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.ColumnWrapper;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
@@ -96,10 +94,7 @@ public class TransformationTable extends Composite {
    *
    */
   private void createTable() {
-    TableStatus tableStatus = collectionStatus.getTableStatusByTableId(table.getId());
-    List<ViewerColumn> allColumns = DataTransformationUtils.getViewerColumnsWithVirtualColumns(table.getColumns(),
-      tableStatus);
-    for (ViewerColumn column : allColumns) {
+    for (ViewerColumn column : table.getColumns()) {
       ColumnWrapper columnWrapper = new ColumnWrapper(table.getName(), denormalizeConfiguration,
         database.getMetadata());
       columnWrapper.setColumnDisplayName(column.getDisplayName());
@@ -121,14 +116,10 @@ public class TransformationTable extends Composite {
 
   private void setColumnsToInclude(RelatedTablesConfiguration relatedTable, List<ColumnWrapper> columns) {
     ViewerTable referencedTable = database.getMetadata().getTable(relatedTable.getTableUUID());
-    TableStatus referencedTableStatus = collectionStatus.getTableStatusByTableId(referencedTable.getId());
-    List<ViewerColumn> allReferencedTableColumns = DataTransformationUtils
-      .getViewerColumnsWithVirtualColumns(referencedTable.getColumns(), referencedTableStatus);
-
     ColumnWrapper columnWrapper = new ColumnWrapper(relatedTable.getUuid(), referencedTable.getName(), relatedTable,
       denormalizeConfiguration, database.getMetadata());
     for (RelatedColumnConfiguration columnToInclude : relatedTable.getColumnsIncluded()) {
-      ViewerColumn col = allReferencedTableColumns.get(columnToInclude.getIndex());
+      ViewerColumn col = referencedTable.getColumns().get(columnToInclude.getIndex());
       columnWrapper.setColumnDisplayName(col.getDisplayName());
       columnWrapper.setColumnDescription(col.getDescription());
     }

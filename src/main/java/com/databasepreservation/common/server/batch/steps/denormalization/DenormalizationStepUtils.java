@@ -37,37 +37,32 @@ public class DenormalizationStepUtils {
         ViewerTable rootTable = database.getMetadata().getTable(tableUUID);
         path.add(rootTable.getName());
 
-        processRelatedTable(collectionStatus, database, targetTableStatus, relatedTable, path);
+        processRelatedTable(database, targetTableStatus, relatedTable, path);
       }
 
       collectionStatus.setNeedsToBeProcessed(false);
     }
   }
 
-  private static void processRelatedTable(CollectionStatus collectionStatus, ViewerDatabase database,
-    TableStatus targetTableStatus, RelatedTablesConfiguration relatedTable, List<String> path) {
+  private static void processRelatedTable(ViewerDatabase database, TableStatus targetTableStatus,
+    RelatedTablesConfiguration relatedTable, List<String> path) {
 
     ViewerTable currentTableMeta = database.getMetadata().getTable(relatedTable.getTableUUID());
     path.add(currentTableMeta.getName());
 
     List<RelatedColumnConfiguration> columnsIncluded = relatedTable.getColumnsIncluded();
     if (!columnsIncluded.isEmpty()) {
-      createAndAddColumn(collectionStatus, database, targetTableStatus, relatedTable, path, currentTableMeta);
+      createAndAddColumn(targetTableStatus, relatedTable, path, currentTableMeta);
     }
 
     List<RelatedTablesConfiguration> innerTables = relatedTable.getRelatedTables();
     for (RelatedTablesConfiguration inner : innerTables) {
-      processRelatedTable(collectionStatus, database, targetTableStatus, inner, new ArrayList<>(path));
+      processRelatedTable(database, targetTableStatus, inner, new ArrayList<>(path));
     }
   }
 
-  private static void createAndAddColumn(CollectionStatus collectionStatus, ViewerDatabase database,
-    TableStatus targetTableStatus, RelatedTablesConfiguration relatedTable, List<String> path,
-    ViewerTable currentTableMeta) {
-
-    TableStatus currentTableStatus = collectionStatus.getTableStatusByTableId(currentTableMeta.getId());
-    List<ViewerColumn> allColumns = DataTransformationUtils
-      .getViewerColumnsWithVirtualColumns(currentTableMeta.getColumns(), currentTableStatus);
+  private static void createAndAddColumn(TableStatus targetTableStatus, RelatedTablesConfiguration relatedTable,
+    List<String> path, ViewerTable currentTableMeta) {
 
     List<String> names = new ArrayList<>();
     List<String> origTypes = new ArrayList<>();
@@ -75,7 +70,7 @@ public class DenormalizationStepUtils {
     List<String> nullables = new ArrayList<>();
 
     for (RelatedColumnConfiguration col : relatedTable.getColumnsIncluded()) {
-      ViewerColumn meta = DataTransformationUtils.getColumnBySolrName(allColumns, col.getSolrName());
+      ViewerColumn meta = DataTransformationUtils.getColumnBySolrName(currentTableMeta.getColumns(), col.getSolrName());
       if (meta != null) {
         names.add(col.getColumnName());
         origTypes.add(col.getColumnName() + ":" + meta.getType().getOriginalTypeName());

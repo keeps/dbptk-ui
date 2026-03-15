@@ -3,6 +3,7 @@ package com.databasepreservation.common.client.models.status;
 import java.util.Date;
 
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -12,7 +13,11 @@ public interface IsProcessable {
 
   Date getLastUpdatedDate();
 
+  void setProcessingState(ProcessingState state);
+
   Date getLastExecutionDate();
+
+  void setLastExecutionDate(Date date);
 
   default boolean shouldProcess() {
     if (getProcessingState() == ProcessingState.TO_REMOVE) {
@@ -27,5 +32,16 @@ public interface IsProcessable {
       return false;
     }
     return getLastUpdatedDate().after(getLastExecutionDate());
+  }
+
+  @JsonIgnore
+  default boolean isMarkedForRemoval() {
+    return getProcessingState() == ProcessingState.TO_REMOVE;
+  }
+
+  @JsonIgnore
+  default void markAsProcessed() {
+    setProcessingState(ProcessingState.PROCESSED);
+    setLastExecutionDate(new Date());
   }
 }

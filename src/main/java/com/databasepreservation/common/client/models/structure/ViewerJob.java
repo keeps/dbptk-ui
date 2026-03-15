@@ -9,10 +9,11 @@ package com.databasepreservation.common.client.models.structure;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.databasepreservation.common.client.index.IsIndexed;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -39,7 +40,7 @@ public class ViewerJob extends IsIndexed implements Serializable {
   private Long skipCount;
   private Integer currentStepNumber;
   private Integer totalSteps;
-
+  private List<String> stepNames = new ArrayList<>();
 
   @Override
   public void setUuid(String uuid) {
@@ -185,5 +186,13 @@ public class ViewerJob extends IsIndexed implements Serializable {
 
   public void setCurrentStepNumber(Integer currentStepNumber) {
     this.currentStepNumber = currentStepNumber;
+  }
+
+  public List<String> getStepNames() {
+    return stepNames;
+  }
+
+  public void setStepNames(List<String> stepNames) {
+    this.stepNames = stepNames;
   }
 }

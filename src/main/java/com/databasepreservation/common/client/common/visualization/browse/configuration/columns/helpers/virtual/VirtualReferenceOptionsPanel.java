@@ -13,6 +13,7 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
 import com.databasepreservation.common.client.models.status.collection.VirtualForeignKeysStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -160,7 +161,7 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
 
     if (foreignKeysStatus == null) {
       showVirtualReferenceEditor(new ForeignKeysStatus());
-    } else if (foreignKeysStatus.getType() != null && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+    } else if (foreignKeysStatus.getSourceType() != null && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
       showVirtualReferenceEditor(foreignKeysStatus);
     } else {
       showFkInfo(foreignKeysStatus, table);
@@ -221,7 +222,7 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
     }
 
     ForeignKeysStatus foreignKeysStatus = new ForeignKeysStatus();
-    foreignKeysStatus.setType(ViewerType.dbTypes.VIRTUAL);
+    foreignKeysStatus.setSourceType(ViewerSourceType.VIRTUAL);
     foreignKeysStatus.setId("virtual_fk_" + selectedTable);
     foreignKeysStatus.setName("virtual_fk_" + selectedTable);
     foreignKeysStatus.setReferencedTableId(selectedTable);

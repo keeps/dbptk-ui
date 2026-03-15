@@ -36,8 +36,8 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -360,26 +360,21 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     ViewerTable referencedTable = node.getParentNode().getTable();
     ViewerTable sourceTable = node.getTable();
 
-    List<ViewerColumn> allSourceColumns = DataTransformationUtils.getViewerColumnsWithVirtualColumns(
-      sourceTable.getColumns(), collectionStatus.getTableStatus(sourceTable.getUuid()));
-    List<ViewerColumn> allReferencedColumns = DataTransformationUtils.getViewerColumnsWithVirtualColumns(
-      referencedTable.getColumns(), collectionStatus.getTableStatus(referencedTable.getUuid()));
-
     for (ViewerReference reference : foreignKey.getReferences()) {
       boolean isVirtual = false;
 
       if (foreignKey.getReferencedTableUUID().equals(referencedTable.getUuid())) {
 
-        ViewerColumn column = DataTransformationUtils.getColumnByIndex(allSourceColumns,
+        ViewerColumn column = DataTransformationUtils.getColumnByIndex(sourceTable.getColumns(),
           reference.getSourceColumnIndex());
         isVirtual = isIsVirtualRelationship(sourceTable, column, isVirtual);
 
         information.add(buildReferenceInformation(
           messages.dataTransformationTextForIsRelatedTo(referencedTable.getId(), column.getDisplayName()), isVirtual));
       } else {
-        ViewerColumn referencedColumn = DataTransformationUtils.getColumnByIndex(allReferencedColumns,
+        ViewerColumn referencedColumn = DataTransformationUtils.getColumnByIndex(referencedTable.getColumns(),
           reference.getSourceColumnIndex());
-        ViewerColumn column = DataTransformationUtils.getColumnByIndex(allSourceColumns,
+        ViewerColumn column = DataTransformationUtils.getColumnByIndex(sourceTable.getColumns(),
           reference.getReferencedColumnIndex());
         isVirtual = isIsVirtualRelationship(referencedTable, referencedColumn, isVirtual);
 
@@ -396,8 +391,8 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     ForeignKeysStatus foreignKeysStatus = collectionStatus.getForeignKeyByTableAndColumnId(sourceTable.getUuid(),
       column.getSolrName());
 
-    if (foreignKeysStatus != null && foreignKeysStatus.getType() != null
-      && foreignKeysStatus.getType().equals(ViewerType.dbTypes.VIRTUAL)) {
+    if (foreignKeysStatus != null && foreignKeysStatus.getSourceType() != null
+      && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
       isVirtual = true;
     }
     return isVirtual;

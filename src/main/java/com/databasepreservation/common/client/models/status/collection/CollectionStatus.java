@@ -340,4 +340,16 @@ public class CollectionStatus implements Serializable {
   public void setNeedsToBeProcessed(boolean needsToBeProcessed) {
     this.needsToBeProcessed = needsToBeProcessed;
   }
+
+  public void removeMarkedVirtualTables() {
+    if (this.tables == null)
+      return;
+    this.tables.removeIf(t -> t.getVirtualTableStatus() != null && t.getVirtualTableStatus().isMarkedForRemoval());
+  }
+
+  public TableStatus findTableStatusById(String tableId) {
+    if (this.tables == null)
+      return null;
+    return this.tables.stream().filter(t -> t.getId().equals(tableId)).findFirst().orElse(null);
+  }
 }

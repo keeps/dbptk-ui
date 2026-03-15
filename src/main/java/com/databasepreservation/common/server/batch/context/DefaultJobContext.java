@@ -1,6 +1,8 @@
 package com.databasepreservation.common.server.batch.context;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,6 +24,7 @@ public class DefaultJobContext implements JobContext {
   private final JobProgressAggregator progressAggregator;
   private final Map<String, DenormalizeConfiguration> denormalizeConfigs;
 
+  private final List<String> stepNames = new ArrayList<>();
   private final AtomicInteger currentStepNumber = new AtomicInteger(0);
   private final AtomicInteger totalSteps = new AtomicInteger(1);
   private volatile String currentStepName = "";
@@ -71,6 +74,19 @@ public class DefaultJobContext implements JobContext {
   @Override
   public DenormalizeConfiguration getDenormalizeConfig(String entryID) {
     return denormalizeConfigs.get(entryID);
+  }
+
+  @Override
+  public List<String> getStepNames() {
+    return stepNames;
+  }
+
+  @Override
+  public void setStepNames(List<String> stepNames) {
+    this.stepNames.clear();
+    if (stepNames != null) {
+      this.stepNames.addAll(stepNames);
+    }
   }
 
   @Override

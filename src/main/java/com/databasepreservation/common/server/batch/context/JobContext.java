@@ -1,5 +1,7 @@
 package com.databasepreservation.common.server.batch.context;
 
+import java.util.List;
+
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.server.batch.core.JobProgressAggregator;
@@ -33,6 +35,25 @@ public interface JobContext {
    *          The identifier for the denormalization entry.
    */
   DenormalizeConfiguration getDenormalizeConfig(String entryID);
+
+  /**
+   * Retrieves the list of human-readable step names corresponding to the steps
+   * defined in the job. This is used for UI display purposes (e.g., showing "Step
+   * 1: Text Extraction", "Step 2: Denormalization", etc.).
+   * 
+   * @return A list of step display names in the order they are executed.
+   */
+  List<String> getStepNames();
+
+  /**
+   * Sets the list of human-readable step names corresponding to the steps defined
+   * in the job. This should be called by the orchestrator before the job starts,
+   * after determining the execution plan and order of steps.
+   * 
+   * @param stepNames
+   *          A list of step display names in the order they are executed.
+   */
+  void setStepNames(List<String> stepNames);
 
   /**
    * Retrieves the current step number being executed (1-based index). This is

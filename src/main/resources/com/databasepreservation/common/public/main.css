@@ -3715,59 +3715,25 @@ rgba(0, 0, 0, .125);
     width: 100%;
 }
 
-/* Estado Inicial: Mensagem e Botão */
-.config-initial-state {
+.config-state-panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 105px;
+}
+
+.config-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    min-height: 36px;
 }
 
-.config-initial-state .config-message {
+.config-title-text {
     font-size: 13px;
     color: #444;
     font-weight: 500;
-}
-
-.config-progress-state {
-    display: flex;
-    flex-direction: column;
-}
-
-.config-progress-state .progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.config-progress-state .progress-text {
-    font-size: 11px;
-    font-weight: bold;
-    color: #888;
-}
-
-.config-progress-state .progress {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 6px;
-    background-color: #f0f0f0;
-    border-radius: 0;
     margin: 0;
-    border: none;
-}
-
-.config-progress-state .progress-bar {
-    height: 100%;
-    background-color: #089de3;
-    box-shadow: none;
-    transition: width 0.4s ease;
-}
-
-.config-progress-state .progress-bar.active {
-    background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
-    background-size: 20px 20px;
-    animation: progress-bar-stripes 1s linear infinite;
 }
 
 .job-title-panel {
@@ -3782,19 +3748,50 @@ rgba(0, 0, 0, .125);
     color: #333;
 }
 
-.step-info-panel {
-    margin-top: 15px;
+.steps-indicator-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0;
+    min-height: 20px;
 }
 
-.step-count-label {
-    font-size: 1.2rem;
-    color: #666;
+.mini-step-badge {
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+    font-family: "Ubuntu", sans-serif;
+}
+
+.step-completed {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.step-active {
+    background-color: #089de3;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.step-pending {
+    background-color: #f8f9fa;
+    color: #adb5bd;
+    border: 1px solid #e9ecef;
+}
+
+.config-footer {
+    display: flex;
+    flex-direction: column;
+    margin-top: auto;
 }
 
 .progress-info-panel {
     display: flex;
     justify-content: space-between;
-    margin-top: 5px;
+    align-items: center;
     margin-bottom: 5px;
 }
 
@@ -3802,11 +3799,47 @@ rgba(0, 0, 0, .125);
     font-size: 1.2rem;
     font-weight: 500;
     color: #333;
+    margin: 0;
 }
 
 .elapsed-time-label {
     font-size: 1.2rem;
     color: #666;
+    margin: 0;
+}
+
+.progress {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background-color: #f0f0f0;
+    border-radius: 0;
+    margin: 0;
+    border: none;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #089de3;
+    box-shadow: none;
+    transition: width 0.4s ease;
+}
+
+.progress-bar.active {
+    background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    background-size: 20px 20px;
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+.inactive-bar {
+    width: 100%;
+    background-color: #e9ecef !important;
+    box-shadow: none !important;
+}
+
+.text-muted {
+    color: #999 !important;
+    font-weight: normal !important;
 }
 
 @keyframes slideInBottom {
