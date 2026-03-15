@@ -7,40 +7,53 @@
     <a:Alert ui:field="alertPanel" addStyleNames="configuration-bar-alert" visible="false">
         <g:FlowPanel addStyleNames="configuration-status-wrapper">
 
-            <g:FlowPanel ui:field="initialStatePanel" addStyleNames="config-initial-state">
-                <g:Label ui:field="messageLabel" addStyleNames="config-message"/>
-                <g:SimplePanel>
+            <g:FlowPanel ui:field="initialStatePanel" addStyleNames="config-state-panel">
+
+                <g:FlowPanel addStyleNames="config-header">
+                    <g:Label ui:field="messageLabel" addStyleNames="config-title-text"/>
                     <g:Button ui:field="btnApplyConfiguration" addStyleNames="btn btn-primary btn-play">
                         <ui:text from='{messages.basicActionRun}'/>
                     </g:Button>
-                </g:SimplePanel>
+                </g:FlowPanel>
+
+                <g:FlowPanel ui:field="pendingStepsContainer" addStyleNames="steps-indicator-container"/>
+
+                <g:FlowPanel addStyleNames="config-footer">
+                    <g:FlowPanel addStyleNames="progress-info-panel">
+                        <g:Label ui:field="readyToStartLabel" addStyleNames="step-name-progress-label text-muted"/>
+                        <g:Label ui:field="elapsedTimePlaceholderLabel" addStyleNames="elapsed-time-label text-muted"/>
+                    </g:FlowPanel>
+                    <g:HTMLPanel addStyleNames="progress">
+                        <g:HTMLPanel addStyleNames="progress-bar inactive-bar"/>
+                    </g:HTMLPanel>
+                </g:FlowPanel>
+
             </g:FlowPanel>
 
-            <g:FlowPanel ui:field="progressPanel" visible="false" addStyleNames="config-progress-state">
-                <g:FlowPanel addStyleNames="progress-header">
+            <g:FlowPanel ui:field="progressPanel" visible="false" addStyleNames="config-state-panel">
+
+                <g:FlowPanel addStyleNames="config-header">
                     <g:FlowPanel addStyleNames="job-title-panel">
                         <g:Label ui:field="jobNameLabel" addStyleNames="job-name-label"/>
                         <g:HTML ui:field="statusBadge" addStyleNames="status-badge"/>
                     </g:FlowPanel>
-                    <g:SimplePanel>
-                        <g:Button ui:field="btnGoToJobs" addStyleNames="btn btn-primary btn-jobs">
-                            <ui:text from='{messages.configurationStatusPanelLabelForJobsBtn}'/>
-                        </g:Button>
-                    </g:SimplePanel>
+                    <g:Button ui:field="btnGoToJobs" addStyleNames="btn btn-primary btn-jobs">
+                        <ui:text from='{messages.configurationStatusPanelLabelForJobsBtn}'/>
+                    </g:Button>
                 </g:FlowPanel>
 
-                <g:FlowPanel addStyleNames="step-info-panel">
-                    <g:Label ui:field="stepCountLabel" addStyleNames="step-count-label"/>
+                <g:FlowPanel ui:field="stepsContainer" addStyleNames="steps-indicator-container"/>
+
+                <g:FlowPanel addStyleNames="config-footer">
+                    <g:FlowPanel addStyleNames="progress-info-panel">
+                        <g:Label ui:field="stepNameProgressLabel" addStyleNames="step-name-progress-label"/>
+                        <g:Label ui:field="elapsedTimeLabel" addStyleNames="elapsed-time-label"/>
+                    </g:FlowPanel>
+                    <g:HTMLPanel addStyleNames="progress">
+                        <g:HTMLPanel ui:field="progressBar" addStyleNames="progress-bar progress-bar-striped active"/>
+                    </g:HTMLPanel>
                 </g:FlowPanel>
 
-                <g:FlowPanel addStyleNames="progress-info-panel">
-                    <g:Label ui:field="stepNameProgressLabel" addStyleNames="step-name-progress-label"/>
-                    <g:Label ui:field="elapsedTimeLabel" addStyleNames="elapsed-time-label"/>
-                </g:FlowPanel>
-
-                <g:HTMLPanel addStyleNames="progress">
-                    <g:HTMLPanel ui:field="progressBar" addStyleNames="progress-bar progress-bar-striped active"/>
-                </g:HTMLPanel>
             </g:FlowPanel>
 
         </g:FlowPanel>

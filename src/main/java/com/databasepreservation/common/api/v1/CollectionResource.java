@@ -487,6 +487,27 @@ public class CollectionResource implements CollectionService {
     }
   }
 
+  @Override
+  public List<String> getPendingJobPlan(String databaseUUID, String collectionUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+
+      return orchestrator.getJobPlan(databaseUUID, dataTransformationJob);
+
+    } catch (AuthorizationException | BatchJobException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID);
+    }
+  }
+
   /*******************************************************************************
    * Collection Resource - Config Sub-resource - Virtual columns
    ******************************************************************************/

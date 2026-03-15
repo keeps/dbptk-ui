@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
@@ -515,7 +516,7 @@ public class ConfigurationManager {
           // 3. Mark Virtual Foreign Keys for removal
           if (table.getForeignKeys() != null) {
             for (ForeignKeysStatus fk : table.getForeignKeys()) {
-              if (ViewerType.dbTypes.VIRTUAL.equals(fk.getType()) && fk.getVirtualForeignKeysStatus() != null) {
+              if (ViewerSourceType.VIRTUAL.equals(fk.getSourceType()) && fk.getVirtualForeignKeysStatus() != null) {
                 fk.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_REMOVE);
                 needsBatchProcessing = true;
               }

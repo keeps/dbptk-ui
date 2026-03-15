@@ -1,6 +1,5 @@
 package com.databasepreservation.common.server.batch.listeners;
 
-import com.databasepreservation.common.server.batch.core.BatchConstants;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -10,6 +9,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 
 import com.databasepreservation.common.server.batch.context.JobContext;
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.StepDefinition;
 import com.databasepreservation.common.server.controller.JobController;
 
@@ -31,16 +31,18 @@ public class StepStatusListener implements StepExecutionListener {
   public void beforeStep(StepExecution stepExecution) {
     try {
 
-      if (stepExecution.getStepName().contains(BatchConstants.PARTITION_PREFIX) || stepExecution.getStepName().contains(BatchConstants.PARTITION_WORKER_NAME)) {
+      if (stepExecution.getStepName().contains(BatchConstants.PARTITION_PREFIX)
+        || stepExecution.getStepName().contains(BatchConstants.PARTITION_WORKER_NAME)) {
         return;
       }
       context.incrementStepNumber();
       context.setCurrentStepName(definition.getDisplayName());
 
       JobController.editSolrBatchJob(stepExecution.getJobExecution(), context);
-      LOGGER.info("Starting Step: {} for database: {}", definition.getName(), context.getDatabaseUUID());
+      LOGGER.info("[STEP] [{}/{}] STARTED: {} for database: {}", context.getCurrentStepNumber(),
+        context.getTotalSteps(), definition.getName(), context.getDatabaseUUID());
     } catch (GenericException | NotFoundException e) {
-      LOGGER.error("Cannot update Step on SOLR for {}", context.getDatabaseUUID(), e);
+      LOGGER.error("[STEP] ERROR: Cannot update Step on SOLR for {}", context.getDatabaseUUID(), e);
     }
   }
 
@@ -49,11 +51,12 @@ public class StepStatusListener implements StepExecutionListener {
     try {
       definition.onStepCompleted(context, stepExecution.getStatus());
 
-      LOGGER.info("Step {} FINISHED with status: {}. Total items: {}", definition.getName(),
-        stepExecution.getExitStatus().getExitCode(), context.getJobProgressAggregator().getTotal());
+      LOGGER.info("[STEP] [{}/{}] FINISHED: {} with status: {}. Total items: {}", context.getCurrentStepNumber(),
+        context.getTotalSteps(), definition.getName(), stepExecution.getExitStatus().getExitCode(),
+        context.getJobProgressAggregator().getTotal());
 
     } catch (Exception e) {
-      LOGGER.error("Error during onStepCompleted for step {}", definition.getName(), e);
+      LOGGER.error("[STEP] FAILED during onStepCompleted for step {}", definition.getName(), e);
       return ExitStatus.FAILED;
     }
     return stepExecution.getExitStatus();

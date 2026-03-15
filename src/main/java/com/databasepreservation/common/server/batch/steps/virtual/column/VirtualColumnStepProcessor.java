@@ -13,11 +13,10 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.batch.exceptions.DataTransformationException;
-import com.databasepreservation.common.server.batch.steps.virtual.VirtualEntityStepUtils;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -34,15 +33,18 @@ public class VirtualColumnStepProcessor implements ItemProcessor<ViewerRow, View
 
     if (tableStatus != null) {
       this.virtualColumns = tableStatus.getColumns().stream()
-        .filter(c -> ViewerType.dbTypes.VIRTUAL.equals(c.getType()))
+        .filter(c -> ViewerSourceType.VIRTUAL.equals(c.getSourceType()))
         .collect(Collectors.toMap(c -> c.getId(), c -> c.getVirtualColumnStatus()));
     } else {
       this.virtualColumns = new HashMap<>();
     }
+    LOGGER.info("Initialized VirtualColumnStepProcessor for table: {} with {} virtual columns to process.", tableID,
+      virtualColumns.size());
   }
 
   @Override
   public ViewerRow process(ViewerRow row) throws Exception {
+    LOGGER.debug("Processing virtual columns for row UUID: {}", row.getUuid());
     if (tableStatus == null) {
       throw new BatchJobException("Table with ID " + row.getTableId()
         + " not found in collection status. Cannot process virtual columns for row: " + row.getUuid());
@@ -64,7 +66,7 @@ public class VirtualColumnStepProcessor implements ItemProcessor<ViewerRow, View
       String columnId = entry.getKey();
       VirtualColumnStatus vcs = entry.getValue();
 
-      if (VirtualEntityStepUtils.isMarkedForRemoval(vcs)) {
+      if (vcs != null && vcs.isMarkedForRemoval()) {
         cells.put(columnId, null);
       } else {
         applyTemplateToVirtualColumn(row, columnId, vcs, cells);

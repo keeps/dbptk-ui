@@ -11,7 +11,6 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.server.batch.context.JobContext;
-import com.databasepreservation.common.server.batch.steps.virtual.VirtualEntityStepUtils;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -23,12 +22,14 @@ public class VirtualTableStepProcessor implements ItemProcessor<ViewerRow, Viewe
 
   public VirtualTableStepProcessor(JobContext context, String tableID) {
     this.context = context;
-    this.tableStatus = VirtualEntityStepUtils.findTableStatus(context, tableID);
+    this.tableStatus = context.getCollectionStatus().findTableStatusById(tableID);
+    LOGGER.info("Initialized VirtualTableStepProcessor for table: {} with virtual table status: {}", tableID,
+      tableStatus != null ? "found" : "not found");
   }
 
   @Override
   public ViewerRow process(ViewerRow row) throws Exception {
-    LOGGER.info("Processing virtual table {} for row: {}", tableStatus.getName(), row.getUuid());
+    LOGGER.debug("Processing virtual table {} for row: {}", tableStatus.getName(), row.getUuid());
 
     ViewerRow viewerRow = new ViewerRow();
     viewerRow.setUuid(tableStatus.getUuid() + "_" + row.getUuid());

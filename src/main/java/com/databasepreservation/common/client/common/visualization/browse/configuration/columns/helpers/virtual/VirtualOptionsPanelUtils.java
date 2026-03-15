@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -84,7 +85,7 @@ public class VirtualOptionsPanelUtils {
       return false;
     }
 
-    return allowVirtualColumns || !ViewerType.dbTypes.VIRTUAL.equals(type);
+    return allowVirtualColumns || !ViewerSourceType.VIRTUAL.equals(column.getSourceType());
   }
 
   public static void selectListBoxValue(ListBox listBox, String value) {

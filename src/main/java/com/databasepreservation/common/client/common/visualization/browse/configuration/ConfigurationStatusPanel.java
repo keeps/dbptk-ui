@@ -72,18 +72,28 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   HTML statusBadge;
   @UiField
   Label jobNameLabel;
+
   @UiField
-  Label stepCountLabel;
+  FlowPanel stepsContainer;
+  @UiField
+  FlowPanel pendingStepsContainer;
+
   @UiField
   Label stepNameProgressLabel;
   @UiField
   Label elapsedTimeLabel;
+
+  @UiField
+  Label readyToStartLabel;
+  @UiField
+  Label elapsedTimePlaceholderLabel;
 
   private Timer progressTimer;
   private boolean jobFinishedSuccessfully = false;
   private boolean isStoppingPolling = false;
   private CollectionStatus collectionStatus;
   private ViewerDatabase database;
+  private List<String> plannedSteps = new ArrayList<>();
 
   interface ConfigurationStatusPanelUiBinder extends UiBinder<Widget, ConfigurationStatusPanel> {
   }
@@ -96,6 +106,9 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
     initWidget(binder.createAndBindUi(this));
 
     messageLabel.setText(messages.configurationStatusPanelLabelForTitle());
+
+    readyToStartLabel.setText(messages.configurationStatusPanelTextForInitializing());
+    elapsedTimePlaceholderLabel.setText(messages.configurationStatusPanelTextForElapsedTime("--m --s"));
 
     alertPanel.setVisible(false);
     toggleProgressMode(false);
@@ -280,10 +293,11 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
       @Override
       public void run() {
         jobFinishedSuccessfully = false;
+        isStoppingPolling = false;
         updateVisualState();
       }
     };
-    resetTimer.schedule(5000);
+    resetTimer.schedule(10000);
   }
 
   private void handleJobFailure(ViewerJob job) {
@@ -303,10 +317,16 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
         progressBar.getElement().getStyle().setWidth(0, com.google.gwt.dom.client.Style.Unit.PCT);
         statusBadge.setHTML("");
         jobNameLabel.setText(messages.configurationStatusPanelTextForInitializing());
-        stepCountLabel.setText("");
         stepNameProgressLabel.setText(messages.configurationStatusPanelTextForInitializing());
         elapsedTimeLabel.setText("");
         progressBar.getElement().getStyle().clearBackgroundColor();
+
+        stepsContainer.clear();
+        for (String name : plannedSteps) {
+          Label badge = new Label(name);
+          badge.addStyleName("mini-step-badge step-pending");
+          stepsContainer.add(badge);
+        }
       }
       return;
     }
@@ -320,13 +340,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
       jobNameLabel.setText(messages.configurationStatusPanelTextForInitializing());
     }
 
-    // Step Count
-    if (job.getCurrentStepNumber() != null && job.getTotalSteps() != null) {
-      stepCountLabel
-        .setText(messages.configurationStatusPanelTextForStepCount(job.getCurrentStepNumber(), job.getTotalSteps()));
-    } else {
-      stepCountLabel.setText(messages.configurationStatusPanelTextForInitializing());
-    }
+    renderSteps(job);
 
     // Elapsed Time
     elapsedTimeLabel.setText(messages.configurationStatusPanelTextForElapsedTime(calculateTotalTime(job)));
@@ -396,6 +410,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
       if (newStatus.isNeedsToBeProcessed()) {
         jobFinishedSuccessfully = false;
+        isStoppingPolling = false;
       }
 
       if (progressTimer == null && !jobFinishedSuccessfully) {
@@ -421,11 +436,73 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
       alertPanel.setVisible(needsProcess);
 
-      if (needsProcess) {
+      if (needsProcess && !isStoppingPolling) {
         toggleProgressMode(false);
         btnApplyConfiguration.setEnabled(true);
         statusBadge.setHTML("");
+
+        fetchPendingPlanFromServer();
       }
+    }
+  }
+
+  private void fetchPendingPlanFromServer() {
+    CollectionService.Util.call((List<String> planNames) -> {
+      renderPendingPlan(planNames);
+    }).getPendingJobPlan(database.getUuid(), database.getUuid());
+  }
+
+  private void renderPendingPlan(List<String> planNames) {
+    pendingStepsContainer.clear();
+
+    this.plannedSteps = planNames != null ? planNames : new ArrayList<>();
+
+    if (planNames == null || planNames.isEmpty()) {
+      return;
+    }
+
+    for (String name : planNames) {
+      Label badge = new Label(name);
+      badge.addStyleName("mini-step-badge step-pending");
+      pendingStepsContainer.add(badge);
+    }
+  }
+
+  private void renderSteps(ViewerJob job) {
+    stepsContainer.clear();
+    List<String> allSteps = job.getStepNames();
+
+    if (allSteps == null || allSteps.isEmpty()) {
+      if (plannedSteps != null && !plannedSteps.isEmpty()) {
+        allSteps = plannedSteps;
+      } else {
+        Label fallback = new Label(messages.configurationStatusPanelTextForStepCount(
+          job.getCurrentStepNumber(), job.getTotalSteps()));
+        fallback.addStyleName("step-count-label");
+        stepsContainer.add(fallback);
+        return;
+      }
+    }
+
+    boolean isJobFinished = job.getStatus() == ViewerJobStatus.COMPLETED;
+    int currentIdx = (job.getCurrentStepNumber() != null) ? job.getCurrentStepNumber() - 1 : 0;
+
+    for (int i = 0; i < allSteps.size(); i++) {
+      Label stepBadge = new Label(allSteps.get(i));
+      stepBadge.addStyleName("mini-step-badge");
+
+      // TODO add fontawesome icons
+      if (isJobFinished || i < currentIdx) {
+        stepBadge.addStyleName("step-completed");
+        stepBadge.setText("✓ " + allSteps.get(i));
+      } else if (i == currentIdx) {
+        stepBadge.addStyleName("step-active");
+        stepBadge.setText("▶ " + allSteps.get(i));
+      } else {
+        stepBadge.addStyleName("step-pending");
+      }
+
+      stepsContainer.add(stepBadge);
     }
   }
 }

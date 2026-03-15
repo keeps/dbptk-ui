@@ -58,6 +58,7 @@ public class JobController {
     }
 
     if (jobContext != null) {
+      viewerJob.setStepNames(jobContext.getStepNames());
       viewerJob.setCurrentStepName(jobContext.getCurrentStepName());
       viewerJob.setCurrentStepNumber(jobContext.getCurrentStepNumber());
       viewerJob.setTotalSteps(jobContext.getTotalSteps());
@@ -104,11 +105,13 @@ public class JobController {
     return viewerJob;
   }
 
-  public static void addMinimalSolrBatchJob(JobParameters parameters) throws NotFoundException, GenericException {
+  public static void addMinimalSolrBatchJob(JobParameters parameters, JobContext context) throws NotFoundException, GenericException {
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     ViewerJob viewerJob = createMinimalViewerJob(parameters);
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, viewerJob.getDatabaseUuid());
     viewerJob.setDatabaseName(database.getMetadata().getName());
+    viewerJob.setStepNames(context.getStepNames());
+    viewerJob.setTotalSteps(context.getTotalSteps());
     solrManager.addBatchJob(viewerJob);
 
     LOGGER.info("JOB Created in Solr with ID: {} for Database UUID: {}, Collection UUID: {}", viewerJob.getUuid(),

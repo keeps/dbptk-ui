@@ -5,22 +5,25 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ForeignKeysStatus implements Serializable {
 
   @Serial
   private static final long serialVersionUID = -4638995124950641111L;
 
   private String id;
+  private ViewerSourceType sourceType;
   private String name;
   private String referencedTableUUID;
   private String referencedTableId;
   private List<ReferencedColumnStatus> references = new ArrayList<>();
-  private ViewerType.dbTypes type;
   private VirtualForeignKeysStatus virtualForeignKeysStatus;
 
   public String getId() {
@@ -29,6 +32,14 @@ public class ForeignKeysStatus implements Serializable {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public ViewerSourceType getSourceType() {
+    return sourceType;
+  }
+
+  public void setSourceType(ViewerSourceType sourceType) {
+    this.sourceType = sourceType;
   }
 
   public String getName() {
@@ -63,20 +74,17 @@ public class ForeignKeysStatus implements Serializable {
     this.references = references;
   }
 
-  public ViewerType.dbTypes getType() {
-    return type;
-  }
-
-  public void setType(ViewerType.dbTypes type) {
-    this.type = type;
-  }
-
   public VirtualForeignKeysStatus getVirtualForeignKeysStatus() {
     return virtualForeignKeysStatus;
   }
 
   public void setVirtualForeignKeysStatus(VirtualForeignKeysStatus virtualForeignKeysStatus) {
     this.virtualForeignKeysStatus = virtualForeignKeysStatus;
+  }
+
+  @JsonIgnore
+  public boolean isVirtual() {
+    return ViewerSourceType.VIRTUAL.equals(this.sourceType);
   }
 
   public static class ReferencedColumnStatus implements Serializable {
