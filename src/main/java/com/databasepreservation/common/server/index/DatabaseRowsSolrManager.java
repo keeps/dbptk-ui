@@ -16,12 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.server.index.schema.collections.DatabasesCollection;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
@@ -621,21 +623,31 @@ public class DatabaseRowsSolrManager {
     return true;
   }
 
-  public void updateDatabaseMetadata(String databaseUUID, ViewerMetadata metadata) {
+  public void updateDatabaseMetadata(String databaseUUID, ViewerMetadata metadata) throws GenericException {
     LOGGER.debug("Starting to update database metadata ({})", databaseUUID);
 
-    // create document to update this DB
-    SolrInputDocument doc = new SolrInputDocument();
-    doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
-
     try {
-      doc.addField(ViewerConstants.SOLR_DATABASES_METADATA,
-        SolrUtils.asValueUpdate(JsonTransformer.getJsonFromObject(metadata)));
+      SolrDocument existingDoc = client.getById(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, databaseUUID);
+
+      SolrInputDocument doc = new SolrInputDocument();
+      doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
+
+      if (existingDoc != null && existingDoc.containsKey(ViewerConstants.SOLR_DATABASES_METADATA)) {
+        //deprecated
+        doc.addField(ViewerConstants.SOLR_DATABASES_METADATA,
+          SolrUtils.asValueUpdate(JsonTransformer.getJsonFromObject(metadata)));
+      } else {
+        if (metadata != null) {
+          DatabasesCollection.populateMetadataInDocument(metadata, doc, true);
+        }
+      }
+
       insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
       ViewerFactory.getConfigurationManager().updateDatabaseMetadata(databaseUUID, metadata);
       LOGGER.debug("Finish updating database metadata ({})", databaseUUID);
-    } catch (GenericException | ViewerException e) {
+    } catch (GenericException | ViewerException | IOException | SolrServerException e) {
       LOGGER.error("Could not update database metadata ({})", databaseUUID, e);
+      throw new GenericException("Could not update database metadata " + databaseUUID , e);
     }
 
   }

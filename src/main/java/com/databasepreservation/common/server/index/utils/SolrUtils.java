@@ -27,6 +27,21 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import com.databasepreservation.common.client.models.structure.ViewerCandidateKey;
+import com.databasepreservation.common.client.models.structure.ViewerCheckConstraint;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
+import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
+import com.databasepreservation.common.client.models.structure.ViewerPrivilegeStructure;
+import com.databasepreservation.common.client.models.structure.ViewerReference;
+import com.databasepreservation.common.client.models.structure.ViewerRoleStructure;
+import com.databasepreservation.common.client.models.structure.ViewerRoutine;
+import com.databasepreservation.common.client.models.structure.ViewerRoutineParameter;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerTrigger;
+import com.databasepreservation.common.client.models.structure.ViewerUserStructure;
+import com.databasepreservation.common.client.models.structure.ViewerView;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -574,7 +589,10 @@ public class SolrUtils {
     T ret;
     Class<T> classToRetrieve = collection.getObjectClass();
     try {
-      SolrDocument doc = index.getById(collection.getIndexName(), id);
+      Map<String, String> param = new HashMap<>();
+      param.put("fl", "*, [child]");
+      SolrParams params = new MapSolrParams(param);
+      SolrDocument doc = index.getById(collection.getIndexName(), id, params);
       if (doc != null) {
         try {
           ret = collection.fromSolrDocument(doc);
@@ -985,19 +1003,50 @@ public class SolrUtils {
     boolean prefixWithANDOperatorIfBuilderNotEmpty) {
     appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
 
+    boolean isParent = key != null && key.startsWith("{!parent");
+    String parentTag = "";
+    String fieldName = key;
+
+    if (isParent) {
+      int closeIdx = key.indexOf('}');
+      if (closeIdx > 0) {
+        parentTag = key.substring(0, closeIdx + 1);
+        fieldName = key.substring(closeIdx + 1);
+      }
+
+      ret.append("_query_:\"");
+      ret.append(parentTag);
+      ret.append(fieldName).append(":(");
+    } else {
+      ret.append("(");
+    }
+
     String[] split = value.trim().split("\\s+");
-    ret.append("(");
     for (int i = 0; i < split.length; i++) {
       if (i != 0 && operator != null) {
         ret.append(" ").append(operator).append(" ");
       }
+
       if (split[i].matches("(AND|OR|NOT)")) {
-        ret.append(key).append(": \"").append(split[i]).append("\"");
+        if (isParent) {
+          ret.append(split[i]);
+        } else {
+          ret.append(fieldName).append(": \"").append(split[i]).append("\"");
+        }
       } else {
-        ret.append(key).append(": (").append(escapeSolrSpecialChars(split[i])).append(")");
+        if (isParent) {
+          ret.append(escapeSolrSpecialChars(split[i]));
+        } else {
+          ret.append(fieldName).append(": (").append(escapeSolrSpecialChars(split[i])).append(")");
+        }
       }
     }
-    ret.append(")");
+
+    if (isParent) {
+      ret.append(")\"");
+    } else {
+      ret.append(")");
+    }
   }
 
   public static Map<String, Object> asValueUpdate(Object value) {
@@ -1388,6 +1437,9 @@ public class SolrUtils {
     if (object != null) {
       if (object instanceof String) {
         ret = (String) object;
+      } else if (object instanceof java.util.List) {
+        java.util.List<?> list = (java.util.List<?>) object;
+        ret = list.isEmpty() ? defaultValue : String.valueOf(list.get(0));
       } else {
         LOGGER.warn("Could not convert Solr object to string, unsupported class: {}", object.getClass().getName());
       }
@@ -1448,6 +1500,393 @@ public class SolrUtils {
     }
 
     return ret;
+  }
+
+  public static ViewerSchema documentToSchema(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerSchema schema = new ViewerSchema();
+    schema.setUuid(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_SCHEMA_UUID), null));
+    schema.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_SCHEMA_NAME), null));
+    schema.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_SCHEMA_DESCRIPTION), null));
+    schema.setFolder(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_SCHEMA_FOLDER), null));
+
+    List<ViewerTable> tables = new ArrayList<>();
+    List<ViewerView> views = new ArrayList<>();
+    List<ViewerRoutine> routines = new ArrayList<>();
+
+    if (doc.containsKey(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TABLES)
+      && doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TABLES) != null) {
+      for (Object child : doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TABLES)) {
+        if (child instanceof SolrDocument) {
+          tables.add(documentToTable((SolrDocument) child));
+        }
+      }
+    }
+
+    if (doc.containsKey(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_VIEWS)
+      && doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_VIEWS) != null) {
+      for (Object child : doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_VIEWS)) {
+        if (child instanceof SolrDocument) {
+          views.add(documentToView((SolrDocument) child));
+        }
+      }
+    }
+
+    if (doc.containsKey(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_ROUTINES)
+      && doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_ROUTINES) != null) {
+      for (Object child : doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_ROUTINES)) {
+        if (child instanceof SolrDocument) {
+          routines.add(documentToRoutine((SolrDocument) child));
+        }
+      }
+    }
+
+    schema.setTables(tables);
+    schema.setViews(views);
+    schema.setRoutines(routines);
+
+    return schema;
+  }
+
+  public static ViewerTable documentToTable(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerTable table = new ViewerTable();
+    table.setUuid(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_UUID), null));
+    table.setId(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_ID), null));
+    table.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_NAME), null));
+    table.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_DESCRIPTION), null));
+    table.setFolder(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_FOLDER), null));
+    table.setCountRows(objectToLong(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_ROWS), 0L));
+    table.setSchemaUUID(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_SCHEMA_UUID), null));
+    table.setSchemaName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_SCHEMA_NAME), null));
+    table.setNameWithoutPrefix(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_NAME_WITHOUT_PREFIX), null));
+    table.setCustomView(objectToBoolean(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_CUSTOM_VIEW), false));
+    table.setMaterializedView(objectToBoolean(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_MATERIALIZED_VIEW), false));
+
+    List<ViewerColumn> columns = new ArrayList<>();
+    List<ViewerForeignKey> fks = new ArrayList<>();
+    List<ViewerCandidateKey> cks = new ArrayList<>();
+    List<ViewerCheckConstraint> checks = new ArrayList<>();
+    List<ViewerTrigger> triggers = new ArrayList<>();
+
+    if (doc.containsKey(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_COLUMNS)
+      && doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_COLUMNS) != null) {
+      for (Object child : doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_COLUMNS)) {
+        if (child instanceof SolrDocument) {
+          columns.add(documentToColumn((SolrDocument) child));
+        }
+      }
+    }
+
+    if (doc.containsKey(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PRIMARY_KEYS)
+      && doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PRIMARY_KEYS) != null) {
+      for (Object child : doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PRIMARY_KEYS)) {
+        if (child instanceof SolrDocument) {
+          table.setPrimaryKey(documentToPrimaryKey((SolrDocument) child));
+        }
+      }
+    }
+
+    if (doc.containsKey(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEYS)
+      && doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEYS) != null) {
+      for (Object child : doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEYS)) {
+        if (child instanceof SolrDocument) {
+          fks.add(documentToForeignKey((SolrDocument) child));
+        }
+      }
+    }
+
+    if (doc.containsKey(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_CANDIDATE_KEYS)
+      && doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_CANDIDATE_KEYS) != null) {
+      for (Object child : doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_CANDIDATE_KEYS)) {
+        if (child instanceof SolrDocument) {
+          cks.add(documentToCandidateKey((SolrDocument) child));
+        }
+      }
+    }
+
+    if (doc.containsKey(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_CHECK_CONSTRAINTS)
+      && doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_CHECK_CONSTRAINTS) != null) {
+      for (Object child : doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_CHECK_CONSTRAINTS)) {
+        if (child instanceof SolrDocument) {
+          checks.add(documentToCheckConstraint((SolrDocument) child));
+        }
+      }
+    }
+
+    if (doc.containsKey(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TRIGGERS)
+      && doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TRIGGERS) != null) {
+      for (Object child : doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TRIGGERS)) {
+        if (child instanceof SolrDocument) {
+          triggers.add(documentToTrigger((SolrDocument) child));
+        }
+      }
+    }
+
+    table.setColumns(columns);
+    table.setForeignKeys(fks);
+    table.setCandidateKeys(cks);
+    table.setCheckConstraints(checks);
+    table.setTriggers(triggers);
+
+    return table;
+  }
+
+  public static ViewerView documentToView(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerView view = new ViewerView();
+    view.setUuid(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_VIEW_UUID), null));
+    view.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_VIEW_NAME), null));
+    view.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_VIEW_DESCRIPTION), null));
+    view.setQuery(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_VIEW_QUERY), null));
+    view.setQueryOriginal(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_VIEW_QUERY_ORIGINAL), null));
+    view.setSchemaUUID(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_VIEW_SCHEMA_UUID), null));
+    view.setSchemaName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_VIEW_SCHEMA_NAME), null));
+
+    List<ViewerColumn> columns = new ArrayList<>();
+    if (doc.containsKey(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_COLUMNS)
+      && doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_COLUMNS) != null) {
+      for (Object child : doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_COLUMNS)) {
+        if (child instanceof SolrDocument) {
+          columns.add(documentToColumn((SolrDocument) child));
+        }
+      }
+    }
+
+    view.setColumns(columns);
+    return view;
+  }
+
+  public static ViewerRoutine documentToRoutine(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerRoutine routine = new ViewerRoutine();
+    routine.setUuid(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_ROUTINE_UUID), null));
+    routine.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_ROUTINE_NAME), null));
+    routine.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_ROUTINE_DESCRIPTION), null));
+    routine.setSource(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_ROUTINE_SOURCE), null));
+    routine.setBody(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_ROUTINE_BODY), null));
+    routine.setCharacteristic(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_ROUTINE_CHARACTERISTIC), null));
+    routine.setReturnType(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_ROUTINE_RETURN_TYPE), null));
+
+    List<ViewerRoutineParameter> params = new ArrayList<>();
+    if (doc.containsKey(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PARAMETERS)
+      && doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PARAMETERS) != null) {
+      for (Object child : doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PARAMETERS)) {
+        if (child instanceof SolrDocument) {
+          params.add(documentToParameter((SolrDocument) child));
+        }
+      }
+    }
+
+    routine.setParameters(params);
+    return routine;
+  }
+
+  public static ViewerColumn documentToColumn(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerColumn viewerColumn = new ViewerColumn();
+    viewerColumn.setSolrName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_SOLR_NAME), null));
+    viewerColumn.setDisplayName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_NAME), null));
+    viewerColumn.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_DESCRIPTION), null));
+    viewerColumn.setDefaultValue(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_DEFAULT_VALUE), null));
+    viewerColumn.setNillable(objectToBoolean(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_NILLABLE), true));
+    viewerColumn
+      .setAutoIncrement(objectToBoolean(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_AUTO_INCREMENT), false));
+    viewerColumn
+      .setColumnIndexInEnclosingTable(objectToInteger(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_INDEX), 0));
+
+    com.databasepreservation.common.client.models.structure.ViewerType type = new com.databasepreservation.common.client.models.structure.ViewerType();
+    type.setOriginalTypeName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_TYPE_ORIGINAL), null));
+    type.setTypeName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_TYPE_NAME), null));
+    String dbTypeStr = objectToString(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_TYPE_DB), null);
+    if (dbTypeStr != null && !dbTypeStr.isEmpty()) {
+      try {
+        type.setDbType(com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.valueOf(dbTypeStr));
+      } catch (Exception e) {
+      }
+    }
+    viewerColumn.setType(type);
+    return viewerColumn;
+  }
+
+  public static ViewerPrimaryKey documentToPrimaryKey(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerPrimaryKey viewerPrimaryKey = new ViewerPrimaryKey();
+    viewerPrimaryKey.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PK_NAME), null));
+    viewerPrimaryKey.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PK_DESCRIPTION), null));
+    viewerPrimaryKey.setColumnIndexesInViewerTable(
+      objectToIntegerList(doc.getFieldValues(ViewerConstants.SOLR_DATABASES_PK_COLUMN_INDEXES)));
+    return viewerPrimaryKey;
+  }
+
+  public static ViewerCandidateKey documentToCandidateKey(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerCandidateKey viewerCandidateKey = new ViewerCandidateKey();
+    viewerCandidateKey.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_CK_NAME), null));
+    viewerCandidateKey.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_CK_DESCRIPTION), null));
+    viewerCandidateKey.setColumnIndexesInViewerTable(
+      objectToIntegerList(doc.getFieldValues(ViewerConstants.SOLR_DATABASES_CK_COLUMN_INDEXES)));
+    return viewerCandidateKey;
+  }
+
+  public static ViewerForeignKey documentToForeignKey(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerForeignKey viewerForeignKey = new ViewerForeignKey();
+    viewerForeignKey.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_FK_NAME), null));
+    viewerForeignKey.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_FK_DESCRIPTION), null));
+    viewerForeignKey
+      .setReferencedTableUUID(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_FK_REFERENCED_TABLE_UUID), null));
+    viewerForeignKey
+      .setReferencedTableId(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_FK_REFERENCED_TABLE_ID), null));
+    viewerForeignKey.setMatchType(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_FK_MATCH_TYPE), null));
+    viewerForeignKey.setDeleteAction(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_FK_DELETE_ACTION), null));
+    viewerForeignKey.setUpdateAction(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_FK_UPDATE_ACTION), null));
+
+    List<Integer> sources = objectToIntegerList(
+      doc.getFieldValues(ViewerConstants.SOLR_DATABASES_FK_REFERENCE_SOURCE_IDX));
+    List<Integer> refs = objectToIntegerList(doc.getFieldValues(ViewerConstants.SOLR_DATABASES_FK_REFERENCE_REF_IDX));
+    List<ViewerReference> refList = new ArrayList<>();
+
+    if (sources != null && refs != null && sources.size() == refs.size()) {
+      for (int i = 0; i < sources.size(); i++) {
+        ViewerReference r = new ViewerReference();
+        r.setSourceColumnIndex(sources.get(i));
+        r.setReferencedColumnIndex(refs.get(i));
+        refList.add(r);
+      }
+    }
+    viewerForeignKey.setReferences(refList);
+    return viewerForeignKey;
+  }
+
+  public static ViewerCheckConstraint documentToCheckConstraint(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerCheckConstraint viewerCheckConstraint = new ViewerCheckConstraint();
+    viewerCheckConstraint.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_CHECK_NAME), null));
+    viewerCheckConstraint
+      .setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_CHECK_DESCRIPTION), null));
+    viewerCheckConstraint.setCondition(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_CHECK_CONDITION), null));
+    return viewerCheckConstraint;
+  }
+
+  public static ViewerTrigger documentToTrigger(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerTrigger viewerTrigger = new ViewerTrigger();
+    viewerTrigger.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TRIGGER_NAME), null));
+    viewerTrigger.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TRIGGER_DESCRIPTION), null));
+    viewerTrigger.setActionTime(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TRIGGER_ACTION_TIME), null));
+    viewerTrigger.setTriggerEvent(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TRIGGER_EVENT), null));
+    viewerTrigger.setAliasList(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TRIGGER_ALIAS_LIST), null));
+    viewerTrigger.setTriggeredAction(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TRIGGER_ACTION), null));
+    return viewerTrigger;
+  }
+
+  public static ViewerRoutineParameter documentToParameter(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerRoutineParameter viewerRoutineParameter = new ViewerRoutineParameter();
+    viewerRoutineParameter.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PARAMETER_NAME), null));
+    viewerRoutineParameter.setMode(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PARAMETER_MODE), null));
+    viewerRoutineParameter
+      .setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PARAMETER_DESCRIPTION), null));
+
+    com.databasepreservation.common.client.models.structure.ViewerType type = new com.databasepreservation.common.client.models.structure.ViewerType();
+    type.setOriginalTypeName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PARAMETER_TYPE_ORIGINAL), null));
+    type.setTypeName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PARAMETER_TYPE_NAME), null));
+    String dbTypeStr = objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PARAMETER_TYPE_DB), null);
+    if (dbTypeStr != null && !dbTypeStr.isEmpty()) {
+      type.setDbType(com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.valueOf(dbTypeStr));
+    }
+
+    viewerRoutineParameter.setType(type);
+    return viewerRoutineParameter;
+  }
+
+  public static ViewerUserStructure documentToUser(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerUserStructure viewerUserStructure = new ViewerUserStructure();
+    viewerUserStructure.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_USER_NAME), null));
+    viewerUserStructure.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_USER_DESCRIPTION), null));
+    return viewerUserStructure;
+  }
+
+  public static ViewerRoleStructure documentToRole(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerRoleStructure viewerRoleStructure = new ViewerRoleStructure();
+    viewerRoleStructure.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_ROLE_NAME), null));
+    viewerRoleStructure.setAdmin(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_ROLE_ADMIN), null));
+    viewerRoleStructure.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_ROLE_DESCRIPTION), null));
+    return viewerRoleStructure;
+  }
+
+  public static ViewerPrivilegeStructure documentToPrivilege(SolrDocument doc) {
+    if (doc == null) {
+      return null;
+    }
+    ViewerPrivilegeStructure viewerPrivilegeStructure = new ViewerPrivilegeStructure();
+    viewerPrivilegeStructure.setType(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PRIVILEGE_TYPE), null));
+    viewerPrivilegeStructure
+      .setGrantor(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PRIVILEGE_GRANTOR), null));
+    viewerPrivilegeStructure
+      .setGrantee(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PRIVILEGE_GRANTEE), null));
+    viewerPrivilegeStructure.setObject(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PRIVILEGE_OBJECT), null));
+    viewerPrivilegeStructure.setOption(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PRIVILEGE_OPTION), null));
+    viewerPrivilegeStructure
+      .setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_PRIVILEGE_DESCRIPTION), null));
+    return viewerPrivilegeStructure;
+  }
+
+  public static List<Integer> objectToIntegerList(Object object) {
+    List<Integer> list = new ArrayList<>();
+    if (object == null) {
+      return list;
+    }
+
+    if (object instanceof java.util.Collection) {
+      for (Object v : (java.util.Collection<?>) object) {
+        addIntegerToList(list, v);
+      }
+    } else {
+      addIntegerToList(list, object);
+    }
+    return list;
+  }
+
+  private static void addIntegerToList(List<Integer> list, Object v) {
+    if (v instanceof Number) {
+      list.add(((Number) v).intValue());
+    } else if (v instanceof String) {
+      try {
+        list.add(Integer.parseInt((String) v));
+      } catch (NumberFormatException e) {
+        LOGGER.error("Attempted to convert an invalid value to Integer from Solr: '{}'", v);
+      }
+    }
   }
 
   public static String createSearchAllAlias(SolrClient index, String aliasName, List<String> collections)

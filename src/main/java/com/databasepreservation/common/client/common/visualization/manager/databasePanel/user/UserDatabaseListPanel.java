@@ -25,6 +25,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.common.search.DatabaseAdvancedSearchFields;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -94,7 +95,11 @@ public class UserDatabaseListPanel extends ContentPanel {
       });
       return allDatabaseList;
     }, new AsyncTableCellOptions<>(ViewerDatabase.class, ViewerConstants.SEARCH_ALL_LIST_ID));
-    search = new SearchWrapper(true).createListAndSearchPanel(databaseMetadataList, false)
+
+    DatabaseAdvancedSearchFields metadataSearchFields = new DatabaseAdvancedSearchFields();
+
+    search = new SearchWrapper(true)
+      .createListAndSearchPanel(databaseMetadataList, false, metadataSearchFields)
       .createListAndSearchPanel(databaseSearchAll, true);
 
     initWidget(binder.createAndBindUi(this));
