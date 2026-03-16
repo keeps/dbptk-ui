@@ -260,8 +260,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
                   }
                 });
               }
-            }
-            else {
+            } else {
               hideTimer.cancel();
             }
           } else if (event.getNativeEvent().getType().equals("mouseout")) {
@@ -601,7 +600,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           fieldsToReturn.add(dateStringId);
           highlightFields.add(dateStringId);
           queryFields.add(dateStringId);
-        } else if (column.getId().matches("lob.+_s")) {
+        } else if (column.getId().matches("lob.+_s")
+          && column.getLobTextExtractionStatus().getExtractedAndIndexedText()) {
           String ocrStringId = "ocr_" + column.getId() + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX;
           fieldsToReturn.add(ocrStringId);
           highlightFields.add(ocrStringId);
@@ -638,8 +638,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     }
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
-      getFacets(), false, fieldsToReturn, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery,
-      queryFields, true, highlightFields);
+      getFacets(), false, fieldsToReturn, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery, queryFields,
+      true, highlightFields);
 
     CollectionService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(),
       table.getSchemaName(), table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());

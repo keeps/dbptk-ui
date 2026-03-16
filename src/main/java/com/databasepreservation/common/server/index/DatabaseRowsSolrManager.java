@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -46,6 +45,7 @@ import com.databasepreservation.common.client.index.filter.SimpleFilterParameter
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
@@ -192,10 +192,24 @@ public class DatabaseRowsSolrManager {
       fieldsToReturn, new HashMap<>(), filterQueries, "lucene", List.of(), false, List.of());
   }
 
+  public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
+    Sublist sublist, Facets facets, List<String> fieldsToReturn, String defType, List<Filter> filterQueries,
+    List<String> queryFields) throws GenericException, RequestNotValidException {
+    return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,
+      fieldsToReturn, new HashMap<>(), filterQueries, defType, queryFields, false, List.of());
+  }
+
   public <T extends IsIndexed> IndexResult<T> findHits(Class<T> classToReturn, String alias, Filter filter,
     Sorter sorter, Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
     return SolrUtils.findHits(client, SolrDefaultCollectionRegistry.get(classToReturn), alias, filter, sorter, sublist,
-      facets);
+      facets, "lucene", List.of());
+  }
+
+  public <T extends IsIndexed> IndexResult<T> findHits(Class<T> classToReturn, String alias, Filter filter,
+    Sorter sorter, Sublist sublist, Facets facets, String defType, List<String> queryFields)
+    throws GenericException, RequestNotValidException {
+    return SolrUtils.findHits(client, SolrDefaultCollectionRegistry.get(classToReturn), alias, filter, sorter, sublist,
+      facets, defType, queryFields);
   }
 
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,

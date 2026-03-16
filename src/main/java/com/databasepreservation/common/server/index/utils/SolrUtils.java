@@ -207,8 +207,8 @@ public class SolrUtils {
   }
 
   public static <T extends IsIndexed> IndexResult<T> findHits(SolrClient index, SolrCollection<T> collection,
-    String alias, Filter filter, Sorter sorter, Sublist sublist, Facets facets)
-    throws GenericException, RequestNotValidException {
+    String alias, Filter filter, Sorter sorter, Sublist sublist, Facets facets, String defType,
+    List<String> queryFields) throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
@@ -219,6 +219,9 @@ public class SolrUtils {
     query.setRows(0);
 
     parseAndConfigureFacets(facets, query);
+
+    query.setParam("defType", defType);
+    query.setParam("qf", String.join(" ", queryFields));
 
     try {
       QueryRequest request = new QueryRequest(query);
