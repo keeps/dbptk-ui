@@ -1031,13 +1031,13 @@ public class SolrUtils {
         if (isParent) {
           ret.append(split[i]);
         } else {
-          ret.append(fieldName).append(": \"").append(split[i]).append("\"");
+          ret.append(fieldName).append(":\"").append(split[i]).append("\"");
         }
       } else {
         if (isParent) {
           ret.append(escapeSolrSpecialChars(split[i]));
         } else {
-          ret.append(fieldName).append(": (").append(escapeSolrSpecialChars(split[i])).append(")");
+          ret.append(fieldName).append(":(").append(escapeSolrSpecialChars(split[i])).append(")");
         }
       }
     }
