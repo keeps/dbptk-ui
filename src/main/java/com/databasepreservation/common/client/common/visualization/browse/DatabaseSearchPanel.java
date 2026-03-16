@@ -23,7 +23,7 @@ import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.table.TablePanel;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.EDismaxSimplerQueryFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -198,7 +198,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
     if (ViewerStringUtils.isBlank(searchText)) {
       filter = ViewerConstants.DEFAULT_FILTER;
     } else {
-      filter = new Filter(new BasicSearchFilterParameter(ViewerConstants.INDEX_SEARCH, searchText));
+      filter = new Filter(new EDismaxSimplerQueryFilterParameter(searchText));
     }
 
     for (TableSearchPanelContainer tableSearchPanelContainer : tableSearchPanelContainers) {
