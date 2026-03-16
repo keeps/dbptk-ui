@@ -9,7 +9,9 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import com.databasepreservation.common.api.v1.utils.JobResponse;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
+import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
@@ -25,6 +27,8 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
+import com.databasepreservation.common.client.models.user.User;
+import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -46,7 +50,7 @@ import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
 
 /**
- * * @author Gabriel Barros <gbarros@keep.pt>
+ * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class ConfigurationStatusPanel extends Composite implements ICollectionStatusObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
@@ -91,6 +95,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   private Timer progressTimer;
   private boolean jobFinishedSuccessfully = false;
   private boolean isStoppingPolling = false;
+  private boolean isAuthorized = false; // Controle de acesso por roles
   private CollectionStatus collectionStatus;
   private ViewerDatabase database;
   private List<String> plannedSteps = new ArrayList<>();
@@ -114,11 +119,32 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
     toggleProgressMode(false);
     ObserverManager.getCollectionObserver().addObserver(this);
     initHandlers();
+
+    this.setVisible(false);
+    checkPermissions();
+  }
+
+  private void checkPermissions() {
+    UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+      @Override
+      public void onSuccess(User user) {
+        AuthenticationService.Util.call((Boolean authenticationIsEnabled) -> {
+          isAuthorized = !authenticationIsEnabled || user.isAdmin();
+          ConfigurationStatusPanel.this.setVisible(isAuthorized);
+
+          if (isAuthorized && database != null) {
+            refreshStatusFromServer(true);
+          }
+        }).isAuthenticationEnabled();
+      }
+    });
   }
 
   public void setDatabase(ViewerDatabase database) {
     this.database = database;
-    refreshStatusFromServer(true);
+    if (isAuthorized) {
+      refreshStatusFromServer(true);
+    }
   }
 
   @Override
@@ -168,6 +194,8 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
           startPolling(latestJob.getUuid());
         }
       }
+    }, errorMessage -> {
+      GWT.log("[ConfigurationStatusPanel] Error retrieving last active job status: " + errorMessage);
     }).find(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
@@ -254,7 +282,13 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
       }
 
     }, errorMessage -> {
-      //
+      GWT.log("[ConfigurationStatusPanel] Error polling job status: " + errorMessage);
+      isStoppingPolling = true;
+      stopPolling();
+      toggleProgressMode(false);
+      btnApplyConfiguration.setEnabled(true);
+      Dialogs.showErrors(messages.configurationStatusPanelDialogTitleForError(), errorMessage,
+        messages.basicActionClose());
     }).retrieve(jobUUID);
   }
 
@@ -422,7 +456,9 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   @Override
   protected void onAttach() {
     super.onAttach();
-    refreshStatusFromServer(true);
+    if (isAuthorized) {
+      refreshStatusFromServer(true);
+    }
   }
 
   private void updateVisualState() {
@@ -449,6 +485,8 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   private void fetchPendingPlanFromServer() {
     CollectionService.Util.call((List<String> planNames) -> {
       renderPendingPlan(planNames);
+    }, errorMessage -> {
+      GWT.log("[ConfigurationStatusPanel] Error fetching pending plan: " + errorMessage);
     }).getPendingJobPlan(database.getUuid(), database.getUuid());
   }
 
@@ -476,8 +514,8 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
       if (plannedSteps != null && !plannedSteps.isEmpty()) {
         allSteps = plannedSteps;
       } else {
-        Label fallback = new Label(messages.configurationStatusPanelTextForStepCount(
-          job.getCurrentStepNumber(), job.getTotalSteps()));
+        Label fallback = new Label(
+          messages.configurationStatusPanelTextForStepCount(job.getCurrentStepNumber(), job.getTotalSteps()));
         fallback.addStyleName("step-count-label");
         stepsContainer.add(fallback);
         return;

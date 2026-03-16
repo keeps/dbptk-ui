@@ -79,7 +79,6 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -485,7 +484,8 @@ public class CollectionResource implements CollectionService {
       user = controllerAssistant.checkRoles(request);
       ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
 
-      DenormalizeConfiguration config = ViewerFactory.getConfigurationManager().getDenormalizeConfiguration(databaseUUID, tableUUID);
+      DenormalizeConfiguration config = ViewerFactory.getConfigurationManager()
+        .getDenormalizeConfiguration(databaseUUID, tableUUID);
       if (config != null) {
         config.setProcessingState(ProcessingState.TO_REMOVE);
         ViewerFactory.getConfigurationManager().updateDenormalizationConfigurationFile(databaseUUID, config);
@@ -545,34 +545,6 @@ public class CollectionResource implements CollectionService {
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
         databaseUUID);
     }
-  }
-
-  /*******************************************************************************
-   * Collection Resource - Config Sub-resource - Virtual columns
-   ******************************************************************************/
-  @Override
-  public Boolean createVirtualColumn(String databaseUUID, String collectionUUID, String tableUUID,
-    VirtualColumnStatus virtualColumnStatus) {
-    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-
-    LogEntryState state = LogEntryState.SUCCESS;
-    User user = new User();
-
-    try {
-      user = controllerAssistant.checkRoles(request);
-      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
-      ViewerFactory.getConfigurationManager().addVirtualColumn(databaseUUID, collectionUUID, tableUUID,
-        virtualColumnStatus);
-    } catch (ViewerException | AuthorizationException | IllegalArgumentException | IllegalAccessException
-      | GenericException e) {
-      state = LogEntryState.FAILURE;
-      throw new RESTException(e);
-    } finally {
-      // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
-    }
-
-    return true;
   }
 
   /*******************************************************************************

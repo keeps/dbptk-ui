@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
@@ -37,7 +36,6 @@ import com.databasepreservation.common.client.models.status.collection.ForeignKe
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -45,6 +43,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.exceptions.DependencyViolationException;
 import com.databasepreservation.common.exceptions.ViewerException;
@@ -562,21 +561,6 @@ public class ConfigurationManager {
       Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
       ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
       JsonTransformer.writeObjectToFile(updatingStatus, statusFile);
-    }
-  }
-
-  public void addVirtualColumn(String databaseUUID, String collectionUUID, String tableUUID,
-    VirtualColumnStatus virtualColumnStatus) throws GenericException, IllegalAccessException, ViewerException {
-
-    DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
-    if (!databaseStatus.getCollections().isEmpty()) {
-      final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionUUID);
-      TableStatus table = collectionStatus.getTableStatus(tableUUID);
-
-      int order = table.getLastColumnOrder();
-      ColumnStatus columnStatus = StatusUtils.getColumnStatus(virtualColumnStatus, true, ++order);
-      table.addColumnStatus(columnStatus);
-      updateCollectionStatus(databaseUUID, collectionStatus);
     }
   }
 
