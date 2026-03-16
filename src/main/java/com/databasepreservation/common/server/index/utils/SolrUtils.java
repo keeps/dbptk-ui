@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,21 +28,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import com.databasepreservation.common.client.models.structure.ViewerCandidateKey;
-import com.databasepreservation.common.client.models.structure.ViewerCheckConstraint;
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
-import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
-import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
-import com.databasepreservation.common.client.models.structure.ViewerPrivilegeStructure;
-import com.databasepreservation.common.client.models.structure.ViewerReference;
-import com.databasepreservation.common.client.models.structure.ViewerRoleStructure;
-import com.databasepreservation.common.client.models.structure.ViewerRoutine;
-import com.databasepreservation.common.client.models.structure.ViewerRoutineParameter;
-import com.databasepreservation.common.client.models.structure.ViewerSchema;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.models.structure.ViewerTrigger;
-import com.databasepreservation.common.client.models.structure.ViewerUserStructure;
-import com.databasepreservation.common.client.models.structure.ViewerView;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -98,8 +84,23 @@ import com.databasepreservation.common.client.index.filter.SimpleFilterParameter
 import com.databasepreservation.common.client.index.sort.SortParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
+import com.databasepreservation.common.client.models.structure.ViewerCandidateKey;
+import com.databasepreservation.common.client.models.structure.ViewerCheckConstraint;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
+import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
+import com.databasepreservation.common.client.models.structure.ViewerPrivilegeStructure;
+import com.databasepreservation.common.client.models.structure.ViewerReference;
+import com.databasepreservation.common.client.models.structure.ViewerRoleStructure;
+import com.databasepreservation.common.client.models.structure.ViewerRoutine;
+import com.databasepreservation.common.client.models.structure.ViewerRoutineParameter;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerTrigger;
+import com.databasepreservation.common.client.models.structure.ViewerUserStructure;
+import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.filter.solr.TermsFilterParameter;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
@@ -187,9 +188,9 @@ public class SolrUtils {
     }
 
     query.setParam("defType", defType);
-    query.setParam("qf", String.join(" ", queryFields));
+    query.setParam("qf", (queryFields != null) ? String.join(" ", queryFields) : "");
     query.setParam("hl", highlighting);
-    query.setParam("hl.fl", String.join(" ", highlightedFields));
+    query.setParam("hl.fl", (highlightedFields != null) ? String.join(" ", highlightedFields) : "");
     query.setParam("hl.tag.pre", "<b>");
     query.setParam("hl.tag.post", "</b>");
 
@@ -293,7 +294,8 @@ public class SolrUtils {
     Filter filterQuery, List<String> queryFields, boolean highlighting, List<String> highlightedFields)
     throws GenericException, RequestNotValidException {
     return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets, fieldsToReturn,
-      extraParameters, List.of(filterQuery), defType, queryFields, highlighting, highlightedFields);
+      extraParameters, (filterQuery != null) ? List.of(filterQuery) : Collections.emptyList(), defType, queryFields,
+      highlighting, highlightedFields);
   }
 
   public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, Filter filter,
