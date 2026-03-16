@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.client.common.lists;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -220,7 +221,11 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Map<Column<ViewerDatabase, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);
 
-    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets());
+    List<String> queryFields = List.of(ViewerConstants.INDEX_SEARCH);
+
+    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets(),
+      false, new ArrayList<>(), new HashMap<>(), ViewerConstants.SOLR_EDISMAX, new Filter(), queryFields, false,
+      List.of());
 
     DatabaseService.Util.call(callback).find(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
   }

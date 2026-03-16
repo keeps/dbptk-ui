@@ -167,7 +167,7 @@ public class DatabaseResource implements DatabaseService {
       }
       final IndexResult<ViewerDatabase> result = ViewerFactory.getSolrManager().find(ViewerDatabase.class,
         findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn,
-        filterQueries);
+        findRequest.defType, filterQueries, findRequest.queryFields);
       count = result.getTotalCount();
       return result;
     } catch (GenericException | RequestNotValidException e) {
@@ -263,7 +263,8 @@ public class DatabaseResource implements DatabaseService {
       simpleFacetParameter.setOffset(findRequest.sublist.getFirstElementIndex());
 
       final IndexResult<ViewerDatabase> facetsSearch = ViewerFactory.getSolrManager().findHits(ViewerDatabase.class,
-        collectionAlias, filter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter));
+        collectionAlias, filter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter),
+        findRequest.defType, findRequest.queryFields);
 
       count = facetsSearch.getTotalCount();
       FacetFieldResult facetResults = facetsSearch.getFacetResults().get(0);
