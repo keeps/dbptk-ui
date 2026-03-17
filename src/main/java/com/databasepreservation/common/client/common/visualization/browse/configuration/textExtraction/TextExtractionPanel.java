@@ -121,7 +121,6 @@ public class TextExtractionPanel extends ContentPanel {
 
     btnSave.addClickHandler(clickEvent -> {
       Date now = new Date();
-      boolean hasChanges = false;
 
       for (String tableUUID : initialLoading.keySet()) {
         SelectionModel<ViewerColumn> selectedColumns = tables.get(tableUUID).getSelectionModel();
@@ -133,16 +132,17 @@ public class TextExtractionPanel extends ContentPanel {
 
           LobTextExtractionStatus status = colStatus.getLobTextExtractionStatus();
 
-          boolean currentState = status != null && status.getExtractedAndIndexedText();
+          boolean currentState = status != null && status.getProcessingState() != null
+            && (status.getProcessingState().equals(ProcessingState.PROCESSING)
+              || status.getProcessingState().equals(ProcessingState.PROCESSED)
+              || status.getProcessingState().equals(ProcessingState.TO_PROCESS));
 
           if (currentState != isSelected) {
-            hasChanges = true;
             if (status == null) {
               status = new LobTextExtractionStatus();
               colStatus.setLobTextExtractionStatus(status);
             }
 
-            status.setExtractedAndIndexedText(isSelected);
             status.setLastUpdatedDate(now);
 
             if (isSelected) {
@@ -215,8 +215,12 @@ public class TextExtractionPanel extends ContentPanel {
           ColumnStatus colStatus = collectionStatus.getTableStatus(tableUUID).getColumnById(viewerColumn.getSolrName());
 
           boolean isExtractEnabled = false;
-          if (colStatus != null && colStatus.getLobTextExtractionStatus() != null) {
-            isExtractEnabled = colStatus.getLobTextExtractionStatus().getExtractedAndIndexedText();
+          if (colStatus != null && colStatus.getLobTextExtractionStatus() != null
+            && colStatus.getLobTextExtractionStatus().getProcessingState() != null) {
+            isExtractEnabled = colStatus.getLobTextExtractionStatus().getProcessingState()
+              .equals(ProcessingState.PROCESSING)
+              || colStatus.getLobTextExtractionStatus().getProcessingState().equals(ProcessingState.TO_PROCESS)
+              || colStatus.getLobTextExtractionStatus().getProcessingState().equals(ProcessingState.PROCESSED);
           }
 
           selectionTablePanel.getSelectionModel().setSelected(viewerColumn, isExtractEnabled);
