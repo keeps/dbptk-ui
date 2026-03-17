@@ -83,6 +83,8 @@ public class LobTextExtractionProcessor implements ItemProcessor<ViewerRow, RowL
   public RowLobTextUpdate process(ViewerRow row) throws Exception {
     RowLobTextUpdate updateItem = new RowLobTextUpdate(row.getUuid());
 
+    updateItem.setTableId(row.getTableId());
+
     for (ColumnStatus lobColumn : columnsToExtract) {
       ViewerCell lobCell = row.getCells().get(lobColumn.getId());
 
