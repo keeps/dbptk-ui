@@ -43,6 +43,7 @@ public class Main implements EntryPoint {
    */
   @Override
   public void onModuleLoad() {
+    
     ContextService.Util.call((StringResponse env) -> {
       ApplicationType.setType(env.getValue());
       // Set uncaught exception handler

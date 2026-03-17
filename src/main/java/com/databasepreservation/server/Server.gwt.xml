@@ -10,8 +10,15 @@
     <source path='shared'/>
 
     <!-- better stack trace, http://www.summa.com/blog/2012/06/11/7-tips-for-exception-handling-in-gwt -->
-    <set-property name="compiler.stackMode" value="emulated" />
+    <set-property name="compiler.stackMode" value="emulated" />    
     <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true" />
-    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true" />
+    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true" />    
+
+    <!-- Enable source maps for debugging  -->
+    <set-property name="compiler.useSourceMaps" value="true" />
+    <set-property name="compiler.useSymbolMaps" value="true" />
+    <add-linker name="symbolMaps" />
+
+    <!-- Faster compilation, remove in production -->
     <collapse-all-properties/>
 </module>

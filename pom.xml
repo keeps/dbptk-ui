@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.databasepreservation.visualization</groupId>
@@ -24,7 +24,7 @@
         <maven.compiler.source>auto</maven.compiler.source>
         <maven.compiler.target>auto</maven.compiler.target>
 
-        <version.gwt>2.11.0</version.gwt>
+        <version.gwt>2.13.0</version.gwt>
         <scope.gwt-dev>provided</scope.gwt-dev>
         <version.dbptk>4.3.0</version.dbptk>
         <version.roda>5.4.0</version.roda>
@@ -205,13 +205,14 @@
                     <plugin>
                         <groupId>net.ltgt.gwt.maven</groupId>
                         <artifactId>gwt-maven-plugin</artifactId>
-                        <version>1.0.1</version>
+                        <version>1.2.0</version>
                         <extensions>true</extensions>
                         <executions>
                             <execution>
                                 <id>${desktop}</id>
                                 <configuration>
                                     <moduleName>${desktop}</moduleName>
+                                    <deploy>${project.build.outputDirectory}/deploy</deploy>
                                     <systemProperties>
                                         <javax.xml.parsers.SAXParserFactory>
                                             org.apache.xerces.jaxp.SAXParserFactoryImpl
@@ -227,6 +228,7 @@
                                 <id>${server}</id>
                                 <configuration>
                                     <moduleName>${server}</moduleName>
+                                    <deploy>${project.build.outputDirectory}/deploy</deploy>
                                     <systemProperties>
                                         <javax.xml.parsers.SAXParserFactory>
                                             org.apache.xerces.jaxp.SAXParserFactoryImpl
@@ -264,13 +266,8 @@
                                     ${project.build.directory}/${project.build.finalName}
                                 </additionalClasspathElement>
                             </additionalClasspathElements>
-                            <jvmArguments>
-                                -Dgwt.codeServerPort=9876 -Xdebug
-                                -Djava.net.preferIPv4Stack=true
-                                -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
-                                -Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
-                                -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
-                                -Dserver.port=8080
+                            <jvmArguments> -Dgwt.codeServerPort=9876 -Xdebug -Djava.net.preferIPv4Stack=true -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl -Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
+                                -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Dserver.port=8080
                                 --add-opens java.base/java.util=ALL-UNNAMED
                                 --add-opens java.base/java.lang=ALL-UNNAMED
                                 --add-opens java.xml/com.sun.org.apache.xerces.internal.jaxp=ALL-UNNAMED
@@ -290,8 +287,7 @@
                             <draftCompile>true</draftCompile>
                             <style>PRETTY</style>
                             <forceCompilation>true</forceCompilation>
-                            <jvmArgs>
-                                -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
+                            <jvmArgs> -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
                             </jvmArgs>
                         </configuration>
                         <executions>
@@ -323,13 +319,8 @@
                                     ${project.build.directory}/${project.build.finalName}
                                 </additionalClasspathElement>
                             </additionalClasspathElements>
-                            <jvmArguments>
-                                -Dgwt.codeServerPort=9876 -Xdebug
-                                -Djava.net.preferIPv4Stack=true
-                                -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
-                                -Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
-                                -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Denv=desktop
-                                -Dserver.port=8080
+                            <jvmArguments> -Dgwt.codeServerPort=9876 -Xdebug -Djava.net.preferIPv4Stack=true -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl -Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
+                                -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Denv=desktop -Dserver.port=8080
                                 --add-opens java.base/java.util=ALL-UNNAMED
                                 --add-opens java.base/java.lang=ALL-UNNAMED
                                 --add-opens java.xml/com.sun.org.apache.xerces.internal.jaxp=ALL-UNNAMED
@@ -349,8 +340,7 @@
                             <draftCompile>true</draftCompile>
                             <style>PRETTY</style>
                             <forceCompilation>true</forceCompilation>
-                            <jvmArgs>
-                                -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
+                            <jvmArgs> -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
                             </jvmArgs>
                         </configuration>
                         <executions>

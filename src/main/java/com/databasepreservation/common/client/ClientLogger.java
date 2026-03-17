@@ -10,9 +10,11 @@ package com.databasepreservation.common.client;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.http.client.Response;
+import org.fusesource.restygwt.client.Defaults;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
+import org.fusesource.restygwt.client.dispatcher.DefaultFilterawareDispatcher;
+import org.fusesource.restygwt.client.dispatcher.DispatcherFilter;
 
 import com.databasepreservation.common.api.exceptions.RESTException;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
@@ -20,6 +22,7 @@ import com.databasepreservation.common.client.services.ClientLoggerService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.shared.SerializableThrowable;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.logging.client.DevelopmentModeLogHandler;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -89,6 +92,18 @@ public class ClientLogger implements IsSerializable {
    * Set the uncaught exception handler
    */
   public static void setUncaughtExceptionHandler() {
+    DefaultFilterawareDispatcher.singleton().addFilter(new DispatcherFilter() {
+
+      @Override
+      public boolean filter(Method method, RequestBuilder builder) {
+       method.header("X-GWT-Permutation", GWT.getPermutationStrongName());
+            return true; // continue
+      }
+      
+    });
+    
+    Defaults.setDispatcher(DefaultFilterawareDispatcher.singleton());
+    
     GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
       ClientLogger clientlogger = new ClientLogger("Uncaught");
 
@@ -156,7 +171,7 @@ public class ClientLogger implements IsSerializable {
         }
       };
       ClientLoggerService.Util.call(errorcallback).detailedLog("trace", classname, message,
-        SerializableThrowable.fromThrowable(error));
+          SerializableThrowable.fromThrowable(error));
     }
   }
 
@@ -206,7 +221,7 @@ public class ClientLogger implements IsSerializable {
         }
       };
       ClientLoggerService.Util.call(errorcallback).detailedLog("debug", classname, object,
-        SerializableThrowable.fromThrowable(error));
+          SerializableThrowable.fromThrowable(error));
     }
   }
 
@@ -255,7 +270,7 @@ public class ClientLogger implements IsSerializable {
         }
       };
       ClientLoggerService.Util.call(errorcallback).detailedLog("info", classname, message,
-        SerializableThrowable.fromThrowable(error));
+          SerializableThrowable.fromThrowable(error));
     }
   }
 
@@ -303,7 +318,7 @@ public class ClientLogger implements IsSerializable {
         }
       };
       ClientLoggerService.Util.call(errorcallback).detailedLog("warn", classname, message,
-        SerializableThrowable.fromThrowable(error));
+          SerializableThrowable.fromThrowable(error));
     }
   }
 
@@ -359,7 +374,7 @@ public class ClientLogger implements IsSerializable {
       };
 
       ClientLoggerService.Util.call(errorcallback).detailedLog("error", classname, message,
-        SerializableThrowable.fromThrowable(error));
+          SerializableThrowable.fromThrowable(error));
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message, error.getMessage()
       // + (error.getCause() != null ? "\nCause: " +
@@ -420,7 +435,7 @@ public class ClientLogger implements IsSerializable {
       };
 
       ClientLoggerService.Util.call(errorcallback).detailedLog("fatal", classname, message,
-        SerializableThrowable.fromThrowable(error));
+          SerializableThrowable.fromThrowable(error));
 
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message, error.getMessage()
@@ -443,7 +458,7 @@ public class ClientLogger implements IsSerializable {
    * Set class name
    *
    * @param classname
-   *          the name of class being logged
+   *                  the name of class being logged
    */
   public void setClassname(String classname) {
     this.classname = classname;
