@@ -172,14 +172,25 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
   public ColumnStatus getColumnStatus() {
     ColumnStatus statusToReturn = (originalStatus != null) ? originalStatus : new ColumnStatus();
 
+    ViewerType.dbTypes type = ViewerType.dbTypes.STRING;
+    if (sourceColumnsIds != null && !sourceColumnsIds.isEmpty()) {
+      if (sourceColumnsIds.size() == 1) {
+        ColumnStatus sourceColumn = tableStatus.getColumns().stream()
+          .filter(col -> col.getId().equals(sourceColumnsIds.get(0))).findFirst().orElse(null);
+        if (sourceColumn != null) {
+          type = sourceColumn.getType();
+        }
+      }
+    }
+
     if (ViewerStringUtils.isBlank(statusToReturn.getId())) {
       String uuid = UUID.randomUUID().toString();
-      statusToReturn.setId(
-        ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + "_virtual_" + uuid + ViewerConstants.SOLR_DYN_STRING);
+      statusToReturn.setId(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + "_virtual_" + uuid
+        + VirtualOptionsPanelUtils.getVirtualColumnSolrSuffix(type));
       statusToReturn.setOrder(tableStatus.getLastColumnOrder() + 1);
     }
 
-    statusToReturn.setType(ViewerType.dbTypes.VIRTUAL);
+    statusToReturn.setType(type);
     statusToReturn.setSourceType(ViewerSourceType.VIRTUAL);
     statusToReturn.setName(virtualColumnName.getText());
     statusToReturn.setCustomName(virtualColumnName.getText());

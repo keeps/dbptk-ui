@@ -1,7 +1,7 @@
 package com.databasepreservation.common.server.batch.steps.virtual.table;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +9,7 @@ import org.springframework.batch.item.ItemProcessor;
 
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.common.client.models.structure.ViewerMimeType;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.server.batch.context.JobContext;
 
@@ -37,11 +38,31 @@ public class VirtualTableStepProcessor implements ItemProcessor<ViewerRow, Viewe
     viewerRow.setTableUUID(tableStatus.getUuid());
     viewerRow.setTableId(tableStatus.getId());
 
-    // only columns that are present in table status should be included in the
-    // viewer row
-    Map<String, ViewerCell> cellsToInclude = tableStatus.getColumns().stream()
-      .filter(c -> row.getCells().containsKey(c.getId()))
-      .collect(Collectors.toMap(c -> c.getId(), c -> row.getCells().get(c.getId())));
+    Map<String, ViewerCell> cellsToInclude = new HashMap<>();
+
+    tableStatus.getColumns().forEach(c -> {
+      String colId = c.getId();
+
+      if (row.getCells().containsKey(colId)) {
+        ViewerCell originalCell = row.getCells().get(colId);
+        cellsToInclude.put(colId, originalCell);
+
+        if (originalCell.getStoreType() != null) {
+          viewerRow.getColsLobTypeList().put(colId, originalCell.getStoreType());
+        }
+
+        String mimeType = originalCell.getMimeType();
+        String fileExt = originalCell.getFileExtension();
+
+        if (mimeType != null && !mimeType.equals("null")) {
+          ViewerMimeType mimeObj = new ViewerMimeType();
+          mimeObj.setMimeType(mimeType);
+          mimeObj.setFileExtension(fileExt);
+
+          viewerRow.getColsMimeTypeList().put(colId, mimeObj);
+        }
+      }
+    });
 
     viewerRow.setCells(cellsToInclude);
 

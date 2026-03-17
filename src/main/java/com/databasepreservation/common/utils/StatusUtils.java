@@ -23,7 +23,6 @@ import com.databasepreservation.common.client.models.status.collection.LobTextEx
 import com.databasepreservation.common.client.models.status.collection.SearchStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
-import com.databasepreservation.common.client.models.status.collection.VirtualColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.VirtualForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.status.database.Indicators;
@@ -35,7 +34,6 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabaseVal
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
-import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.server.ViewerConfiguration;
@@ -174,24 +172,6 @@ public class StatusUtils {
       status.updateSearchListTemplate(template);
       status.updateDetailsTemplate(detailedTemplate);
     }
-
-    return status;
-  }
-
-  public static ColumnStatus getColumnStatus(VirtualColumnStatus virtualColumnStatus, boolean show, int order) {
-    ColumnStatus status = new ColumnStatus();
-    status.setId("col" + order + "v_s");
-    status.setName("Virtual Column " + order);
-    status.setType(ViewerType.dbTypes.VIRTUAL);
-    status.setSourceType(ViewerSourceType.VIRTUAL);
-    status.setCustomName("Virtual Column " + order);
-    status.setDescription("Virtual Column generated from relation");
-    status.setCustomDescription("Virtual Column generated from relation");
-    status.setOrder(order);
-    status.setExportStatus(getExportStatus());
-    status.setSearchStatus(getSearchStatus(show));
-    status.setDetailsStatus(getDetailsStatus(show));
-    status.setVirtualColumnStatus(virtualColumnStatus);
 
     return status;
   }
