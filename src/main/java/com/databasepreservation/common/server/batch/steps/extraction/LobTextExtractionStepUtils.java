@@ -31,7 +31,7 @@ public class LobTextExtractionStepUtils {
       return false;
     LobTextExtractionStatus status = column.getLobTextExtractionStatus();
 
-    return status != null && status.getExtractedAndIndexedText() && status.shouldProcess();
+    return status != null && status.getProcessingState() != null && status.shouldProcess();
   }
 
   public static boolean isMarkedForCleanup(ColumnStatus column) {

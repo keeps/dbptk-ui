@@ -17,6 +17,7 @@ public class RowLobTextUpdate extends IsIndexed implements Serializable {
   private static final long serialVersionUID = -8620226350367163522L;
 
   private String uuid;
+  private String tableId;
   private final Map<String, String> extractedTexts = new HashMap<>();
   private final List<String> columnsToClear = new ArrayList<>();
 
@@ -40,6 +41,14 @@ public class RowLobTextUpdate extends IsIndexed implements Serializable {
   @Override
   public void setUuid(String uuid) {
     this.uuid = uuid;
+  }
+
+  public String getTableId() {
+    return tableId;
+  }
+
+  public void setTableId(String tableId) {
+    this.tableId = tableId;
   }
 
   public Map<String, String> getExtractedTexts() {

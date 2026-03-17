@@ -87,6 +87,7 @@ public class LobTextExtractionStep extends AbstractIndexingStepDefinition<Viewer
 
     List<String> fieldsToReturn = new ArrayList<>();
     fieldsToReturn.add(ViewerConstants.INDEX_ID);
+    fieldsToReturn.add(ViewerConstants.SOLR_ROWS_TABLE_ID);
     if (tableStatus != null) {
       tableStatus.getColumns().stream().filter(LobTextExtractionStepUtils::shouldProcess).map(ColumnStatus::getId)
         .forEach(fieldsToReturn::add);
@@ -106,7 +107,7 @@ public class LobTextExtractionStep extends AbstractIndexingStepDefinition<Viewer
 
   @Override
   public ItemWriter<RowLobTextUpdate> createWriter(JobContext context) {
-    return new SolrLobTextItemWriter(solrManager, context.getDatabaseUUID());
+    return new SolrLobTextItemWriter(solrManager, context);
   }
 
   @Override
