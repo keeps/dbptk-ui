@@ -3,44 +3,44 @@
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
 
     <g:FlowPanel ui:field="content">
+        <g:FlowPanel addStyleNames="dialog-customize-columns-options">
+            <g:FlowPanel ui:field="fkReferencePanel" visible="false" addStyleNames="alert alert-info">
+                <g:FlowPanel>
+                    <g:HTML>
+                        <i class="fa fa-info-circle"></i>
+                        <strong>
+                            <ui:text from='{messages.columnManagementLabelFkDetected}'/>
+                        </strong>
+                    </g:HTML>
+                </g:FlowPanel>
 
-        <g:FlowPanel ui:field="fkReferencePanel" visible="false" addStyleNames="alert alert-info">
-            <g:FlowPanel>
-                <g:HTML>
-                    <i class="fa fa-info-circle"></i>
-                    <strong>
-                        <ui:text from='{messages.columnManagementLabelFkDetected}'/>
-                    </strong>
-                </g:HTML>
+                <g:FlowPanel>
+                    <g:Label ui:field="fkTableLabel" addStyleNames="font-bold margin-bottom-5"/>
+                    <g:Label ui:field="fkColumnsLabel" addStyleNames="font-bold"/>
+                </g:FlowPanel>
             </g:FlowPanel>
 
-            <g:FlowPanel>
-                <g:Label ui:field="fkTableLabel" addStyleNames="font-bold margin-bottom-5"/>
-                <g:Label ui:field="fkColumnsLabel" addStyleNames="font-bold"/>
-            </g:FlowPanel>
-        </g:FlowPanel>
+            <g:FlowPanel ui:field="virtualReferencePanel" addStyleNames="form-helper">
+                <g:Label addStyleNames="dialog-form-separator">
+                    <ui:text from='{messages.columnManagementLabelForRelationship}'/>
+                </g:Label>
 
-        <g:FlowPanel ui:field="virtualReferencePanel">
-            <g:Label addStyleNames="dialog-form-separator">
-                <ui:text from='{messages.columnManagementLabelForRelationship}'/>
-            </g:Label>
+                <g:FlowPanel>
+                    <g:HTML addStyleNames="form-label">
+                        <ui:text from='{messages.columnManagementLabelForReferencedTable}'/>
+                    </g:HTML>
+                    <g:ListBox ui:field="referencedTableListBox" addStyleNames="form-control"/>
+                    <g:Label ui:field="errorReferencedTable" addStyleNames="dialog-input-error-text" visible="false"/>
+                </g:FlowPanel>
 
-            <g:FlowPanel>
-                <g:HTML addStyleNames="form-label">
-                    <ui:text from='{messages.columnManagementLabelForReferencedTable}'/>
-                </g:HTML>
-                <g:ListBox ui:field="referencedTableListBox" addStyleNames="form-control"/>
-                <g:Label ui:field="errorReferencedTable" addStyleNames="dialog-input-error-text" visible="false"/>
-            </g:FlowPanel>
+                <g:FlowPanel>
+                    <g:HTML addStyleNames="form-label">
+                        Target Column
+                    </g:HTML>
+                    <g:ListBox ui:field="referencedColumnListBox" addStyleNames="form-control"/>
+                    <g:Label ui:field="errorReferencedColumn" addStyleNames="dialog-input-error-text" visible="false"/>
+                </g:FlowPanel>
 
-            <g:FlowPanel>
-                <g:HTML addStyleNames="form-label">
-                    <ui:text from='{messages.columnManagementLabelForReferencedColumnsTemplate}'/>
-                </g:HTML>
-                <g:TextBox addStyleNames="form-textbox full-width" ui:field="templateReferencedColumns"/>
-                <g:FlowPanel ui:field="templateReferencedColumnsHint" addStyleNames="dialog-possible-fields-options" />
-                <g:Label ui:field="errorTemplateReferencedColumns" addStyleNames="dialog-input-error-text"
-                         visible="false"/>
             </g:FlowPanel>
         </g:FlowPanel>
 

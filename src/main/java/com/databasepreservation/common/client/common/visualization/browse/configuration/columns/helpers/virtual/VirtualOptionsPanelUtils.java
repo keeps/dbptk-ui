@@ -96,4 +96,28 @@ public class VirtualOptionsPanelUtils {
       }
     }
   }
+
+  public static String getVirtualColumnSolrSuffix(ViewerType.dbTypes type) {
+    switch (type) {
+      case BINARY:
+      case CLOB:
+        return ViewerConstants.SOLR_DYN_STRING;
+      case BOOLEAN:
+        return ViewerConstants.SOLR_DYN_BOOLEAN;
+      case DATETIME:
+      case DATETIME_JUST_DATE:
+      case DATETIME_JUST_TIME:
+        return ViewerConstants.SOLR_DYN_TDATETIME;
+      case ENUMERATION:
+        return ViewerConstants.SOLR_DYN_STRING;
+      case TIME_INTERVAL:
+        return ViewerConstants.SOLR_DYN_DATES;
+      case NUMERIC_FLOATING_POINT:
+        return ViewerConstants.SOLR_DYN_DOUBLE;
+      case NUMERIC_INTEGER:
+        return ViewerConstants.SOLR_DYN_LONG;
+      default:
+        return ViewerConstants.SOLR_DYN_TEXT_GENERAL;
+    }
+  }
 }

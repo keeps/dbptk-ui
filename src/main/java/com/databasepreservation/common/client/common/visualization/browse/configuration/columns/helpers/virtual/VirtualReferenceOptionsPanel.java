@@ -1,7 +1,5 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.virtual;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.StringJoiner;
 
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
@@ -15,19 +13,15 @@ import com.databasepreservation.common.client.models.status.collection.VirtualFo
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -44,20 +38,17 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
   private final TableStatus currentTableStatus;
   private final ColumnStatus currentColumnStatus;
   private final ViewerDatabase database;
-  private List<String> targetColumnsIds = new ArrayList<>();
 
   @UiField
   ClientMessages messages;
   @UiField
-  FlowPanel virtualReferencePanel, fkReferencePanel, templateReferencedColumnsHint;
+  FlowPanel virtualReferencePanel, fkReferencePanel;
   @UiField
-  ListBox referencedTableListBox;
-  @UiField
-  TextBox templateReferencedColumns;
+  ListBox referencedTableListBox, referencedColumnListBox;
   @UiField
   Label fkTableLabel, fkColumnsLabel;
   @UiField
-  Label errorReferencedTable, errorTemplateReferencedColumns;
+  Label errorReferencedTable, errorReferencedColumn;
 
   public static VirtualReferenceOptionsPanel createInstance(ViewerDatabase database, CollectionStatus collectionStatus,
     TableStatus tableStatus, ColumnStatus columnStatus, ForeignKeysStatus foreignKeysStatus) {
@@ -93,23 +84,24 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
       }
     });
 
-    templateReferencedColumns.addKeyUpHandler(new KeyUpHandler() {
+    referencedColumnListBox.addChangeHandler(new ChangeHandler() {
       @Override
-      public void onKeyUp(KeyUpEvent event) {
-        VirtualReferenceOptionsPanel.this.clearError(templateReferencedColumns, errorTemplateReferencedColumns);
+      public void onChange(ChangeEvent event) {
+        clearError(referencedColumnListBox, errorReferencedColumn);
       }
     });
   }
 
   private void onReferencedTableChanged() {
+    referencedColumnListBox.clear();
+    referencedColumnListBox.addItem("", "");
+
     String selectedTableId = referencedTableListBox.getSelectedItemText();
-    if (selectedTableId.isEmpty()) {
-      resetVirtualFields();
-    } else {
+    if (!selectedTableId.isEmpty()) {
       TableStatus targetTable = collectionStatus.getTableStatusByTableId(selectedTableId);
       if (targetTable != null) {
-        VirtualOptionsPanelUtils.renderColumnTemplateButtons(targetTable.getColumns(), templateReferencedColumnsHint,
-          templateReferencedColumns, targetColumnsIds, messages, true);
+        targetTable.getColumns().stream().filter(c -> VirtualOptionsPanelUtils.isSupportedColumnType(c, true))
+          .forEach(c -> referencedColumnListBox.addItem(c.getName(), c.getId()));
       }
     }
   }
@@ -119,25 +111,26 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
     boolean isValid = true;
 
     clearError(referencedTableListBox, errorReferencedTable);
-    clearError(templateReferencedColumns, errorTemplateReferencedColumns);
+    clearError(referencedColumnListBox, errorReferencedColumn);
 
     if (fkReferencePanel.isVisible()) {
       return true;
     }
 
     String selectedTable = referencedTableListBox.getSelectedValue();
-    boolean hasTable = !ViewerStringUtils.isBlank(selectedTable);
-    boolean hasTemplate = !ViewerStringUtils.isBlank(templateReferencedColumns.getText());
+    String selectedColumn = referencedColumnListBox.getSelectedValue();
 
-    if (hasTemplate && !hasTable) {
+    boolean hasTable = !ViewerStringUtils.isBlank(selectedTable);
+    boolean hasColumn = !ViewerStringUtils.isBlank(selectedColumn);
+
+    if (!hasTable) {
       showError(referencedTableListBox, errorReferencedTable,
         messages.columnManagementLabelForReferencedTable() + " is required.");
       isValid = false;
     }
 
-    if (hasTable && !hasTemplate) {
-      showError(templateReferencedColumns, errorTemplateReferencedColumns,
-        messages.columnManagementLabelForReferencedColumnsTemplate() + " is required.");
+    if (hasTable && !hasColumn) {
+      showError(referencedColumnListBox, errorReferencedColumn, "Target column is required.");
       isValid = false;
     }
 
@@ -161,7 +154,8 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
 
     if (foreignKeysStatus == null) {
       showVirtualReferenceEditor(new ForeignKeysStatus());
-    } else if (foreignKeysStatus.getSourceType() != null && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
+    } else if (foreignKeysStatus.getSourceType() != null
+      && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
       showVirtualReferenceEditor(foreignKeysStatus);
     } else {
       showFkInfo(foreignKeysStatus, table);
@@ -199,18 +193,10 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
 
     onReferencedTableChanged();
 
-    if (virtualStatus.getTemplateStatus() != null) {
-      templateReferencedColumns.setText(virtualStatus.getTemplateStatus().getTemplate());
-      for (ForeignKeysStatus.ReferencedColumnStatus reference : foreignKeysStatus.getReferences()) {
-        targetColumnsIds.add(reference.getReferencedColumnId());
-      }
+    if (foreignKeysStatus.getReferences() != null && !foreignKeysStatus.getReferences().isEmpty()) {
+      String targetColId = foreignKeysStatus.getReferences().get(0).getReferencedColumnId();
+      VirtualOptionsPanelUtils.selectListBoxValue(referencedColumnListBox, targetColId);
     }
-  }
-
-  private void resetVirtualFields() {
-    templateReferencedColumns.setText("");
-    templateReferencedColumnsHint.clear();
-    targetColumnsIds.clear();
   }
 
   public ForeignKeysStatus getVirtualReferenceStatus() {
@@ -228,16 +214,18 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
     foreignKeysStatus.setReferencedTableId(selectedTable);
     foreignKeysStatus.setReferencedTableUUID(selectedTableUUID);
 
-    for (String targetColumnsId : targetColumnsIds) {
-      ForeignKeysStatus.ReferencedColumnStatus viewerReference = new ForeignKeysStatus.ReferencedColumnStatus();
-      viewerReference.setReferencedColumnId(targetColumnsId);
-      viewerReference.setSourceColumnId(currentColumnStatus.getId());
-      foreignKeysStatus.getReferences().add(viewerReference);
-    }
+    String targetColumnId = referencedColumnListBox.getSelectedValue();
+    String targetColumnName = referencedColumnListBox.getSelectedItemText();
+
+    ForeignKeysStatus.ReferencedColumnStatus viewerReference = new ForeignKeysStatus.ReferencedColumnStatus();
+    viewerReference.setReferencedColumnId(targetColumnId);
+    viewerReference.setSourceColumnId(currentColumnStatus.getId());
+    foreignKeysStatus.getReferences().add(viewerReference);
 
     VirtualForeignKeysStatus status = new VirtualForeignKeysStatus();
     TemplateStatus template = new TemplateStatus();
-    template.setTemplate(templateReferencedColumns.getText());
+
+    template.setTemplate("{{" + targetColumnName + "}}");
     status.setTemplateStatus(template);
 
     foreignKeysStatus.setVirtualForeignKeysStatus(status);

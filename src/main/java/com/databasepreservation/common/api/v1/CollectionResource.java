@@ -698,7 +698,36 @@ public class CollectionResource implements CollectionService {
       final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
         .getConfigurationCollection(databaseUUID, databaseUUID);
-      final TableStatus configTable = configurationCollection.getTableStatusByTableId(row.getTableId());
+      TableStatus configTable = configurationCollection.getTableStatusByTableId(row.getTableId());
+
+      if (configTable.getVirtualTableStatus() != null) {
+        String originalRowIndex = rowIndex.substring(rowIndex.lastIndexOf('_') + 1);
+        String sourceTableUUID = configTable.getVirtualTableStatus().getSourceTableUUID();
+
+        TableStatus originalTableConfig = configurationCollection.getTables().stream()
+          .filter(t -> t.getUuid().equals(sourceTableUUID)).findFirst()
+          .orElseThrow(() -> new NotFoundException("Original table not found"));
+
+        ViewerRow originalRow = solrManager.retrieveRows(databaseUUID, originalRowIndex);
+
+        String columnId = configTable.getColumnByIndex(columnIndex).getId();
+        int originalColumnIndex = -1;
+        for (int i = 0; i < originalTableConfig.getColumns().size(); i++) {
+          if (originalTableConfig.getColumns().get(i).getId().equals(columnId)) {
+            originalColumnIndex = i;
+            break;
+          }
+        }
+
+        if (originalColumnIndex == -1) {
+          throw new NotFoundException("Column not found in original table");
+        }
+
+        configTable = originalTableConfig;
+        row = originalRow;
+        rowIndex = originalRowIndex;
+        columnIndex = originalColumnIndex;
+      }
 
       if (ViewerType.dbTypes.CLOB.equals(configTable.getColumnByIndex(columnIndex).getType())) {
         return handleClobDownload(configTable, row, columnIndex);
