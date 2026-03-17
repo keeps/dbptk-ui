@@ -243,6 +243,9 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     MethodCallback<IndexResult<ViewerDatabase>> callback) {
     Filter filter = getFilter();
 
+    filter.add(
+      new SimpleFilterParameter(ViewerConstants.SOLR_CONTENT_TYPE, ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_ROOT));
+
     Map<Column<ViewerDatabase, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
 
     if (nameColumn != null) {
