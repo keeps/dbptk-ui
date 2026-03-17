@@ -145,6 +145,38 @@ public class SolrUtils {
     return humanFriendlyName;
   }
 
+  private static void applyFiltersToQuery(SolrQuery query, Filter mainFilter, List<Filter> filterQueries)
+    throws RequestNotValidException {
+    Filter qFilter = new Filter();
+    List<Filter> fqFilters = new ArrayList<>();
+
+    if (filterQueries != null) {
+      fqFilters.addAll(filterQueries);
+    }
+
+    if (mainFilter != null && mainFilter.getParameters() != null) {
+      for (FilterParameter param : mainFilter.getParameters()) {
+        String paramString = parseFilter(new Filter(param));
+
+        if (paramString.contains("{!") || paramString.contains("_query_:")) {
+          fqFilters.add(new Filter(param));
+        } else {
+          qFilter.add(param);
+        }
+      }
+    }
+
+    query.setQuery(parseFilter(qFilter));
+
+    List<String> parsedFilterQueries = new ArrayList<>();
+    for (Filter fq : fqFilters) {
+      parsedFilterQueries.add(parseFilter(fq));
+    }
+    if (!parsedFilterQueries.isEmpty()) {
+      query.setFilterQueries(parsedFilterQueries.toArray(new String[0]));
+    }
+  }
+
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
     Sorter sorter, Sublist sublist) throws GenericException, RequestNotValidException {
     return find(index, collection, filter, sorter, sublist, Facets.NONE, new ArrayList<>(), new HashMap<>());
@@ -163,12 +195,9 @@ public class SolrUtils {
     List<String> highlightedFields) throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
-    query.setQuery(parseFilter(filter));
-    List<String> parsedFilterQueries = new ArrayList<>();
-    for (Filter filterQuery : filterQueries) {
-      parsedFilterQueries.add(parseFilter(filterQuery));
-    }
-    query.setFilterQueries(parsedFilterQueries.toArray(new String[0]));
+
+    applyFiltersToQuery(query, filter, filterQueries);
+
     final List<SolrQuery.SortClause> sortClauses = parseSorter(sorter);
     sortClauses.add(SolrQuery.SortClause.asc(RodaConstants.INDEX_UUID));
     query.setSorts(sortClauses);
@@ -227,7 +256,9 @@ public class SolrUtils {
     List<String> queryFields) throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
-    query.setQuery(parseFilter(filter));
+
+    applyFiltersToQuery(query, filter, null);
+
     final List<SolrQuery.SortClause> sortClauses = parseSorter(sorter);
     sortClauses.add(SolrQuery.SortClause.asc(RodaConstants.INDEX_UUID));
     query.setSorts(sortClauses);
@@ -318,12 +349,8 @@ public class SolrUtils {
     Pair<IndexResult<T>, String> ret;
     SolrQuery query = new SolrQuery();
     query.setParam("q.op", DEFAULT_QUERY_PARSER_OPERATOR);
-    query.setQuery(parseFilter(filter));
-    List<String> parsedFilterQueries = new ArrayList<>();
-    for (Filter filterQuery : filterQueries) {
-      parsedFilterQueries.add(parseFilter(filterQuery));
-    }
-    query.setFilterQueries(parsedFilterQueries.toArray(new String[0]));
+
+    applyFiltersToQuery(query, filter, filterQueries);
 
     query.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
     query.setRows(pageSize);
@@ -367,7 +394,8 @@ public class SolrUtils {
     Pair<IndexResult<ViewerRow>, String> ret;
     SolrQuery query = new SolrQuery();
     query.setParam("q.op", DEFAULT_QUERY_PARSER_OPERATOR);
-    query.setQuery(parseFilter(filter));
+
+    applyFiltersToQuery(query, filter, null);
 
     query.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
     query.setRows(pageSize);
