@@ -130,7 +130,6 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
       public void onSuccess(User user) {
         AuthenticationService.Util.call((Boolean authenticationIsEnabled) -> {
           isAuthorized = !authenticationIsEnabled || user.isAdmin();
-          ConfigurationStatusPanel.this.setVisible(isAuthorized);
 
           if (isAuthorized && database != null) {
             refreshStatusFromServer(true);
@@ -235,9 +234,12 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
   private void startPolling(String jobUUID) {
     isStoppingPolling = false;
+
+    this.setVisible(true);
     alertPanel.setVisible(true);
+
     toggleProgressMode(true);
-    updateProgressVisuals(null); // Reset visual
+    updateProgressVisuals(null);
 
     progressTimer = new Timer() {
       @Override
@@ -466,10 +468,12 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
       boolean needsProcess = collectionStatus.isNeedsToBeProcessed();
 
       if (jobFinishedSuccessfully) {
+        this.setVisible(true);
         alertPanel.setVisible(true);
         return;
       }
 
+      this.setVisible(needsProcess);
       alertPanel.setVisible(needsProcess);
 
       if (needsProcess && !isStoppingPolling) {
