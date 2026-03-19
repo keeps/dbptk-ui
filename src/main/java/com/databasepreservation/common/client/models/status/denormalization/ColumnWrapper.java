@@ -87,17 +87,21 @@ public class ColumnWrapper {
   }
 
   public SafeHtml createPath() {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<span class=\"table-ref-link\">");
-    createPathRelatedTo(relatedTable, sb);
-    sb.appendHtmlConstant("<span class=\"table-ref-path\"><b>");
-    //sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BREADCRUMB_SEPARATOR));
-    sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COLUMN));
-    sb.append(SafeHtmlUtils.fromString(columnDisplayName));
-    sb.appendHtmlConstant("</b></span>");
-    sb.appendHtmlConstant("</span>");
-    relatedTable.setPath(sb.toSafeHtml().asString());
-    return sb.toSafeHtml();
+    SafeHtmlBuilder sbBase = new SafeHtmlBuilder();
+
+    createPathRelatedTo(relatedTable, sbBase);
+    relatedTable.setPath(sbBase.toSafeHtml().asString());
+
+    SafeHtmlBuilder sbFull = new SafeHtmlBuilder();
+    sbFull.appendHtmlConstant("<span class=\"table-ref-link\">");
+    sbFull.append(sbBase.toSafeHtml());
+    sbFull.appendHtmlConstant("<span class=\"table-ref-path\"><b>");
+    sbFull.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COLUMN));
+    sbFull.append(SafeHtmlUtils.fromString(columnDisplayName));
+    sbFull.appendHtmlConstant("</b></span>");
+    sbFull.appendHtmlConstant("</span>");
+
+    return sbFull.toSafeHtml();
   }
 
   private void createPathRelatedTo(RelatedTablesConfiguration relatedTable, SafeHtmlBuilder sb) {
@@ -116,7 +120,8 @@ public class ColumnWrapper {
             break;
           }
         }
-        if(innerPath) break;
+        if (innerPath)
+          break;
       }
     }
 
