@@ -1477,6 +1477,11 @@ public class SolrUtils {
     return ret;
   }
 
+  public static Boolean getSolrBooleanValue(String originalValue) {
+    return originalValue != null
+      && (originalValue.startsWith("1") || originalValue.startsWith("t") || originalValue.startsWith("T"));
+  }
+
   public static <E extends Enum<E>> String formatEnum(E enumValue) {
     return enumValue.name();
   }
