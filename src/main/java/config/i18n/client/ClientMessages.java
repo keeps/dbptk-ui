@@ -1348,6 +1348,8 @@ public interface ClientMessages extends Messages {
 
   String rowPanelTextForLobUnavailable();
 
+  String rowPanelTextForShowAllNestedColumns();
+
   /********************************************
    * Advanced Search
    *******************************************/
@@ -1574,6 +1576,10 @@ public interface ClientMessages extends Messages {
   String dataTransformationTextForDescription();
 
   String dataTransformationLabelForVirtualRelationship();
+
+  String dataTransformationLabelForTargetColumn();
+
+  String dataTransformationTextForTargetColumnSelect(String id);
 
   /********************************************
    * Sponsors Panel

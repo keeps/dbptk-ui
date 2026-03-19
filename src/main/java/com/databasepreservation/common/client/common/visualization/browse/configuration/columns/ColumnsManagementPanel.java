@@ -414,7 +414,25 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       return sb.toSafeHtml();
     } else {
       if (column.getType().equals(ViewerType.dbTypes.NESTED)) {
-        return SafeHtmlUtils.fromSafeConstant(column.getNestedColumns().getPath());
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        sb.appendHtmlConstant("<span class=\"table-ref-link\">");
+
+        if (column.getNestedColumns().getPath() != null) {
+          sb.appendHtmlConstant(column.getNestedColumns().getPath());
+        }
+
+        sb.appendHtmlConstant("<span class=\"table-ref-path\"><b>");
+        sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COLUMN));
+
+        if (column.getNestedColumns().getNestedFields() != null) {
+          sb.appendEscaped(String.join(", ", column.getNestedColumns().getNestedFields()));
+        }
+
+        sb.appendHtmlConstant("</b></span>");
+
+        sb.appendHtmlConstant("</span>");
+
+        return sb.toSafeHtml();
       } else {
         return SafeHtmlUtils.fromString(column.getName());
       }
