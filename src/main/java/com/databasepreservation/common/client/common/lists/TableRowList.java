@@ -461,33 +461,42 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
    */
   private List<String> getCellHighlights(ViewerRow row, ColumnStatus configColumn) {
     Map<String, List<String>> rowHighlights = getResult().getHighlightingInfo().get(row.getUuid());
+    List<String> cellHighlights = new ArrayList<>();
     if (rowHighlights != null) {
-      String columnHighlightedName;
+      List<String> columnHighlightedNames = new ArrayList<>();
       switch (configColumn.getType()) {
         case NESTED:
           // TODO: Support highlighting for nested fields
-          columnHighlightedName = configColumn.getId();
+          columnHighlightedNames.add(configColumn.getId());
           break;
         case BINARY:
         case CLOB:
-          columnHighlightedName = "ocr_" + configColumn.getId() + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX;
+          columnHighlightedNames.add(configColumn.getId());
+          columnHighlightedNames
+            .add("ocr_" + configColumn.getId() + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX);
           break;
         case DATETIME:
         case DATETIME_JUST_DATE:
         case DATETIME_JUST_TIME:
-          columnHighlightedName = configColumn.getId().replace(ViewerConstants.SOLR_DYN_DATE,
-            ViewerConstants.SOLR_DYN_TEXT_GENERAL);
+          columnHighlightedNames
+            .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_DATE, ViewerConstants.SOLR_DYN_TEXT_GENERAL));
+          break;
+        case BOOLEAN:
+          columnHighlightedNames
+            .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_BOOLEAN, ViewerConstants.SOLR_DYN_STRING));
           break;
         default:
-          columnHighlightedName = configColumn.getId();
+          columnHighlightedNames.add(configColumn.getId());
           break;
       }
-      List<String> cellHighlights = rowHighlights.get(columnHighlightedName);
-      if (cellHighlights != null && !cellHighlights.isEmpty()) {
-        return cellHighlights;
+      for (String columnHighlightedName : columnHighlightedNames) {
+        List<String> nameHighlights = rowHighlights.get(columnHighlightedName);
+        if (nameHighlights != null) {
+          cellHighlights.addAll(rowHighlights.get(columnHighlightedName));
+        }
       }
     }
-    return List.of();
+    return cellHighlights;
   }
 
   private Column<ViewerRow, SafeHtml> buildDownloadColumn(ColumnStatus configColumn, ViewerDatabase database,
@@ -587,26 +596,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     Filter filter = getFilter();
     boolean hasNested = false;
 
+    createFieldLists(fieldsToReturn, queryFields, highlightFields);
+
     for (ColumnStatus column : status.getTableStatus(table.getUuid()).getVisibleColumnsList()) {
       if (column.getNestedColumns() != null) {
         hasNested = true;
-      } else {
-        fieldsToReturn.add(column.getId());
-        highlightFields.add(column.getId());
-        queryFields.add(column.getId());
-        if (column.getId().endsWith(ViewerConstants.SOLR_DYN_DATE)) {
-          String dateStringId = column.getId().replace(ViewerConstants.SOLR_DYN_DATE,
-            ViewerConstants.SOLR_DYN_TEXT_GENERAL);
-          fieldsToReturn.add(dateStringId);
-          highlightFields.add(dateStringId);
-          queryFields.add(dateStringId);
-        } else if (column.getId().matches("lob.+_s")
-          && column.getLobTextExtractionStatus().getExtractedAndIndexedText()) {
-          String ocrStringId = "ocr_" + column.getId() + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX;
-          fieldsToReturn.add(ocrStringId);
-          highlightFields.add(ocrStringId);
-          queryFields.add(ocrStringId);
-        }
+        break;
       }
     }
 
@@ -646,6 +641,47 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     if (!getPersistSelections()) {
       setSelectingAll(false);
+    }
+  }
+
+  protected void createFieldLists(List<String> fieldsToReturn, List<String> queryFields, List<String> highlightFields) {
+    CollectionStatus status = getObject().getStatus();
+    ViewerTable table = getObject().getTable();
+    for (ColumnStatus column : status.getTableStatus(table.getUuid()).getVisibleColumnsList()) {
+      if (column.getNestedColumns() == null) {
+        if (column.getId().endsWith(ViewerConstants.SOLR_DYN_DATE)) {
+          String dateStringId = column.getId().replace(ViewerConstants.SOLR_DYN_DATE,
+            ViewerConstants.SOLR_DYN_TEXT_GENERAL);
+          // Return both fields, but only query and highlight on the text field
+          fieldsToReturn.add(column.getId());
+          fieldsToReturn.add(dateStringId);
+          highlightFields.add(dateStringId);
+          queryFields.add(dateStringId);
+        } else if (column.getId().endsWith(ViewerConstants.SOLR_DYN_BOOLEAN)) {
+          // Return both fields, but only query and highlight on the string field
+          String booleanStringId = column.getId().replace(ViewerConstants.SOLR_DYN_BOOLEAN,
+            ViewerConstants.SOLR_DYN_STRING);
+          fieldsToReturn.add(column.getId());
+          fieldsToReturn.add(booleanStringId);
+          queryFields.add(booleanStringId);
+          highlightFields.add(booleanStringId);
+        } else if (column.getId().matches("lob.+_s")
+          // Return, query, and highlight both fields
+          && column.getLobTextExtractionStatus().getExtractedAndIndexedText()) {
+          String ocrStringId = "ocr_" + column.getId() + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX;
+          fieldsToReturn.add(ocrStringId);
+          highlightFields.add(ocrStringId);
+          queryFields.add(ocrStringId);
+          fieldsToReturn.add(column.getId());
+          highlightFields.add(column.getId());
+          queryFields.add(column.getId());
+        } else {
+          // Use field as is for all purposes
+          fieldsToReturn.add(column.getId());
+          highlightFields.add(column.getId());
+          queryFields.add(column.getId());
+        }
+      }
     }
   }
 
