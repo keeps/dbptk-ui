@@ -44,6 +44,7 @@ import com.databasepreservation.common.client.models.status.collection.ColumnSta
 import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -62,6 +63,7 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.SwitchBtn;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -263,6 +265,8 @@ public class RowPanel extends RightPanel {
       b.appendHtmlConstant("</div>");
     }
 
+    Set<String> processedMultiValueTables = new java.util.HashSet<>();
+
     for (ColumnStatus columnStatus : status.getTableStatus(table.getUuid()).getColumns()) {
       if (columnStatus.getDetailsStatus().isShow()) {
         if (columnStatus.getNestedColumns() == null) {
@@ -272,7 +276,7 @@ public class RowPanel extends RightPanel {
           getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
             colIndexReferencedBy.get(column.getSolrName()), isPrimaryKeyColumn, columnStatus);
         } else {
-          getNestedHTML(columnStatus);
+          getNestedHTML(columnStatus, processedMultiValueTables);
         }
       }
     }
@@ -469,102 +473,202 @@ public class RowPanel extends RightPanel {
     }
   }
 
-  private void getNestedHTML(ColumnStatus columnStatus) {
+  private void getNestedHTML(ColumnStatus columnStatus, java.util.Set<String> processedMultiValueTables) {
     NestedColumnStatus nestedColumns = columnStatus.getNestedColumns();
-    if (nestedColumns != null) {
-      ViewerTable nestedTable = database.getMetadata().getTableById(nestedColumns.getOriginalTable());
+    if (nestedColumns == null) {
+      return;
+    }
 
-      List<FilterParameter> filterParameterList = new ArrayList<>();
-      filterParameterList.add(new CrossCollectionInnerJoinFilterParameter(rowUUID, columnStatus.getId(),
-        ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid()));
-      Filter filter = new Filter();
-      filter.add(filterParameterList);
+    ViewerTable nestedTable = database.getMetadata().getTableById(nestedColumns.getOriginalTable());
+    String targetUuid = getTargetUuid(columnStatus, nestedColumns);
+    Filter filter = createInnerJoinFilter(targetUuid);
 
-      if (columnStatus.getNestedColumns().getMultiValue()) {
-        FlowPanel card = new FlowPanel();
-        card.setStyleName("card");
+    if (nestedColumns.getMultiValue()) {
+      renderMultiValueNestedTable(targetUuid, nestedTable, filter, processedMultiValueTables);
+    } else {
+      renderSingleValueNestedTemplate(columnStatus, nestedTable, filter);
+    }
+  }
 
-        final TableSearchPanel tablePanel = new TableSearchPanel(status);
-        tablePanel.provideSource(database, nestedTable, filter, true);
-        card.add(tablePanel);
+  private String getTargetUuid(ColumnStatus columnStatus, NestedColumnStatus nestedColumns) {
+    String refUuid = nestedColumns.getReferenceUuid();
+    return (refUuid != null && !refUuid.isEmpty()) ? refUuid : columnStatus.getId();
+  }
 
-        content.add(card);
-      } else {
-        String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
-        FlowPanel panel = new FlowPanel();
-        content.add(panel);
-        if (template != null) {
-          FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, new Sorter(), new Sublist(),
-            null, false, new ArrayList<>());
-          CollectionService.Util.call((IndexResult<ViewerRow> result) -> {
-            if (result.getTotalCount() >= 1) {
-              RowField rowField;
-              String json = JSOUtils.cellsToJson(result.getResults().get(0).getCells(), nestedTable);
-              String s = JavascriptUtils.compileTemplate(template, json);
-              if (columnStatus.getTypeName().contains("BINARY LARGE OBJECT")) {
-                String templateLob = "<a href=\"{{" + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + "}}\">{{"
-                  + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL + "}}</a>";
+  private Filter createInnerJoinFilter(String targetUuid) {
+    List<FilterParameter> filterParameterList = new ArrayList<>();
+    filterParameterList.add(new CrossCollectionInnerJoinFilterParameter(rowUUID, targetUuid,
+      ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid()));
+    Filter filter = new Filter();
+    filter.add(filterParameterList);
+    return filter;
+  }
 
-                // loop to find the original column index
-                Map.Entry<String, ViewerCell> originalCell = null;
-                for (Map.Entry<String, ViewerCell> entry : result.getResults().get(0).getCells().entrySet()) {
-                  ViewerCell v = entry.getValue();
-                  if (v.getStoreType() != null) {
-                    originalCell = entry;
-                    break;
-                  }
-                }
-                int originalColumnIndex = 0;
-                for (ViewerColumn c : nestedTable.getColumns()) {
-                  if (c.getSolrName().equals(originalCell.getKey())) {
-                    break;
-                  }
-                  originalColumnIndex++;
-                }
+  private void renderMultiValueNestedTable(String targetUuid, ViewerTable nestedTable, Filter filter,
+    java.util.Set<String> processedMultiValueTables) {
+    if (processedMultiValueTables.contains(targetUuid)) {
+      return;
+    }
+    processedMultiValueTables.add(targetUuid);
 
-                if ((database.getPath() == null || database.getPath().isEmpty())
-                  && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
-                  rowField = RowField.createInstance(new Label(s).getText(),
-                    new HTML(messages.rowPanelTextForLobUnavailable()));
-                } else {
-                  String exportLobUri = RestUtils.createExportLobUri(database.getUuid(), nestedTable.getSchemaName(),
-                    nestedTable.getName(), result.getResults().get(0).getUuid(), originalColumnIndex);
-                  if (originalCell.getValue().getMimeType().equals("application/pdf")
-                    || originalCell.getValue().getValue().endsWith(".pdf")
-                    || originalCell.getValue().getValue().endsWith(".PDF")) {
-                    String viewerPdf = GWT.getHostPageBaseURL() + "webjars/pdf-js/web/viewer.html?file=" + exportLobUri;
-                    Frame frame = new Frame(viewerPdf);
-                    frame.addStyleName("embedded-iiif-viewer");
-                    rowField = RowField.createInstance(null, columnStatus.getCustomName(), viewerPdf, frame, null);
-                  } else {
-                    SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
-                    if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
-                      json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL,
-                        messages.row_openLOBViewer(), ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK,
-                        RestUtils.createUVLob(), ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, exportLobUri);
+    FlowPanel card = new FlowPanel();
+    card.setStyleName("card");
 
-                      templateLob = ViewerConstants.DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE;
-                    } else {
-                      json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL,
-                        messages.row_downloadLOB(), ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, exportLobUri);
-                    }
+    final TableSearchPanel tablePanel = new TableSearchPanel(status);
+    tablePanel.provideSource(database, nestedTable, filter, true);
 
-                    safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(templateLob, json));
+    java.util.Set<String> allIncludedFields = getIncludedFieldsForNestedTable(targetUuid);
+    TableStatus nestedTableStatus = status.getTableStatus(nestedTable.getUuid());
 
-                    rowField = RowField.createInstance(columnStatus.getCustomName(), new HTML(safeHtml));
-                  }
-                }
-              } else {
-                rowField = RowField.createInstance(columnStatus.getCustomName(), new Label(s));
-              }
+    FlowPanel toolbar = createVisibilityToolbar(tablePanel, nestedTableStatus, allIncludedFields);
 
-              rowField.addColumnDescription(columnStatus.getCustomDescription());
-              panel.add(rowField);
-            }
-          }).findRows(database.getUuid(), database.getUuid(), nestedTable.getSchemaName(), nestedTable.getName(),
-            findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+    card.add(tablePanel);
+    card.add(toolbar);
+    content.add(card);
+  }
+
+  private java.util.Set<String> getIncludedFieldsForNestedTable(String targetUuid) {
+    java.util.Set<String> allIncludedFields = new java.util.HashSet<>();
+    for (ColumnStatus parentCol : status.getTableStatus(table.getUuid()).getColumns()) {
+      if (parentCol.getNestedColumns() != null) {
+        String checkUuid = getTargetUuid(parentCol, parentCol.getNestedColumns());
+        if (targetUuid.equals(checkUuid) && parentCol.getNestedColumns().getNestedFields() != null) {
+          allIncludedFields.addAll(parentCol.getNestedColumns().getNestedFields());
         }
       }
+    }
+    return allIncludedFields;
+  }
+
+  private FlowPanel createVisibilityToolbar(TableSearchPanel tablePanel, TableStatus nestedTableStatus,
+    java.util.Set<String> allIncludedFields) {
+    FlowPanel toolbar = new FlowPanel();
+
+    toolbar.getElement().getStyle().setProperty("textAlign", "right");
+
+    SwitchBtn toggleColumnsSwitch = new SwitchBtn(messages.rowPanelTextForShowAllNestedColumns(), false);
+    toolbar.add(toggleColumnsSwitch);
+
+    final boolean[] showingAll = {false};
+
+    Runnable updateVisibility = () -> {
+      Map<String, Boolean> columnVisibility = new HashMap<>();
+      for (ColumnStatus col : nestedTableStatus.getColumns()) {
+        boolean isVisible = showingAll[0] || allIncludedFields.contains(col.getName())
+          || allIncludedFields.contains(col.getCustomName());
+        columnVisibility.put(col.getName(), isVisible);
+      }
+      tablePanel.setColumnVisibility(columnVisibility);
+    };
+
+    updateVisibility.run();
+
+    toggleColumnsSwitch.setClickHandler(event -> {
+      toggleColumnsSwitch.getButton().setValue(!toggleColumnsSwitch.getButton().getValue(), true);
+      showingAll[0] = toggleColumnsSwitch.getButton().getValue();
+      updateVisibility.run();
+    });
+
+    return toolbar;
+  }
+
+  private void renderSingleValueNestedTemplate(ColumnStatus columnStatus, ViewerTable nestedTable, Filter filter) {
+    String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
+    if (template == null) {
+      return;
+    }
+
+    FlowPanel panel = new FlowPanel();
+    content.add(panel);
+
+    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, new Sorter(), new Sublist(), null,
+      false, new ArrayList<>());
+
+    CollectionService.Util.call((IndexResult<ViewerRow> result) -> {
+      if (result.getTotalCount() >= 1) {
+        RowField rowField = buildRowFieldFromResult(result.getResults().get(0), columnStatus, nestedTable, template);
+        panel.add(rowField);
+      }
+    }).findRows(database.getUuid(), database.getUuid(), nestedTable.getSchemaName(), nestedTable.getName(), findRequest,
+      LocaleInfo.getCurrentLocale().getLocaleName());
+  }
+
+  private RowField buildRowFieldFromResult(ViewerRow viewerRow, ColumnStatus columnStatus, ViewerTable nestedTable,
+    String template) {
+    Map<String, ViewerCell> validCells = getValidCells(viewerRow.getCells(), nestedTable);
+    String json = JSOUtils.cellsToJson(validCells, nestedTable);
+    String compiledTemplate = JavascriptUtils.compileTemplate(template, json);
+
+    RowField rowField;
+    if (columnStatus.getTypeName().contains("BINARY LARGE OBJECT")) {
+      rowField = buildLobRowField(viewerRow, validCells, nestedTable, columnStatus, compiledTemplate);
+    } else {
+      rowField = RowField.createInstance(columnStatus.getCustomName(), new Label(compiledTemplate));
+    }
+
+    rowField.addColumnDescription(columnStatus.getCustomDescription());
+    return rowField;
+  }
+
+  private Map<String, ViewerCell> getValidCells(Map<String, ViewerCell> rawCells, ViewerTable nestedTable) {
+    Map<String, ViewerCell> validCells = new HashMap<>();
+    for (Map.Entry<String, ViewerCell> entry : rawCells.entrySet()) {
+      if (nestedTable.getColumnBySolrName(entry.getKey()) != null) {
+        validCells.put(entry.getKey(), entry.getValue());
+      }
+    }
+    return validCells;
+  }
+
+  private RowField buildLobRowField(ViewerRow viewerRow, Map<String, ViewerCell> validCells, ViewerTable nestedTable,
+    ColumnStatus columnStatus, String compiledTemplate) {
+    Map.Entry<String, ViewerCell> originalCell = null;
+    for (Map.Entry<String, ViewerCell> entry : validCells.entrySet()) {
+      if (entry.getValue().getStoreType() != null) {
+        originalCell = entry;
+        break;
+      }
+    }
+
+    if (originalCell == null || ((database.getPath() == null || database.getPath().isEmpty())
+      && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED))) {
+      return RowField.createInstance(new Label(compiledTemplate).getText(),
+        new HTML(messages.rowPanelTextForLobUnavailable()));
+    }
+
+    int originalColumnIndex = 0;
+    for (ViewerColumn c : nestedTable.getColumns()) {
+      if (c.getSolrName().equals(originalCell.getKey()))
+        break;
+      originalColumnIndex++;
+    }
+
+    String exportLobUri = RestUtils.createExportLobUri(database.getUuid(), nestedTable.getSchemaName(),
+      nestedTable.getName(), viewerRow.getUuid(), originalColumnIndex);
+
+    if (originalCell.getValue().getMimeType().equals("application/pdf")
+      || originalCell.getValue().getValue().toLowerCase().endsWith(".pdf")) {
+      String viewerPdf = GWT.getHostPageBaseURL() + "webjars/pdf-js/web/viewer.html?file=" + exportLobUri;
+      Frame frame = new Frame(viewerPdf);
+      frame.addStyleName("embedded-iiif-viewer");
+      return RowField.createInstance(null, columnStatus.getCustomName(), viewerPdf, frame, null);
+    } else {
+      String templateLob = "<a href=\"{{" + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + "}}\">{{"
+        + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL + "}}</a>";
+      String json;
+
+      if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
+        json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
+          ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
+          ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, exportLobUri);
+        templateLob = ViewerConstants.DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE;
+      } else {
+        json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+          ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, exportLobUri);
+      }
+
+      SafeHtml safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(templateLob, json));
+      return RowField.createInstance(columnStatus.getCustomName(), new HTML(safeHtml));
     }
   }
 

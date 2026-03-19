@@ -28,7 +28,6 @@ import com.databasepreservation.common.client.common.visualization.browse.inform
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -287,9 +286,8 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     }
 
     FlowPanel container = new FlowPanel();
-    TableStatus childTableStatus = collectionStatus.getTableStatusByTableId(childTable.getId());
     TransformationChildTables tableInstance = TransformationChildTables.createInstance(childNode,
-      denormalizeConfiguration, rootTable, buttons, childTableStatus);
+      denormalizeConfiguration, rootTable, buttons);
     MultipleSelectionTablePanel<ViewerColumn> selectTable = tableInstance.createTable();
 
     SwitchBtn switchBtn = new SwitchBtn("Enable", false);

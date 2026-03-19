@@ -2,6 +2,8 @@ package com.databasepreservation.common.server.batch.steps.denormalization;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
@@ -52,7 +54,13 @@ public class DenormalizationStepUtils {
 
     List<RelatedColumnConfiguration> columnsIncluded = relatedTable.getColumnsIncluded();
     if (!columnsIncluded.isEmpty()) {
-      createAndAddColumn(targetTableStatus, relatedTable, path, currentTableMeta);
+      Map<Integer, List<RelatedColumnConfiguration>> groupedColumns = columnsIncluded.stream()
+        .collect(Collectors.groupingBy(c -> c.getGroupId() != null ? c.getGroupId() : 1));
+
+      for (Map.Entry<Integer, List<RelatedColumnConfiguration>> entry : groupedColumns.entrySet()) {
+        createAndAddColumnForGroup(targetTableStatus, relatedTable, path, currentTableMeta, entry.getKey(),
+          entry.getValue());
+      }
     }
 
     List<RelatedTablesConfiguration> innerTables = relatedTable.getRelatedTables();
@@ -61,8 +69,8 @@ public class DenormalizationStepUtils {
     }
   }
 
-  private static void createAndAddColumn(TableStatus targetTableStatus, RelatedTablesConfiguration relatedTable,
-    List<String> path, ViewerTable currentTableMeta) {
+  private static void createAndAddColumnForGroup(TableStatus targetTableStatus, RelatedTablesConfiguration relatedTable,
+    List<String> path, ViewerTable currentTableMeta, Integer groupId, List<RelatedColumnConfiguration> groupColumns) {
 
     List<String> names = new ArrayList<>();
     List<String> solrNames = new ArrayList<>();
@@ -70,7 +78,7 @@ public class DenormalizationStepUtils {
     List<String> typeNames = new ArrayList<>();
     List<String> nullables = new ArrayList<>();
 
-    for (RelatedColumnConfiguration col : relatedTable.getColumnsIncluded()) {
+    for (RelatedColumnConfiguration col : groupColumns) {
       ViewerColumn meta = DataTransformationUtils.getColumnBySolrName(currentTableMeta.getColumns(), col.getSolrName());
       if (meta != null) {
         names.add(col.getColumnName());
@@ -83,7 +91,8 @@ public class DenormalizationStepUtils {
 
     ViewerColumn viewerColumn = new ViewerColumn();
     viewerColumn.setDescription("Please EDIT");
-    viewerColumn.setSolrName(relatedTable.getUuid());
+
+    viewerColumn.setSolrName(relatedTable.getUuid() + "_" + groupId);
     viewerColumn.setDisplayName(String.join(">", path) + ">" + names.toString());
 
     int nextOrder = targetTableStatus.getLastColumnOrder() + 1;
@@ -108,6 +117,7 @@ public class DenormalizationStepUtils {
     nested.setPath(related.getPath());
     nested.setNestedFields(names);
     nested.setNestedSolrNames(solrNames);
+    nested.setReferenceUuid(related.getUuid());
     return nested;
   }
 

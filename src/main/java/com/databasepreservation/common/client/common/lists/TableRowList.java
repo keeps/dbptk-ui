@@ -292,9 +292,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         StringBuilder sb = new StringBuilder();
         SafeHtml ret = null;
         if (row.getNestedRowList() != null) {
+
+          String refUuid = configColumn.getNestedColumns().getReferenceUuid();
+          String targetUuid = (refUuid != null && !refUuid.isEmpty()) ? refUuid : configColumn.getId();
+
           for (ViewerRow nestedRow : row.getNestedRowList()) {
             if (nestedRow != null && nestedRow.getCells() != null && !nestedRow.getCells().isEmpty()
-              && nestedRow.getNestedUUID().equals(configColumn.getId())) {
+              && nestedRow.getNestedUUID().equals(targetUuid)) {
               Map<String, ViewerCell> cells = nestedRow.getCells();
 
               // removes the nested prefix of the nested collumn
@@ -358,12 +362,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         String url;
         SafeHtml ret = null;
         if (row.getNestedRowList() != null) {
+
+          String refUuid = configColumn.getNestedColumns().getReferenceUuid();
+          String targetUuid = (refUuid != null && !refUuid.isEmpty()) ? refUuid : configColumn.getId();
+
           for (ViewerRow nestedRow : row.getNestedRowList()) {
             if (nestedRow != null && nestedRow.getCells() != null && !nestedRow.getCells().isEmpty()
-              && nestedRow.getNestedUUID().equals(configColumn.getId())) {
+              && nestedRow.getNestedUUID().equals(targetUuid)) {
               Map<String, ViewerCell> cells = nestedRow.getCells();
 
-              // removes the nested prefix of the nested collumn
               Map<String, ViewerCell> cells_no_nested_prefix = cells.entrySet().stream().collect(Collectors
                 .toMap(entry -> entry.getKey().replace(ViewerConstants.SOLR_ROWS_NESTED_COL, ""), Map.Entry::getValue));
 

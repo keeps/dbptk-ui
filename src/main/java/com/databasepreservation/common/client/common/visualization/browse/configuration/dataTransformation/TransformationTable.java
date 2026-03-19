@@ -116,15 +116,29 @@ public class TransformationTable extends Composite {
 
   private void setColumnsToInclude(RelatedTablesConfiguration relatedTable, List<ColumnWrapper> columns) {
     ViewerTable referencedTable = database.getMetadata().getTable(relatedTable.getTableUUID());
-    ColumnWrapper columnWrapper = new ColumnWrapper(relatedTable.getUuid(), referencedTable.getName(), relatedTable,
-      denormalizeConfiguration, database.getMetadata());
-    for (RelatedColumnConfiguration columnToInclude : relatedTable.getColumnsIncluded()) {
-      ViewerColumn col = referencedTable.getColumns().get(columnToInclude.getIndex());
-      columnWrapper.setColumnDisplayName(col.getDisplayName());
-      columnWrapper.setColumnDescription(col.getDescription());
+
+    Map<Integer, List<RelatedColumnConfiguration>> groupedColumns = new HashMap<>();
+    for (RelatedColumnConfiguration col : relatedTable.getColumnsIncluded()) {
+      Integer groupId = col.getGroupId() != null ? col.getGroupId() : 1;
+      groupedColumns.computeIfAbsent(groupId, k -> new ArrayList<>()).add(col);
     }
-    if (columnWrapper.getColumnDisplayName() != null) {
-      columns.add(columnWrapper);
+
+    for (Map.Entry<Integer, List<RelatedColumnConfiguration>> entry : groupedColumns.entrySet()) {
+      Integer groupId = entry.getKey();
+      List<RelatedColumnConfiguration> columnsInGroup = entry.getValue();
+
+      ColumnWrapper columnWrapper = new ColumnWrapper(relatedTable.getUuid() + "_" + groupId, referencedTable.getName(),
+        relatedTable, denormalizeConfiguration, database.getMetadata());
+
+      for (RelatedColumnConfiguration columnToInclude : columnsInGroup) {
+        ViewerColumn col = referencedTable.getColumns().get(columnToInclude.getIndex());
+        columnWrapper.setColumnDisplayName(col.getDisplayName());
+        columnWrapper.setColumnDescription(col.getDescription());
+      }
+
+      if (columnWrapper.getColumnDisplayName() != null) {
+        columns.add(columnWrapper);
+      }
     }
 
     for (RelatedTablesConfiguration innerTable : relatedTable.getRelatedTables()) {

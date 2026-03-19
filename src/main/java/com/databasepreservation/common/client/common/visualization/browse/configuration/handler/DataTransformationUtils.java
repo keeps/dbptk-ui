@@ -8,11 +8,11 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.handler;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -30,7 +30,6 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.models.structure.ViewerType;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -146,15 +145,29 @@ public class DataTransformationUtils {
     int nestedCount = 0;
     String keys = "";
     String separator = "";
+
+    Set<String> processedNestedUUIDs = new HashSet<>();
+
     for (ColumnStatus column : tableStatus.getColumns()) {
       if (column.getNestedColumns() != null) {
-        String nestedTableId = column.getId();
+
+        String referenceUuid = column.getNestedColumns().getReferenceUuid();
+        // backward compatible: if referenceUuid is not set, use the column id as
+        // nestedTableId
+        String nestedTableId = (referenceUuid != null && !referenceUuid.isEmpty()) ? referenceUuid : column.getId();
+
+        if (processedNestedUUIDs.contains(nestedTableId)) {
+          continue;
+        }
+        processedNestedUUIDs.add(nestedTableId);
+
         String key = ViewerConstants.SOLR_ROWS_NESTED + "." + nestedCount;
         keys = keys + separator + key;
         separator = ",";
         addDefaultNestedFieldsToReturn(fieldsToReturn);
         fieldsToReturn.add(key + ":[subquery]");
         addNestedDefaultFieldList(extraParameters, key);
+
         extraParameters.put(key + ".q", "+nestedUUID:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
         Integer quantity = column.getNestedColumns().getQuantityInList();
         if (quantity <= column.getNestedColumns().getMaxQuantityInList()) {
@@ -177,6 +190,21 @@ public class DataTransformationUtils {
     fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED + "*");
     fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED_COL + "*");
     fieldsToReturn.add("originalRowUUID_t");
+  }
+
+  public static void updateColumnGroup(String uuid, ViewerColumn column,
+    DenormalizeConfiguration denormalizeConfiguration, Integer groupId) {
+    RelatedTablesConfiguration relatedTable = denormalizeConfiguration.getRelatedTable(uuid);
+
+    if (relatedTable != null) {
+      for (RelatedColumnConfiguration checkColumn : relatedTable.getColumnsIncluded()) {
+        if (checkColumn.getIndex() == column.getColumnIndexInEnclosingTable()) {
+          checkColumn.setGroupId(groupId);
+          denormalizeConfiguration.setState(ViewerJobStatus.NEW);
+          break;
+        }
+      }
+    }
   }
 
   @Nullable

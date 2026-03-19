@@ -7,11 +7,11 @@
  */
 package com.databasepreservation.common.client.models.status.collection;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -23,6 +23,7 @@ public class NestedColumnStatus implements Serializable {
   private List<String> nestedFields = new ArrayList<>();
   private List<String> nestedSolrNames = new ArrayList<>();
   private Integer quantityInList = 10;
+  private String referenceUuid;
 
   @JsonIgnore
   private final Integer MAX_QUANTITY_IN_LIST = 20;
@@ -78,5 +79,13 @@ public class NestedColumnStatus implements Serializable {
 
   public void setNestedSolrNames(List<String> nestedSolrNames) {
     this.nestedSolrNames = nestedSolrNames;
+  }
+
+  public String getReferenceUuid() {
+    return referenceUuid;
+  }
+
+  public void setReferenceUuid(String referenceUuid) {
+    this.referenceUuid = referenceUuid;
   }
 }
