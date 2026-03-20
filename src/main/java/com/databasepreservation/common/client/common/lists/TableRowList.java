@@ -45,6 +45,7 @@ import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
+import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -323,6 +324,17 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         }
         return ret;
       }
+
+      @Override
+      public String getCellStyleNames(Cell.Context context, ViewerRow row) {
+        List<String> styleNames = new ArrayList<>();
+
+        if (!getCellHighlights(row, configColumn).isEmpty()) {
+          styleNames.add("highlighted-cell");
+        }
+
+        return String.join(" ", styleNames);
+      }
     };
   }
 
@@ -466,8 +478,11 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       List<String> columnHighlightedNames = new ArrayList<>();
       switch (configColumn.getType()) {
         case NESTED:
-          // TODO: Support highlighting for nested fields
-          columnHighlightedNames.add(configColumn.getId());
+          NestedColumnStatus nestedConfigColumn = configColumn.getNestedColumns();
+          for (String nestedSolrName : nestedConfigColumn.getNestedSolrNames()) {
+            columnHighlightedNames.add(
+              nestedConfigColumn.getOriginalTable() + "_nst_" + nestedSolrName + ViewerConstants.SOLR_DYN_TEXT_MULTI);
+          }
           break;
         case BINARY:
         case CLOB:
@@ -681,6 +696,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           highlightFields.add(column.getId());
           queryFields.add(column.getId());
         }
+      } else {
+        NestedColumnStatus nestedColumn = column.getNestedColumns();
+        ArrayList<String> individualNestedFieldNames = new ArrayList<>();
+        for (String nestedSolrName : nestedColumn.getNestedSolrNames()) {
+          individualNestedFieldNames
+            .add(nestedColumn.getOriginalTable() + "_nst_" + nestedSolrName + ViewerConstants.SOLR_DYN_TEXT_MULTI);
+        }
+        highlightFields.addAll(individualNestedFieldNames);
+        queryFields.addAll(individualNestedFieldNames);
       }
     }
   }
