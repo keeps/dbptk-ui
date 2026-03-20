@@ -34,6 +34,7 @@ public class Field {
   public static final String TYPE_INT = "pint";
   public static final String TYPE_DATE = "pdate";
   public static final String TYPE_STRING = "string";
+  public static final String TYPE_TEXT_GEN_SORT = "text_gen_sort";
 
   public static final String FIELD_SEARCH = ViewerConstants.INDEX_SEARCH;
   public static final String FIELD_LOB_TEXT_SEARCH = ViewerConstants.INDEX_LOB_TEXT_SEARCH;

@@ -23,25 +23,13 @@ public class DatabaseAdvancedSearchFields extends FlowPanel {
     addSearchField(ViewerConstants.SOLR_DATABASES_METADATA_NAME, messages.siardMetadata_databaseName());
     addSearchField(ViewerConstants.SOLR_DATABASES_METADATA_DESCRIPTION, messages.description());
     addSearchField(ViewerConstants.SOLR_DATABASES_METADATA_DATA_OWNER, messages.siardMetadata_dataOwner());
-    addSearchField(ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVER, messages.siardMetadata_archivist());
-    addSearchField(ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVER_CONTACT, messages.siardMetadata_archivistContact());
-    addSearchField(ViewerConstants.SOLR_DATABASES_METADATA_PRODUCER_APPLICATION,
-      messages.siardMetadata_producerApplication());
-    addSearchField(ViewerConstants.SOLR_DATABASES_METADATA_CLIENT_MACHINE, messages.siardMetadata_clientMachine());
-    addSearchField(ViewerConstants.SOLR_DATABASES_METADATA_DATABASE_PRODUCT, messages.siardMetadata_databaseProduct());
-    addSearchField(ViewerConstants.SOLR_DATABASES_METADATA_DATABASE_USER, messages.siardMetadata_databaseUser());
     addSearchField(ViewerConstants.SOLR_DATABASES_METADATA_ORIGIN_TIMESPAN,
       messages.siardMetadata_dataOriginTimeSpan());
-    addSearchField(ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVAL_DATE, messages.siardMetadata_archivalDate());
 
     addSearchField("{!parent which='content_type:database'}" + ViewerConstants.SOLR_DATABASES_TABLE_NAME,
       messages.schema_tableName());
     addSearchField("{!parent which='content_type:database'}" + ViewerConstants.SOLR_DATABASES_COLUMN_NAME,
       messages.columnName());
-    addSearchField("{!parent which='content_type:database'}" + ViewerConstants.SOLR_DATABASES_VIEW_NAME,
-      messages.viewName());
-    addSearchField("{!parent which='content_type:database'}" + ViewerConstants.SOLR_DATABASES_ROUTINE_NAME,
-      messages.routineName());
   }
 
   private void addSearchField(String solrField, String label) {
