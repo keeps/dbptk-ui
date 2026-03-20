@@ -215,21 +215,21 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
 
     fields.add(new Field(SOLR_DATABASES_STATUS, Field.TYPE_STRING).setIndexed(true).setRequired(true));
 
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_NAME, Field.TYPE_TEXT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_DESCRIPTION, Field.TYPE_TEXT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_ARCHIVER, Field.TYPE_TEXT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_ARCHIVER_CONTACT, Field.TYPE_TEXT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_DATA_OWNER, Field.TYPE_TEXT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_ORIGIN_TIMESPAN, Field.TYPE_TEXT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_LOB_FOLDER, Field.TYPE_TEXT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_PRODUCER_APPLICATION, Field.TYPE_TEXT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_ARCHIVAL_DATE, Field.TYPE_TEXT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_CLIENT_MACHINE, Field.TYPE_TEXT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_DATABASE_PRODUCT, Field.TYPE_TEXT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_DATABASE_USER, Field.TYPE_TEXT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_NAME, Field.TYPE_TEXT_GEN_SORT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_DESCRIPTION, Field.TYPE_TEXT_GEN_SORT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_ARCHIVER, Field.TYPE_TEXT_GEN_SORT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_ARCHIVER_CONTACT, Field.TYPE_TEXT_GEN_SORT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_DATA_OWNER, Field.TYPE_TEXT_GEN_SORT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_ORIGIN_TIMESPAN, Field.TYPE_TEXT_GEN_SORT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_LOB_FOLDER, Field.TYPE_TEXT_GEN_SORT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_PRODUCER_APPLICATION, Field.TYPE_TEXT_GEN_SORT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_ARCHIVAL_DATE, Field.TYPE_TEXT_GEN_SORT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_CLIENT_MACHINE, Field.TYPE_TEXT_GEN_SORT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_DATABASE_PRODUCT, Field.TYPE_TEXT_GEN_SORT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_DATABASE_USER, Field.TYPE_TEXT_GEN_SORT));
 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SCHEMA_UUID, Field.TYPE_STRING));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SCHEMA_NAME, Field.TYPE_TEXT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SCHEMA_NAME, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SCHEMA_DESCRIPTION, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SCHEMA_FOLDER, Field.TYPE_STRING));
 
@@ -249,7 +249,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_UUID, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_ID, Field.TYPE_STRING));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_NAME, Field.TYPE_TEXT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_NAME, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_DESCRIPTION, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_FOLDER, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_ROWS, Field.TYPE_LONG));
@@ -260,7 +260,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_MATERIALIZED_VIEW, Field.TYPE_BOOLEAN));
 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VIEW_UUID, Field.TYPE_STRING));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VIEW_NAME, Field.TYPE_TEXT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VIEW_NAME, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VIEW_DESCRIPTION, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VIEW_QUERY, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VIEW_QUERY_ORIGINAL, Field.TYPE_STRING));
@@ -268,7 +268,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VIEW_SCHEMA_NAME, Field.TYPE_STRING));
 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_COLUMN_SOLR_NAME, Field.TYPE_STRING));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_COLUMN_NAME, Field.TYPE_TEXT));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_COLUMN_NAME, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_COLUMN_DESCRIPTION, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_COLUMN_TYPE_ORIGINAL, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_COLUMN_TYPE_NAME, Field.TYPE_STRING));
