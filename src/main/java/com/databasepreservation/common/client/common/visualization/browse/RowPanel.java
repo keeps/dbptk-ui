@@ -10,6 +10,7 @@ package com.databasepreservation.common.client.common.visualization.browse;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -265,7 +266,7 @@ public class RowPanel extends RightPanel {
       b.appendHtmlConstant("</div>");
     }
 
-    Set<String> processedMultiValueTables = new java.util.HashSet<>();
+    Set<String> processedMultiValueTables = new HashSet<>();
 
     for (ColumnStatus columnStatus : status.getTableStatus(table.getUuid()).getColumns()) {
       if (columnStatus.getDetailsStatus().isShow()) {
@@ -473,7 +474,7 @@ public class RowPanel extends RightPanel {
     }
   }
 
-  private void getNestedHTML(ColumnStatus columnStatus, java.util.Set<String> processedMultiValueTables) {
+  private void getNestedHTML(ColumnStatus columnStatus, Set<String> processedMultiValueTables) {
     NestedColumnStatus nestedColumns = columnStatus.getNestedColumns();
     if (nestedColumns == null) {
       return;
@@ -484,7 +485,8 @@ public class RowPanel extends RightPanel {
     Filter filter = createInnerJoinFilter(targetUuid);
 
     if (nestedColumns.getMultiValue()) {
-      renderMultiValueNestedTable(targetUuid, nestedTable, filter, processedMultiValueTables);
+      renderMultiValueNestedTable(targetUuid, nestedTable, filter, processedMultiValueTables,
+        columnStatus.getCustomName());
     } else {
       renderSingleValueNestedTemplate(columnStatus, nestedTable, filter);
     }
@@ -505,7 +507,7 @@ public class RowPanel extends RightPanel {
   }
 
   private void renderMultiValueNestedTable(String targetUuid, ViewerTable nestedTable, Filter filter,
-    java.util.Set<String> processedMultiValueTables) {
+    Set<String> processedMultiValueTables, String context) {
     if (processedMultiValueTables.contains(targetUuid)) {
       return;
     }
@@ -515,9 +517,9 @@ public class RowPanel extends RightPanel {
     card.setStyleName("card");
 
     final TableSearchPanel tablePanel = new TableSearchPanel(status);
-    tablePanel.provideSource(database, nestedTable, filter, true);
+    tablePanel.provideSource(database, nestedTable, filter, true, context);
 
-    java.util.Set<String> allIncludedFields = getIncludedFieldsForNestedTable(targetUuid);
+    Set<String> allIncludedFields = getIncludedFieldsForNestedTable(targetUuid);
     TableStatus nestedTableStatus = status.getTableStatus(nestedTable.getUuid());
 
     FlowPanel toolbar = createVisibilityToolbar(tablePanel, nestedTableStatus, allIncludedFields);
@@ -527,8 +529,8 @@ public class RowPanel extends RightPanel {
     content.add(card);
   }
 
-  private java.util.Set<String> getIncludedFieldsForNestedTable(String targetUuid) {
-    java.util.Set<String> allIncludedFields = new java.util.HashSet<>();
+  private Set<String> getIncludedFieldsForNestedTable(String targetUuid) {
+    Set<String> allIncludedFields = new HashSet<>();
     for (ColumnStatus parentCol : status.getTableStatus(table.getUuid()).getColumns()) {
       if (parentCol.getNestedColumns() != null) {
         String checkUuid = getTargetUuid(parentCol, parentCol.getNestedColumns());
@@ -541,7 +543,7 @@ public class RowPanel extends RightPanel {
   }
 
   private FlowPanel createVisibilityToolbar(TableSearchPanel tablePanel, TableStatus nestedTableStatus,
-    java.util.Set<String> allIncludedFields) {
+    Set<String> allIncludedFields) {
     FlowPanel toolbar = new FlowPanel();
 
     toolbar.getElement().getStyle().setProperty("textAlign", "right");
