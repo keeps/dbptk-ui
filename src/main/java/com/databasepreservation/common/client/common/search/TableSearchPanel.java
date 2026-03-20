@@ -115,6 +115,11 @@ public class TableSearchPanel extends Composite {
 
   public void provideSource(final ViewerDatabase database, final ViewerTable table, Filter initialFilter,
     Boolean isNested) {
+    provideSource(database, table, initialFilter, isNested, null);
+  }
+
+  public void provideSource(final ViewerDatabase database, final ViewerTable table, Filter initialFilter,
+    Boolean isNested, String context) {
     if (initialFilter == null) {
       initialFilter = new Filter();
     }
@@ -137,9 +142,9 @@ public class TableSearchPanel extends Composite {
     String extractedTextCopyField = hasExportedLobText ? ViewerConstants.INDEX_LOB_TEXT_SEARCH : null;
 
     if (isNested) {
+      String tableName = context != null ? context : table.getName();
       searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, extractedTextCopyField,
-        messages.searchPlaceholder(), table.getName(), showSearchAdvancedDisclosureButton,
-        new DefaultAsyncCallback<Void>() {
+        messages.searchPlaceholder(), tableName, showSearchAdvancedDisclosureButton, new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void result) {
             TableSearchPanel.this.saveQuery();
