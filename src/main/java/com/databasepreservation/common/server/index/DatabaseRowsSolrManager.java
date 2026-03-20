@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.server.index.schema.collections.DatabasesCollection;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -64,6 +63,7 @@ import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
+import com.databasepreservation.common.server.index.schema.collections.DatabasesCollection;
 import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
 import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
@@ -838,6 +838,7 @@ public class DatabaseRowsSolrManager {
   private static void addNestedSolrDocument(ViewerRow row, SolrInputDocument doc) {
     List<SolrInputDocument> solrNestedDocs = new ArrayList<>();
     List<String> searchTokens = new ArrayList<>();
+    Map<String, List<String>> parentNestedFields = new HashMap<>();
 
     for (ViewerRow nestedRow : row.getNestedRowList()) {
       SolrInputDocument nestedDoc = new SolrInputDocument();
@@ -853,6 +854,11 @@ public class DatabaseRowsSolrManager {
         String key = cellEntry.getKey();
         String value = cellEntry.getValue() != null ? cellEntry.getValue().getValue() : null;
 
+        String nestedRowFieldKey = nestedRow.getNestedTableId() + "_" + key + ViewerConstants.SOLR_DYN_TEXT_MULTI;
+        List<String> parentNestedFieldList = parentNestedFields.computeIfAbsent(nestedRowFieldKey,
+          k -> new ArrayList<>());
+        parentNestedFieldList.add(value);
+
         nestedDoc.addField(key, value);
         if (value != null) {
           searchTokens.add(value);
@@ -866,5 +872,10 @@ public class DatabaseRowsSolrManager {
     doc.addField("token" + ViewerConstants.SOLR_DYN_NEST_MULTI, SolrUtils.asValueUpdate(searchTokens));
     doc.addField("type" + ViewerConstants.SOLR_DYN_TEXT_GENERAL, SolrUtils.asValueUpdate("parent"));
     doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.asValueUpdate(solrNestedDocs));
+
+    for (Map.Entry<String, List<String>> parentNestedField : parentNestedFields.entrySet()) {
+      doc.addField(parentNestedField.getKey(), SolrUtils.asValueUpdate(parentNestedField.getValue()));
+    }
+
   }
 }
