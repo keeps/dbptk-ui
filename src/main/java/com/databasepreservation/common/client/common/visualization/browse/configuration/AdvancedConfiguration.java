@@ -151,19 +151,28 @@ public class AdvancedConfiguration extends ContentPanel {
   }
 
   private void setupFooterButtons() {
-    btnReset.setText("Reset Configuration");
+    btnReset.setText(messages.advancedConfigurationBtnForResetConfiguration());
 
     if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       btnReset.addClickHandler(event -> {
-        CommonDialogs.showConfirmDialog("Reset Configuration", SafeHtmlUtils.fromString(
-          "Are you sure you want to reset all structural configurations? This will mark all Virtual Tables, Columns, and Denormalizations for removal. Custom names and descriptions will be kept. This action cannot be undone."),
-          "Cancel", "Reset", CommonDialogs.Level.DANGER, "550px", new DefaultAsyncCallback<Boolean>() {
+        CommonDialogs.showConfirmDialog(messages.advancedConfigurationLabelForResetConfigurationDialog(),
+          SafeHtmlUtils.fromString(messages.advancedConfigurationTextForResetConfigurationDialogConfirmation()),
+          messages.basicActionCancel(), messages.basicActionConfirm(), CommonDialogs.Level.DANGER, "550px",
+          new DefaultAsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean confirmed) {
               if (confirmed) {
                 CollectionService.Util.call((CollectionStatus updatedStatus) -> {
                   final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
                   collectionObserver.setCollectionStatus(updatedStatus);
+
+                  if (!updatedStatus.isNeedsToBeProcessed()) {
+                    CommonDialogs.showInformationDialog(
+                      messages.advancedConfigurationLabelForResetConfigurationDialog(),
+                      messages.advancedConfigurationTextForResetConfigurationDialogNoAction(),
+                      messages.basicActionConfirm());
+                  }
+
                 }).resetCollectionConfiguration(database.getUuid(), database.getUuid());
               }
             }

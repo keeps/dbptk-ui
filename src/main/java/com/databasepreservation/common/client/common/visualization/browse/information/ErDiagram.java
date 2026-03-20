@@ -28,12 +28,16 @@ import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -47,7 +51,7 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
   private CollectionStatus collectionStatus;
 
   @UiField
-  TextBox searchBox;
+  SuggestBox searchBox;
   @UiField
   AccessibleFocusPanel searchButton;
   @UiField
@@ -61,6 +65,8 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
   private final ViewerDatabase database;
   private final ViewerSchema schema;
   private final String path;
+  private boolean isInitialized = false;
+  private boolean needsUpdate = false;
 
   public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path) {
     String separator = "/";
@@ -78,6 +84,8 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
   @Override
   public void updateCollection(CollectionStatus collectionStatus) {
     this.collectionStatus = collectionStatus;
+
+    this.needsUpdate = true;
 
     // If the widget is currently visible on the DOM, force a re-render
     if (this.isAttached()) {
@@ -130,19 +138,23 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     diagram.addStyleName("erdiagram");
     diagram.getElement().setId("erdiagram-" + schema.getUuid());
     diagram.addAttachHandler(event -> {
-      if (event.isAttached()) {
+      if (!isInitialized || needsUpdate) {
         renderDiagram();
       }
     });
     contentItems.add(diagram);
 
-    searchButton.addClickHandler(event -> executeSearch());
-
-    searchBox.addKeyUpHandler(event -> {
+    searchButton.addClickHandler(event -> {
       boolean hasText = !searchBox.getText().trim().isEmpty();
       clearCrossButton.setVisible(hasText);
+      executeSearch();
+    });
 
-      if (event.getNativeKeyCode() == com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER) {
+    searchBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
+      @Override
+      public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
+        boolean hasText = !searchBox.getText().trim().isEmpty();
+        clearCrossButton.setVisible(hasText);
         executeSearch();
       }
     });
@@ -181,7 +193,11 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     int minColumns = Integer.MAX_VALUE;
     int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
 
+    MultiWordSuggestOracle oracle = (MultiWordSuggestOracle) searchBox.getSuggestOracle();
+    oracle.clear();
     for (ViewerTable viewerTable : schema.getTables()) {
+      oracle.add(viewerTable.getName());
+
       if (path.equals(HistoryManager.ROUTE_DATA_TRANSFORMATION)
         && (viewerTable.isMaterializedView() || viewerTable.isCustomView())) {
         continue;
@@ -338,6 +354,9 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     String edges = visEdgeMapper.write(jsniEdgeList);
 
     loadDiagram(databaseUUID, schema.getUuid(), nodes, edges, ApplicationType.getType(), path);
+
+    this.isInitialized = true;
+    this.needsUpdate = false;
   }
 
   private void executeSearch() {

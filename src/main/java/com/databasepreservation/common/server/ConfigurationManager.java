@@ -512,7 +512,7 @@ public class ConfigurationManager {
 
               // 2.1 Mark Extracted Lob Columns for removal
               if (col.getLobTextExtractionStatus() != null) {
-                if(col.getLobTextExtractionStatus().getProcessingState() != ProcessingState.TO_REMOVE) {
+                if (col.getLobTextExtractionStatus().getExtractedAndIndexedText()) {
                   col.getLobTextExtractionStatus().setProcessingState(ProcessingState.TO_REMOVE);
                   needsBatchProcessing = true;
                 }

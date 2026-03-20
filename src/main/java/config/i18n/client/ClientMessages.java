@@ -1552,6 +1552,14 @@ public interface ClientMessages extends Messages {
 
   String advancedConfigurationBtnForTextExtraction();
 
+  String advancedConfigurationBtnForResetConfiguration();
+
+  String advancedConfigurationLabelForResetConfigurationDialog();
+
+  String advancedConfigurationTextForResetConfigurationDialogConfirmation();
+
+  String advancedConfigurationTextForResetConfigurationDialogNoAction();
+
   /********************************************
    * Data Transformation
    *******************************************/

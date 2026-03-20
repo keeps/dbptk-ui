@@ -6,7 +6,7 @@
         <g:FlowPanel styleName="searchPanel" ui:field="searchPanel">
             <g:FlowPanel styleName="searchPanelLeft">
                 <g:FlowPanel styleName="searchPanelLeftInput">
-                    <g:TextBox ui:field="searchBox" addStyleNames="searchBox"/>
+                    <g:SuggestBox ui:field="searchBox" addStyleNames="searchBox"/>
                 </g:FlowPanel>
 
                 <wcag:AccessibleFocusPanel styleName="searchPanelClearButton" ui:field="clearCrossButton"
