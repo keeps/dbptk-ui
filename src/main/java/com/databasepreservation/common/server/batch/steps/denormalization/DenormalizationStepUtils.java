@@ -65,6 +65,7 @@ public class DenormalizationStepUtils {
     List<String> path, ViewerTable currentTableMeta) {
 
     List<String> names = new ArrayList<>();
+    List<String> solrNames = new ArrayList<>();
     List<String> origTypes = new ArrayList<>();
     List<String> typeNames = new ArrayList<>();
     List<String> nullables = new ArrayList<>();
@@ -73,6 +74,7 @@ public class DenormalizationStepUtils {
       ViewerColumn meta = DataTransformationUtils.getColumnBySolrName(currentTableMeta.getColumns(), col.getSolrName());
       if (meta != null) {
         names.add(col.getColumnName());
+        solrNames.add(col.getSolrName());
         origTypes.add(col.getColumnName() + ":" + meta.getType().getOriginalTypeName());
         typeNames.add(col.getColumnName() + ":" + meta.getType().getTypeName());
         nullables.add(col.getColumnName() + ":" + meta.getNillable());
@@ -87,7 +89,7 @@ public class DenormalizationStepUtils {
     int nextOrder = targetTableStatus.getLastColumnOrder() + 1;
     ColumnStatus columnStatus = StatusUtils.getColumnStatus(viewerColumn, true, nextOrder);
 
-    columnStatus.setNestedColumns(buildNestedStatus(relatedTable, names));
+    columnStatus.setNestedColumns(buildNestedStatus(relatedTable, names, solrNames));
     columnStatus.setOriginalType(removeBrackets(origTypes));
     columnStatus.setTypeName(removeBrackets(typeNames));
     columnStatus.setNullable(removeBrackets(nullables));
@@ -98,12 +100,14 @@ public class DenormalizationStepUtils {
     targetTableStatus.addColumnStatus(columnStatus);
   }
 
-  private static NestedColumnStatus buildNestedStatus(RelatedTablesConfiguration related, List<String> names) {
+  private static NestedColumnStatus buildNestedStatus(RelatedTablesConfiguration related, List<String> names,
+    List<String> solrNames) {
     NestedColumnStatus nested = new NestedColumnStatus();
     nested.setMultiValue(related.getMultiValue());
     nested.setOriginalTable(related.getTableID());
     nested.setPath(related.getPath());
     nested.setNestedFields(names);
+    nested.setNestedSolrNames(solrNames);
     return nested;
   }
 
