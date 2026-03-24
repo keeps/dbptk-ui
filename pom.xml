@@ -31,9 +31,9 @@
         <version.jersey>3.1.6</version.jersey>
         <version.swagger>2.2.27</version.swagger>
         <version.jackson>2.18.3</version.jackson>
-        <version.cas-client>4.0.4</version.cas-client>
+        <version.cas-client>4.1.0</version.cas-client>
         <version.solr>9.8.0</version.solr>
-        <version.springboot>3.4.10</version.springboot>
+        <version.springboot>3.5.12</version.springboot>
         <version.logback>1.5.19</version.logback>
 
         <desktop>com.databasepreservation.desktop.Desktop</desktop>
