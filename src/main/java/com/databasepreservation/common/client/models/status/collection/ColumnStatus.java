@@ -265,6 +265,10 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
     this.getNestedColumns().setQuantityInList(quantity);
   }
 
+  public void updateNestedColumnsMultiValueTableName(String tableName) {
+    this.getNestedColumns().setMultiValueTableName(tableName);
+  }
+
   @Override
   public String toString() {
     return "ColumnStatus{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", customName='" + customName + '\''

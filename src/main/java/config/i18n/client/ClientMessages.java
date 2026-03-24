@@ -1712,6 +1712,8 @@ public interface ClientMessages extends Messages {
 
   String columnManagementLabelForQuantityList();
 
+  String columnManagementLabelForMultiValueTableName();
+
   String columnManagementApplicationTypeAction(@Select String action);
 
   String columnManagementTextForApplicationTypeHint();

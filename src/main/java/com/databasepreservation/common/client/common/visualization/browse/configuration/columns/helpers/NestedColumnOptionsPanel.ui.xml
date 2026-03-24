@@ -48,5 +48,13 @@
             <g:IntegerBox addStyleNames="form-textbox" ui:field="quantityList"/>
             <g:Label addStyleNames="column-description" ui:field="quantityListHint"/>
         </g:FlowPanel>
+
+        <g:FlowPanel ui:field="multiValueTableNamePanel" visible="false">
+            <g:Label addStyleNames="form-label">
+                <ui:text from='{messages.columnManagementLabelForMultiValueTableName}'/>
+            </g:Label>
+            <g:TextBox addStyleNames="form-textbox" ui:field="multiValueTableName"/>
+            <g:Label addStyleNames="column-description" ui:field="multiValueTableNameHint"/>
+        </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

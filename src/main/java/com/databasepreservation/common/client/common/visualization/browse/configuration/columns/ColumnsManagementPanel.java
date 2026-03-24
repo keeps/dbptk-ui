@@ -810,6 +810,19 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
               @Override
               public void onSuccess(Dialogs.DialogAction value) {
                 if (value.equals(Dialogs.DialogAction.SAVE)) {
+
+                  TableStatus currentTable = collectionStatus.getTableStatusByTableId(tableId);
+                  String multiValueTableName = ((NestedColumnOptionsPanel) nestedColumnOptionPanel).getMultiValueTableName();
+                  String targetReferenceUuid = columnStatus.getNestedColumns().getReferenceUuid();
+
+                  if (targetReferenceUuid != null) {
+                    for (ColumnStatus col : currentTable.getColumns()) {
+                      if (col.getNestedColumns() != null && targetReferenceUuid.equals(col.getNestedColumns().getReferenceUuid())) {
+                        col.updateNestedColumnsMultiValueTableName(multiValueTableName);
+                      }
+                    }
+                  }
+
                   collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                     .updateSearchListTemplate(nestedColumnOptionPanel.getSearchTemplate());
                   collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())

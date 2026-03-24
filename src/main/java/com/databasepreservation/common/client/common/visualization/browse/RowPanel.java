@@ -485,8 +485,12 @@ public class RowPanel extends RightPanel {
     Filter filter = createInnerJoinFilter(targetUuid);
 
     if (nestedColumns.getMultiValue()) {
-      renderMultiValueNestedTable(targetUuid, nestedTable, filter, processedMultiValueTables,
-        columnStatus.getCustomName());
+      String context = columnStatus.getCustomName();
+      if (columnStatus.getNestedColumns() != null
+        && !columnStatus.getNestedColumns().getMultiValueTableName().isEmpty()) {
+        context = columnStatus.getNestedColumns().getMultiValueTableName();
+      }
+      renderMultiValueNestedTable(targetUuid, nestedTable, filter, processedMultiValueTables, context);
     } else {
       renderSingleValueNestedTemplate(columnStatus, nestedTable, filter);
     }

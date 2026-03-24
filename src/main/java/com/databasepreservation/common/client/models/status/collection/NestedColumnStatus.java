@@ -24,6 +24,7 @@ public class NestedColumnStatus implements Serializable {
   private List<String> nestedSolrNames = new ArrayList<>();
   private Integer quantityInList = 10;
   private String referenceUuid;
+  private String multiValueTableName;
 
   @JsonIgnore
   private final Integer MAX_QUANTITY_IN_LIST = 20;
@@ -87,5 +88,13 @@ public class NestedColumnStatus implements Serializable {
 
   public void setReferenceUuid(String referenceUuid) {
     this.referenceUuid = referenceUuid;
+  }
+
+  public String getMultiValueTableName() {
+    return multiValueTableName;
+  }
+
+  public void setMultiValueTableName(String multiValueTableName) {
+    this.multiValueTableName = multiValueTableName;
   }
 }
