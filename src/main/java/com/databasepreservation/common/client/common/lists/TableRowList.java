@@ -234,6 +234,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           currentMouseOverColumn = null;
           popupPanel.removeStyleName("cell-highlight-popup-visible");
           popupPanel.addStyleName("cell-highlight-popup-hidden");
+          popupPanel.hide();
         }
       };
 
@@ -332,6 +333,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       @Override
       public String getCellStyleNames(Cell.Context context, ViewerRow row) {
         List<String> styleNames = new ArrayList<>();
+        styleNames.add("nowrap");
+        styleNames.add("text-align-left");
 
         if (!getCellHighlights(row, configColumn).isEmpty()) {
           styleNames.add("highlighted-cell");
@@ -459,6 +462,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       @Override
       public String getCellStyleNames(Cell.Context context, ViewerRow row) {
         List<String> styleNames = new ArrayList<>();
+        styleNames.add("nowrap");
+        styleNames.add("text-align-left");
 
         if (!getCellHighlights(row, configColumn).isEmpty()) {
           styleNames.add("highlighted-cell");
@@ -563,6 +568,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       @Override
       public String getCellStyleNames(Cell.Context context, ViewerRow row) {
         List<String> styleNames = new ArrayList<>();
+        styleNames.add("nowrap");
+        styleNames.add("text-align-left");
 
         if (!getCellHighlights(row, configColumn).isEmpty()) {
           styleNames.add("highlighted-cell");
