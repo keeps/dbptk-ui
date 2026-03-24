@@ -52,6 +52,11 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
   }
 
   @Override
+  public long calculateWorkload(JobContext context) {
+    return 0;
+  }
+
+  @Override
   public String getDisplayName() {
     return "Finalize Schema Metadata Synchronization";
   }
