@@ -11,11 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.common.RodaConstants;
-import org.roda.core.data.exceptions.GenericException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,17 +37,16 @@ public class JsonTransformer {
   }
 
   public static void writeObjectToFile(Object object, Path file) throws ViewerException {
-      try {
-        String json = getJsonFromObject(object);
-        if (json != null) {
-          Files.createDirectories(file.getParent());
-          Files.write(file, json.getBytes());
-        }
-      } catch (IOException e) {
-        throw new ViewerException("Error writing object, as json, to file", e);
+    try {
+      String json = getJsonFromObject(object);
+      if (json != null) {
+        Files.createDirectories(file.getParent());
+        Files.write(file, json.getBytes());
       }
+    } catch (IOException e) {
+      throw new ViewerException("Error writing object, as json, to file", e);
+    }
   }
-
 
   public static String getJsonFromObject(Object object) throws ViewerException {
     String ret = null;
@@ -87,6 +85,39 @@ public class JsonTransformer {
       ret = mapper.readValue(json, objectClass);
     } catch (IOException e) {
       throw new ViewerException("Error while parsing JSON", e);
+    }
+    return ret;
+  }
+
+  public static <T> List<String> getJsonListFromObjectList(List<T> objects) throws ViewerException {
+    if (objects == null) {
+      return null;
+    }
+    List<String> ret = new java.util.ArrayList<>();
+    for (T obj : objects) {
+      ret.add(getJsonFromObject(obj));
+    }
+    return ret;
+  }
+
+  public static <T> List<T> getObjectListFromJsonList(List<String> jsonList, Class<T> objectClass) {
+    if (jsonList == null) {
+      return null;
+    }
+
+    List<T> ret = new java.util.ArrayList<>();
+    for (String json : jsonList) {
+      if (json == null || json.trim().isEmpty()) {
+        continue;
+      }
+      try {
+        T obj = getObjectFromJson(json, objectClass);
+        if (obj != null) {
+          ret.add(obj);
+        }
+      } catch (ViewerException e) {
+        LOGGER.warn("Error while parsing individual JSON string from list: {}", json, e);
+      }
     }
     return ret;
   }

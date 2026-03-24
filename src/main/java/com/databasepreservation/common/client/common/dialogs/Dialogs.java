@@ -9,6 +9,7 @@ package com.databasepreservation.common.client.common.dialogs;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import com.databasepreservation.common.client.common.NoAsyncCallback;
@@ -18,7 +19,10 @@ import com.databasepreservation.common.client.common.lists.columns.IndexedColumn
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidatableOptionsPanel;
+import com.databasepreservation.common.client.models.structure.ViewerJob;
+import com.databasepreservation.common.client.models.structure.ViewerJobStepExecution;
 import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -29,9 +33,11 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
@@ -47,6 +53,7 @@ public class Dialogs {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final String BTN_LINK_STYLE = "btn btn-link";
   private static final String BTN_PLAY_STYLE = "btn btn-play";
+  private static final String BTN_REFRESH_STYLE = "btn btn-refresh";
   private static final String BTN_ITEM = "btn-item";
   private static final String WUI_DIALOG_LAYOUT_FOOTER = "wui-dialog-layout-footer";
   private static final String WUI_DIALOG_LAYOUT = "wui-dialog-layout";
@@ -927,6 +934,174 @@ public class Dialogs {
 
     dialogBox.center();
     dialogBox.show();
+  }
+
+  public static void showJobDetailsDialog(String title, ViewerJob job, String closeBtnText, Command onRefreshCommand) {
+    final DialogBox dialogBox = createDialogBoxSkeleton(false, true, true, false, title, WUI_DIALOG_INFORMATION);
+    dialogBox.setWidth("700px");
+
+    FlowPanel layout = new FlowPanel();
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
+
+    // 1. Process metrics and global duration
+    long toProcess = job.getRowsToProcess() != null ? job.getRowsToProcess() : 0;
+    long processed = job.getProcessRows() != null ? job.getProcessRows() : 0;
+    long skips = job.getSkipCount() != null ? job.getSkipCount() : 0;
+
+    if (job.getStatus() != null && job.getStatus().name().equals("COMPLETED") && (processed + skips < toProcess)) {
+      processed = toProcess - skips;
+    }
+
+    String durationStr = "-";
+    if (job.getStartTime() != null) {
+      Date end = job.getEndTime() != null ? job.getEndTime() : new Date();
+      durationStr = formatDuration(end.getTime() - job.getStartTime().getTime());
+    }
+
+    // 2. Metrics Top Panel
+    FlowPanel metricsPanel = new FlowPanel();
+    metricsPanel.getElement().getStyle().setProperty("display", "flex");
+    metricsPanel.getElement().getStyle().setProperty("justifyContent", "space-between");
+    metricsPanel.getElement().getStyle().setMarginBottom(20, Style.Unit.PX);
+
+    metricsPanel.add(createFieldPanel(messages.jobDetailsProcessedItems(), processed + " / " + toProcess));
+
+    FlowPanel skipsField = createFieldPanel(messages.jobDetailsSkippedItems(), String.valueOf(skips));
+    if (skips > 0) {
+      skipsField.getWidget(1).addStyleName("error");
+    }
+    metricsPanel.add(skipsField);
+
+    // Global duration added back
+    metricsPanel.add(createFieldPanel(messages.jobDetailsTotalDuration(), durationStr));
+
+    layout.add(metricsPanel);
+
+    // 3. Steps Breakdown
+    if (job.getStepExecutions() != null && !job.getStepExecutions().isEmpty()) {
+      layout.add(buildStepsTable(job.getStepExecutions()));
+    }
+
+    // 4. Status Message
+    if (ViewerStringUtils.isNotBlank(job.getExitDescription())) {
+      layout.add(createFieldPanel(messages.jobDetailsStatusMessage(), job.getExitDescription()));
+    }
+
+    // 5. Error List using GWT components
+    List<String> errors = job.getErrorDetails();
+    if (errors != null && !errors.isEmpty()) {
+      Label errorTitle = new Label(messages.jobDetailsErrorDetails());
+      errorTitle.addStyleName("label");
+      errorTitle.addStyleName("error");
+      layout.add(errorTitle);
+
+      FlowPanel errorListContainer = new FlowPanel();
+      errorListContainer.addStyleName("job-error-container");
+
+      for (String err : errors) {
+        Label errLabel = new Label(err);
+        errLabel.addStyleName("job-error-item");
+        errorListContainer.add(errLabel);
+      }
+      layout.add(errorListContainer);
+    }
+
+    // 6. Footer
+    FlowPanel footer = new FlowPanel();
+    footer.addStyleName(WUI_DIALOG_LAYOUT_FOOTER);
+
+    if (onRefreshCommand != null) {
+      Button refreshButton = new Button(messages.jobDetailsRefreshPage());
+      refreshButton.addStyleName(BTN_REFRESH_STYLE);
+      refreshButton.getElement().getStyle().setMarginRight(10, Style.Unit.PX);
+      refreshButton.addClickHandler(event -> {
+        dialogBox.hide();
+        onRefreshCommand.execute();
+      });
+      footer.add(refreshButton);
+    }
+
+    Button closeButton = new Button(closeBtnText);
+    closeButton.addStyleName(BTN_LINK_STYLE);
+    closeButton.addClickHandler(event -> dialogBox.hide());
+    footer.add(closeButton);
+
+    layout.add(footer);
+    dialogBox.setWidget(layout);
+    dialogBox.center();
+    dialogBox.show();
+  }
+
+  private static FlowPanel createFieldPanel(String labelText, String valueText) {
+    FlowPanel field = new FlowPanel();
+    field.addStyleName("field");
+    Label label = new Label(labelText);
+    label.addStyleName("label");
+    Label value = new Label(valueText);
+    value.addStyleName("value");
+    field.add(label);
+    field.add(value);
+    return field;
+  }
+
+  private static Widget buildStepsTable(List<ViewerJobStepExecution> stepExecutions) {
+    FlowPanel wrapper = new FlowPanel();
+
+    Label tableTitle = new Label(messages.jobDetailsStepsBreakdown());
+    tableTitle.addStyleName("h6");
+    tableTitle.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    wrapper.add(tableTitle);
+
+    FlexTable table = new FlexTable();
+    table.addStyleName("steps-table");
+
+    table.setText(0, 0, messages.jobDetailsStepName());
+    table.setText(0, 1, messages.jobDetailsStepStatus());
+    table.setText(0, 2, messages.jobDetailsStepProcessed());
+    table.setText(0, 3, messages.jobDetailsStepSkipped());
+    table.setText(0, 4, messages.jobDetailsStepDuration());
+
+    int row = 1;
+    for (ViewerJobStepExecution step : stepExecutions) {
+      table.setText(row, 0, step.getName());
+
+      Label statusBadge = new Label(step.getStatus());
+      statusBadge.addStyleName(step.getStatus().equals("COMPLETED") ? "label-success"
+        : (step.getStatus().equals("FAILED") ? "label-danger" : "label-warning"));
+      table.setWidget(row, 1, statusBadge);
+
+      table.setText(row, 2, String.valueOf(step.getProcessed()));
+
+      Label skipsLabel = new Label(String.valueOf(step.getSkips()));
+      if (step.getSkips() > 0) {
+        skipsLabel.addStyleName("error");
+      }
+      table.setWidget(row, 3, skipsLabel);
+
+      table.setText(row, 4, formatDuration(step.getDuration()));
+
+      table.getCellFormatter().addStyleName(row, 2, "value");
+      table.getCellFormatter().addStyleName(row, 4, "value");
+      row++;
+    }
+
+    wrapper.add(table);
+    return wrapper;
+  }
+
+  private static String formatDuration(long ms) {
+    if (ms <= 0)
+      return "-";
+    long s = (ms / 1000) % 60;
+    long m = (ms / (1000 * 60)) % 60;
+    long h = (ms / (1000 * 60 * 60));
+    if (h > 0)
+      return h + "h " + m + "m " + s + "s";
+    if (m > 0)
+      return m + "m " + s + "s";
+    if (s > 0)
+      return s + "s";
+    return messages.jobDetailsLessThanOneSecond();
   }
 
 }

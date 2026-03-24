@@ -1624,6 +1624,36 @@ public interface ClientMessages extends Messages {
 
   String batchJobsTextForDetail();
 
+  String jobDetailsProcessedItems();
+
+  String jobDetailsSkippedItems();
+
+  String jobDetailsTotalDuration();
+
+  String jobDetailsStepsBreakdown();
+
+  String jobDetailsStepName();
+
+  String jobDetailsStepStatus();
+
+  String jobDetailsStepProcessed();
+
+  String jobDetailsStepSkipped();
+
+  String jobDetailsStepDuration();
+
+  String jobDetailsStatusMessage();
+
+  String jobDetailsErrorDetails();
+
+  String jobDetailsRefreshPage();
+
+  String jobDetailsTitle();
+
+  String jobDetailsTitleFailed();
+
+  String jobDetailsLessThanOneSecond();
+
   /********************************************
    * Table Management Panel
    *******************************************/

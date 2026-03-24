@@ -1,16 +1,23 @@
 package com.databasepreservation.common.server.batch.listeners;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 
+import com.databasepreservation.common.client.models.structure.ViewerJobStepExecution;
+import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.StepDefinition;
+import com.databasepreservation.common.server.batch.core.TaskletStepDefinition;
 import com.databasepreservation.common.server.controller.JobController;
 
 /**
@@ -50,6 +57,27 @@ public class StepStatusListener implements StepExecutionListener {
   public ExitStatus afterStep(StepExecution stepExecution) {
     try {
       definition.onStepCompleted(context, stepExecution.getStatus());
+
+      long duration = 0;
+      LocalDateTime startTime = stepExecution.getStartTime();
+      if (startTime != null) {
+        LocalDateTime endTime = stepExecution.getEndTime() != null ? stepExecution.getEndTime() : LocalDateTime.now();
+        duration = ChronoUnit.MILLIS.between(startTime, endTime);
+      }
+
+      long processed = stepExecution.getWriteCount();
+      long skips = stepExecution.getSkipCount();
+
+      if (definition instanceof TaskletStepDefinition && stepExecution.getStatus() == BatchStatus.COMPLETED) {
+        processed = definition.calculateWorkload(context);
+        context.getJobProgressAggregator().addProgress(stepExecution.getId(), processed);
+      }
+
+      ViewerJobStepExecution stepDetails = new ViewerJobStepExecution(definition.getDisplayName(),
+        stepExecution.getStatus().name(), processed, skips, duration);
+
+      String jobUUID = stepExecution.getJobExecution().getJobParameters().getString(BatchConstants.JOB_UUID_KEY);
+      ViewerFactory.getSolrManager().appendBatchJobStepExecution(jobUUID, stepDetails);
 
       LOGGER.info("[STEP] [{}/{}] FINISHED: {} with status: {}. Total items: {}", context.getCurrentStepNumber(),
         context.getTotalSteps(), definition.getName(), stepExecution.getExitStatus().getExitCode(),

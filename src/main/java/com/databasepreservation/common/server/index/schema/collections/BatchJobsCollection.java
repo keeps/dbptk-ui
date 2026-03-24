@@ -45,11 +45,13 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
+import com.databasepreservation.common.client.models.structure.ViewerJobStepExecution;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.schema.AbstractSolrCollection;
 import com.databasepreservation.common.server.index.schema.CopyField;
 import com.databasepreservation.common.server.index.schema.Field;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
+import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 
 /**
@@ -97,7 +99,12 @@ public class BatchJobsCollection extends AbstractSolrCollection<ViewerJob> {
     fields.add(new Field(SOLR_BATCH_JOB_SKIP_COUNT, Field.TYPE_LONG).setIndexed(true).setRequired(false));
     fields.add(new Field(SOLR_BATCH_JOB_CURRENT_STEP_NUMBER, Field.TYPE_INT).setIndexed(true).setRequired(false));
     fields.add(new Field(SOLR_BATCH_JOB_TOTAL_STEPS, Field.TYPE_INT).setIndexed(true).setRequired(false));
-    fields.add(new Field(SOLR_BATCH_JOB_STEP_NAMES, Field.TYPE_STRING).setIndexed(true).setRequired(false).setMultiValued(true));
+    fields.add(
+      new Field(SOLR_BATCH_JOB_STEP_NAMES, Field.TYPE_STRING).setIndexed(true).setRequired(false).setMultiValued(true));
+    fields.add(new Field(ViewerConstants.SOLR_BATCH_JOB_ERROR_DETAILS, Field.TYPE_STRING).setIndexed(true)
+      .setRequired(false).setMultiValued(true));
+    fields.add(new Field(ViewerConstants.SOLR_BATCH_JOB_STEP_EXECUTIONS, Field.TYPE_STRING).setIndexed(false)
+      .setRequired(false).setMultiValued(true));
 
     return fields;
   }
@@ -125,6 +132,13 @@ public class BatchJobsCollection extends AbstractSolrCollection<ViewerJob> {
     doc.addField(SOLR_BATCH_JOB_CURRENT_STEP_NUMBER, viewerJob.getCurrentStepNumber());
     doc.addField(SOLR_BATCH_JOB_TOTAL_STEPS, viewerJob.getCurrentStepNumber());
     doc.addField(SOLR_BATCH_JOB_STEP_NAMES, viewerJob.getStepNames());
+    if (viewerJob.getErrorDetails() != null && !viewerJob.getErrorDetails().isEmpty()) {
+      doc.addField(ViewerConstants.SOLR_BATCH_JOB_ERROR_DETAILS, viewerJob.getErrorDetails());
+    }
+    if (viewerJob.getStepExecutions() != null && !viewerJob.getStepExecutions().isEmpty()) {
+      doc.addField(ViewerConstants.SOLR_BATCH_JOB_STEP_EXECUTIONS,
+        JsonTransformer.getJsonListFromObjectList(viewerJob.getStepExecutions()));
+    }
 
     return doc;
   }
@@ -152,6 +166,11 @@ public class BatchJobsCollection extends AbstractSolrCollection<ViewerJob> {
     viewerJob.setCurrentStepNumber(SolrUtils.objectToInteger(doc.get(SOLR_BATCH_JOB_CURRENT_STEP_NUMBER), null));
     viewerJob.setTotalSteps(SolrUtils.objectToInteger(doc.get(SOLR_BATCH_JOB_TOTAL_STEPS), null));
     viewerJob.setStepNames(SolrUtils.objectToListString(doc.get(SOLR_BATCH_JOB_STEP_NAMES)));
+    viewerJob.setErrorDetails(SolrUtils.objectToListString(doc.get(ViewerConstants.SOLR_BATCH_JOB_ERROR_DETAILS)));
+    List<String> stepExecutionsJsonList = SolrUtils
+      .objectToListString(doc.get(ViewerConstants.SOLR_BATCH_JOB_STEP_EXECUTIONS));
+    viewerJob.setStepExecutions(
+      JsonTransformer.getObjectListFromJsonList(stepExecutionsJsonList, ViewerJobStepExecution.class));
 
     return viewerJob;
   }

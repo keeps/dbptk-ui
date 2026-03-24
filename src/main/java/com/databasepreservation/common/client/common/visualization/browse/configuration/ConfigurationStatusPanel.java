@@ -33,12 +33,12 @@ import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Alert;
-import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -296,31 +296,28 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
   private void handleJobSuccess(ViewerJob job) {
     jobFinishedSuccessfully = true;
-
     String stepName = (job != null && job.getCurrentStepName() != null) ? job.getCurrentStepName()
       : messages.configurationStatusPanelTextForInitializing();
 
+    progressBar.removeStyleName("progress-bar-striped");
+    progressBar.removeStyleName("active");
+    progressBar.getElement().getStyle().setWidth(100, com.google.gwt.dom.client.Style.Unit.PCT);
+    statusBadge.setHTML(LabelUtils.getJobStatus(ViewerJobStatus.COMPLETED));
+
     if (job != null && job.getSkipCount() != null && job.getSkipCount() > 0) {
-      Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
-        messages.configurationStatusPanelToastDescriptionForProcessingCompletedWithSkip(job.getSkipCount()));
-      progressBar.removeStyleName("progress-bar-striped");
-      progressBar.removeStyleName("active");
       progressBar.getElement().getStyle().setBackgroundColor("#f0ad4e");
       stepNameProgressLabel
         .setText(messages.configurationStatusPanelDescriptionForStepFinishedWithSkip(stepName, job.getSkipCount()));
       stepNameProgressLabel.getElement().getStyle().setColor("#c98114");
     } else {
-      Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
-        messages.configurationStatusPanelToastDescriptionForProcessingCompleted());
-      progressBar.removeStyleName("active");
       stepNameProgressLabel.setText(messages.configurationStatusPanelDescriptionForStepFinished(stepName));
     }
 
-    progressBar.getElement().getStyle().setWidth(100, com.google.gwt.dom.client.Style.Unit.PCT);
-    statusBadge.setHTML(LabelUtils.getJobStatus(ViewerJobStatus.COMPLETED));
-
     if (job != null) {
       elapsedTimeLabel.setText(messages.configurationStatusPanelTextForElapsedTime(calculateTotalTime(job)));
+
+      Dialogs.showJobDetailsDialog(messages.jobDetailsTitle(), job, messages.basicActionClose(),
+        () -> Window.Location.reload());
     }
 
     refreshStatusFromServer(false);
@@ -338,10 +335,8 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
   private void handleJobFailure(ViewerJob job) {
     jobFinishedSuccessfully = false;
-    String errorDetails = job.getExitDescription() != null ? job.getExitDescription()
-      : messages.configurationStatusPanelDialogTitleForError();
-    Dialogs.showErrors(messages.configurationStatusPanelDialogTitleForError(), errorDetails,
-      messages.basicActionClose());
+
+    Dialogs.showJobDetailsDialog(messages.jobDetailsTitleFailed(), job, messages.basicActionClose(), null);
 
     toggleProgressMode(false);
     btnApplyConfiguration.setEnabled(true);
