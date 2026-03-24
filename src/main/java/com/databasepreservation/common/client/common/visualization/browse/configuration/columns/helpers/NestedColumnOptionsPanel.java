@@ -37,7 +37,7 @@ public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
   ClientMessages messages = GWT.create(ClientMessages.class);
 
   @UiField
-  TextBox templateList, templateDetail, templateExport, items;
+  TextBox templateList, templateDetail, templateExport, items, multiValueTableName;
 
   @UiField
   FlowPanel templateListHint, templateDetailHint, templateExportHint;
@@ -46,7 +46,7 @@ public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
   HTML templateEngineLabel;
 
   @UiField
-  FlowPanel content, templateDetailPanel, templateExportPanel, separatorPanel;
+  FlowPanel content, templateDetailPanel, templateExportPanel, separatorPanel, multiValueTableNamePanel;
 
   @UiField
   IntegerBox quantityList;
@@ -79,6 +79,10 @@ public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
 
   public int getQuantityInList() {
     return quantityList.getValue();
+  }
+
+  public String getMultiValueTableName() {
+    return multiValueTableName.getText();
   }
 
   private NestedColumnOptionsPanel(ColumnStatus columnStatus) {
@@ -126,6 +130,11 @@ public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
       templateDetailHint.setVisible(false);
       templateDetailPanel
         .insert(new Alert(Alert.MessageAlertType.INFO, messages.columnManagementTextForMultiValueFields()), 2);
+    }
+
+    if (columnStatus.getNestedColumns() != null && columnStatus.getNestedColumns().getMultiValue()) {
+      multiValueTableNamePanel.setVisible(true);
+      multiValueTableName.setText(columnStatus.getNestedColumns().getMultiValueTableName());
     }
   }
 
