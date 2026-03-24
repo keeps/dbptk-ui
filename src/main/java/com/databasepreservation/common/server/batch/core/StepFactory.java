@@ -3,6 +3,9 @@ package com.databasepreservation.common.server.batch.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ChunkListener;
+import org.springframework.batch.core.ItemProcessListener;
+import org.springframework.batch.core.ItemReadListener;
+import org.springframework.batch.core.ItemWriteListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.partition.support.Partitioner;
@@ -24,6 +27,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.listeners.PartitionStatusListener;
+import com.databasepreservation.common.server.batch.listeners.SolrItemErrorListener;
 import com.databasepreservation.common.server.batch.listeners.SolrProgressFeedListener;
 import com.databasepreservation.common.server.batch.listeners.StepStatusListener;
 import com.databasepreservation.common.server.batch.policy.ErrorPolicy;
@@ -195,6 +199,12 @@ public class StepFactory {
 
     builder.listener((StepExecutionListener) progressListener);
     builder.listener((ChunkListener) progressListener);
+
+    SolrItemErrorListener<Object, Object> errorListener = new SolrItemErrorListener<>(solrManager);
+    builder.listener((StepExecutionListener) errorListener);
+    builder.listener((ItemReadListener<Object>) errorListener);
+    builder.listener((ItemProcessListener<Object, Object>) errorListener);
+    builder.listener((ItemWriteListener<Object>) errorListener);
 
     // Partition status is always tracked at the worker level
     if (definition instanceof PartitionableStep partitionable) {

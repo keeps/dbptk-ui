@@ -16,6 +16,8 @@ import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
 import com.databasepreservation.common.client.common.lists.columns.TooltipColumn;
 import com.databasepreservation.common.client.common.lists.utils.BasicAsyncTableCell;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
@@ -36,6 +38,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
 
 import config.i18n.client.ClientMessages;
 
@@ -60,6 +63,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
 
   @Override
   protected void configureDisplay(CellTable<ViewerJob> display) {
+    display.setSelectionModel(display.getSelectionModel(), DefaultSelectionEventManager.createBlacklistManager(1, 8));
 
     idColumn = new TooltipColumn<ViewerJob>() {
       @Override
@@ -153,6 +157,21 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       }
     };
 
+    Column<ViewerJob, String> detailsColumn = new ButtonColumn<ViewerJob>() {
+      @Override
+      public String getValue(ViewerJob object) {
+        return messages.batchJobsTextForDetail();
+      }
+    };
+
+    detailsColumn.setFieldUpdater((index, job, value) -> {
+      String title = (job.getStatus() != null && job.getStatus().name().equals("FAILED"))
+        ? messages.jobDetailsTitleFailed()
+        : messages.jobDetailsTitle();
+
+      Dialogs.showJobDetailsDialog(title, job, messages.basicActionClose(), null);
+    });
+
     addColumn(idColumn, messages.batchJobsTextForJobId(), true, TextAlign.NONE, 5);
     addColumn(databaseColumn, messages.batchJobsTextForDatabase(), true, TextAlign.NONE, 10);
     addColumn(nameColumn, messages.batchJobsTextForName(), true, TextAlign.NONE, 8);
@@ -161,6 +180,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
     addColumn(endTimeColumn, messages.batchJobsTextForEndTime(), true, TextAlign.NONE, 10);
     addColumn(progressColumn, "Progress", true, TextAlign.NONE, 10);
     addColumn(statusColumn, messages.batchJobsTextForStatus(), true, TextAlign.NONE, 8);
+    addColumn(detailsColumn, "Details", false, TextAlign.NONE, 5);
 
     idColumn.setSortable(true);
     statusColumn.setSortable(true);

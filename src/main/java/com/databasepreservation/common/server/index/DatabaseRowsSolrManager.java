@@ -53,6 +53,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabaseFro
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
+import com.databasepreservation.common.client.models.structure.ViewerJobStepExecution;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -383,6 +384,36 @@ public class DatabaseRowsSolrManager {
     }
   }
 
+  public void appendBatchJobStepExecution(String jobUUID, ViewerJobStepExecution stepExecution) {
+    if (jobUUID == null || stepExecution == null)
+      return;
+    try {
+      SolrInputDocument doc = new SolrInputDocument();
+      doc.addField(ViewerConstants.INDEX_ID, jobUUID);
+      doc.addField(ViewerConstants.SOLR_BATCH_JOB_STEP_EXECUTIONS,
+        SolrUtils.addValueUpdate(JsonTransformer.getJsonFromObject(stepExecution)));
+
+      insertDocument(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Failed to append step execution to job {}", jobUUID, e);
+    }
+  }
+
+  public void appendBatchJobError(String jobUUID, String errorMessage) {
+    if (jobUUID == null || errorMessage == null)
+      return;
+
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, jobUUID);
+    doc.addField(ViewerConstants.SOLR_BATCH_JOB_ERROR_DETAILS, SolrUtils.addValueUpdate(errorMessage));
+
+    try {
+      insertDocument(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Solr error while attempting to append error to batch job {}", jobUUID, e);
+    }
+  }
+
   public void addSavedSearch(SavedSearch savedSearch)
     throws NotFoundException, GenericException, IllegalAccessException {
     SolrCollection<SavedSearch> savedSearchesCollection = SolrDefaultCollectionRegistry.get(SavedSearch.class);
@@ -642,7 +673,7 @@ public class DatabaseRowsSolrManager {
       doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
 
       if (existingDoc != null && existingDoc.containsKey(ViewerConstants.SOLR_DATABASES_METADATA)) {
-        //deprecated
+        // deprecated
         doc.addField(ViewerConstants.SOLR_DATABASES_METADATA,
           SolrUtils.asValueUpdate(JsonTransformer.getJsonFromObject(metadata)));
       } else {
@@ -656,7 +687,7 @@ public class DatabaseRowsSolrManager {
       LOGGER.debug("Finish updating database metadata ({})", databaseUUID);
     } catch (GenericException | ViewerException | IOException | SolrServerException e) {
       LOGGER.error("Could not update database metadata ({})", databaseUUID, e);
-      throw new GenericException("Could not update database metadata " + databaseUUID , e);
+      throw new GenericException("Could not update database metadata " + databaseUUID, e);
     }
 
   }
@@ -831,7 +862,8 @@ public class DatabaseRowsSolrManager {
     } while (!insertedAllDocuments && System.currentTimeMillis() < timeoutLimit);
 
     if (!insertedAllDocuments) {
-      throw new ViewerException("Bulk update timed out for collection: " + collection);
+      throw new ViewerException("Failed to insert documents into collection " + collection
+        + " after multiple attempts. Timeout limit reached.");
     }
   }
 

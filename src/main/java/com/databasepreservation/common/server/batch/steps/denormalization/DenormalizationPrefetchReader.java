@@ -56,6 +56,7 @@ public class DenormalizationPrefetchReader implements ItemStreamReader<ViewerRow
   private final DenormalizeConfiguration config;
   private final String databaseUUID;
   private final ViewerDatabase database;
+  private static final int MAX_CLAUSES_BATCH_SIZE = 500;
 
   // In-memory buffer to hold the fully enriched chunk before yielding to the
   // Processor
@@ -134,17 +135,24 @@ public class DenormalizationPrefetchReader implements ItemStreamReader<ViewerRow
 
   /**
    * Recursively fetches and maps related child rows using a Breadth-First Search
-   * (BFS) approach.
-   *
-   * @param parentRows
-   *          The list of parent rows to be enriched.
-   * @param relatedTable
-   *          The configuration detailing the relationship and fields to fetch.
+   * (BFS) approach. Handles sub-batching to prevent Solr maxBooleanClauses syntax
+   * errors.
    */
   private void enrichWithRelatedTables(List<ViewerRow> parentRows, RelatedTablesConfiguration relatedTable)
     throws Exception {
-    if (parentRows.isEmpty())
+    if (parentRows == null || parentRows.isEmpty())
       return;
+
+    for (int i = 0; i < parentRows.size(); i += MAX_CLAUSES_BATCH_SIZE) {
+      int end = Math.min(i + MAX_CLAUSES_BATCH_SIZE, parentRows.size());
+      List<ViewerRow> parentBatch = parentRows.subList(i, end);
+
+      processBatchOfRelatedTables(parentBatch, relatedTable);
+    }
+  }
+
+  private void processBatchOfRelatedTables(List<ViewerRow> parentRows, RelatedTablesConfiguration relatedTable)
+    throws Exception {
 
     List<ReferencesConfiguration> refs = relatedTable.getReferences();
     if (refs == null || refs.isEmpty())
@@ -182,12 +190,10 @@ public class DenormalizationPrefetchReader implements ItemStreamReader<ViewerRow
       }
     }
 
-    // If no parent has valid foreign keys, abort fetching to save I/O
     if (parentToExpectedKeys.isEmpty())
       return;
 
-    // STEP 2: Build the optimized Solr Query (using IN clauses for the gathered
-    // keys)
+    // STEP 2: Build the optimized Solr Query
     List<FilterParameter> params = new ArrayList<>();
     params.add(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, relatedTable.getTableID()));
 
@@ -219,8 +225,7 @@ public class DenormalizationPrefetchReader implements ItemStreamReader<ViewerRow
       }
     }
 
-    // STEP 5: In-memory association (Map fully populated children back to their
-    // respective parents)
+    // STEP 5: In-memory association
     List<String> columnsToDisplay = getColumnsIncludedNames(relatedTable);
 
     for (ViewerRow parent : parentRows) {

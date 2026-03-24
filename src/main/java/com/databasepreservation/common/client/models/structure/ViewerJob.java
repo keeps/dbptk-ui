@@ -41,6 +41,8 @@ public class ViewerJob extends IsIndexed implements Serializable {
   private Integer currentStepNumber;
   private Integer totalSteps;
   private List<String> stepNames = new ArrayList<>();
+  private List<String> errorDetails = new ArrayList<>();
+  private List<ViewerJobStepExecution> stepExecutions = new ArrayList<>();
 
   @Override
   public void setUuid(String uuid) {
@@ -194,5 +196,21 @@ public class ViewerJob extends IsIndexed implements Serializable {
 
   public void setStepNames(List<String> stepNames) {
     this.stepNames = stepNames;
+  }
+
+  public List<String> getErrorDetails() {
+    return errorDetails;
+  }
+
+  public void setErrorDetails(List<String> errorDetails) {
+    this.errorDetails = errorDetails;
+  }
+
+  public List<ViewerJobStepExecution> getStepExecutions() {
+    return stepExecutions;
+  }
+
+  public void setStepExecutions(List<ViewerJobStepExecution> stepExecutions) {
+    this.stepExecutions = stepExecutions;
   }
 }

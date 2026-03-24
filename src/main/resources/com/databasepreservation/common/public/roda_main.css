@@ -500,6 +500,8 @@ pre code {
 .error:before {
     content: '\f071';
     font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+
     padding-left: 5px;
     text-rendering: auto;
     -webkit-font-smoothing: antialiased;
