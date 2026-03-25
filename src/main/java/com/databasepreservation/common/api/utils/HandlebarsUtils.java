@@ -48,13 +48,14 @@ public class HandlebarsUtils {
     for (String solrColumnName : fieldsToReturn) {
       final ColumnStatus columnConfig = configTable.getColumnById(solrColumnName);
 
-      if (columnConfig != null && ViewerType.dbTypes.NESTED.equals(columnConfig.getType())) {
+      if (columnConfig != null && ViewerType.dbTypes.NESTED.equals(columnConfig.getType())
+        && columnConfig.getNestedColumns() != null) {
         // treat nested
         if (!row.getNestedRowList().isEmpty()) {
           String template = columnConfig.getExportStatus().getTemplateStatus().getTemplate();
           StringBuilder stringBuilder = new StringBuilder();
           boolean first = true;
-          Iterator<ViewerRow> iterator = nestedRows.get(solrColumnName).iterator();
+          Iterator<ViewerRow> iterator = nestedRows.get(columnConfig.getNestedColumns().getReferenceUuid()).iterator();
           ViewerRow r;
           while (iterator.hasNext()) {
             r = iterator.next();
