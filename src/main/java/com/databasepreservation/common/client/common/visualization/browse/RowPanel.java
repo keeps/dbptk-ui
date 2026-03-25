@@ -486,7 +486,7 @@ public class RowPanel extends RightPanel {
 
     if (nestedColumns.getMultiValue()) {
       String context = columnStatus.getCustomName();
-      if (columnStatus.getNestedColumns() != null
+      if (columnStatus.getNestedColumns() != null && columnStatus.getNestedColumns().getMultiValueTableName() != null
         && !columnStatus.getNestedColumns().getMultiValueTableName().isEmpty()) {
         context = columnStatus.getNestedColumns().getMultiValueTableName();
       }
