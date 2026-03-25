@@ -812,12 +812,14 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 if (value.equals(Dialogs.DialogAction.SAVE)) {
 
                   TableStatus currentTable = collectionStatus.getTableStatusByTableId(tableId);
-                  String multiValueTableName = ((NestedColumnOptionsPanel) nestedColumnOptionPanel).getMultiValueTableName();
+                  String multiValueTableName = ((NestedColumnOptionsPanel) nestedColumnOptionPanel)
+                    .getMultiValueTableName();
                   String targetReferenceUuid = columnStatus.getNestedColumns().getReferenceUuid();
 
                   if (targetReferenceUuid != null) {
                     for (ColumnStatus col : currentTable.getColumns()) {
-                      if (col.getNestedColumns() != null && targetReferenceUuid.equals(col.getNestedColumns().getReferenceUuid())) {
+                      if (col.getNestedColumns() != null
+                        && targetReferenceUuid.equals(col.getNestedColumns().getReferenceUuid())) {
                         col.updateNestedColumnsMultiValueTableName(multiValueTableName);
                       }
                     }
@@ -929,8 +931,12 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                     collectionStatus.setNeedsToBeProcessed(true);
                     saveChanges(true);
                   } else if (value.equals(Dialogs.DialogAction.REMOVE)) {
-                    GWT.log("Removing foreign key status from collection status");
-                    tableStatus.removeForeignKeyStatusById(updatedForeignKeyStatus.getId());
+                    if (foreignKeysStatus != null && foreignKeysStatus.getVirtualForeignKeysStatus() != null) {
+                      foreignKeysStatus.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_REMOVE);
+                      foreignKeysStatus.getVirtualForeignKeysStatus().setLastUpdatedDate(new Date());
+
+                      tableStatus.addOrUpdateForeignKeyStatus(foreignKeysStatus);
+                    }
                     collectionStatus.setNeedsToBeProcessed(true);
                     saveChanges(true);
                   }
