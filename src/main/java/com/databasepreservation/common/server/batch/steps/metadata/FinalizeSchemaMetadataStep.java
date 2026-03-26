@@ -1,6 +1,9 @@
 package com.databasepreservation.common.server.batch.steps.metadata;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +22,7 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
@@ -32,12 +36,12 @@ import com.databasepreservation.common.server.batch.steps.denormalization.Denorm
  * The central and atomic synchronization point for all schema metadata
  * alterations.
  * <p>
- * <b>Architectural Note:</b> To prevent "Split-Brain" inconsistencies between
- * the Solr index and the physical JSON configuration files, this step acts as
- * the <b>Single Source of Truth</b> for finalizing the database schema. It
- * computes all pending schema mutations (such as new Virtual Tables, Virtual
- * Columns, and Nested Denormalization columns) in memory, and persists them
- * atomically in a single transaction.
+ * <b>Architectural Note:</b> To prevent inconsistencies between the Solr index
+ * and the physical JSON configuration files, this step acts as the <b>Single
+ * Source of Truth</b> for finalizing the database schema. It computes all
+ * pending schema mutations (such as new Virtual Tables, Virtual Columns, and
+ * Nested Denormalization columns) in memory, and persists them atomically in a
+ * single transaction.
  * </p>
  *
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -165,32 +169,47 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
 
     if (tableStatus.getVirtualTableStatus().isMarkedForRemoval()) {
       LOGGER.info("Removing virtual table from metadata: {}", tableStatus.getId());
-      ViewerTable viewerTable = metadata.getTable(tableStatus.getUuid());
-      if (viewerTable != null) {
-        metadata.getSchema(viewerTable.getSchemaUUID()).getTables()
-          .removeIf(t -> t.getUuid().equals(tableStatus.getUuid()));
+
+      // Bypass cache and remove directly from the official list to ensure deletion
+      if (metadata.getSchemas() != null) {
+        metadata.getSchemas().forEach(schema -> {
+          if (schema.getTables() != null) {
+            schema.getTables().removeIf(t -> t.getUuid().equals(tableStatus.getUuid()));
+          }
+        });
       }
     } else {
       LOGGER.info("Adding/Updating virtual table in metadata: {}", tableStatus.getId());
       ViewerTable originalTable = metadata.getTable(tableStatus.getVirtualTableStatus().getSourceTableUUID());
       if (originalTable != null) {
         ViewerTable virtualViewerTable = buildVirtualViewerTable(tableStatus, originalTable);
-        metadata.getSchema(virtualViewerTable.getSchemaUUID()).getTables()
-          .removeIf(t -> t.getUuid().equals(virtualViewerTable.getUuid()));
-        metadata.getSchema(virtualViewerTable.getSchemaUUID()).getTables().add(virtualViewerTable);
+        ViewerSchema schema = metadata.getSchema(virtualViewerTable.getSchemaUUID());
+        if (schema != null && schema.getTables() != null) {
+          schema.getTables().removeIf(t -> t.getUuid().equals(virtualViewerTable.getUuid()));
+          schema.getTables().add(virtualViewerTable);
+        }
       }
     }
+
+    // Force ViewerMetadata to rebuild its internal maps (cache) with the updated
+    // lists
+    metadata.setSchemas(metadata.getSchemas());
   }
 
   private void processVirtualColumnsMetadata(TableStatus tableStatus, ViewerMetadata metadata) {
     if (tableStatus.getColumns() == null)
       return;
 
-    tableStatus.removeMarkedVirtualColumns(); // Clean memory first
+    tableStatus.removeMarkedVirtualColumns();
 
     ViewerTable viewerTable = metadata.getTable(tableStatus.getUuid());
     if (viewerTable == null)
       return;
+
+    // Ensure columns list is mutable before modifying
+    if (!(viewerTable.getColumns() instanceof ArrayList)) {
+      viewerTable.setColumns(new ArrayList<>(viewerTable.getColumns()));
+    }
 
     tableStatus.getColumns().stream().filter(ColumnStatus::isVirtual).forEach(column -> {
       viewerTable.getColumns().removeIf(c -> c.getSolrName().equals(column.getId()));
@@ -199,11 +218,12 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
         LOGGER.info("Adding/Updating virtual column '{}' in table '{}'", column.getId(), tableStatus.getId());
         viewerTable.getColumns().add(buildViewerColumn(column, viewerTable));
       } else {
-        LOGGER.info(
-          "virtual column '{}' in table '{}' is marked for removal and will be deleted from metadata in the latest step",
+        LOGGER.info("Virtual column '{}' in table '{}' is marked for removal and was deleted from metadata",
           column.getId(), tableStatus.getId());
       }
     });
+
+    metadata.setSchemas(metadata.getSchemas());
   }
 
   private void processVirtualReferencesMetadata(TableStatus tableStatus, ViewerMetadata metadata) {
@@ -214,11 +234,15 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
     if (sourceViewerTable == null)
       return;
 
+    // Initialize list to prevent NullPointerException
+    if (sourceViewerTable.getForeignKeys() == null) {
+      sourceViewerTable.setForeignKeys(new ArrayList<>());
+    }
+
     tableStatus.getForeignKeys().stream().filter(fk -> fk.isVirtual() && fk.getVirtualForeignKeysStatus() != null)
       .forEach(fkStatus -> {
-        if (sourceViewerTable.getForeignKeys() != null) {
-          sourceViewerTable.getForeignKeys().removeIf(fk -> fk.getName().equals(fkStatus.getName()));
-        }
+
+        sourceViewerTable.getForeignKeys().removeIf(fk -> fk.getName().equals(fkStatus.getName()));
 
         if (!fkStatus.getVirtualForeignKeysStatus().isMarkedForRemoval()) {
           LOGGER.info("Adding/Updating virtual foreign key '{}' in table '{}'", fkStatus.getName(),
@@ -227,15 +251,13 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
           if (targetTable != null) {
             sourceViewerTable.getForeignKeys().add(buildViewerForeignKey(fkStatus, sourceViewerTable, targetTable));
           }
-          fkStatus.getVirtualForeignKeysStatus().markAsProcessed(); // Updates memory state
+          fkStatus.getVirtualForeignKeysStatus().markAsProcessed();
         } else {
-          LOGGER.info(
-            "Virtual foreign key '{}' in table '{}' is marked for removal and will be deleted from metadata in the latest step",
+          LOGGER.info("Virtual foreign key '{}' in table '{}' is marked for removal and was deleted from metadata",
             fkStatus.getName(), tableStatus.getId());
         }
       });
 
-    // Clean memory state
     tableStatus.getForeignKeys()
       .removeIf(fk -> fk.isVirtual() && fk.getVirtualForeignKeysStatus().isMarkedForRemoval());
   }
@@ -249,7 +271,7 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
     viewerTable.setDescription(tableStatus.getDescription());
     viewerTable.setFolder(tableStatus.getTableFolder());
 
-    java.util.List<ViewerColumn> columnsToInclude = tableStatus.getColumns().stream()
+    List<ViewerColumn> columnsToInclude = tableStatus.getColumns().stream()
       .map(column -> originalTable.getColumnBySolrName(column.getId())).filter(c -> c != null).map(originalCol -> {
         ViewerColumn newCol = new ViewerColumn();
         newCol.setSolrName(originalCol.getSolrName());
@@ -262,9 +284,10 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
         newCol.setAutoIncrement(originalCol.getAutoIncrement());
         newCol.setSourceType(ViewerSourceType.VIRTUAL);
         return newCol;
-      }).toList();
+      }).collect(Collectors.toList());
 
-    viewerTable.setColumns(columnsToInclude);
+    // Wrap in ArrayList to guarantee mutability for future modifications
+    viewerTable.setColumns(new ArrayList<>(columnsToInclude));
 
     viewerTable.setSchemaUUID(originalTable.getSchemaUUID());
     viewerTable.setSchemaName(originalTable.getSchemaName());
@@ -280,11 +303,11 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
       }
     }
 
-    viewerTable.setForeignKeys(new java.util.ArrayList<>());
+    viewerTable.setForeignKeys(new ArrayList<>());
     if (tableStatus.getVirtualTableStatus().getUseSourceTableForeignKeys()) {
       if (originalTable.getForeignKeys() != null) {
         for (ViewerColumn viewerColumn : columnsToInclude) {
-          java.util.List<ViewerForeignKey> viewerForeignKeys = originalTable.getForeignKeys().stream()
+          List<ViewerForeignKey> viewerForeignKeys = originalTable.getForeignKeys().stream()
             .filter(fk -> fk.getReferences().stream()
               .anyMatch(r -> r.getSourceColumnIndex().equals(viewerColumn.getColumnIndexInEnclosingTable())))
             .toList();
@@ -325,7 +348,7 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
     vfk.setReferencedTableId(fkStatus.getReferencedTableId());
     vfk.setDescription("Virtual Reference created via UI");
 
-    java.util.List<ViewerReference> references = new java.util.ArrayList<>();
+    List<ViewerReference> references = new ArrayList<>();
 
     if (fkStatus.getReferences() != null) {
       for (ForeignKeysStatus.ReferencedColumnStatus refStatus : fkStatus.getReferences()) {
