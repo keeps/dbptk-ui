@@ -123,12 +123,6 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
     boolean hasTable = !ViewerStringUtils.isBlank(selectedTable);
     boolean hasColumn = !ViewerStringUtils.isBlank(selectedColumn);
 
-    if (!hasTable) {
-      showError(referencedTableListBox, errorReferencedTable,
-        messages.columnManagementLabelForReferencedTable() + " is required.");
-      isValid = false;
-    }
-
     if (hasTable && !hasColumn) {
       showError(referencedColumnListBox, errorReferencedColumn, "Target column is required.");
       isValid = false;

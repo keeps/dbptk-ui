@@ -299,19 +299,32 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
       visNodeList.add(visNode);
 
+      Map<String, JsniEdge> edgeMap = new HashMap<>();
+
       for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-        jsniEdgeList.add(new JsniEdge(viewerTable.getId(), viewerForeignKey.getReferencedTableId(), isVirtualTable));
+        boolean isVirtualForeignKey = viewerForeignKey.getSourceType() != null
+          && viewerForeignKey.getSourceType().equals(ViewerSourceType.VIRTUAL);
+
+        boolean isVirtualRelation = isVirtualTable || isVirtualForeignKey;
+
+        edgeMap.put(viewerForeignKey.getName(), new JsniEdge(viewerTable.getId(),
+          viewerForeignKey.getReferencedTableId(), isVirtualRelation, isVirtualRelation));
       }
 
       if (collectionStatus != null) {
         for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(viewerTable.getUuid())) {
-          if (foreignKeysStatus.getSourceType() != null
-            && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
-            JsniEdge virtualEdge = new JsniEdge(viewerTable.getId(), foreignKeysStatus.getReferencedTableId(), true);
-            jsniEdgeList.add(virtualEdge);
-          }
+
+          boolean isVirtualStatus = foreignKeysStatus.getSourceType() != null
+            && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL);
+          boolean isVirtualRelation = isVirtualTable || isVirtualStatus;
+
+          String fkKey = foreignKeysStatus.getId() != null ? foreignKeysStatus.getId() : foreignKeysStatus.getName();
+          edgeMap.put(fkKey, new JsniEdge(viewerTable.getId(), foreignKeysStatus.getReferencedTableId(),
+            isVirtualRelation, isVirtualRelation));
         }
       }
+
+      jsniEdgeList.addAll(edgeMap.values());
     }
 
     Double normMinColumnsAndRows = 0.0;
@@ -630,12 +643,19 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     String arrows;
     int length;
     boolean dashes;
+    VisEdgeSmooth smooth;
 
-    public JsniEdge(String from, String to, boolean dashes) {
+    public JsniEdge(String from, String to, boolean dashes, boolean isVirtual) {
       this.from = from;
       this.to = to;
       this.length = 100;
       this.dashes = dashes;
+
+      if (isVirtual) {
+        this.smooth = new VisEdgeSmooth("curvedCCW", 0.15);
+      } else {
+        this.smooth = new VisEdgeSmooth("curvedCW", 0.15);
+      }
     }
 
     public String getFrom() {
@@ -676,6 +696,43 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
     public void setDashes(boolean dashes) {
       this.dashes = dashes;
+    }
+
+    public VisEdgeSmooth getSmooth() {
+      return smooth;
+    }
+
+    public void setSmooth(VisEdgeSmooth smooth) {
+      this.smooth = smooth;
+    }
+  }
+
+  static class VisEdgeSmooth {
+    String type;
+    double roundness;
+
+    public VisEdgeSmooth() {
+    }
+
+    public VisEdgeSmooth(String type, double roundness) {
+      this.type = type;
+      this.roundness = roundness;
+    }
+
+    public String getType() {
+      return type;
+    }
+
+    public void setType(String type) {
+      this.type = type;
+    }
+
+    public double getRoundness() {
+      return roundness;
+    }
+
+    public void setRoundness(double roundness) {
+      this.roundness = roundness;
     }
   }
 
@@ -731,10 +788,7 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
                 }
             },
             "edges": {
-                "smooth": {
-                    "type": "straightCross",
-                    "forceDirection": "horizontal"
-                }, "arrows": {
+                 "arrows": {
                     "to": {
                         "enabled": true
                     }
