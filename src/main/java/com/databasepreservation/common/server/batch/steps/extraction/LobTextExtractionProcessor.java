@@ -1,5 +1,6 @@
 package com.databasepreservation.common.server.batch.steps.extraction;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -59,6 +61,7 @@ public class LobTextExtractionProcessor implements ItemProcessor<ViewerRow, RowL
     this.dbVersion = dbVersion;
 
     this.tikaTemplate = new RestTemplate();
+    this.tikaTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
     this.tikaURL = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
       ViewerConstants.PROPERTY_OCR_TIKA_URL);
     this.tikaVolumePathConfig = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
