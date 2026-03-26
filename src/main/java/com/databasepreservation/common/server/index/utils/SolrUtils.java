@@ -720,7 +720,7 @@ public class SolrUtils {
       appendExactMatch(ret, simplePar.getName(), simplePar.getValue(), true, prefixWithANDOperatorIfBuilderNotEmpty);
     } else if (parameter instanceof EDismaxSimplerQueryFilterParameter) {
       EDismaxSimplerQueryFilterParameter eDismaxSimplePar = (EDismaxSimplerQueryFilterParameter) parameter;
-      appendEDismaxSearchTerm(ret, eDismaxSimplePar.getValue(), true, prefixWithANDOperatorIfBuilderNotEmpty);
+      appendEDismaxSearchTerm(ret, eDismaxSimplePar.getValue(), false, prefixWithANDOperatorIfBuilderNotEmpty);
     } else if (parameter instanceof OneOfManyFilterParameter) {
       OneOfManyFilterParameter param = (OneOfManyFilterParameter) parameter;
       appendValuesUsingOROperator(ret, param.getName(), param.getValues(), prefixWithANDOperatorIfBuilderNotEmpty);
