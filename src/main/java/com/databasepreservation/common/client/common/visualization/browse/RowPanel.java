@@ -33,7 +33,6 @@ import com.databasepreservation.common.client.common.helpers.HelperExportTableDa
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.CrossCollectionInnerJoinFilterParameter;
@@ -42,7 +41,6 @@ import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -54,7 +52,6 @@ import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
-import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.services.CollectionService;
@@ -191,27 +188,12 @@ public class RowPanel extends RightPanel {
 
     // get references where this column is source in foreign keys
     for (ViewerForeignKey fk : table.getForeignKeys()) {
-      Ref ref = new Ref(table, metadata.getTable(fk.getReferencedTableUUID()), fk, status);
+      Ref ref = new Ref(table, metadata.getTable(fk.getReferencedTableUUID()), fk);
       if (fk.getReferences().size() == 1) {
         Set<Ref> refs = colIndexRelatedTo.computeIfAbsent(ref.getSingleColumnIndex(), k -> new TreeSet<>());
         refs.add(ref);
       } else {
         recordRelatedTo.add(ref);
-      }
-    }
-
-    // get virtual foreign keys where this column is source in foreign keys
-    for (ForeignKeysStatus fkStatus : status.getForeignKeysByTableUUID(table.getUuid())) {
-      if (fkStatus.getSourceType() != null && fkStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
-        ViewerForeignKey fk = DataTransformationUtils.convertToViewerForeignKey(fkStatus, status, table.getUuid());
-
-        Ref ref = new Ref(table, metadata.getTable(fk.getReferencedTableUUID()), fk, status);
-        if (fk.getReferences().size() == 1) {
-          Set<Ref> refs = colIndexRelatedTo.computeIfAbsent(ref.getSingleColumnIndex(), k -> new TreeSet<>());
-          refs.add(ref);
-        } else {
-          recordRelatedTo.add(ref);
-        }
       }
     }
 
@@ -221,30 +203,12 @@ public class RowPanel extends RightPanel {
       for (ViewerTable viewerTable : viewerSchema.getTables()) {
         for (ViewerForeignKey fk : viewerTable.getForeignKeys()) {
           if (fk.getReferencedTableUUID().equals(table.getUuid())) {
-            Ref ref = new Ref(table, viewerTable, fk, status);
+            Ref ref = new Ref(table, viewerTable, fk);
             if (fk.getReferences().size() == 1) {
               Set<Ref> refs = colIndexReferencedBy.computeIfAbsent(ref.getSingleColumnIndex(), k -> new TreeSet<>());
               refs.add(ref);
             } else {
               recordReferencedBy.add(ref);
-            }
-          }
-        }
-
-        // for virtual
-        for (ForeignKeysStatus fkStatus : status.getForeignKeysByTableUUID(viewerTable.getUuid())) {
-          if (fkStatus.getSourceType() != null && fkStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
-            ViewerForeignKey fk = DataTransformationUtils.convertToViewerForeignKey(fkStatus, status,
-              viewerTable.getUuid());
-
-            if (fk.getReferencedTableUUID().equals(table.getUuid())) {
-              Ref ref = new Ref(table, viewerTable, fk, status);
-              if (fk.getReferences().size() == 1) {
-                Set<Ref> refs = colIndexReferencedBy.computeIfAbsent(ref.getSingleColumnIndex(), k -> new TreeSet<>());
-                refs.add(ref);
-              } else {
-                recordReferencedBy.add(ref);
-              }
             }
           }
         }
@@ -693,7 +657,7 @@ public class RowPanel extends RightPanel {
     ViewerTable refTable;
     Map<String, String> foreignSolrColumnToRowSolrColumn;
 
-    Ref(ViewerTable currentTable, ViewerTable otherTable, ViewerForeignKey foreignKey, CollectionStatus status) {
+    Ref(ViewerTable currentTable, ViewerTable otherTable, ViewerForeignKey foreignKey) {
       refTable = otherTable;
       foreignSolrColumnToRowSolrColumn = new TreeMap<>();
 
@@ -722,7 +686,7 @@ public class RowPanel extends RightPanel {
           // get column indexes from fk target
           for (ViewerReference viewerReference : foreignKey.getReferences()) {
             String solrColumnName = getSolrNameByColumnIndex(otherTable.getColumns(),
-              viewerReference.getReferencedColumnIndex());
+              viewerReference.getSourceColumnIndex());
             Integer columnIndexToGetValue = viewerReference.getReferencedColumnIndex();
             String solrColumnNameToGetValue = getSolrNameByColumnIndex(currentTable.getColumns(),
               columnIndexToGetValue);

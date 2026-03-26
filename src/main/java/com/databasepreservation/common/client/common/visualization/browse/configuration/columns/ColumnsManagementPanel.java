@@ -786,9 +786,11 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 collectionStatus.setNeedsToBeProcessed(true);
                 saveChanges(true);
               } else if (value.equals(Dialogs.DialogAction.REMOVE)) {
-                if (virtualForeignKeysStatus != null) {
-                  virtualForeignKeysStatus.setProcessingState(ProcessingState.TO_REMOVE);
-                  virtualForeignKeysStatus.setLastUpdatedDate(new Date());
+                if (foreignKeysStatus != null && foreignKeysStatus.getVirtualForeignKeysStatus() != null) {
+                  foreignKeysStatus.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_REMOVE);
+                  foreignKeysStatus.getVirtualForeignKeysStatus().setLastUpdatedDate(new Date());
+
+                  tableStatus.addOrUpdateForeignKeyStatus(foreignKeysStatus);
                 }
                 updatedColumnStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_REMOVE);
                 column.setVirtualColumnStatus(updatedColumnStatus.getVirtualColumnStatus());
