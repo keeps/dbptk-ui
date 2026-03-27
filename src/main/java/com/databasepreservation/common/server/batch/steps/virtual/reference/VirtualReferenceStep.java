@@ -42,10 +42,16 @@ public class VirtualReferenceStep implements StepDefinition, TaskletStepDefiniti
 
   @Override
   public Tasklet createTasklet(JobContext context, ExecutionContext executionContext) {
-    // All metadata mutation logic has been moved to the
-    // FinalizeVirtualEntitiesMetadataStep
-    // We keep this Tasklet returning FINISHED just for visual feedback and history
-    // purposes in Spring
+    if (context.getCollectionStatus().getTables() != null) {
+      context.getCollectionStatus().getTables().forEach(table -> {
+        if (table.getForeignKeys() != null) {
+          table.getForeignKeys().stream().filter(fk -> fk.isVirtual() && fk.getVirtualForeignKeysStatus() != null)
+            .filter(fk -> fk.getVirtualForeignKeysStatus().shouldProcess())
+            .filter(fk -> !fk.getVirtualForeignKeysStatus().isMarkedForRemoval())
+            .forEach(fk -> fk.getVirtualForeignKeysStatus().markAsPendingMetadata());
+        }
+      });
+    }
     return (contribution, chunkContext) -> org.springframework.batch.repeat.RepeatStatus.FINISHED;
   }
 
