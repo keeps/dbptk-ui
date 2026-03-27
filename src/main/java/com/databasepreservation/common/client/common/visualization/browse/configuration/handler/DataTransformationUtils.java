@@ -228,6 +228,7 @@ public class DataTransformationUtils {
     foreignKey.setName(foreignKeysStatus.getName());
     foreignKey.setReferencedTableUUID(foreignKeysStatus.getReferencedTableUUID());
     foreignKey.setReferencedTableId(foreignKeysStatus.getReferencedTableId());
+    foreignKey.setSourceType(foreignKeysStatus.getSourceType());
 
     TableStatus sourceTableStatus = collectionStatus.getTableStatus(sourceTableUUID);
     TableStatus referencedTableStatus = collectionStatus.getTableStatus(foreignKeysStatus.getReferencedTableUUID());
