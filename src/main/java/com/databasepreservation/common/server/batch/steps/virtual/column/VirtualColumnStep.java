@@ -5,8 +5,11 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.AbstractIndexingStepDefinition;
 import com.databasepreservation.common.server.batch.core.BatchConstants;
@@ -16,6 +19,7 @@ import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
 import com.databasepreservation.common.server.batch.steps.partition.PartitionStrategy;
 import com.databasepreservation.common.server.batch.steps.partition.TablePartitionStrategy;
 import com.databasepreservation.common.server.batch.steps.virtual.VirtualEntityStepUtils;
+import com.databasepreservation.common.server.batch.steps.virtual.VirtualSchemaBuilderUtils;
 
 /**
  * Step responsible for computing virtual columns. It is chunk-oriented and
@@ -60,7 +64,25 @@ public class VirtualColumnStep extends AbstractIndexingStepDefinition<ViewerRow,
       String tableId = partitionContext.getString(BatchConstants.TABLE_ID_KEY);
       TableStatus tableStatus = jobContext.getCollectionStatus().findTableStatusById(tableId);
       if (tableStatus != null) {
-        tableStatus.updateProcessedVirtualColumnsState();
+        tableStatus.getColumns().stream().filter(ColumnStatus::isVirtual)
+          .filter(ColumnStatus::hasVirtualColumnToProcess).filter(c -> !c.getVirtualColumnStatus().isMarkedForRemoval())
+          .forEach(c -> c.getVirtualColumnStatus().markAsPendingMetadata());
+
+        jobContext.changeViewerDatabase(database -> {
+          ViewerMetadata metadata = database.getMetadata();
+          ViewerTable viewerTable = metadata.getTable(tableStatus.getUuid());
+          if (viewerTable != null) {
+            if (!(viewerTable.getColumns() instanceof java.util.ArrayList)) {
+              viewerTable.setColumns(new java.util.ArrayList<>(viewerTable.getColumns()));
+            }
+
+            tableStatus.getColumns().stream().filter(c -> c.isVirtual() && c.getVirtualColumnStatus() != null)
+              .filter(c -> c.getVirtualColumnStatus().isPendingMetadata()).forEach(column -> {
+                viewerTable.getColumns().removeIf(c -> c.getSolrName().equals(column.getId()));
+                viewerTable.getColumns().add(VirtualSchemaBuilderUtils.buildViewerColumn(column));
+              });
+          }
+        });
       }
     }
   }

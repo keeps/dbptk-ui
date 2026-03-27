@@ -1,7 +1,5 @@
 package com.databasepreservation.common.server.batch.steps.denormalization;
 
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
@@ -89,13 +87,7 @@ public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRo
     DenormalizeConfiguration config = context.getDenormalizeConfig(entryID);
 
     // 3. Eagerly load the database metadata once per partition initialization
-    ViewerDatabase database;
-    try {
-      database = solrManager.retrieve(ViewerDatabase.class, context.getDatabaseUUID());
-    } catch (NotFoundException | GenericException e) {
-      throw new IllegalStateException("Critical Failure: Unable to load database metadata for UUID: "
-        + context.getDatabaseUUID() + ". Partition initialization aborted.", e);
-    }
+    ViewerDatabase database = context.getViewerDatabase();
 
     // 4. Wrap the base reader in the PrefetchReader to enable chunk-aware
     // relational fetching

@@ -278,7 +278,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
     card.setDescription(childTable.getDescription());
     card.addStyleName("card-disabled");
-    card.addExtraContent(getInformationAboutRelashionship(childNode));
+    card.addExtraContent(getInformationAboutRelationship(childNode));
     card.getElement().setId(childNode.getUuid());
 
     if (childNode.getIsVirtual()) {
@@ -352,7 +352,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     return relationShipList;
   }
 
-  private FlowPanel getInformationAboutRelashionship(TableNode node) {
+  private FlowPanel getInformationAboutRelationship(TableNode node) {
     FlowPanel information = new FlowPanel();
     ViewerForeignKey foreignKey = node.getForeignKey();
     ViewerTable referencedTable = node.getParentNode().getTable();
@@ -365,7 +365,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
         ViewerColumn column = DataTransformationUtils.getColumnByIndex(sourceTable.getColumns(),
           reference.getSourceColumnIndex());
-        isVirtual = isIsVirtualRelationship(sourceTable, column, isVirtual);
+        isVirtual = isVirtualRelationship(sourceTable, column, isVirtual);
 
         information.add(buildReferenceInformation(
           messages.dataTransformationTextForIsRelatedTo(referencedTable.getId(), column.getDisplayName()), isVirtual));
@@ -374,7 +374,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
           reference.getSourceColumnIndex());
         ViewerColumn column = DataTransformationUtils.getColumnByIndex(sourceTable.getColumns(),
           reference.getReferencedColumnIndex());
-        isVirtual = isIsVirtualRelationship(referencedTable, referencedColumn, isVirtual);
+        isVirtual = isVirtualRelationship(referencedTable, referencedColumn, isVirtual);
 
         information.add(buildReferenceInformation(
           messages.dataTransformationTextForIsReferencedBy(referencedTable.getId(), column.getDisplayName()),
@@ -385,7 +385,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     return information;
   }
 
-  private boolean isIsVirtualRelationship(ViewerTable sourceTable, ViewerColumn column, boolean isVirtual) {
+  private boolean isVirtualRelationship(ViewerTable sourceTable, ViewerColumn column, boolean isVirtual) {
     ForeignKeysStatus foreignKeysStatus = collectionStatus.getForeignKeyByTableAndColumnId(sourceTable.getUuid(),
       column.getSolrName());
 

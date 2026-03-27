@@ -1,9 +1,11 @@
 package com.databasepreservation.common.server.batch.context;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.server.batch.core.JobProgressAggregator;
 
 /**
@@ -17,6 +19,19 @@ public interface JobContext {
    * @return The UUID of the database being processed.
    */
   String getDatabaseUUID();
+
+  /**
+   * Retrieves the "Shadow Database" kept in memory during the job. Contains the
+   * metadata schema, version, and path without needing Solr calls.
+   */
+  ViewerDatabase getViewerDatabase();
+
+  /**
+   *
+   * Safe and synchronized way for Worker Steps to inject structures into the
+   * Shadow Schema.
+   */
+  void changeViewerDatabase(Consumer<ViewerDatabase> consumer);
 
   /**
    * @return The current status of the collection and its structure.
