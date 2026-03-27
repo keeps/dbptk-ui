@@ -146,4 +146,31 @@ public class DenormalizationStepUtils {
   private static String removeBrackets(List<String> list) {
     return list.toString().replace("[", "").replace("]", "");
   }
+
+  public static List<String> getGlobalNestedMetadataFields() {
+    return List.of(ViewerConstants.SOLR_ROWS_NESTED, "token" + ViewerConstants.SOLR_DYN_NEST_MULTI,
+      "type" + ViewerConstants.SOLR_DYN_TEXT_GENERAL);
+  }
+
+  public static List<String> getRelatedTablePrefixes(List<RelatedTablesConfiguration> relatedTables) {
+    List<String> prefixes = new ArrayList<>();
+    if (relatedTables != null) {
+      for (RelatedTablesConfiguration rt : relatedTables) {
+        prefixes.add(rt.getTableID() + "_" + ViewerConstants.SOLR_ROWS_NESTED_COL);
+        prefixes.addAll(getRelatedTablePrefixes(rt.getRelatedTables()));
+      }
+    }
+    return prefixes;
+  }
+
+  public static List<String> getAllNestedUUIDs(List<RelatedTablesConfiguration> relatedTables) {
+    List<String> uuids = new ArrayList<>();
+    if (relatedTables != null) {
+      for (RelatedTablesConfiguration rt : relatedTables) {
+        uuids.add(rt.getUuid());
+        uuids.addAll(getAllNestedUUIDs(rt.getRelatedTables()));
+      }
+    }
+    return uuids;
+  }
 }

@@ -14,8 +14,8 @@ public class DenormalizationStepProcessor implements ItemProcessor<ViewerRow, Vi
 
   @Override
   public ViewerRow process(ViewerRow row) throws Exception {
-    if (row.getNestedRowList() == null || row.getNestedRowList().isEmpty()) {
-      return null;
+    if (row.getNestedRowList() == null) {
+      row.setNestedRowList(new java.util.ArrayList<>());
     }
 
     return row;
