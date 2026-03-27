@@ -63,8 +63,9 @@ public class DatabaseOperation implements Operation {
     if (databaseUuid == null)
       return null;
 
+    // SOLR_DATABASES_METADATA is deprecated
     List<String> fieldsToReturn = Arrays.asList(ViewerConstants.INDEX_ID, ViewerConstants.SOLR_DATABASES_METADATA,
-      ViewerConstants.SOLR_DATABASES_STATUS);
+      ViewerConstants.SOLR_DATABASES_STATUS, ViewerConstants.SOLR_DATABASES_METADATA_NAME);
     Filter filterParam = new Filter(new SimpleFilterParameter(ViewerConstants.INDEX_ID, databaseUuid));
     List<Filter> queryFilters = new ArrayList<>(DatabaseResource.getDatabaseFindContentTypeFilterQueries());
     final IndexResult<ViewerDatabase> viewerDatabase = ViewerFactory.getSolrManager().find(ViewerDatabase.class,
