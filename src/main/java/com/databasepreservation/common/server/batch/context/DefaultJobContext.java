@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import org.roda.core.data.exceptions.GenericException;
 
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.batch.core.JobProgressAggregator;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
@@ -20,6 +22,7 @@ import com.databasepreservation.common.server.batch.exceptions.BatchJobException
  */
 public class DefaultJobContext implements JobContext {
   private final String databaseUUID;
+  private final ViewerDatabase viewerDatabase;
   private final CollectionStatus collectionStatus;
   private final JobProgressAggregator progressAggregator;
   private final Map<String, DenormalizeConfiguration> denormalizeConfigs;
@@ -29,8 +32,10 @@ public class DefaultJobContext implements JobContext {
   private final AtomicInteger totalSteps = new AtomicInteger(1);
   private volatile String currentStepName = "";
 
-  public DefaultJobContext(String databaseUUID, CollectionStatus collectionStatus) throws BatchJobException {
+  public DefaultJobContext(String databaseUUID, ViewerDatabase viewerDatabase, CollectionStatus collectionStatus)
+    throws BatchJobException {
     this.databaseUUID = databaseUUID;
+    this.viewerDatabase = viewerDatabase;
     this.collectionStatus = collectionStatus;
     this.progressAggregator = new JobProgressAggregator();
     this.denormalizeConfigs = new HashMap<>();
@@ -59,6 +64,21 @@ public class DefaultJobContext implements JobContext {
   @Override
   public String getDatabaseUUID() {
     return databaseUUID;
+  }
+
+  @Override
+  public synchronized ViewerDatabase getViewerDatabase() {
+    return viewerDatabase;
+  }
+
+  @Override
+  public synchronized void changeViewerDatabase(Consumer<ViewerDatabase> consumer) {
+    if (this.viewerDatabase != null) {
+      consumer.accept(this.viewerDatabase);
+
+      // Force reconstruction of internal maps and structures to reflect changes
+      this.viewerDatabase.getMetadata().setSchemas(this.viewerDatabase.getMetadata().getSchemas());
+    }
   }
 
   @Override

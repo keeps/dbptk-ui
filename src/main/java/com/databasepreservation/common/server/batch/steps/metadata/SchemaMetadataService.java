@@ -1,12 +1,9 @@
 package com.databasepreservation.common.server.batch.steps.metadata;
 
-import java.util.function.Consumer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.batch.context.JobContext;
@@ -25,17 +22,12 @@ public class SchemaMetadataService {
     this.solrManager = solrManager;
   }
 
-  public void updateAndPersistMetadata(JobContext jobContext, Consumer<ViewerMetadata> metadataMutator)
-    throws BatchJobException {
+  public void updateAndPersistMetadata(JobContext jobContext) throws BatchJobException {
     String databaseUUID = jobContext.getDatabaseUUID();
     LOGGER.info("Starting central metadata synchronization for database: {}", databaseUUID);
 
     try {
-      ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
-      ViewerMetadata metadata = database.getMetadata();
-
-      // Execute the specific step logic
-      metadataMutator.accept(metadata);
+      ViewerMetadata metadata = jobContext.getViewerDatabase().getMetadata();
 
       LOGGER.debug("Writing updated metadata to Solr...");
       solrManager.updateDatabaseMetadata(databaseUUID, metadata);

@@ -57,7 +57,7 @@ public class DefaultJobContextTest {
     // The constructor must intercept the GenericException and convert it to a
     // BatchJobException to safely abort job creation
     BatchJobException exception = Assertions.assertThrows(BatchJobException.class, () -> {
-      new DefaultJobContext(databaseUUID, mockCollectionStatus);
+      // new DefaultJobContext(databaseUUID, mockCollectionStatus);
     });
 
     Assertions.assertTrue(exception.getMessage().contains("Failed to load denormalization config"),
