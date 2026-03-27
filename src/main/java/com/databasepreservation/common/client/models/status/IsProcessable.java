@@ -24,6 +24,11 @@ public interface IsProcessable {
       return true;
     }
 
+    if (getProcessingState() == ProcessingState.PENDING_METADATA || getProcessingState() == ProcessingState.PROCESSED
+      || getProcessingState() == ProcessingState.PROCESSING || getProcessingState() == ProcessingState.FAILED) {
+      return false;
+    }
+
     if (getLastExecutionDate() == null) {
       return true;
     }
@@ -37,6 +42,16 @@ public interface IsProcessable {
   @JsonIgnore
   default boolean isMarkedForRemoval() {
     return getProcessingState() == ProcessingState.TO_REMOVE;
+  }
+
+  @JsonIgnore
+  default void markAsPendingMetadata() {
+    setProcessingState(ProcessingState.PENDING_METADATA);
+  }
+
+  @JsonIgnore
+  default boolean isPendingMetadata() {
+    return getProcessingState() == ProcessingState.PENDING_METADATA;
   }
 
   @JsonIgnore

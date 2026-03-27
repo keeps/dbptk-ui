@@ -51,9 +51,9 @@ public class LobTextExtractionStepUtils {
         LobTextExtractionStatus status = c.getLobTextExtractionStatus();
 
         if (isMarkedForCleanup(c)) {
-          status.setProcessingState(null);
+          status.setProcessingState(ProcessingState.TO_REMOVE);
         } else {
-          status.setProcessingState(ProcessingState.PROCESSED);
+          status.markAsPendingMetadata();
         }
         status.setLastExecutionDate(now);
       });
