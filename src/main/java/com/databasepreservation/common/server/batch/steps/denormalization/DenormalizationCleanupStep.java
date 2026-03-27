@@ -1,5 +1,6 @@
 package com.databasepreservation.common.server.batch.steps.denormalization;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -15,10 +16,12 @@ import org.springframework.stereotype.Component;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
-import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.batch.context.JobContext;
@@ -27,6 +30,7 @@ import com.databasepreservation.common.server.batch.exceptions.BatchJobException
 import com.databasepreservation.common.server.batch.policy.ErrorPolicy;
 import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 
 /**
  * A dedicated Tasklet Step strictly responsible for destructive I/O operations.
@@ -115,6 +119,8 @@ public class DenormalizationCleanupStep implements TaskletStepDefinition {
   private void removeDenormalizeConfiguration(JobContext jobContext, String entryID, DenormalizeConfiguration config)
     throws BatchJobException {
 
+    cleanupParentDocuments(jobContext.getDatabaseUUID(), config);
+
     // 1. Delete all associated nested documents from the Solr index
     deleteNestedRowsForConfig(jobContext.getDatabaseUUID(), config);
 
@@ -137,32 +143,55 @@ public class DenormalizationCleanupStep implements TaskletStepDefinition {
     }
   }
 
-  /**
-   * Issues bulk delete queries to Solr to purge corresponding nested documents.
-   */
+  private void cleanupParentDocuments(String databaseUUID, DenormalizeConfiguration config) throws BatchJobException {
+    List<String> prefixes = DenormalizationStepUtils.getRelatedTablePrefixes(config.getRelatedTables());
+    if (prefixes.isEmpty())
+      return;
+
+    Filter filter = FilterUtils.filterByTable(new Filter(), config.getTableID());
+    List<String> fieldsToReturn = List.of(ViewerConstants.INDEX_ID);
+
+    try (IterableIndexResult parentRows = solrManager.findAllRows(databaseUUID, filter, new Sorter(), fieldsToReturn)) {
+      List<String> batchUUIDs = new ArrayList<>();
+
+      for (ViewerRow parent : parentRows) {
+        batchUUIDs.add(parent.getUuid());
+
+        if (batchUUIDs.size() >= 100) {
+          processCleanupBatch(databaseUUID, batchUUIDs, prefixes);
+          batchUUIDs.clear();
+        }
+      }
+
+      if (!batchUUIDs.isEmpty()) {
+        processCleanupBatch(databaseUUID, batchUUIDs, prefixes);
+      }
+
+    } catch (ViewerException | IOException e) {
+      throw new BatchJobException("Failed to clean up parent documents for config: " + config.getId(), e);
+    }
+  }
+
+  private void processCleanupBatch(String databaseUUID, List<String> batchUUIDs, List<String> prefixes)
+    throws ViewerException {
+    List<String> fieldsToNullify = new ArrayList<>(
+      solrManager.getExactDynamicFieldNames(databaseUUID, batchUUIDs, prefixes));
+    fieldsToNullify.addAll(DenormalizationStepUtils.getGlobalNestedMetadataFields());
+    solrManager.removeDynamicFieldsFromParentDocuments(databaseUUID, batchUUIDs, fieldsToNullify);
+  }
+
   private void deleteNestedRowsForConfig(String databaseUUID, DenormalizeConfiguration config)
     throws BatchJobException {
     try {
-      List<RelatedTablesConfiguration> allRelated = new ArrayList<>();
-      collectAllRelatedTables(config.getRelatedTables(), allRelated);
+      List<String> nestedUUIDs = DenormalizationStepUtils.getAllNestedUUIDs(config.getRelatedTables());
 
-      for (RelatedTablesConfiguration related : allRelated) {
-        Filter filter = new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_NESTED_UUID, related.getUuid()));
+      for (String nestedUUID : nestedUUIDs) {
+        Filter filter = new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_NESTED_UUID, nestedUUID));
         solrManager.deleteRowsByQuery(databaseUUID, filter);
       }
     } catch (ViewerException e) {
       throw new BatchJobException(
         "Failed to issue bulk delete queries to Solr for denormalization config: " + config.getId(), e);
-    }
-  }
-
-  private void collectAllRelatedTables(List<RelatedTablesConfiguration> relatedTables,
-    List<RelatedTablesConfiguration> collector) {
-    if (relatedTables == null)
-      return;
-    for (RelatedTablesConfiguration rt : relatedTables) {
-      collector.add(rt);
-      collectAllRelatedTables(rt.getRelatedTables(), collector);
     }
   }
 }
