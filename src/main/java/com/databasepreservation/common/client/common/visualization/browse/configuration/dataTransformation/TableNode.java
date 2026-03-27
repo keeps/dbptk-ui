@@ -22,6 +22,7 @@ import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.google.gwt.core.client.GWT;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -52,60 +53,39 @@ public class TableNode {
    */
   public void setupChildren() {
     // if this table has reference to another tables
-    for (ViewerForeignKey foreignKey : table.getForeignKeys()) {
+    for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(table.getUuid())) {
+      ViewerForeignKey foreignKey = DataTransformationUtils.convertToViewerForeignKey(foreignKeysStatus,
+        collectionStatus, table.getUuid());
+
       ViewerTable viewerTable = metadata.getTable(foreignKey.getReferencedTableUUID());
       // avoid to add the same table in the same tree path
       if (this.searchTop(viewerTable) == null && viewerTable != null) {
         TableNode childNode = new TableNode(database, viewerTable, collectionStatus);
         childNode.uuid = generateUUID(foreignKey, viewerTable);
         childNode.multiValue = this.parentIsMultiValue(this);
+        childNode.isVirtual = foreignKey.getSourceType() != null
+          && foreignKey.getSourceType().equals(ViewerSourceType.VIRTUAL);
         children.put(foreignKey, childNode);
-      }
-    }
-
-    // Virtual
-    for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(table.getUuid())) {
-      if (foreignKeysStatus.getSourceType() != null
-        && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
-        ViewerForeignKey foreignKey = DataTransformationUtils.convertToViewerForeignKey(foreignKeysStatus,
-          collectionStatus, table.getUuid());
-        ViewerTable viewerTable = metadata.getTable(foreignKey.getReferencedTableUUID());
-        // avoid to add the same table in the same tree path
-        if (this.searchTop(viewerTable) == null && viewerTable != null) {
-          TableNode childNode = new TableNode(database, viewerTable, collectionStatus);
-          childNode.uuid = generateUUID(foreignKey, viewerTable);
-          childNode.multiValue = this.parentIsMultiValue(this);
-          childNode.isVirtual = true;
-          children.put(foreignKey, childNode);
-        }
       }
     }
 
     // if this table is referenced by another tables
     for (ViewerSchema schema : metadata.getSchemas()) {
       for (ViewerTable viewerTable : schema.getTables()) {
-        for (ViewerForeignKey foreignKey : viewerTable.getForeignKeys()) {
-          if (foreignKey.getReferencedTableUUID().equals(table.getUuid()) && this.searchTop(viewerTable) == null) {
+        for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(viewerTable.getUuid())) {
+          if (foreignKeysStatus.getReferencedTableUUID().equals(table.getUuid())
+            && this.searchTop(viewerTable) == null) {
+
+            ViewerForeignKey foreignKey = DataTransformationUtils.convertToViewerForeignKey(foreignKeysStatus,
+              collectionStatus, viewerTable.getUuid());
+            GWT.log("is referenced : foreignKey: " + foreignKey.getName() + " sourceType: " + foreignKey.getSourceType()
+              + " from table: " + viewerTable.getName());
             TableNode childNode = new TableNode(database, viewerTable, collectionStatus);
             childNode.uuid = generateUUID(foreignKey, viewerTable);
             childNode.multiValue = true;
+            childNode.isVirtual = foreignKey.getSourceType() != null
+              && foreignKey.getSourceType().equals(ViewerSourceType.VIRTUAL);
             children.put(foreignKey, childNode);
-          }
-        }
-
-        // for virtual
-        for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(viewerTable.getUuid())) {
-          if (foreignKeysStatus.getSourceType() != null
-            && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
-            ViewerForeignKey foreignKey = DataTransformationUtils.convertToViewerForeignKey(foreignKeysStatus,
-              collectionStatus, viewerTable.getUuid());
-            if (foreignKey.getReferencedTableUUID().equals(table.getUuid()) && this.searchTop(viewerTable) == null) {
-              TableNode childNode = new TableNode(database, viewerTable, collectionStatus);
-              childNode.uuid = generateUUID(foreignKey, viewerTable);
-              childNode.multiValue = true;
-              childNode.isVirtual = true;
-              children.put(foreignKey, childNode);
-            }
           }
         }
       }
@@ -123,13 +103,6 @@ public class TableNode {
     }
 
     return uuid.toString();
-  }
-
-  public void convertTreePathToList(List<TableNode> list) {
-    if (this.getParentNode() != null) {
-      this.getParentNode().convertTreePathToList(list);
-      list.add(this);
-    }
   }
 
   public void setChildren(Map<ViewerForeignKey, TableNode> children) {
@@ -176,15 +149,6 @@ public class TableNode {
 
   public Map<ViewerForeignKey, TableNode> getChildren() {
     return children;
-  }
-
-  public TableNode getChildrenByID(String tableUuid) {
-    for (Map.Entry<ViewerForeignKey, TableNode> entry : children.entrySet()) {
-      if (entry.getValue().table.getUuid().equals(tableUuid)) {
-        return entry.getValue();
-      }
-    }
-    return null;
   }
 
   public String getUuid() {
