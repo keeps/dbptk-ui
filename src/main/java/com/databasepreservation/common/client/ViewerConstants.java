@@ -780,6 +780,12 @@ public class ViewerConstants {
   public static final String TIKA_EXTRACT_ENDPOINT = "/tika";
 
   /**
+   * Search highlighting
+   */
+  public static final String PROPERTY_SEARCH_HIGHLIGHT_TAG_PRE = "ui.highlight.tag.pre";
+  public static final String PROPERTY_SEARCH_HIGHLIGHT_TAG_POST = "ui.highlight.tag.post";
+
+  /**
    * Show schema name in reference table
    */
   public static final String PROPERTY_REFERENCE_TABLE_SHOW_SCHEMA_NAME = "ui.reference.table.show.schema.name";

@@ -251,7 +251,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
                 currentMouseOverRow = row;
                 currentMouseOverColumn = configColumn;
                 hideTimer.cancel();
-                popupPanel.setWidget(new HTML(SafeHtmlUtils.fromSafeConstant(String.join("\n", snippets))));
+                popupPanel
+                  .setWidget(createHighlightPopupWidget(snippets, row.getCells().get(configColumn.getId()).getValue()));
                 Element el = Element.as(event.getNativeEvent().getEventTarget());
                 popupPanel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
                   @Override
@@ -273,6 +274,22 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         }
       }
     });
+  }
+
+  private HTML createHighlightPopupWidget(List<String> snippets, String cellValue) {
+    if (snippets.size() == 1) {
+      String snippet = snippets.get(0);
+      String snippetTagPre = ClientConfigurationManager.getStringWithDefault("",
+        ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_PRE);
+      String snippetTagPost = ClientConfigurationManager.getStringWithDefault("",
+        ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_POST);
+      String cleanSnippet = snippet.replace(snippetTagPre, "").replace(snippetTagPost, "");
+      if (cleanSnippet.equals(cellValue)) {
+        return new HTML(SafeHtmlUtils.fromSafeConstant(snippet));
+      }
+    }
+    String snippetWithFullText = String.join("\n", snippets) + "\n\n" + "<em>" + cellValue + "</em>";
+    return new HTML(SafeHtmlUtils.fromSafeConstant(snippetWithFullText));
   }
 
   private Column<ViewerRow, SafeHtml> buildTemplateColumn(ColumnStatus configColumn, ViewerTable nestedTable) {
