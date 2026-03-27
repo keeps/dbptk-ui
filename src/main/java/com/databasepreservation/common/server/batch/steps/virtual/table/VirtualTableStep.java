@@ -65,7 +65,7 @@ public class VirtualTableStep extends AbstractIndexingStepDefinition<ViewerRow, 
       TableStatus tableStatus = jobContext.getCollectionStatus().findTableStatusById(tableId);
 
       if (tableStatus != null && tableStatus.getVirtualTableStatus() != null) {
-        tableStatus.updateProcessedVirtualTableState();
+        tableStatus.getVirtualTableStatus().markAsPendingMetadata();
       }
     }
   }

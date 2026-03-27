@@ -36,12 +36,9 @@ import com.databasepreservation.common.server.batch.steps.denormalization.Denorm
  * The central and atomic synchronization point for all schema metadata
  * alterations.
  * <p>
- * <b>Architectural Note:</b> To prevent inconsistencies between the Solr index
- * and the physical JSON configuration files, this step acts as the <b>Single
- * Source of Truth</b> for finalizing the database schema. It computes all
- * pending schema mutations (such as new Virtual Tables, Virtual Columns, and
- * Nested Denormalization columns) in memory, and persists them atomically in a
- * single transaction.
+ * <b>State Machine Note:</b> This step acts as the Gatekeeper. It looks for
+ * entities left in the PENDING_METADATA state by the Worker Steps, updates the
+ * Solr Schema, and then closes the loop by marking them as PROCESSED.
  * </p>
  *
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -66,12 +63,8 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
   }
 
   /**
-   * Evaluates whether this metadata synchronization step needs to run.
-   * <p>
-   * It will trigger if the job processed ANY virtual entities OR if any
-   * denormalization configurations successfully reached the
-   * {@link ViewerJobStatus#COMPLETED} state.
-   * </p>
+   * Triggers ONLY if there are entities waiting for metadata finalization
+   * (PENDING_METADATA) or marked for removal.
    */
   @Override
   public ExecutionPolicy getExecutionPolicy() {
@@ -79,18 +72,25 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
       boolean hasVirtuals = false;
       if (context.getCollectionStatus().getTables() != null) {
         hasVirtuals = context.getCollectionStatus().getTables().stream()
-          .anyMatch(table -> (table.getVirtualTableStatus() != null && table.getVirtualTableStatus().shouldProcess())
-            || (table.getColumns() != null && table.getColumns().stream().anyMatch(
-              c -> c.isVirtual() && c.getVirtualColumnStatus() != null && c.getVirtualColumnStatus().shouldProcess()))
-            || (table.getForeignKeys() != null && table.getForeignKeys().stream().anyMatch(fk -> fk.isVirtual()
-              && fk.getVirtualForeignKeysStatus() != null && fk.getVirtualForeignKeysStatus().shouldProcess())));
+          .anyMatch(table -> (table.getVirtualTableStatus() != null
+            && (table.getVirtualTableStatus().isPendingMetadata() || table.getVirtualTableStatus().shouldProcess()))
+
+            || (table.getColumns() != null && table.getColumns().stream()
+              .anyMatch(c -> c.isVirtual() && c.getVirtualColumnStatus() != null
+                && (c.getVirtualColumnStatus().isPendingMetadata() || c.getVirtualColumnStatus().shouldProcess())))
+
+            || (table.getForeignKeys() != null && table.getForeignKeys().stream()
+              .anyMatch(fk -> fk.isVirtual() && fk.getVirtualForeignKeysStatus() != null
+                && (fk.getVirtualForeignKeysStatus().isPendingMetadata()
+                  || fk.getVirtualForeignKeysStatus().shouldProcess()))));
       }
 
       boolean hasDenormalizations = false;
       Set<String> denormEntries = context.getCollectionStatus().getDenormalizations();
       if (denormEntries != null && !denormEntries.isEmpty()) {
         hasDenormalizations = denormEntries.stream().map(context::getDenormalizeConfig)
-          .anyMatch(config -> config != null && config.shouldProcess());
+          .anyMatch(config -> config != null
+            && (config.getState() == ViewerJobStatus.PENDING_METADATA || config.shouldProcess()));
       }
 
       return hasVirtuals || hasDenormalizations;
@@ -153,11 +153,15 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
       for (String entryID : entries) {
         DenormalizeConfiguration config = context.getDenormalizeConfig(entryID);
 
-        if (config != null && config.getState() == ViewerJobStatus.COMPLETED) {
+        // Process only if it's pending metadata finalization
+        if (config != null && config.getState() == ViewerJobStatus.PENDING_METADATA) {
           LOGGER.info("Injecting denormalized nested columns into the schema for: {}", entryID);
           // Inject the nested columns dynamically into the CollectionStatus memory tree
           DenormalizationStepUtils.updateCollectionStatusInMemory(context.getCollectionStatus(), config,
             tempDatabaseWrapper);
+
+          config.setState(ViewerJobStatus.COMPLETED);
+          config.setLastExecutionDate(new java.util.Date());
         }
       }
     }
@@ -167,10 +171,15 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
     if (tableStatus.getVirtualTableStatus() == null)
       return;
 
-    if (tableStatus.getVirtualTableStatus().isMarkedForRemoval()) {
-      LOGGER.info("Removing virtual table from metadata: {}", tableStatus.getId());
+    boolean isPending = tableStatus.getVirtualTableStatus().isPendingMetadata();
+    boolean isRemoval = tableStatus.getVirtualTableStatus().isMarkedForRemoval();
 
-      // Bypass cache and remove directly from the official list to ensure deletion
+    // 1. Gatekeeper Check
+    if (!isPending && !isRemoval)
+      return;
+
+    if (isRemoval) {
+      LOGGER.info("Removing virtual table from metadata: {}", tableStatus.getId());
       if (metadata.getSchemas() != null) {
         metadata.getSchemas().forEach(schema -> {
           if (schema.getTables() != null) {
@@ -191,16 +200,18 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
       }
     }
 
-    // Force ViewerMetadata to rebuild its internal maps (cache) with the updated
-    // lists
+    // 2. Force ViewerMetadata to rebuild its internal maps (cache fix)
     metadata.setSchemas(metadata.getSchemas());
+
+    // 3. Close the loop
+    if (isPending) {
+      tableStatus.getVirtualTableStatus().markAsProcessed();
+    }
   }
 
   private void processVirtualColumnsMetadata(TableStatus tableStatus, ViewerMetadata metadata) {
     if (tableStatus.getColumns() == null)
       return;
-
-    tableStatus.removeMarkedVirtualColumns();
 
     ViewerTable viewerTable = metadata.getTable(tableStatus.getUuid());
     if (viewerTable == null)
@@ -211,18 +222,26 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
       viewerTable.setColumns(new ArrayList<>(viewerTable.getColumns()));
     }
 
-    tableStatus.getColumns().stream().filter(ColumnStatus::isVirtual).forEach(column -> {
-      viewerTable.getColumns().removeIf(c -> c.getSolrName().equals(column.getId()));
+    tableStatus.getColumns().stream().filter(ColumnStatus::isVirtual)
+      .filter(c -> c.getVirtualColumnStatus() != null
+        && (c.getVirtualColumnStatus().isPendingMetadata() || c.getVirtualColumnStatus().isMarkedForRemoval()))
+      .forEach(column -> {
 
-      if (!column.getVirtualColumnStatus().isMarkedForRemoval()) {
-        LOGGER.info("Adding/Updating virtual column '{}' in table '{}'", column.getId(), tableStatus.getId());
-        viewerTable.getColumns().add(buildViewerColumn(column, viewerTable));
-      } else {
-        LOGGER.info("Virtual column '{}' in table '{}' is marked for removal and was deleted from metadata",
-          column.getId(), tableStatus.getId());
-      }
-    });
+        viewerTable.getColumns().removeIf(c -> c.getSolrName().equals(column.getId()));
 
+        if (column.getVirtualColumnStatus().isPendingMetadata()) {
+          LOGGER.info("Adding/Updating virtual column '{}' in table '{}'", column.getId(), tableStatus.getId());
+          viewerTable.getColumns().add(buildViewerColumn(column, viewerTable));
+
+          // Close the loop
+          column.getVirtualColumnStatus().markAsProcessed();
+        } else {
+          LOGGER.info("Virtual column '{}' in table '{}' is marked for removal and was deleted from metadata",
+            column.getId(), tableStatus.getId());
+        }
+      });
+
+    tableStatus.removeMarkedVirtualColumns();
     metadata.setSchemas(metadata.getSchemas());
   }
 
@@ -234,17 +253,18 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
     if (sourceViewerTable == null)
       return;
 
-    // Initialize list to prevent NullPointerException
     if (sourceViewerTable.getForeignKeys() == null) {
       sourceViewerTable.setForeignKeys(new ArrayList<>());
     }
 
     tableStatus.getForeignKeys().stream().filter(fk -> fk.isVirtual() && fk.getVirtualForeignKeysStatus() != null)
+      .filter(fk -> fk.getVirtualForeignKeysStatus().isPendingMetadata()
+        || fk.getVirtualForeignKeysStatus().isMarkedForRemoval())
       .forEach(fkStatus -> {
 
         sourceViewerTable.getForeignKeys().removeIf(fk -> fk.getName().equals(fkStatus.getName()));
 
-        if (!fkStatus.getVirtualForeignKeysStatus().isMarkedForRemoval()) {
+        if (fkStatus.getVirtualForeignKeysStatus().isPendingMetadata()) {
           LOGGER.info("Adding/Updating virtual foreign key '{}' in table '{}'", fkStatus.getName(),
             tableStatus.getId());
           ViewerTable targetTable = metadata.getTable(fkStatus.getReferencedTableUUID());
@@ -286,9 +306,7 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
         return newCol;
       }).collect(Collectors.toList());
 
-    // Wrap in ArrayList to guarantee mutability for future modifications
     viewerTable.setColumns(new ArrayList<>(columnsToInclude));
-
     viewerTable.setSchemaUUID(originalTable.getSchemaUUID());
     viewerTable.setSchemaName(originalTable.getSchemaName());
     viewerTable.setCountRows(originalTable.getCountRows());

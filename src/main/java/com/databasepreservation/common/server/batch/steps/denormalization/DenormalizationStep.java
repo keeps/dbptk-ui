@@ -131,9 +131,7 @@ public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRo
       DenormalizeConfiguration config = jobContext.getDenormalizeConfig(entryID);
 
       if (config != null) {
-        // Mark the specific denormalization target as completed
-        config.setState(ViewerJobStatus.COMPLETED);
-        config.setLastExecutionDate(new java.util.Date());
+        config.setState(ViewerJobStatus.PENDING_METADATA);
       }
     }
   }
