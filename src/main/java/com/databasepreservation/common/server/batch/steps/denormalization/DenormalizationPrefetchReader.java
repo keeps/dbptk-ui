@@ -127,6 +127,37 @@ public class DenormalizationPrefetchReader implements ItemStreamReader<ViewerRow
 
     // 2. If we have rows, execute the bulk fetch for the entire relational tree
     if (!buffer.isEmpty() && config.getRelatedTables() != null) {
+      List<String> prefixes = DenormalizationStepUtils.getRelatedTablePrefixes(config.getRelatedTables());
+
+      if (!prefixes.isEmpty()) {
+        List<String> parentUuids = buffer.stream().map(ViewerRow::getUuid).collect(Collectors.toList());
+
+        Set<String> exactFieldsToRemove;
+        try {
+          exactFieldsToRemove = solrManager.getExactDynamicFieldNames(databaseUUID, parentUuids, prefixes);
+        } catch (Exception e) {
+          exactFieldsToRemove = new HashSet<>();
+        }
+
+        for (ViewerRow parentRow : buffer) {
+          if (parentRow.getCells() == null) {
+            parentRow.setCells(new HashMap<>());
+          }
+
+          for (String exactField : exactFieldsToRemove) {
+            ViewerCell nullCell = new ViewerCell();
+            nullCell.setValue(null);
+            parentRow.getCells().put(exactField, nullCell);
+          }
+
+          for (String globalField : DenormalizationStepUtils.getGlobalNestedMetadataFields()) {
+            ViewerCell nullCell = new ViewerCell();
+            nullCell.setValue(null);
+            parentRow.getCells().put(globalField, nullCell);
+          }
+        }
+      }
+
       for (RelatedTablesConfiguration relatedTable : config.getRelatedTables()) {
         enrichWithRelatedTables(buffer, relatedTable);
       }
