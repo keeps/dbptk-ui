@@ -6,7 +6,10 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.AbstractIndexingStepDefinition;
 import com.databasepreservation.common.server.batch.core.BatchConstants;
@@ -16,6 +19,7 @@ import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
 import com.databasepreservation.common.server.batch.steps.partition.PartitionStrategy;
 import com.databasepreservation.common.server.batch.steps.partition.TablePartitionStrategy;
 import com.databasepreservation.common.server.batch.steps.virtual.VirtualEntityStepUtils;
+import com.databasepreservation.common.server.batch.steps.virtual.VirtualSchemaBuilderUtils;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
 @Component
@@ -66,6 +70,20 @@ public class VirtualTableStep extends AbstractIndexingStepDefinition<ViewerRow, 
 
       if (tableStatus != null && tableStatus.getVirtualTableStatus() != null) {
         tableStatus.getVirtualTableStatus().markAsPendingMetadata();
+
+        jobContext.changeViewerDatabase(database -> {
+          ViewerMetadata metadata = database.getMetadata();
+          ViewerTable originalTable = metadata.getTable(tableStatus.getVirtualTableStatus().getSourceTableUUID());
+          if (originalTable != null) {
+            ViewerTable virtualTable = VirtualSchemaBuilderUtils.buildVirtualViewerTable(tableStatus, originalTable);
+            ViewerSchema schema = metadata.getSchema(virtualTable.getSchemaUUID());
+
+            if (schema != null && schema.getTables() != null) {
+              schema.getTables().removeIf(t -> t.getUuid().equals(virtualTable.getUuid()));
+              schema.getTables().add(virtualTable);
+            }
+          }
+        });
       }
     }
   }

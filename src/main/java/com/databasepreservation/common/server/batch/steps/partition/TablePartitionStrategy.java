@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
@@ -41,24 +40,14 @@ public class TablePartitionStrategy implements PartitionStrategy {
     Map<String, ExecutionContext> partitions = new HashMap<>();
 
     if (context.getCollectionStatus().getTables() != null) {
-      final String dbVersion;
-      final String dbPath;
-      try {
-        ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, context.getDatabaseUUID());
+      ViewerDatabase database = context.getViewerDatabase();
 
-        if (database == null) {
-          throw new UnexpectedJobExecutionException(
-            "Cannot partition workload: Database " + context.getDatabaseUUID() + " returned null from Solr.");
-        }
-        dbVersion = database.getVersion();
-        dbPath = database.getPath();
-      } catch (NotFoundException | GenericException e) {
-        LOGGER.error("Fatal error: Database {} not found or inaccessible during partitioning.",
-          context.getDatabaseUUID(), e);
-
+      if (database == null) {
         throw new UnexpectedJobExecutionException(
-          "Failed to retrieve database configuration for partitioning: " + e.getMessage(), e);
+          "Cannot partition workload: Database " + context.getDatabaseUUID() + " returned null from Solr.");
       }
+      final String dbVersion = database.getVersion();
+      final String dbPath = database.getPath();
 
       context.getCollectionStatus().getTables().stream().filter(tableFilter).forEach(table -> {
         ExecutionContext partitionContext = new ExecutionContext();

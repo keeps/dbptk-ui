@@ -265,18 +265,6 @@ public class TableStatus implements Serializable {
   }
 
   @JsonIgnore
-  public void updateProcessedVirtualColumnsState() {
-    if (this.columns == null)
-      return;
-
-    this.columns.stream().filter(ColumnStatus::isVirtual).filter(ColumnStatus::hasVirtualColumnToProcess)
-      .filter(c -> !c.getVirtualColumnStatus().isMarkedForRemoval())
-      .forEach(c -> c.getVirtualColumnStatus().markAsPendingMetadata());
-
-    recalculateVirtualColumnIndexes();
-  }
-
-  @JsonIgnore
   public void removeMarkedVirtualColumns() {
     if (this.columns == null)
       return;
@@ -285,7 +273,7 @@ public class TableStatus implements Serializable {
   }
 
   @JsonIgnore
-  private void recalculateVirtualColumnIndexes() {
+  public void recalculateVirtualColumnIndexes() {
     if (this.columns == null)
       return;
 
@@ -296,13 +284,6 @@ public class TableStatus implements Serializable {
       if (column.isVirtual()) {
         column.setColumnIndex(index++);
       }
-    }
-  }
-
-  @JsonIgnore
-  public void updateProcessedVirtualTableState() {
-    if (this.virtualTableStatus != null) {
-      this.virtualTableStatus.markAsPendingMetadata();
     }
   }
 
