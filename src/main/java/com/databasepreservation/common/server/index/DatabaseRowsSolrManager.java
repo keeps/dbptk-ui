@@ -21,6 +21,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
@@ -901,13 +902,65 @@ public class DatabaseRowsSolrManager {
 
     // Add the search tokens to the parent document for better searchability and the
     // nested documents as a nested field
-    doc.addField("token" + ViewerConstants.SOLR_DYN_NEST_MULTI, SolrUtils.asValueUpdate(searchTokens));
-    doc.addField("type" + ViewerConstants.SOLR_DYN_TEXT_GENERAL, SolrUtils.asValueUpdate("parent"));
-    doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.asValueUpdate(solrNestedDocs));
+    doc.setField("token" + ViewerConstants.SOLR_DYN_NEST_MULTI, SolrUtils.asValueUpdate(searchTokens));
+    doc.setField("type" + ViewerConstants.SOLR_DYN_TEXT_GENERAL, SolrUtils.asValueUpdate("parent"));
+    doc.setField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.asValueUpdate(solrNestedDocs));
 
     for (Map.Entry<String, List<String>> parentNestedField : parentNestedFields.entrySet()) {
-      doc.addField(parentNestedField.getKey(), SolrUtils.asValueUpdate(parentNestedField.getValue()));
+      doc.setField(parentNestedField.getKey(), SolrUtils.asValueUpdate(parentNestedField.getValue()));
+    }
+  }
+
+  public java.util.Set<String> getExactDynamicFieldNames(String databaseUUID, List<String> documentUUIDs,
+    List<String> prefixes) throws ViewerException {
+    java.util.Set<String> exactFields = new java.util.HashSet<>();
+    if (documentUUIDs.isEmpty() || prefixes.isEmpty())
+      return exactFields;
+
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+    SolrQuery query = new SolrQuery();
+
+    query.setQuery(ViewerConstants.INDEX_ID + ":(\"" + String.join("\" OR \"", documentUUIDs) + "\")");
+    query.addField(ViewerConstants.INDEX_ID);
+
+    for (String prefix : prefixes) {
+      query.addField(prefix + "*");
+    }
+    query.setRows(documentUUIDs.size());
+
+    try {
+      QueryResponse response = client.query(collection.getIndexName(), query);
+      for (SolrDocument doc : response.getResults()) {
+        for (String fieldName : doc.getFieldNames()) {
+          if (!fieldName.equals(ViewerConstants.INDEX_ID)) {
+            exactFields.add(fieldName);
+          }
+        }
+      }
+    } catch (SolrServerException | IOException | SolrException e) {
+      throw new ViewerException("Failed to fetch exact dynamic fields for in-flight cleanup", e);
+    }
+    return exactFields;
+  }
+
+  public void removeDynamicFieldsFromParentDocuments(String databaseUUID, List<String> documentUUIDs,
+    List<String> fieldsToRemove) throws ViewerException {
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+    List<SolrInputDocument> docs = new ArrayList<>(documentUUIDs.size());
+
+    for (String uuid : documentUUIDs) {
+      SolrInputDocument doc = new SolrInputDocument();
+      doc.addField(ViewerConstants.INDEX_ID, uuid);
+
+      for (String fieldName : fieldsToRemove) {
+        Map<String, Object> atomicNull = new HashMap<>();
+        atomicNull.put("set", null);
+
+        doc.setField(fieldName, atomicNull);
+      }
+      docs.add(doc);
     }
 
+    executeBulkUpdate(collection.getIndexName(), docs);
   }
 }
