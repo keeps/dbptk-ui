@@ -15,6 +15,8 @@ import java.util.Map;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.ColumnWrapper;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
@@ -46,7 +48,6 @@ import config.i18n.client.ClientMessages;
  */
 public class TransformationTable extends Composite {
   interface TransformationTableUiBinder extends UiBinder<Widget, TransformationTable> {
-
   }
 
   private static TransformationTableUiBinder binder = GWT.create(TransformationTableUiBinder.class);
@@ -61,25 +62,12 @@ public class TransformationTable extends Composite {
   @UiField
   FlowPanel content;
 
-  /**
-   *
-   * @param database
-   * @param table
-   * @param configuration
-   * @return
-   */
   public static TransformationTable getInstance(ViewerDatabase database, ViewerTable table,
     DenormalizeConfiguration configuration, CollectionStatus collectionStatus) {
     return instances.computeIfAbsent(database.getUuid() + table.getUuid(),
       k -> new TransformationTable(database, table, configuration, collectionStatus));
   }
 
-  /**
-   * @param database
-   * @param table
-   * @param configuration
-   * @param collectionStatus
-   */
   public TransformationTable(ViewerDatabase database, ViewerTable table, DenormalizeConfiguration configuration,
     CollectionStatus collectionStatus) {
     initWidget(binder.createAndBindUi(this));
@@ -91,14 +79,34 @@ public class TransformationTable extends Composite {
   }
 
   /**
-   *
+   * Initializes the base table columns, overriding native names with custom UI
+   * names.
    */
   private void createTable() {
+    TableStatus tStatus = collectionStatus.getTableStatusByTableId(table.getId());
+
     for (ViewerColumn column : table.getColumns()) {
       ColumnWrapper columnWrapper = new ColumnWrapper(table.getName(), denormalizeConfiguration,
         database.getMetadata());
-      columnWrapper.setColumnDisplayName(column.getDisplayName());
-      columnWrapper.setColumnDescription(column.getDescription());
+
+      String displayName = column.getDisplayName();
+      String description = column.getDescription();
+
+      // Override with user-defined UI labels if available
+      if (tStatus != null) {
+        ColumnStatus cStatus = tStatus.getColumnById(column.getSolrName());
+        if (cStatus != null) {
+          if (cStatus.getCustomName() != null && !cStatus.getCustomName().trim().isEmpty()) {
+            displayName = cStatus.getCustomName();
+          }
+          if (cStatus.getCustomDescription() != null) {
+            description = cStatus.getCustomDescription();
+          }
+        }
+      }
+
+      columnWrapper.setColumnDisplayName(displayName);
+      columnWrapper.setColumnDescription(description);
       originalColumns.add(columnWrapper);
     }
 
@@ -114,8 +122,13 @@ public class TransformationTable extends Composite {
     drawTable(columns);
   }
 
+  /**
+   * Recursively fetches and appends related columns to the visual grid, applying
+   * custom UI labels.
+   */
   private void setColumnsToInclude(RelatedTablesConfiguration relatedTable, List<ColumnWrapper> columns) {
     ViewerTable referencedTable = database.getMetadata().getTable(relatedTable.getTableUUID());
+    TableStatus tStatus = collectionStatus.getTableStatusByTableId(referencedTable.getId());
 
     Map<Integer, List<RelatedColumnConfiguration>> groupedColumns = new HashMap<>();
     for (RelatedColumnConfiguration col : relatedTable.getColumnsIncluded()) {
@@ -132,8 +145,25 @@ public class TransformationTable extends Composite {
 
       for (RelatedColumnConfiguration columnToInclude : columnsInGroup) {
         ViewerColumn col = referencedTable.getColumns().get(columnToInclude.getIndex());
-        columnWrapper.setColumnDisplayName(col.getDisplayName());
-        columnWrapper.setColumnDescription(col.getDescription());
+
+        String displayName = col.getDisplayName();
+        String description = col.getDescription();
+
+        // Override with user-defined UI labels if available
+        if (tStatus != null) {
+          ColumnStatus cStatus = tStatus.getColumnById(col.getSolrName());
+          if (cStatus != null) {
+            if (cStatus.getCustomName() != null && !cStatus.getCustomName().trim().isEmpty()) {
+              displayName = cStatus.getCustomName();
+            }
+            if (cStatus.getCustomDescription() != null) {
+              description = cStatus.getCustomDescription();
+            }
+          }
+        }
+
+        columnWrapper.setColumnDisplayName(displayName);
+        columnWrapper.setColumnDescription(description);
       }
 
       if (columnWrapper.getColumnDisplayName() != null) {

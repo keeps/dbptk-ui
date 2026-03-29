@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
-import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
-import com.databasepreservation.common.server.batch.steps.metadata.SchemaMetadataService;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
@@ -16,10 +16,13 @@ import org.springframework.core.GenericTypeResolver;
 
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.batch.components.readers.SolrItemReader;
 import com.databasepreservation.common.server.batch.components.writers.SolrItemWriter;
 import com.databasepreservation.common.server.batch.context.JobContext;
+import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.batch.policy.ErrorPolicy;
+import com.databasepreservation.common.server.batch.steps.metadata.SchemaMetadataService;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
 /**
@@ -31,6 +34,7 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
  */
 public abstract class AbstractIndexingStepDefinition<I extends IsIndexed & Serializable, O extends IsIndexed & Serializable>
   implements ChunkStepDefinition<I, O> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIndexingStepDefinition.class);
 
   @Autowired
   protected DatabaseRowsSolrManager solrManager;
@@ -74,6 +78,10 @@ public abstract class AbstractIndexingStepDefinition<I extends IsIndexed & Seria
 
   @Override
   public void onStepCompleted(JobContext context, BatchStatus status) throws BatchJobException {
-    // Default implementation does nothing, can be overridden by subclasses if needed
+    try {
+      solrManager.refreshIndex(context.getDatabaseUUID());
+    } catch (ViewerException e) {
+      LOGGER.warn("Failed to refresh Solr index after step completion: {}", e.getMessage());
+    }
   }
 }

@@ -1,3 +1,10 @@
+/**
+ * The contents of this file are subject to the license and copyright
+ * detailed in the LICENSE file at the root of the source
+ * tree and available online at
+ *
+ * https://github.com/keeps/dbptk-ui
+ */
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.virtual;
 
 import java.util.ArrayList;
@@ -33,6 +40,13 @@ import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
 
 /**
+ * Panel responsible for creating and editing Virtual Columns.
+ * <p>
+ * <b>Architecture Note:</b> This panel implements Strict Type Inference. It
+ * evaluates the user-defined Handlebars template to determine the correct Solr
+ * dynamic field suffix (e.g., _l for Long, _t_sort for String) avoiding
+ * strict-typing crashes in the backend indexer.
+ *
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements ValidatableOptionsPanel {
@@ -113,6 +127,37 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
     }
   }
 
+  /**
+   * Infers the database type strictly based on the provided Handlebars template.
+   * <p>
+   * If the template mixes text with variables (e.g., "{{actor_id}} - {{name}}"),
+   * the resulting type is forced to STRING to prevent Solr
+   * NumberFormatExceptions. It only inherits native numeric/date types if the
+   * template is an exact 1:1 mapping.
+   *
+   * @return The strictly inferred ViewerType.
+   */
+  private ViewerType.dbTypes inferStrictType() {
+    String templateText = templateSourceColumns.getText().trim();
+
+    if (sourceColumnsIds != null && sourceColumnsIds.size() == 1) {
+      ColumnStatus sourceColumn = tableStatus.getColumns().stream()
+        .filter(col -> col.getId().equals(sourceColumnsIds.get(0))).findFirst().orElse(null);
+
+      if (sourceColumn != null) {
+        // Inherit native type ONLY if the template is exclusively the variable
+        // placeholder
+        String exactPlaceholder = ViewerConstants.OPEN_TEMPLATE_ENGINE + sourceColumn.getName()
+          + ViewerConstants.CLOSE_TEMPLATE_ENGINE;
+        if (templateText.equals(exactPlaceholder)) {
+          return sourceColumn.getType();
+        }
+      }
+    }
+    // Any template with multiple variables or static text must default to STRING
+    return ViewerType.dbTypes.STRING;
+  }
+
   @Override
   public boolean validate() {
     boolean isValid = true;
@@ -154,6 +199,23 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
       isValid = false;
     }
 
+    // Validation: Prevent modifying a template if it alters the underlying Solr
+    // field suffix type.
+    // Changing a numeric column to a string column requires deleting and recreating
+    // the virtual column.
+    if (originalStatus != null && originalStatus.getType() != null) {
+      ViewerType.dbTypes inferredType = inferStrictType();
+      String oldSuffix = VirtualOptionsPanelUtils.getVirtualColumnSolrSuffix(originalStatus.getType());
+      String newSuffix = VirtualOptionsPanelUtils.getVirtualColumnSolrSuffix(inferredType);
+
+      if (!oldSuffix.equals(newSuffix)) {
+        showError(templateSourceColumns, errorTemplateSourceColumns,
+          "Type mismatch: This column was created as a Number/Date, but your new template generates Text. "
+            + "Please delete this virtual column and create a new one to avoid Solr indexing errors.");
+        isValid = false;
+      }
+    }
+
     return isValid;
   }
 
@@ -172,19 +234,17 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
   public ColumnStatus getColumnStatus() {
     ColumnStatus statusToReturn = (originalStatus != null) ? originalStatus : new ColumnStatus();
 
-    ViewerType.dbTypes type = ViewerType.dbTypes.STRING;
-    if (sourceColumnsIds != null && !sourceColumnsIds.isEmpty()) {
-      if (sourceColumnsIds.size() == 1) {
-        ColumnStatus sourceColumn = tableStatus.getColumns().stream()
-          .filter(col -> col.getId().equals(sourceColumnsIds.get(0))).findFirst().orElse(null);
-        if (sourceColumn != null) {
-          type = sourceColumn.getType();
-        }
-      }
+    ViewerType.dbTypes type = inferStrictType();
+
+    // If editing an existing column, force the original type to prevent orphaning
+    // the existing Solr ID
+    if (originalStatus != null && originalStatus.getType() != null) {
+      type = originalStatus.getType();
     }
 
     if (ViewerStringUtils.isBlank(statusToReturn.getId())) {
       String uuid = UUID.randomUUID().toString();
+      // Appends the strictly inferred suffix to the Solr ID (e.g., _l, _t_sort)
       statusToReturn.setId(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + "_virtual_" + uuid
         + VirtualOptionsPanelUtils.getVirtualColumnSolrSuffix(type));
       statusToReturn.setOrder(tableStatus.getLastColumnOrder() + 1);
