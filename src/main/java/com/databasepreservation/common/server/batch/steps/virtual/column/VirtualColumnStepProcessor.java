@@ -78,6 +78,10 @@ public class VirtualColumnStepProcessor implements ItemProcessor<ViewerRow, View
     Map<String, ViewerCell> cells) {
     String processedValue = HandlebarsUtils.applyVirtualColumnTemplate(row, tableStatus, vcs);
 
+    if (processedValue != null && processedValue.trim().isEmpty()) {
+      processedValue = null;
+    }
+
     ViewerCell virtualCell = new ViewerCell();
     virtualCell.setValue(processedValue);
     cells.put(columnId, virtualCell);

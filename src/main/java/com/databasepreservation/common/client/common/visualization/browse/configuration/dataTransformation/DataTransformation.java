@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.api.v1.utils.ConfigurationContext;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.LoadingDiv;
@@ -27,7 +28,6 @@ import com.databasepreservation.common.client.common.visualization.browse.config
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -63,11 +63,6 @@ import config.i18n.client.ClientMessages;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class DataTransformation extends RightPanel implements ICollectionStatusObserver {
-  @Override
-  public void updateCollection(CollectionStatus collectionStatus) {
-    instances.clear();
-    this.collectionStatus = collectionStatus;
-  }
 
   interface DataTransformerUiBinder extends UiBinder<Widget, DataTransformation> {
   }
@@ -89,6 +84,9 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
   FlowPanel toolBar;
 
   @UiField
+  FlowPanel rootTablePanel;
+
+  @UiField
   LoadingDiv loading;
 
   @UiField
@@ -105,27 +103,29 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
   private Button btnGotoTable = new Button();
   private Button btnCancel = new Button();
   private List<Button> buttons = new ArrayList<>();
-  private List<Button> buttonsToSidebar = new ArrayList<>();
-  private Boolean isInformation;
+  private boolean isInformation;
 
-  @Override
-  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    List<BreadcrumbItem> breadcrumbItems;
-    breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(), database.getMetadata().getName(),
-      messages.breadcrumbTextForDataTransformation());
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
-  }
+  /** Flag to manage state synchronization with the backend projection. */
+  private boolean isInitialized = false;
+
+  /**
+   * Tracks dynamically added widgets to allow surgical clearing without killing
+   * UiBinder nodes.
+   */
+  private List<Widget> dynamicWidgets = new ArrayList<>();
 
   public static DataTransformation getInstance(CollectionStatus collectionStatus, ViewerDatabase database,
     DataTransformationSidebar sidebar) {
-    return instances.computeIfAbsent(database.getUuid(),
-      k -> new DataTransformation(collectionStatus, database, null, sidebar));
+    return getInstance(collectionStatus, database, null, sidebar);
   }
 
   public static DataTransformation getInstance(CollectionStatus collectionStatus, ViewerDatabase database,
     String tableId, DataTransformationSidebar sidebar) {
-    return instances.computeIfAbsent(database.getUuid() + tableId,
+    String key = database.getUuid() + (tableId == null ? "info" : tableId);
+    DataTransformation instance = instances.computeIfAbsent(key,
       k -> new DataTransformation(collectionStatus, database, tableId, sidebar));
+    instance.sidebar = sidebar;
+    return instance;
   }
 
   private DataTransformation(CollectionStatus collectionStatus, ViewerDatabase database, String tableId,
@@ -137,18 +137,93 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     this.sidebar = sidebar;
     this.collectionStatus = collectionStatus;
     this.tableId = tableId;
-    this.configurationStatusPanel.setDatabase(database);
+    this.isInitialized = false;
+
+    this.configurationStatusPanel.setDatabase(this.database);
+
     if (this.tableId == null) {
-      isInformation = true;
-      content.add(informationPanel());
-      toolBar.setVisible(false);
+      this.isInformation = true;
+      this.toolBar.setVisible(false);
     } else {
-      isInformation = false;
+      this.isInformation = false;
+    }
+  }
+
+  @Override
+  protected void onAttach() {
+    super.onAttach();
+    if (!isInitialized) {
+      fetchProjectedDatabase();
+    } else if (database != null) {
+      updateControllerPanel();
+    }
+  }
+
+  @Override
+  public void updateCollection(CollectionStatus newStatus) {
+    if (this.collectionStatus != null && this.collectionStatus.getDatabaseUUID().equals(newStatus.getDatabaseUUID())) {
+      if (this.collectionStatus != newStatus) {
+        this.isInitialized = false;
+        if (this.isAttached()) {
+          fetchProjectedDatabase();
+        }
+      }
+    }
+  }
+
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(),
+      database.getMetadata().getName(), messages.breadcrumbTextForDataTransformation());
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
+  }
+
+  private void fetchProjectedDatabase() {
+    loading.setVisible(true);
+
+    CollectionService.Util.call((ConfigurationContext context) -> {
+      if (context != null && context.getProjectedDatabase() != null) {
+        this.database = context.getProjectedDatabase();
+        this.collectionStatus = context.getCollectionStatus();
+        this.isInitialized = true;
+
+        configurationStatusPanel.setDatabase(this.database);
+
+        if (this.sidebar != null) {
+          this.sidebar.reset(this.database, this.collectionStatus);
+        }
+
+        rebuildDynamicUI();
+      }
+    }).getConfigurationContext(this.database.getUuid(), this.database.getUuid());
+  }
+
+  /**
+   * Surgical rebuild: Only clears and re-adds widgets in the dynamic containers.
+   * This prevents the ConfigurationStatusPanel from being removed from the DOM.
+   */
+  private void rebuildDynamicUI() {
+    // Clear only the widgets we manually added, leaving UiBinder static nodes
+    // intact
+    for (Widget w : dynamicWidgets) {
+      w.removeFromParent();
+    }
+    dynamicWidgets.clear();
+    message.clear();
+    rootTablePanel.clear();
+
+    if (isInformation) {
+      Widget diagram = informationPanel();
+      rootTablePanel.add(diagram);
+      dynamicWidgets.add(diagram);
+      loading.setVisible(false);
+    } else {
       getDenormalizeConfigurationFile(this.tableId);
     }
   }
 
   private void createToolBar() {
+    toolBar.clear();
     FlowPanel tablePanel = new FlowPanel();
     HTML icon = new HTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
     icon.addStyleName("data-transformation-title-icon");
@@ -164,32 +239,35 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
     toolBar.add(tablePanel);
     toolBar.add(panel);
+    toolBar.setVisible(true);
   }
 
   private ErDiagram informationPanel() {
     return ErDiagram.getInstance(database, database.getMetadata().getSchemas().get(0),
-      HistoryManager.getCurrentHistoryPath().get(0), collectionStatus);
+      HistoryManager.ROUTE_DATA_TRANSFORMATION, collectionStatus);
   }
 
-  /**
-   * Check if exist a configuration file for this database, if exist use to
-   */
   private void getDenormalizeConfigurationFile(String tableId) {
-    loading.setVisible(true);
     this.table = database.getMetadata().getTableById(tableId);
+
+    if (this.table == null) {
+      HistoryManager.gotoAdvancedConfiguration(database.getUuid());
+      return;
+    }
+
     if (collectionStatus.getDenormalizations()
       .contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
       CollectionService.Util.call((DenormalizeConfiguration response) -> {
         denormalizeConfiguration = response;
-        init();
+        initDataTransformationUI();
       }).getDenormalizeConfigurationFile(database.getUuid(), database.getUuid(), table.getUuid());
     } else {
       denormalizeConfiguration = new DenormalizeConfiguration(database.getUuid(), table);
-      init();
+      initDataTransformationUI();
     }
   }
 
-  private void init() {
+  private void initDataTransformationUI() {
     denormalizeConfigurationList.put(table.getUuid(), denormalizeConfiguration);
     loading.setVisible(false);
 
@@ -197,43 +275,44 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
       FontAwesomeIconManager.DATABASE_INFORMATION);
     message.setWidget(alert);
 
-    // root table
     TableNode parentNode = new TableNode(database, table, collectionStatus);
     parentNode.setUuid(table.getUuid());
     parentNode.setupChildren();
-    ViewerTable table = parentNode.getTable();
-    content.add(createRootTableCard(table));
 
-    // relationship list
+    Widget rootCard = createRootTableCard(parentNode.getTable());
+    rootTablePanel.add(rootCard);
+    dynamicWidgets.add(rootCard);
+
     FlowPanel relationShipPanel = new FlowPanel();
     relationShipPanel.setStyleName("data-transformation-panel");
     relationShipPanel.add(expandLevel(parentNode));
-    content.add(relationShipPanel);
+    rootTablePanel.add(relationShipPanel);
+    dynamicWidgets.add(relationShipPanel);
 
-    createButtons();
+    setupActionButtons();
     createToolBar();
   }
 
-  private void createButtons() {
+  private void setupActionButtons() {
+    buttons.clear();
     btnCancel.setEnabled(false);
     btnCancel.setText(messages.basicActionCancel());
     btnCancel.addStyleName("btn btn-times-circle btn-danger");
     btnCancel.addClickHandler(clickEvent -> {
-      instances.entrySet().removeIf(e -> e.getKey().startsWith(database.getUuid()));
-      sidebar.reset(database, collectionStatus);
+      if (sidebar != null) {
+        sidebar.reset(database, collectionStatus);
+      }
       HistoryManager.gotoAdvancedConfiguration(database.getUuid());
     });
 
-    btnGotoTable = new Button();
     btnGotoTable.setText(messages.dataTransformationBtnBrowseTable());
     btnGotoTable.setStyleName("btn btn-table");
     btnGotoTable.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), tableId));
 
     btnSaveConfiguration.setText(messages.basicActionSave());
     btnSaveConfiguration.setStyleName("btn btn-save");
-    btnSaveConfiguration.addClickHandler(clickEvent -> {
-      saveConfiguration(database.getUuid(), denormalizeConfigurationList.entrySet(), collectionStatus);
-    });
+    btnSaveConfiguration
+      .addClickHandler(clickEvent -> saveConfiguration(database.getUuid(), denormalizeConfigurationList.entrySet()));
 
     buttons.add(btnCancel);
     buttons.add(btnSaveConfiguration);
@@ -241,15 +320,8 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     updateControllerPanel();
   }
 
-  /**
-   * Creates the root card of relationship tree
-   *
-   * @return BootstrapCard
-   */
   private BootstrapCard createRootTableCard(ViewerTable table) {
     BootstrapCard card = new BootstrapCard();
-    // card.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
-    // card.setTitle(table.getId());
     card.setDescription(table.getDescription());
     rootTable = TransformationTable.getInstance(database, table, denormalizeConfiguration, collectionStatus);
     FlowPanel rootTablePanel = new FlowPanel();
@@ -258,11 +330,6 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     return card;
   }
 
-  /**
-   * Creates the child card of relationship tree
-   *
-   * @return BootstrapCard
-   */
   private FlowPanel createChildTableCard(TableNode childNode) {
     FlowPanel panel = new FlowPanel();
     panel.addStyleName("data-transformation-wrapper");
@@ -274,16 +341,21 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     BootstrapCard card = new BootstrapCard();
 
     card.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
-    card.setTitle(childTable.getName());
 
+    String cardTitle = childTable.getName();
+    if (collectionStatus.getTableStatusByTableId(childTable.getId()) != null) {
+      String customName = collectionStatus.getTableStatusByTableId(childTable.getId()).getCustomName();
+      if (customName != null && !customName.trim().isEmpty())
+        cardTitle = customName;
+    }
+    card.setTitle(cardTitle);
     card.setDescription(childTable.getDescription());
     card.addStyleName("card-disabled");
     card.addExtraContent(getInformationAboutRelationship(childNode));
     card.getElement().setId(childNode.getUuid());
 
-    if (childNode.getIsVirtual()) {
+    if (childNode.getIsVirtual())
       card.addStyleName("card-virtual");
-    }
 
     FlowPanel container = new FlowPanel();
     TransformationChildTables tableInstance = TransformationChildTables.createInstance(childNode,
@@ -291,9 +363,8 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     MultipleSelectionTablePanel<ViewerColumn> selectTable = tableInstance.createTable();
 
     SwitchBtn switchBtn = new SwitchBtn("Enable", false);
-
     switchBtn.setClickHandler(event -> {
-      switchBtn.getButton().setValue(!switchBtn.getButton().getValue(), true); // workaround for ie11
+      switchBtn.getButton().setValue(!switchBtn.getButton().getValue(), true);
       if (switchBtn.getButton().getValue()) {
         card.removeStyleName("card-disabled");
         grandChild.add(expandLevel(childNode));
@@ -306,47 +377,37 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
         container.clear();
         selectTable.getSelectionModel().clear();
         rootTable.redrawTable(denormalizeConfiguration);
-        for (Button button : buttons) {
-          button.setEnabled(true);
-        }
+        buttons.forEach(button -> button.setEnabled(true));
       }
     });
 
     FlowPanel switchPanel = new FlowPanel();
     switchPanel.add(switchBtn);
-
     card.addHideContent(container, switchPanel);
 
     panel.add(card);
     panel.add(grandChild);
 
     if (denormalizeConfiguration != null) {
-      setup(childNode, switchBtn, card, grandChild, container, selectTable);
+      RelatedTablesConfiguration targetTable = denormalizeConfiguration.getRelatedTable(childNode.getUuid());
+      if (targetTable != null) {
+        switchBtn.getButton().setValue(true, false);
+        grandChild.add(expandLevel(childNode));
+        card.setHideContentVisible(true);
+        card.removeStyleName("card-disabled");
+        container.add(selectTable);
+      }
     }
 
     return panel;
-  }
-
-  private void setup(TableNode childNode, SwitchBtn switchBtn, BootstrapCard card, FlowPanel grandChild,
-    FlowPanel container, MultipleSelectionTablePanel<ViewerColumn> selectTable) {
-    RelatedTablesConfiguration targetTable = denormalizeConfiguration.getRelatedTable(childNode.getUuid());
-    if (targetTable != null) {
-      switchBtn.getButton().setValue(true, false);
-      grandChild.add(expandLevel(childNode));
-      card.setHideContentVisible(true);
-      card.removeStyleName("card-disabled");
-      container.add(selectTable);
-    }
   }
 
   private FlowPanel expandLevel(TableNode node) {
     FlowPanel relationShipList = new FlowPanel();
     for (Map.Entry<ViewerForeignKey, TableNode> entry : node.getChildren().entrySet()) {
       TableNode childNode = entry.getValue();
-
       childNode.setParentNode(node, entry.getKey());
       childNode.setupChildren();
-
       relationShipList.add(createChildTableCard(childNode));
     }
     return relationShipList;
@@ -359,23 +420,16 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     ViewerTable sourceTable = node.getTable();
 
     for (ViewerReference reference : foreignKey.getReferences()) {
-      boolean isVirtual = false;
+      boolean isVirtual = ViewerSourceType.VIRTUAL.equals(foreignKey.getSourceType());
 
       if (foreignKey.getReferencedTableUUID().equals(referencedTable.getUuid())) {
-
         ViewerColumn column = DataTransformationUtils.getColumnByIndex(sourceTable.getColumns(),
           reference.getSourceColumnIndex());
-        isVirtual = isVirtualRelationship(sourceTable, column, isVirtual);
-
         information.add(buildReferenceInformation(
           messages.dataTransformationTextForIsRelatedTo(referencedTable.getId(), column.getDisplayName()), isVirtual));
       } else {
-        ViewerColumn referencedColumn = DataTransformationUtils.getColumnByIndex(referencedTable.getColumns(),
-          reference.getSourceColumnIndex());
         ViewerColumn column = DataTransformationUtils.getColumnByIndex(sourceTable.getColumns(),
           reference.getReferencedColumnIndex());
-        isVirtual = isVirtualRelationship(referencedTable, referencedColumn, isVirtual);
-
         information.add(buildReferenceInformation(
           messages.dataTransformationTextForIsReferencedBy(referencedTable.getId(), column.getDisplayName()),
           isVirtual));
@@ -385,26 +439,10 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     return information;
   }
 
-  private boolean isVirtualRelationship(ViewerTable sourceTable, ViewerColumn column, boolean isVirtual) {
-    ForeignKeysStatus foreignKeysStatus = collectionStatus.getForeignKeyByTableAndColumnId(sourceTable.getUuid(),
-      column.getSolrName());
-
-    if (foreignKeysStatus != null && foreignKeysStatus.getSourceType() != null
-      && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL)) {
-      isVirtual = true;
-    }
-    return isVirtual;
-  }
-
-  /**
-   * Create a reference information panel
-   *
-   */
   private FlowPanel buildReferenceInformation(SafeHtml message, boolean isVirtual) {
     FlowPanel referenceInformation = new FlowPanel();
     referenceInformation.setStyleName("reference-panel");
 
-    // icon
     HTML referenceIcon = new HTML(
       SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE)));
     referenceIcon.setStyleName("icon");
@@ -414,7 +452,6 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     if (isVirtual) {
       FlowPanel virtualLabel = new FlowPanel();
       Label label = new Label(messages.dataTransformationLabelForVirtualRelationship());
-
       label.addStyleName("label-info");
       virtualLabel.add(label);
       referenceInformation.add(virtualLabel);
@@ -427,60 +464,58 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     if (!isInformation) {
       btnSaveConfiguration.setEnabled(false);
       btnCancel.setEnabled(false);
-      // btnClearConfiguration.setEnabled(false);
-      if (!denormalizeConfigurationList.isEmpty()) {
-        for (DenormalizeConfiguration value : denormalizeConfigurationList.values()) {
-          if (value.getState() != null && value.getState().equals(ViewerJobStatus.NEW)) {
-            btnSaveConfiguration.setEnabled(true);
-            btnCancel.setEnabled(true);
-            // btnClearConfiguration.setEnabled(true);
-            break;
-          }
+
+      for (DenormalizeConfiguration config : denormalizeConfigurationList.values()) {
+        if (config != null && ViewerJobStatus.NEW.equals(config.getState())) {
+          btnSaveConfiguration.setEnabled(true);
+          btnCancel.setEnabled(true);
+          break;
         }
       }
-      buttonsToSidebar.clear();
-      buttonsToSidebar.add(btnSaveConfiguration);
-      buttonsToSidebar.add(btnCancel);
-      sidebar.updateControllerPanel(buttonsToSidebar);
+
+      List<Button> sidebarButtons = new ArrayList<>();
+      sidebarButtons.add(btnSaveConfiguration);
+      sidebarButtons.add(btnCancel);
+      sidebar.updateControllerPanel(sidebarButtons);
     } else {
       sidebar.updateControllerPanel(null);
     }
   }
 
   public void saveConfiguration(String databaseUUID,
-    Set<Map.Entry<String, DenormalizeConfiguration>> denormalizeConfigurationSet, CollectionStatus collectionStatus) {
-
+    Set<Map.Entry<String, DenormalizeConfiguration>> denormalizeConfigurationSet) {
     Map<String, DenormalizeConfiguration> configsToSave = new HashMap<>();
     for (Map.Entry<String, DenormalizeConfiguration> entry : denormalizeConfigurationSet) {
       DenormalizeConfiguration config = entry.getValue();
-      if (config != null && config.getState().equals(ViewerJobStatus.NEW)) {
+      if (config != null && ViewerJobStatus.NEW.equals(config.getState())) {
         configsToSave.put(entry.getKey(), config);
       }
     }
 
-    if (configsToSave.isEmpty()) {
+    if (configsToSave.isEmpty())
       return;
-    }
 
     CollectionService.Util.call((Boolean result) -> {
       Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(), "Configurations saved successfully.");
 
-      CollectionService.Util.call((List<CollectionStatus> statusList) -> {
-        if (statusList != null && !statusList.isEmpty()) {
-          ObserverManager.getCollectionObserver().setCollectionStatus(statusList.get(0));
+      CollectionService.Util.call((ConfigurationContext context) -> {
+        if (context != null && context.getProjectedDatabase() != null) {
+          database = context.getProjectedDatabase();
+          collectionStatus = context.getCollectionStatus();
+          ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
+
+          isInitialized = true;
+          configurationStatusPanel.setDatabase(database);
+
+          if (sidebar != null) {
+            sidebar.reset(database, collectionStatus);
+          }
+          rebuildDynamicUI();
         }
-      }).getCollectionConfiguration(databaseUUID, databaseUUID);
+      }).getConfigurationContext(databaseUUID, databaseUUID);
 
     }, errorMessage -> {
       Dialogs.showErrors("Error Saving Configurations", errorMessage, messages.basicActionClose());
     }).createDenormalizeConfigurationFiles(databaseUUID, databaseUUID, configsToSave);
-  }
-
-  @Override
-  protected void onAttach() {
-    super.onAttach();
-    if (database != null) {
-      updateControllerPanel();
-    }
   }
 }

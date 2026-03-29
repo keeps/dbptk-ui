@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.roda.core.data.v2.index.sublist.Sublist;
 
+import com.databasepreservation.common.api.v1.utils.ConfigurationContext;
 import com.databasepreservation.common.api.v1.utils.JobResponse;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -340,6 +341,14 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
     toggleProgressMode(false);
     btnApplyConfiguration.setEnabled(true);
+
+    if (this.collectionStatus != null) {
+      this.collectionStatus.setNeedsToBeProcessed(true);
+      CollectionService.Util.call((ConfigurationContext context) -> {
+        this.collectionStatus = context.getCollectionStatus();
+        updateVisualState();
+      }).updateConfigurationContext(database.getUuid(), database.getUuid(), this.collectionStatus);
+    }
   }
 
   private void updateProgressVisuals(ViewerJob job) {

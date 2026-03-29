@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.databasepreservation.common.api.v1.utils.ConfigurationContext;
 import com.databasepreservation.common.api.v1.utils.JobResponse;
 import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -112,6 +113,17 @@ public interface CollectionService extends DirectRestService {
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/customize", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Updates the internal collection configuration's customization properties")
   Boolean updateCollectionCustomizeProperties(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID,
+    @Parameter(name = "collectionStatus", required = true) @RequestBody CollectionStatus status);
+
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/configContext", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Gets the internal collection configuration AND the projected database schema")
+  ConfigurationContext getConfigurationContext(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID);
+
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/configContext", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Updates the internal collection configuration and returns the new projected context")
+  ConfigurationContext updateConfigurationContext(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID,
     @Parameter(name = "collectionStatus", required = true) @RequestBody CollectionStatus status);
 

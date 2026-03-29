@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.client.common.visualization.browse.configuration.table;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.databasepreservation.common.api.v1.utils.ConfigurationContext;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -32,7 +34,6 @@ import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
-import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
@@ -96,6 +97,14 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
 
   private Map<String, Map<String, StatusHelper>> tableManagementData = new HashMap<>();
 
+  private boolean isInitialized = false;
+
+  /**
+   * Tracks dynamically injected widgets to safely remove them during rebuilds
+   * without killing native UiBinder nodes.
+   */
+  private List<Widget> dynamicWidgets = new ArrayList<>();
+
   public static TableManagementPanel getInstance(ViewerDatabase database, CollectionStatus status) {
     return instances.computeIfAbsent(database.getUuid(), k -> new TableManagementPanel(database, status));
   }
@@ -106,24 +115,79 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
     this.database = database;
     this.collectionStatus = collectionStatus;
     configurationStatusPanel.setDatabase(database);
+  }
+
+  @Override
+  protected void onAttach() {
+    super.onAttach();
+    if (!isInitialized) {
+      fetchProjectedDatabase();
+    }
+  }
+
+  /**
+   * Fetches the unified configuration context (State + Projection) from the
+   * backend.
+   */
+  private void fetchProjectedDatabase() {
+    CollectionService.Util.call((ConfigurationContext context) -> {
+      if (context != null && context.getProjectedDatabase() != null) {
+        this.database = context.getProjectedDatabase();
+        this.collectionStatus = context.getCollectionStatus();
+        this.isInitialized = true;
+
+        configurationStatusPanel.setDatabase(this.database);
+        rebuildUI();
+      }
+    }).getConfigurationContext(database.getUuid(), database.getUuid());
+  }
+
+  /**
+   * Safely clears only dynamically appended elements and triggers a complete UI
+   * rebuild based on the current projected schema.
+   */
+  private void rebuildUI() {
+    // Safely remove only the dynamic widgets to prevent wiping the
+    // ConfigurationStatusPanel from the DOM
+    for (Widget w : dynamicWidgets) {
+      w.removeFromParent();
+    }
+    dynamicWidgets.clear();
+
+    tables.clear();
+    initialLoading.clear();
+    tableManagementData.clear();
 
     init();
   }
 
   private void init() {
-    configureHeader();
+    // 1. Header
+    Widget headerHtml = CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
+      messages.tableManagementPageTitle(), "h1");
+    header.add(headerHtml);
+    dynamicWidgets.add(headerHtml);
 
+    MetadataField instance = MetadataField.createInstance(messages.tableManagementPageTableTextForDescription());
+    instance.setCSS("table-row-description", "font-size-description");
+    content.add(instance);
+    dynamicWidgets.add(instance);
+
+    // 2. Data Grids
     for (ViewerSchema schema : database.getMetadata().getSchemas()) {
       MultipleSelectionTablePanel<ViewerTable> schemaTable = createCellTableForViewerTable();
       schemaTable.setHeight("100%");
       populateTable(schemaTable, database.getMetadata().getSchema(schema.getUuid()));
       tables.put(schema.getUuid(), schemaTable);
+
       FlowPanel widgets = CommonClientUtils.wrapOnDiv("table-management-schema-divider",
         CommonClientUtils.getHeader(SafeHtmlUtils.fromSafeConstant(schema.getName()), "table-management-schema-title"),
         schemaTable);
       content.add(widgets);
+      dynamicWidgets.add(widgets);
     }
 
+    // 3. Action Buttons
     configureButtonsPanel();
   }
 
@@ -190,26 +254,46 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
       }
     });
 
-    content.add(CommonClientUtils.wrapOnDiv("navigation-panel-buttons",
+    FlowPanel buttonsContainer = CommonClientUtils.wrapOnDiv("navigation-panel-buttons",
       CommonClientUtils.wrapOnDiv("btn-item", btnSave), CommonClientUtils.wrapOnDiv("btn-item", btnCancel),
-      CommonClientUtils.wrapOnDiv("btn-item", btnAddVirtualTable)));
+      CommonClientUtils.wrapOnDiv("btn-item", btnAddVirtualTable));
+
+    content.add(buttonsContainer);
+    dynamicWidgets.add(buttonsContainer);
   }
 
-  private void updateCollectionStatus(CollectionStatus collectionStatus) {
-    CollectionService.Util.callDetailed((Boolean result) -> {
-      final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
-      collectionObserver.setCollectionStatus(collectionStatus);
+  /**
+   * Pushes the mutation to the backend and synchronizes the local state with the
+   * newly projected schema, immediately reflecting structural changes.
+   */
+  private void updateCollectionStatus(CollectionStatus newCollectionStatus) {
+    CollectionService.Util.callDetailed((ConfigurationContext context) -> {
+
+      this.database = context.getProjectedDatabase();
+      this.collectionStatus = context.getCollectionStatus();
+
+      // Ensure the Status Panel is explicitly updated with the new database context
+      configurationStatusPanel.setDatabase(this.database);
+
+      ObserverManager.getCollectionObserver().setCollectionStatus(this.collectionStatus);
+
       Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
       changes = false;
+      this.isInitialized = true;
+
+      rebuildUI();
+
     }, errorMessage -> {
       Dialogs.showConfigurationDependencyErrors(errorMessage.get(DefaultMethodCallback.MESSAGE_KEY),
         errorMessage.get(DefaultMethodCallback.DETAILS_KEY), messages.basicActionClose());
-    }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+    }).updateConfigurationContext(database.getUuid(), database.getUuid(), newCollectionStatus);
   }
 
+  /**
+   * Registers a structural intention within the configuration payload.
+   */
   private void addVirtualTable(VirtualTableOptionsPanel optionsPanel, Dialogs.DialogAction action) {
     TableStatus tableStatus = optionsPanel.getTableStatus();
-    ViewerTable simpleViewerTable = optionsPanel.getSimpleViewerTable(tableStatus.getUuid());
 
     if (action == Dialogs.DialogAction.SAVE) {
       tableStatus.getVirtualTableStatus().setProcessingState(ProcessingState.TO_PROCESS);
@@ -220,37 +304,9 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
     collectionStatus.getTables().removeIf(t -> t.getId().equals(tableStatus.getId()));
     collectionStatus.getTables().add(tableStatus);
     collectionStatus.setNeedsToBeProcessed(true);
-    collectionStatus.updateTableShowCondition(simpleViewerTable.getUuid(), true);
+    collectionStatus.updateTableShowCondition(tableStatus.getUuid(), true);
 
     updateCollectionStatus(collectionStatus);
-
-    initialLoading.put(simpleViewerTable.getUuid(), false);
-
-    String schemaId = simpleViewerTable.getSchemaUUID();
-
-    if (schemaId == null || !tables.containsKey(schemaId)) {
-      schemaId = tables.keySet().iterator().next();
-    }
-
-    database.getMetadata().getSchema(schemaId).getTables()
-      .removeIf(t -> t.getUuid().equals(simpleViewerTable.getUuid()));
-    database.getMetadata().getSchema(schemaId).getTables().add(simpleViewerTable);
-
-    MultipleSelectionTablePanel<ViewerTable> schemaTablePanel = tables.get(schemaId);
-    if (schemaTablePanel != null) {
-      schemaTablePanel.getList().removeIf(t -> t.getUuid().equals(simpleViewerTable.getUuid()));
-      schemaTablePanel.addRow(simpleViewerTable);
-      schemaTablePanel.getSelectionModel().setSelected(simpleViewerTable, true);
-    }
-  }
-
-  private void configureHeader() {
-    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
-      messages.tableManagementPageTitle(), "h1"));
-
-    MetadataField instance = MetadataField.createInstance(messages.tableManagementPageTableTextForDescription());
-    instance.setCSS("table-row-description", "font-size-description");
-    content.add(instance);
   }
 
   private void handleCancelEvent(boolean changes) {
@@ -301,7 +357,8 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
         sb.appendHtmlConstant("<span>");
         sb.append(SafeHtmlUtils.fromString(table.getName()));
         sb.appendHtmlConstant("</span>");
-        if (tableStatus.getVirtualTableStatus() != null) {
+
+        if (tableStatus != null && tableStatus.getVirtualTableStatus() != null) {
           ProcessingState state = tableStatus.getVirtualTableStatus().getProcessingState();
           if (ProcessingState.TO_REMOVE.equals(state)) {
             sb.appendHtmlConstant("<span style='color: #dc3545; margin-left: 5px;'>");
@@ -417,7 +474,6 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
         data.setLabel(value);
         addToTableManagementData(table, data);
       }
-
       changes = true;
     });
     return label;
@@ -491,20 +547,14 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
   }
 
   private void addToTableManagementData(ViewerTable table, StatusHelper helper) {
-    Map<String, StatusHelper> helperMap = tableManagementData.get(table.getSchemaUUID());
-
-    if (helperMap == null) {
-      helperMap = new HashMap<>();
-    }
-
+    Map<String, StatusHelper> helperMap = tableManagementData.computeIfAbsent(table.getSchemaUUID(),
+      k -> new HashMap<>());
     helperMap.put(table.getId(), helper);
-    tableManagementData.put(table.getSchemaUUID(), helperMap);
   }
 
   private boolean checkTableManagementDataIsEmpty(ViewerTable table) {
     if (tableManagementData.get(table.getSchemaUUID()) == null)
       return true;
-
     return tableManagementData.get(table.getSchemaUUID()).get(table.getId()) == null;
   }
 
@@ -519,9 +569,20 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
+  /**
+   * Observer callback triggered by global configuration mutations. Marks the
+   * internal state as dirty to force a projection sync on the next attachment.
+   */
   @Override
-  public void updateCollection(CollectionStatus collectionStatus) {
-    instances.clear();
-    this.collectionStatus = collectionStatus;
+  public void updateCollection(CollectionStatus newStatus) {
+    if (this.collectionStatus != null && this.collectionStatus.getDatabaseUUID().equals(newStatus.getDatabaseUUID())) {
+      if (this.collectionStatus != newStatus) {
+        this.isInitialized = false;
+
+        if (this.isAttached()) {
+          fetchProjectedDatabase();
+        }
+      }
+    }
   }
 }

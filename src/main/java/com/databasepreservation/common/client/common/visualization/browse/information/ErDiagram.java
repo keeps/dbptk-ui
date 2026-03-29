@@ -311,19 +311,6 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
           viewerForeignKey.getReferencedTableId(), isVirtualRelation, isVirtualRelation));
       }
 
-      if (collectionStatus != null) {
-        for (ForeignKeysStatus foreignKeysStatus : collectionStatus.getForeignKeysByTableUUID(viewerTable.getUuid())) {
-
-          boolean isVirtualStatus = foreignKeysStatus.getSourceType() != null
-            && foreignKeysStatus.getSourceType().equals(ViewerSourceType.VIRTUAL);
-          boolean isVirtualRelation = isVirtualTable || isVirtualStatus;
-
-          String fkKey = foreignKeysStatus.getId() != null ? foreignKeysStatus.getId() : foreignKeysStatus.getName();
-          edgeMap.put(fkKey, new JsniEdge(viewerTable.getId(), foreignKeysStatus.getReferencedTableId(),
-            isVirtualRelation, isVirtualRelation));
-        }
-      }
-
       jsniEdgeList.addAll(edgeMap.values());
     }
 

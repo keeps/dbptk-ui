@@ -127,17 +127,4 @@ public class DenormalizationStep extends AbstractIndexingStepDefinition<ViewerRo
       }
     }
   }
-
-  /**
-   * Callback executed when the entire step (all partitions) finishes.
-   * <p>
-   * Left intentionally empty. Global metadata updates and Solr cleanup operations
-   * must be orchestrated via a subsequent Tasklet to ensure proper transaction
-   * isolation.
-   * </p>
-   */
-  @Override
-  public void onStepCompleted(JobContext jobContext, BatchStatus status) throws BatchJobException {
-    // No operation required here. Delegated to DenormalizationCleanupStep.
-  }
 }
