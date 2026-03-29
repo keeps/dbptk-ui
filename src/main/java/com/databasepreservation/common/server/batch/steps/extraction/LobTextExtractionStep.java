@@ -132,8 +132,4 @@ public class LobTextExtractionStep extends AbstractIndexingStepDefinition<Viewer
       }
     }
   }
-
-  @Override
-  public void onStepCompleted(JobContext jobContext, BatchStatus status) throws BatchJobException {
-  }
 }

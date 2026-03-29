@@ -963,4 +963,23 @@ public class DatabaseRowsSolrManager {
 
     executeBulkUpdate(collection.getIndexName(), docs);
   }
+
+  /**
+   * Performs a Soft Commit on the database rows collection. This makes all
+   * recently indexed data (like virtual columns or new virtual table rows)
+   * visible to Solr queries without the heavy performance penalty of a Hard
+   * Commit.
+   *
+   * @param databaseUUID
+   *          The unique identifier of the database to refresh.
+   */
+  public void refreshIndex(String databaseUUID) throws ViewerException {
+    String collectionName = SolrRowsCollectionRegistry.get(databaseUUID).getIndexName();
+    try {
+      client.commit(collectionName, false, true, true);
+      LOGGER.info("Soft commit executed successfully for collection: {}", collectionName);
+    } catch (SolrServerException | IOException e) {
+      throw new ViewerException("Failed to perform soft commit on collection " + collectionName, e);
+    }
+  }
 }

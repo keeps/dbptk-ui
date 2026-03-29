@@ -59,6 +59,7 @@ import com.databasepreservation.common.api.utils.DownloadUtils;
 import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.api.utils.StreamResponse;
 import com.databasepreservation.common.api.utils.ViewerStreamingOutput;
+import com.databasepreservation.common.api.v1.utils.ConfigurationContext;
 import com.databasepreservation.common.api.v1.utils.IterableIndexResultsCSVOutputStream;
 import com.databasepreservation.common.api.v1.utils.JobResponse;
 import com.databasepreservation.common.api.v1.utils.ParameterSanitization;
@@ -98,6 +99,7 @@ import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.JobOrchestrator;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.batch.jobs.DataTransformationJob;
+import com.databasepreservation.common.server.batch.steps.virtual.VirtualSchemaBuilderUtils;
 import com.databasepreservation.common.server.controller.ReporterType;
 import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
@@ -343,6 +345,57 @@ public class CollectionResource implements CollectionService {
     }
 
     return true;
+  }
+
+  @Override
+  public ConfigurationContext getConfigurationContext(String databaseUUID, String collectionUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+    try {
+      user = controllerAssistant.checkRoles(request);
+      CollectionStatus status = ViewerFactory.getConfigurationManager().getConfigurationCollection(databaseUUID,
+        collectionUUID);
+
+      // Fetch raw database and project it
+      ViewerDatabase rawDb = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
+      ViewerDatabase projectedDb = VirtualSchemaBuilderUtils.projectDatabase(rawDb, status);
+
+      return new ConfigurationContext(status, projectedDb);
+    } catch (Exception e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+    }
+  }
+
+  @Override
+  public ConfigurationContext updateConfigurationContext(String databaseUUID, String collectionUUID,
+    CollectionStatus status) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+    try {
+      user = controllerAssistant.checkRoles(request);
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
+
+      // Save it
+      ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, status);
+
+      // Fetch raw database and project the newly saved status
+      ViewerDatabase rawDb = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
+      ViewerDatabase projectedDb = VirtualSchemaBuilderUtils.projectDatabase(rawDb, status);
+
+      return new ConfigurationContext(status, projectedDb);
+    } catch (Exception e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+    }
   }
 
   /*******************************************************************************

@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.api.exceptions.RESTException;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -39,6 +41,10 @@ import com.github.jknack.handlebars.Template;
  */
 public class HandlebarsUtils {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(HandlebarsUtils.class);
+
+  private static final Handlebars handlebars = new Handlebars();
+
   public static List<String> getCellValues(ViewerRow row, Map<String, IterableIndexResult> nestedRows,
     TableStatus configTable, List<String> fieldsToReturn) {
     List<String> values = new ArrayList<>();
@@ -61,7 +67,6 @@ public class HandlebarsUtils {
             r = iterator.next();
             if (template != null && !template.isEmpty()) {
               final Map<String, String> map = cellsToJson(r.getCells(), columnConfig.getNestedColumns());
-              Handlebars handlebars = new Handlebars();
               try {
                 Template handlebarTemplate = handlebars.compileInline(template);
                 if (!first) {
@@ -129,7 +134,6 @@ public class HandlebarsUtils {
       return null;
     }
 
-    Handlebars handlebars = new Handlebars();
     try {
       Template handlebarTemplate = handlebars.compileInline(template);
       return handlebarTemplate.apply(map);
@@ -147,7 +151,6 @@ public class HandlebarsUtils {
       return null;
     }
 
-    Handlebars handlebars = new Handlebars();
     try {
       Template handlebarTemplate = handlebars.compileInline(template);
       return handlebarTemplate.apply(map);
@@ -202,28 +205,56 @@ public class HandlebarsUtils {
     return nestedValues;
   }
 
-  public static String applyVirtualColumnTemplate(ViewerRow row, TableStatus tableStatus,
-    VirtualColumnStatus virtualColumnStatus) {
-    if (virtualColumnStatus.getTemplateStatus() == null
-      || StringUtils.isBlank(virtualColumnStatus.getTemplateStatus().getTemplate())) {
+  public static String applyVirtualColumnTemplate(ViewerRow row, TableStatus tableStatus, VirtualColumnStatus vcs) {
+
+    // 1. Early exit if there is no template to process
+    if (vcs == null || vcs.getTemplateStatus() == null || vcs.getTemplateStatus().getTemplate() == null) {
       return null;
     }
 
-    Map<String, String> map = new HashMap<>();
-    for (ColumnStatus column : tableStatus.getColumns()) {
-      ViewerCell cell = row.getCells().get(column.getId());
-      if (cell != null && cell.getValue() != null) {
-        map.put(ViewerStringUtils.replaceAllFor(column.getCustomName(), "\\s", "_"), cell.getValue());
+    String templateString = vcs.getTemplateStatus().getTemplate();
+    Map<String, Object> templateContext = new HashMap<>();
+
+    // 2. Build a rich context mapping for the Handlebars engine
+    if (tableStatus.getColumns() != null && row.getCells() != null) {
+      for (ColumnStatus col : tableStatus.getColumns()) {
+        ViewerCell cell = row.getCells().get(col.getId());
+
+        if (cell != null && cell.getValue() != null) {
+          // A) Bind by Solr technical ID (e.g., "col0_s") - Guarantees backend native
+          // compatibility
+          templateContext.put(col.getId(), cell.getValue());
+
+          // B) Bind by original database readable name (e.g., "actor_id") - Matches UI
+          // input expectations
+          if (col.getName() != null && !col.getName().trim().isEmpty()) {
+            templateContext.put(col.getName(), cell.getValue());
+          }
+        }
       }
     }
 
-    Handlebars handlebars = new Handlebars();
+    // 3. Compile and apply the template
     try {
-      Template handlebarTemplate = handlebars.compileInline(virtualColumnStatus.getTemplateStatus().getTemplate());
-      return handlebarTemplate.apply(map);
-    } catch (IOException e) {
-      throw new RESTException(e);
-    }
+      Template template = handlebars.compileInline(templateString);
+      String result = template.apply(templateContext);
 
+      // 4. Defensive Sanitization:
+      // Handlebars returns "" for unresolved variables or empty evaluations.
+      // We MUST convert blank strings to null to avoid crashing Solr's strict type
+      // converters.
+      if (result != null && result.trim().isEmpty()) {
+        return null;
+      }
+
+      return result;
+
+    } catch (Exception e) {
+      // Log the error but do not crash the batch job.
+      // A bad template from a user should just result in a null value for that row.
+      LOGGER.warn("Failed to evaluate Handlebars template '{}'. Defaulting to null. Reason: {}", templateString,
+        e.getMessage());
+      return null;
+    }
   }
 }

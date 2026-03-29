@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.common.client.ObserverManager;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -172,7 +171,20 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
   }
 
   public void init() {
-    // database metadata
+    searchInit();
+    renderSidebarItems();
+    setVisible(true);
+  }
+
+  /**
+   * Separated rendering logic to allow the sidebar to rebuild itself when
+   * projected structures (virtual tables) arrive via reset().
+   */
+  private void renderSidebarItems() {
+    sidebarGroup.clear();
+    list.clear();
+    firstElement = null;
+
     final ViewerMetadata metadata = database.getMetadata();
 
     SidebarHyperlink informationLink = new SidebarHyperlink(FontAwesomeIconManager
@@ -202,8 +214,8 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
       }
     }
 
-    searchInit();
-    setVisible(true);
+    // Re-apply filter if user had typed anything before the reset
+    doSearch();
   }
 
   private SidebarHyperlink createTableItem(final ViewerSchema schema, final ViewerTable table, final int totalSchemas,
@@ -244,7 +256,13 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
 
   @Override
   public void reset(ViewerDatabase database, CollectionStatus status) {
-
+    if (database != null) {
+      this.database = database;
+      this.collectionStatus = status;
+      if (this.initialized) {
+        renderSidebarItems();
+      }
+    }
   }
 
   @Override
