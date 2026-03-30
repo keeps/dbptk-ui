@@ -18,11 +18,9 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.databasepreservation.common.api.v1.utils.ConfigurationContext;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
@@ -34,6 +32,7 @@ import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.ConfigurationStateController;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
@@ -42,7 +41,6 @@ import com.databasepreservation.common.client.models.status.helpers.StatusHelper
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -130,16 +128,14 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
    * backend.
    */
   private void fetchProjectedDatabase() {
-    CollectionService.Util.call((ConfigurationContext context) -> {
-      if (context != null && context.getProjectedDatabase() != null) {
-        this.database = context.getProjectedDatabase();
-        this.collectionStatus = context.getCollectionStatus();
-        this.isInitialized = true;
+    ConfigurationStateController.getInstance().fetchProjectedDatabase(database.getUuid(), (projectedDb, status) -> {
+      this.database = projectedDb;
+      this.collectionStatus = status;
+      this.isInitialized = true;
 
-        configurationStatusPanel.setDatabase(this.database);
-        rebuildUI();
-      }
-    }).getConfigurationContext(database.getUuid(), database.getUuid());
+      configurationStatusPanel.setDatabase(this.database);
+      rebuildUI();
+    });
   }
 
   /**
@@ -199,36 +195,7 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
     btnSave.addStyleName("btn btn-primary btn-save");
 
     btnCancel.addClickHandler(e -> handleCancelEvent(changes));
-
-    btnSave.addClickHandler(clickEvent -> {
-      if (selectionValidation()) {
-        if (inputValidation()) {
-          if (uniquenessValidation()) {
-            for (MultipleSelectionTablePanel<ViewerTable> value : tables.values()) {
-              for (ViewerTable table : database.getMetadata().getTables().values()) {
-                collectionStatus.updateTableShowCondition(table.getUuid(), value.getSelectionModel().isSelected(table));
-                if (!checkTableManagementDataIsEmpty(table)) {
-                  collectionStatus.updateTableCustomDescription(table.getUuid(),
-                    getTableManagementData(table).getDescription());
-                  collectionStatus.updateTableCustomName(table.getUuid(), getTableManagementData(table).getLabel());
-                }
-              }
-            }
-
-            updateCollectionStatus(collectionStatus);
-          } else {
-            Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogUniqueError(),
-              messages.basicActionClose());
-          }
-        } else {
-          Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogInputError(),
-            messages.basicActionClose());
-        }
-      } else {
-        Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogSelectionError(),
-          messages.basicActionClose());
-      }
-    });
+    btnSave.addClickHandler(clickEvent -> processTableManagementSave());
 
     Button btnAddVirtualTable = new Button();
     btnAddVirtualTable.setText(messages.tableManagementButtonTextForAddVirtualTable());
@@ -262,31 +229,64 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
     dynamicWidgets.add(buttonsContainer);
   }
 
+  private void processTableManagementSave() {
+    if (!selectionValidation()) {
+      Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogSelectionError(),
+        messages.basicActionClose());
+    } else if (!inputValidation()) {
+      Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogInputError(),
+        messages.basicActionClose());
+    } else if (!uniquenessValidation()) {
+      Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogUniqueError(),
+        messages.basicActionClose());
+    } else {
+      applyTableManagementChanges();
+    }
+  }
+
+  private void applyTableManagementChanges() {
+    for (MultipleSelectionTablePanel<ViewerTable> value : tables.values()) {
+      updateTableConditions(value);
+    }
+    updateCollectionStatus(collectionStatus);
+  }
+
+  private void updateTableConditions(MultipleSelectionTablePanel<ViewerTable> value) {
+    for (ViewerTable table : database.getMetadata().getTables().values()) {
+      collectionStatus.updateTableShowCondition(table.getUuid(), value.getSelectionModel().isSelected(table));
+      updateCustomTableDataIfPresent(table);
+    }
+  }
+
+  private void updateCustomTableDataIfPresent(ViewerTable table) {
+    if (!checkTableManagementDataIsEmpty(table)) {
+      StatusHelper statusData = getTableManagementData(table);
+      collectionStatus.updateTableCustomDescription(table.getUuid(), statusData.getDescription());
+      collectionStatus.updateTableCustomName(table.getUuid(), statusData.getLabel());
+    }
+  }
+
   /**
    * Pushes the mutation to the backend and synchronizes the local state with the
    * newly projected schema, immediately reflecting structural changes.
    */
   private void updateCollectionStatus(CollectionStatus newCollectionStatus) {
-    CollectionService.Util.callDetailed((ConfigurationContext context) -> {
+    ConfigurationStateController.getInstance().updateConfigurationContext(database.getUuid(), newCollectionStatus,
+      (projectedDb, status) -> {
+        this.database = projectedDb;
+        this.collectionStatus = status;
 
-      this.database = context.getProjectedDatabase();
-      this.collectionStatus = context.getCollectionStatus();
+        configurationStatusPanel.setDatabase(this.database);
+        ObserverManager.getCollectionObserver().setCollectionStatus(this.collectionStatus);
 
-      // Ensure the Status Panel is explicitly updated with the new database context
-      configurationStatusPanel.setDatabase(this.database);
+        Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
+        changes = false;
+        this.isInitialized = true;
 
-      ObserverManager.getCollectionObserver().setCollectionStatus(this.collectionStatus);
-
-      Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
-      changes = false;
-      this.isInitialized = true;
-
-      rebuildUI();
-
-    }, errorMessage -> {
-      Dialogs.showConfigurationDependencyErrors(errorMessage.get(DefaultMethodCallback.MESSAGE_KEY),
-        errorMessage.get(DefaultMethodCallback.DETAILS_KEY), messages.basicActionClose());
-    }).updateConfigurationContext(database.getUuid(), database.getUuid(), newCollectionStatus);
+        rebuildUI();
+      }, (message, details) -> {
+        Dialogs.showConfigurationDependencyErrors(message, details, messages.basicActionClose());
+      });
   }
 
   /**
@@ -506,44 +506,63 @@ public class TableManagementPanel extends ContentPanel implements ICollectionSta
     for (MultipleSelectionTablePanel<ViewerTable> table : tables.values()) {
       boolean notEmpty = !table.getSelectionModel().getSelectedSet().isEmpty();
       result |= notEmpty;
-
     }
 
     return result;
   }
 
   private boolean uniquenessValidation() {
+    boolean isUnique = true;
     for (String schemaUUID : tables.keySet()) {
-      Set<String> uniques = new HashSet<>();
+      if (isUnique) {
+        isUnique = checkSchemaUniqueness(schemaUUID);
+      }
+    }
+    return isUnique;
+  }
 
-      Map<String, StatusHelper> helperMap = tableManagementData.get(schemaUUID);
-      List<String> selectedSet = tables.get(schemaUUID).getSelectionModel().getSelectedSet().stream()
-        .map(ViewerTable::getId).collect(Collectors.toList());
+  private boolean checkSchemaUniqueness(String schemaUUID) {
+    boolean isUnique = true;
+    Set<String> uniques = new HashSet<>();
 
-      for (String tableId : selectedSet) {
+    Map<String, StatusHelper> helperMap = tableManagementData.get(schemaUUID);
+    List<String> selectedSet = tables.get(schemaUUID).getSelectionModel().getSelectedSet().stream()
+      .map(ViewerTable::getId).collect(Collectors.toList());
+
+    for (String tableId : selectedSet) {
+      if (isUnique) {
         if (!uniques.add(helperMap.get(tableId).getLabel())) {
-          return false;
+          isUnique = false;
         }
       }
     }
-
-    return true;
+    return isUnique;
   }
 
   private boolean inputValidation() {
+    boolean isValid = true;
     for (String schemaUUID : tables.keySet()) {
-      Map<String, StatusHelper> helperMap = tableManagementData.get(schemaUUID);
-      List<String> selectedSet = tables.get(schemaUUID).getSelectionModel().getSelectedSet().stream()
-        .map(ViewerTable::getId).collect(Collectors.toList());
+      if (isValid) {
+        isValid = checkSchemaInputValidation(schemaUUID);
+      }
+    }
+    return isValid;
+  }
 
-      for (String tableId : selectedSet) {
+  private boolean checkSchemaInputValidation(String schemaUUID) {
+    boolean isValid = true;
+    Map<String, StatusHelper> helperMap = tableManagementData.get(schemaUUID);
+    List<String> selectedSet = tables.get(schemaUUID).getSelectionModel().getSelectedSet().stream()
+      .map(ViewerTable::getId).collect(Collectors.toList());
+
+    for (String tableId : selectedSet) {
+      if (isValid) {
         if (ViewerStringUtils.isBlank(helperMap.get(tableId).getLabel())) {
-          return false;
+          isValid = false;
         }
       }
     }
-
-    return true;
+    return isValid;
   }
 
   private void addToTableManagementData(ViewerTable table, StatusHelper helper) {
