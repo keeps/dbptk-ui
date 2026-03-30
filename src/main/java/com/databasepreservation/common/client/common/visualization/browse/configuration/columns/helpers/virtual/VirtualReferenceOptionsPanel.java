@@ -4,6 +4,7 @@ import java.util.StringJoiner;
 
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidatableOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidationUiUtils;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
@@ -79,7 +80,7 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
     referencedTableListBox.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
-        VirtualReferenceOptionsPanel.this.clearError(referencedTableListBox, errorReferencedTable);
+        ValidationUiUtils.clearError(referencedTableListBox, errorReferencedTable);
         VirtualReferenceOptionsPanel.this.onReferencedTableChanged();
       }
     });
@@ -87,7 +88,7 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
     referencedColumnListBox.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
-        clearError(referencedColumnListBox, errorReferencedColumn);
+        ValidationUiUtils.clearError(referencedColumnListBox, errorReferencedColumn);
       }
     });
   }
@@ -110,37 +111,24 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
   public boolean validate() {
     boolean isValid = true;
 
-    clearError(referencedTableListBox, errorReferencedTable);
-    clearError(referencedColumnListBox, errorReferencedColumn);
+    ValidationUiUtils.clearError(referencedTableListBox, errorReferencedTable);
+    ValidationUiUtils.clearError(referencedColumnListBox, errorReferencedColumn);
 
-    if (fkReferencePanel.isVisible()) {
-      return true;
-    }
+    // Only validate if the user is actually defining a new reference
+    if (!fkReferencePanel.isVisible()) {
+      String selectedTable = referencedTableListBox.getSelectedValue();
+      String selectedColumn = referencedColumnListBox.getSelectedValue();
 
-    String selectedTable = referencedTableListBox.getSelectedValue();
-    String selectedColumn = referencedColumnListBox.getSelectedValue();
+      boolean hasTable = !ViewerStringUtils.isBlank(selectedTable);
+      boolean hasColumn = !ViewerStringUtils.isBlank(selectedColumn);
 
-    boolean hasTable = !ViewerStringUtils.isBlank(selectedTable);
-    boolean hasColumn = !ViewerStringUtils.isBlank(selectedColumn);
-
-    if (hasTable && !hasColumn) {
-      showError(referencedColumnListBox, errorReferencedColumn, "Target column is required.");
-      isValid = false;
+      if (hasTable && !hasColumn) {
+        ValidationUiUtils.showError(referencedColumnListBox, errorReferencedColumn, "Target column is required.");
+        isValid = false;
+      }
     }
 
     return isValid;
-  }
-
-  private void showError(Widget input, Label errorLabel, String message) {
-    input.addStyleName("dialog-input-error");
-    errorLabel.setText(message);
-    errorLabel.setVisible(true);
-  }
-
-  private void clearError(Widget input, Label errorLabel) {
-    input.removeStyleName("dialog-input-error");
-    errorLabel.setText("");
-    errorLabel.setVisible(false);
   }
 
   private void populateVirtualReferenceFields(ForeignKeysStatus foreignKeysStatus) {

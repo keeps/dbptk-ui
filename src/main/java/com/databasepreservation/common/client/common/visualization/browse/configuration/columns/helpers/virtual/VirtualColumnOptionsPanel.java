@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidatableOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidationUiUtils;
 import com.databasepreservation.common.client.models.status.collection.AdvancedStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.DetailsStatus;
@@ -92,9 +93,10 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
       }
     });
 
-    virtualColumnName.addKeyUpHandler(event -> clearError(virtualColumnName, errorVirtualColumnName));
+    virtualColumnName.addKeyUpHandler(event -> ValidationUiUtils.clearError(virtualColumnName, errorVirtualColumnName));
 
-    templateSourceColumns.addKeyUpHandler(event -> clearError(templateSourceColumns, errorTemplateSourceColumns));
+    templateSourceColumns
+      .addKeyUpHandler(event -> ValidationUiUtils.clearError(templateSourceColumns, errorTemplateSourceColumns));
 
     virtualColumnName.addValueChangeHandler(event -> {
       String val = virtualColumnName.getText();
@@ -161,74 +163,65 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
   @Override
   public boolean validate() {
     boolean isValid = true;
-
-    clearError(virtualColumnName, errorVirtualColumnName);
-    clearError(templateSourceColumns, errorTemplateSourceColumns);
-
     String nameValue = virtualColumnName.getText();
 
+    ValidationUiUtils.clearError(virtualColumnName, errorVirtualColumnName);
+    ValidationUiUtils.clearError(templateSourceColumns, errorTemplateSourceColumns);
+
+    // Validate column name (Mutually exclusive conditions)
     if (ViewerStringUtils.isBlank(nameValue)) {
-      showError(virtualColumnName, errorVirtualColumnName,
+      ValidationUiUtils.showError(virtualColumnName, errorVirtualColumnName,
         messages.columnManagementLabelForVirtualColumnName() + " is required.");
       isValid = false;
     } else if (nameValue.contains(" ")) {
-      showError(virtualColumnName, errorVirtualColumnName, "Column name cannot contain spaces.");
+      ValidationUiUtils.showError(virtualColumnName, errorVirtualColumnName, "Column name cannot contain spaces.");
       isValid = false;
     } else if (!nameValue.matches("^[a-zA-Z0-9_]+$")) {
-      showError(virtualColumnName, errorVirtualColumnName, "Only letters, numbers and underscores are allowed.");
+      ValidationUiUtils.showError(virtualColumnName, errorVirtualColumnName,
+        "Only letters, numbers and underscores are allowed.");
+      isValid = false;
+    } else if (isDuplicateColumnName(nameValue)) {
+      ValidationUiUtils.showError(virtualColumnName, errorVirtualColumnName, "A column with this name already exists.");
       isValid = false;
     }
 
+    // Validate template logic
+    if (ViewerStringUtils.isBlank(templateSourceColumns.getText())) {
+      ValidationUiUtils.showError(templateSourceColumns, errorTemplateSourceColumns,
+        messages.columnManagementLabelForSourceColumnsTemplate() + " is required.");
+      isValid = false;
+    } else if (hasTypeMismatchError()) {
+      ValidationUiUtils.showError(templateSourceColumns, errorTemplateSourceColumns,
+        "Type mismatch: This column was created as a Number/Date, but your new template generates Text. Please delete this virtual column to avoid errors.");
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  private boolean isDuplicateColumnName(String nameValue) {
     boolean isDuplicate = false;
     for (ColumnStatus column : tableStatus.getColumns()) {
       if (column.getName().equals(nameValue)
         && (originalStatus == null || !column.getId().equals(originalStatus.getId()))) {
         isDuplicate = true;
-        break;
       }
     }
+    return isDuplicate;
+  }
 
-    if (isDuplicate) {
-      showError(virtualColumnName, errorVirtualColumnName, "A column with this name already exists.");
-      isValid = false;
-    }
-
-    if (ViewerStringUtils.isBlank(templateSourceColumns.getText())) {
-      showError(templateSourceColumns, errorTemplateSourceColumns,
-        messages.columnManagementLabelForSourceColumnsTemplate() + " is required.");
-      isValid = false;
-    }
-
-    // Validation: Prevent modifying a template if it alters the underlying Solr
-    // field suffix type.
-    // Changing a numeric column to a string column requires deleting and recreating
-    // the virtual column.
+  private boolean hasTypeMismatchError() {
+    boolean hasMismatch = false;
     if (originalStatus != null && originalStatus.getType() != null) {
       ViewerType.dbTypes inferredType = inferStrictType();
       String oldSuffix = VirtualOptionsPanelUtils.getVirtualColumnSolrSuffix(originalStatus.getType());
       String newSuffix = VirtualOptionsPanelUtils.getVirtualColumnSolrSuffix(inferredType);
 
       if (!oldSuffix.equals(newSuffix)) {
-        showError(templateSourceColumns, errorTemplateSourceColumns,
-          "Type mismatch: This column was created as a Number/Date, but your new template generates Text. "
-            + "Please delete this virtual column and create a new one to avoid Solr indexing errors.");
-        isValid = false;
+        hasMismatch = true;
       }
     }
-
-    return isValid;
-  }
-
-  private void showError(Widget input, Label errorLabel, String message) {
-    input.addStyleName("dialog-input-error");
-    errorLabel.setText(message);
-    errorLabel.setVisible(true);
-  }
-
-  private void clearError(Widget input, Label errorLabel) {
-    input.removeStyleName("dialog-input-error");
-    errorLabel.setText("");
-    errorLabel.setVisible(false);
+    return hasMismatch;
   }
 
   public ColumnStatus getColumnStatus() {

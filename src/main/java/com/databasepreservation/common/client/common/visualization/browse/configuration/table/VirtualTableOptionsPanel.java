@@ -14,6 +14,7 @@ import com.databasepreservation.common.client.common.lists.cells.helper.Checkbox
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidatableOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidationUiUtils;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
@@ -22,7 +23,6 @@ import com.databasepreservation.common.client.models.status.collection.TemplateS
 import com.databasepreservation.common.client.models.status.collection.VirtualTableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -100,12 +100,12 @@ public class VirtualTableOptionsPanel extends ColumnOptionsPanel implements Vali
       }
     });
 
-    virtualTableName.addKeyUpHandler(event -> clearError(virtualTableName, errorVirtualTableName));
+    virtualTableName.addKeyUpHandler(event -> ValidationUiUtils.clearError(virtualTableName, errorVirtualTableName));
 
     sourceTableListBox.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
-        clearError(sourceTableListBox, errorSourceTable);
+        ValidationUiUtils.clearError(sourceTableListBox, errorSourceTable);
         onSourceTableChanged();
       }
     });
@@ -144,41 +144,42 @@ public class VirtualTableOptionsPanel extends ColumnOptionsPanel implements Vali
   @Override
   public boolean validate() {
     boolean isValid = true;
-
-    clearError(virtualTableName, errorVirtualTableName);
-    clearError(sourceTableListBox, errorSourceTable);
-
     String nameValue = virtualTableName.getText();
 
+    ValidationUiUtils.clearError(virtualTableName, errorVirtualTableName);
+    ValidationUiUtils.clearError(sourceTableListBox, errorSourceTable);
+
+    // Validate name (Mutually exclusive conditions)
     if (ViewerStringUtils.isBlank(nameValue)) {
-      showError(virtualTableName, errorVirtualTableName,
+      ValidationUiUtils.showError(virtualTableName, errorVirtualTableName,
         messages.tableManagementLabelForVirtualTableName() + " is required.");
       isValid = false;
-    }
-
-    boolean isDuplicate = false;
-    for (TableStatus tableStatus : collectionStatus.getTables()) {
-      if (originalStatus != null && tableStatus.getUuid().equals(originalStatus.getUuid())) {
-        continue;
-      }
-
-      if (nameValue.equalsIgnoreCase(tableStatus.getName())) {
-        isDuplicate = true;
-        break;
-      }
-    }
-
-    if (isDuplicate) {
-      showError(virtualTableName, errorVirtualTableName, messages.tableManagementLabelForUniqueVirtualTableName());
+    } else if (isDuplicateTableName(nameValue)) {
+      ValidationUiUtils.showError(virtualTableName, errorVirtualTableName,
+        messages.tableManagementLabelForUniqueVirtualTableName());
       isValid = false;
     }
 
+    // Validate source table selection
     if (sourceTableListBox.getSelectedIndex() == 0) {
-      showError(sourceTableListBox, errorSourceTable, messages.tableManagementLabelForSourceTable() + " is required.");
+      ValidationUiUtils.showError(sourceTableListBox, errorSourceTable,
+        messages.tableManagementLabelForSourceTable() + " is required.");
       isValid = false;
     }
 
     return isValid;
+  }
+
+  private boolean isDuplicateTableName(String nameValue) {
+    boolean isDuplicate = false;
+    for (TableStatus tableStatus : collectionStatus.getTables()) {
+      if (originalStatus == null || !tableStatus.getUuid().equals(originalStatus.getUuid())) {
+        if (nameValue.equalsIgnoreCase(tableStatus.getName())) {
+          isDuplicate = true;
+        }
+      }
+    }
+    return isDuplicate;
   }
 
   private void setSourceTablesDropdown() {
@@ -345,39 +346,6 @@ public class VirtualTableOptionsPanel extends ColumnOptionsPanel implements Vali
   private void resetVirtualFields() {
     sourceColumnsTable.clear();
     columnsToInclude.clear();
-  }
-
-  private void showError(Widget input, Label errorLabel, String message) {
-    input.addStyleName("dialog-input-error");
-    errorLabel.setText(message);
-    errorLabel.setVisible(true);
-  }
-
-  private void clearError(Widget input, Label errorLabel) {
-    input.removeStyleName("dialog-input-error");
-    errorLabel.setText("");
-    errorLabel.setVisible(false);
-  }
-
-  public ViewerTable getSimpleViewerTable(String uuid) {
-    ViewerTable viewerTable = new ViewerTable();
-    viewerTable.setUuid(uuid);
-    viewerTable.setSourceType(ViewerSourceType.VIRTUAL);
-    if (originalStatus != null && ViewerStringUtils.isNotBlank(originalStatus.getId())) {
-      viewerTable.setId(originalStatus.getId());
-    } else {
-      ViewerTable sourceViewerTable = database.getMetadata().getTable(sourceTableListBox.getSelectedValue());
-      if (ViewerStringUtils.isNotBlank(sourceViewerTable.getSchemaName())) {
-        viewerTable.setId(sourceViewerTable.getSchemaName() + "." + virtualTableName.getText());
-      } else {
-        viewerTable.setId(virtualTableName.getText());
-      }
-    }
-    viewerTable.setName(virtualTableName.getText());
-    viewerTable.setDescription(virtualTableDescription.getText());
-    ViewerTable sourceViewerTable = database.getMetadata().getTable(sourceTableListBox.getSelectedValue());
-    viewerTable.setSchemaUUID(sourceViewerTable.getSchemaUUID());
-    return viewerTable;
   }
 
   public TableStatus getTableStatus() {

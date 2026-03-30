@@ -7,7 +7,6 @@
  */
 package com.databasepreservation.common.client.common.visualization.browse.configuration.handler;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,6 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation.TableNode;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
@@ -111,30 +109,47 @@ public class DataTransformationUtils {
     DenormalizeConfiguration denormalizeConfiguration) {
     RelatedTablesConfiguration relatedTable = denormalizeConfiguration.getRelatedTable(uuid);
 
-    if (relatedTable != null) {
-      for (RelatedColumnConfiguration checkColumn : relatedTable.getColumnsIncluded()) {
-        if (checkColumn.getIndex() == columnToInclude.getColumnIndexInEnclosingTable()) {
-          return;
-        }
+    if (relatedTable != null && !isColumnAlreadyIncluded(relatedTable, columnToInclude)) {
+      relatedTable.addColumnToInclude(columnToInclude);
+      denormalizeConfiguration.setState(ViewerJobStatus.NEW);
+    }
+  }
+
+  private static boolean isColumnAlreadyIncluded(RelatedTablesConfiguration relatedTable,
+    ViewerColumn columnToInclude) {
+    boolean isIncluded = false;
+    for (RelatedColumnConfiguration checkColumn : relatedTable.getColumnsIncluded()) {
+      if (checkColumn.getIndex() == columnToInclude.getColumnIndexInEnclosingTable()) {
+        isIncluded = true;
       }
     }
-    relatedTable.addColumnToInclude(columnToInclude);
-    denormalizeConfiguration.setState(ViewerJobStatus.NEW);
+    return isIncluded;
   }
 
   public static void removeColumnToInclude(String uuid, ViewerColumn columnToRemove,
     DenormalizeConfiguration denormalizeConfiguration) {
     RelatedTablesConfiguration relatedTable = denormalizeConfiguration.getRelatedTable(uuid);
-    if (relatedTable != null) {
-      List<RelatedColumnConfiguration> columnsIncluded = relatedTable.getColumnsIncluded();
 
-      for (RelatedColumnConfiguration column : columnsIncluded) {
-        if (column.getIndex() == columnToRemove.getColumnIndexInEnclosingTable()) {
-          columnsIncluded.remove(column);
-          denormalizeConfiguration.setState(ViewerJobStatus.NEW);
-          break;
-        }
+    if (relatedTable != null) {
+      removeTargetColumn(relatedTable, columnToRemove, denormalizeConfiguration);
+    }
+  }
+
+  // Avoids modifying list concurrently during iteration and avoids using "break"
+  private static void removeTargetColumn(RelatedTablesConfiguration relatedTable, ViewerColumn columnToRemove,
+    DenormalizeConfiguration denormalizeConfiguration) {
+    List<RelatedColumnConfiguration> columnsIncluded = relatedTable.getColumnsIncluded();
+    RelatedColumnConfiguration targetToRemove = null;
+
+    for (RelatedColumnConfiguration column : columnsIncluded) {
+      if (column.getIndex() == columnToRemove.getColumnIndexInEnclosingTable()) {
+        targetToRemove = column;
       }
+    }
+
+    if (targetToRemove != null) {
+      columnsIncluded.remove(targetToRemove);
+      denormalizeConfiguration.setState(ViewerJobStatus.NEW);
     }
   }
 
@@ -142,43 +157,52 @@ public class DataTransformationUtils {
     Map<String, String> extraParameters, List<String> fieldsToReturn) {
     TableStatus tableStatus = status.getTableStatus(table.getUuid());
     fieldsToReturn.add(ViewerConstants.INDEX_ID);
+
+    if (tableStatus != null && tableStatus.getColumns() != null) {
+      processNestedColumns(tableStatus.getColumns(), extraParameters, fieldsToReturn);
+    }
+  }
+
+  private static void processNestedColumns(List<ColumnStatus> columns, Map<String, String> extraParameters,
+    List<String> fieldsToReturn) {
     int nestedCount = 0;
     String keys = "";
     String separator = "";
-
     Set<String> processedNestedUUIDs = new HashSet<>();
 
-    for (ColumnStatus column : tableStatus.getColumns()) {
+    for (ColumnStatus column : columns) {
       if (column.getNestedColumns() != null) {
-
         String referenceUuid = column.getNestedColumns().getReferenceUuid();
-        // backward compatible: if referenceUuid is not set, use the column id as
-        // nestedTableId
         String nestedTableId = (referenceUuid != null && !referenceUuid.isEmpty()) ? referenceUuid : column.getId();
 
-        if (processedNestedUUIDs.contains(nestedTableId)) {
-          continue;
-        }
-        processedNestedUUIDs.add(nestedTableId);
+        // Process only if not yet processed
+        if (!processedNestedUUIDs.contains(nestedTableId)) {
+          processedNestedUUIDs.add(nestedTableId);
 
-        String key = ViewerConstants.SOLR_ROWS_NESTED + "." + nestedCount;
-        keys = keys + separator + key;
-        separator = ",";
-        addDefaultNestedFieldsToReturn(fieldsToReturn);
-        fieldsToReturn.add(key + ":[subquery]");
-        addNestedDefaultFieldList(extraParameters, key);
+          String key = ViewerConstants.SOLR_ROWS_NESTED + "." + nestedCount;
+          keys = keys + separator + key;
+          separator = ",";
 
-        extraParameters.put(key + ".q", "+nestedUUID:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
-        Integer quantity = column.getNestedColumns().getQuantityInList();
-        if (quantity <= column.getNestedColumns().getMaxQuantityInList()) {
-          extraParameters.put(key + ".rows", quantity.toString());
-        } else {
-          extraParameters.put(key + ".rows", column.getNestedColumns().getMaxQuantityInList().toString());
+          addDefaultNestedFieldsToReturn(fieldsToReturn);
+          fieldsToReturn.add(key + ":[subquery]");
+          addNestedDefaultFieldList(extraParameters, key);
+
+          extraParameters.put(key + ".q", "+nestedUUID:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
+
+          Integer quantity = column.getNestedColumns().getQuantityInList();
+          Integer maxQuantity = column.getNestedColumns().getMaxQuantityInList();
+
+          // Inline if-else
+          extraParameters.put(key + ".rows", (quantity <= maxQuantity ? quantity : maxQuantity).toString());
+
+          nestedCount++;
         }
-        nestedCount++;
       }
     }
-    fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED + ":" + "\"" + keys + "\"");
+
+    if (!keys.isEmpty()) {
+      fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED + ":" + "\"" + keys + "\"");
+    }
   }
 
   public static void addNestedDefaultFieldList(Map<String, String> extraParameters, String key) {
@@ -219,39 +243,5 @@ public class DataTransformationUtils {
         return column;
     }
     return null;
-  }
-
-  public static ViewerForeignKey convertToViewerForeignKey(ForeignKeysStatus foreignKeysStatus,
-    CollectionStatus collectionStatus, String sourceTableUUID) {
-    ViewerForeignKey foreignKey = new ViewerForeignKey();
-
-    foreignKey.setName(foreignKeysStatus.getName());
-    foreignKey.setReferencedTableUUID(foreignKeysStatus.getReferencedTableUUID());
-    foreignKey.setReferencedTableId(foreignKeysStatus.getReferencedTableId());
-    foreignKey.setSourceType(foreignKeysStatus.getSourceType());
-
-    TableStatus sourceTableStatus = collectionStatus.getTableStatus(sourceTableUUID);
-    TableStatus referencedTableStatus = collectionStatus.getTableStatus(foreignKeysStatus.getReferencedTableUUID());
-
-    ArrayList<ViewerReference> viewerReferenceArrayList = new ArrayList<>();
-    for (ForeignKeysStatus.ReferencedColumnStatus reference : foreignKeysStatus.getReferences()) {
-      ViewerReference viewerReference = new ViewerReference();
-
-      ColumnStatus sourceColumn = sourceTableStatus.getColumnById(reference.getSourceColumnId());
-      ColumnStatus referencedColumn = referencedTableStatus.getColumnById(reference.getReferencedColumnId());
-
-      viewerReference.setSourceColumnIndex(sourceColumn.getColumnIndex());
-      viewerReference.setReferencedColumnIndex(referencedColumn.getColumnIndex());
-
-      viewerReferenceArrayList.add(viewerReference);
-    }
-
-    if (foreignKey.getReferences() == null) {
-      foreignKey.setReferences(new ArrayList<>());
-    }
-
-    foreignKey.getReferences().addAll(viewerReferenceArrayList);
-
-    return foreignKey;
   }
 }

@@ -66,8 +66,10 @@ public class TextExtractionPanel extends ContentPanel {
   private final Button btnSave = new Button();
   private final Map<String, MultipleSelectionTablePanel<ViewerColumn>> tables = new HashMap<>();
   private final Map<String, Set<String>> initialLoading = new HashMap<>();
+
   @UiField
   FlowPanel header;
+
   @UiField
   FlowPanel content;
 
@@ -119,54 +121,87 @@ public class TextExtractionPanel extends ContentPanel {
 
     btnCancel.addClickHandler(event -> HistoryManager.gotoAdvancedConfiguration(database.getUuid()));
 
-    btnSave.addClickHandler(clickEvent -> {
-      Date now = new Date();
-
-      for (String tableUUID : initialLoading.keySet()) {
-        SelectionModel<ViewerColumn> selectedColumns = tables.get(tableUUID).getSelectionModel();
-        TableStatus tableStatus = collectionStatus.getTableStatus(tableUUID);
-
-        for (ViewerColumn lobColumn : database.getMetadata().getTable(tableUUID).getBinaryColumns()) {
-          boolean isSelected = selectedColumns.isSelected(lobColumn);
-          ColumnStatus colStatus = tableStatus.getColumnById(lobColumn.getSolrName());
-
-          LobTextExtractionStatus status = colStatus.getLobTextExtractionStatus();
-
-          boolean currentState = status != null && status.getProcessingState() != null
-            && (status.getProcessingState().equals(ProcessingState.PROCESSING)
-              || status.getProcessingState().equals(ProcessingState.PROCESSED)
-              || status.getProcessingState().equals(ProcessingState.TO_PROCESS));
-
-          if (currentState != isSelected) {
-            if (status == null) {
-              status = new LobTextExtractionStatus();
-              colStatus.setLobTextExtractionStatus(status);
-            }
-
-            status.setLastUpdatedDate(now);
-
-            if (isSelected) {
-              status.setProcessingState(ProcessingState.TO_PROCESS);
-            } else {
-              status.setProcessingState(ProcessingState.TO_REMOVE);
-            }
-          }
-        }
-      }
-
-      collectionStatus.setNeedsToBeProcessed(true);
-
-      CollectionService.Util.callDetailed((Boolean result) -> {
-        final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
-        collectionObserver.setCollectionStatus(collectionStatus);
-      }, errorMessage -> {
-        Dialogs.showConfigurationDependencyErrors(errorMessage.get(DefaultMethodCallback.MESSAGE_KEY),
-          errorMessage.get(DefaultMethodCallback.DETAILS_KEY), messages.basicActionClose());
-      }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
-    });
+    btnSave.addClickHandler(clickEvent -> saveTextExtractionChanges());
 
     content.add(CommonClientUtils.wrapOnDiv("navigation-panel-buttons",
       CommonClientUtils.wrapOnDiv("btn-item", btnSave), CommonClientUtils.wrapOnDiv("btn-item", btnCancel)));
+  }
+
+  private void saveTextExtractionChanges() {
+    Date now = new Date();
+
+    for (String tableUUID : initialLoading.keySet()) {
+      processExtractionTable(tableUUID, now);
+    }
+
+    collectionStatus.setNeedsToBeProcessed(true);
+    callUpdateCollectionConfigurationRPC();
+  }
+
+  // Processes an individual table
+  private void processExtractionTable(String tableUUID, Date now) {
+    SelectionModel<ViewerColumn> selectedColumns = tables.get(tableUUID).getSelectionModel();
+    TableStatus tableStatus = collectionStatus.getTableStatus(tableUUID);
+
+    for (ViewerColumn lobColumn : database.getMetadata().getTable(tableUUID).getBinaryColumns()) {
+      processLobColumnExtraction(lobColumn, selectedColumns, tableStatus, now);
+    }
+  }
+
+  // Evaluates and updates the extraction status for a single LOB column
+  private void processLobColumnExtraction(ViewerColumn lobColumn, SelectionModel<ViewerColumn> selectedColumns,
+    TableStatus tableStatus, Date now) {
+    boolean isSelected = selectedColumns.isSelected(lobColumn);
+    ColumnStatus colStatus = tableStatus.getColumnById(lobColumn.getSolrName());
+    LobTextExtractionStatus status = colStatus.getLobTextExtractionStatus();
+
+    boolean currentState = isCurrentlyExtracting(status);
+
+    if (currentState != isSelected) {
+      updateLobExtractionStatus(colStatus, status, isSelected, now);
+    }
+  }
+
+  // Checks current processing state
+  private boolean isCurrentlyExtracting(LobTextExtractionStatus status) {
+    boolean isExtracting = false;
+    if (status != null && status.getProcessingState() != null) {
+      ProcessingState state = status.getProcessingState();
+      if (ProcessingState.PROCESSING.equals(state) || ProcessingState.PROCESSED.equals(state)
+        || ProcessingState.TO_PROCESS.equals(state)) {
+        isExtracting = true;
+      }
+    }
+    return isExtracting;
+  }
+
+  // Updates the column status state
+  private void updateLobExtractionStatus(ColumnStatus colStatus, LobTextExtractionStatus status, boolean isSelected,
+    Date now) {
+    LobTextExtractionStatus activeStatus = status;
+
+    if (activeStatus == null) {
+      activeStatus = new LobTextExtractionStatus();
+      colStatus.setLobTextExtractionStatus(activeStatus);
+    }
+
+    activeStatus.setLastUpdatedDate(now);
+
+    if (isSelected) {
+      activeStatus.setProcessingState(ProcessingState.TO_PROCESS);
+    } else {
+      activeStatus.setProcessingState(ProcessingState.TO_REMOVE);
+    }
+  }
+
+  private void callUpdateCollectionConfigurationRPC() {
+    CollectionService.Util.callDetailed((Boolean result) -> {
+      final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
+      collectionObserver.setCollectionStatus(collectionStatus);
+    }, errorMessage -> {
+      Dialogs.showConfigurationDependencyErrors(errorMessage.get(DefaultMethodCallback.MESSAGE_KEY),
+        errorMessage.get(DefaultMethodCallback.DETAILS_KEY), messages.basicActionClose());
+    }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
   }
 
   private void configureHeader() {
