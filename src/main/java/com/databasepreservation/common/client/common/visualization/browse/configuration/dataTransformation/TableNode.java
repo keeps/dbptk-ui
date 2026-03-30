@@ -48,36 +48,63 @@ public class TableNode {
    * that have references to this
    */
   public void setupChildren() {
+    processDirectForeignKeys();
+    processInverseForeignKeys();
+  }
+
+  private void processDirectForeignKeys() {
     if (table.getForeignKeys() != null) {
       for (ViewerForeignKey fk : table.getForeignKeys()) {
-        ViewerTable referencedTable = metadata.getTable(fk.getReferencedTableUUID());
-
-        if (referencedTable != null && this.searchTop(referencedTable) == null) {
-          TableNode childNode = new TableNode(database, referencedTable, collectionStatus);
-          childNode.uuid = generateUUID(fk, referencedTable);
-          childNode.multiValue = this.parentIsMultiValue(this);
-          childNode.isVirtual = ViewerSourceType.VIRTUAL.equals(fk.getSourceType());
-          children.put(fk, childNode);
-        }
+        processDirectForeignKeyIfValid(fk);
       }
     }
+  }
 
-    for (ViewerSchema schema : metadata.getSchemas()) {
+  private void processDirectForeignKeyIfValid(ViewerForeignKey fk) {
+    ViewerTable referencedTable = metadata.getTable(fk.getReferencedTableUUID());
+
+    // Process only if valid and not creating a loop
+    if (referencedTable != null && this.searchTop(referencedTable) == null) {
+      addChildNode(fk, referencedTable, this.parentIsMultiValue(this));
+    }
+  }
+
+  private void processInverseForeignKeys() {
+    if (metadata.getSchemas() != null) {
+      for (ViewerSchema schema : metadata.getSchemas()) {
+        processSchemaTablesForInverseKeys(schema);
+      }
+    }
+  }
+
+  private void processSchemaTablesForInverseKeys(ViewerSchema schema) {
+    if (schema.getTables() != null) {
       for (ViewerTable otherTable : schema.getTables()) {
-        if (otherTable.getForeignKeys() != null) {
-          for (ViewerForeignKey fk : otherTable.getForeignKeys()) {
-            if (table.getUuid().equals(fk.getReferencedTableUUID()) && this.searchTop(otherTable) == null) {
-
-              TableNode childNode = new TableNode(database, otherTable, collectionStatus);
-              childNode.uuid = generateUUID(fk, otherTable);
-              childNode.multiValue = true;
-              childNode.isVirtual = ViewerSourceType.VIRTUAL.equals(fk.getSourceType());
-              children.put(fk, childNode);
-            }
-          }
-        }
+        processOtherTableForeignKeys(otherTable);
       }
     }
+  }
+
+  private void processOtherTableForeignKeys(ViewerTable otherTable) {
+    if (otherTable.getForeignKeys() != null) {
+      for (ViewerForeignKey fk : otherTable.getForeignKeys()) {
+        processInverseForeignKeyIfValid(fk, otherTable);
+      }
+    }
+  }
+
+  private void processInverseForeignKeyIfValid(ViewerForeignKey fk, ViewerTable otherTable) {
+    if (table.getUuid().equals(fk.getReferencedTableUUID()) && this.searchTop(otherTable) == null) {
+      addChildNode(fk, otherTable, true);
+    }
+  }
+
+  private void addChildNode(ViewerForeignKey fk, ViewerTable targetTable, Boolean multiValue) {
+    TableNode childNode = new TableNode(database, targetTable, collectionStatus);
+    childNode.uuid = generateUUID(fk, targetTable);
+    childNode.multiValue = multiValue;
+    childNode.isVirtual = ViewerSourceType.VIRTUAL.equals(fk.getSourceType());
+    children.put(fk, childNode);
   }
 
   private String generateUUID(ViewerForeignKey foreignKey, ViewerTable viewerTable) {

@@ -10,7 +10,6 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,10 +18,8 @@ import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.databasepreservation.common.api.v1.utils.ConfigurationContext;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -40,28 +37,19 @@ import com.databasepreservation.common.client.common.lists.widgets.BasicTablePan
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.BinaryColumnOptionsPanel;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ClobColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.CustomizeColumnOptionsPanel;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NestedColumnOptionsPanel;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NumericColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.virtual.VirtualColumnOptionsPanel;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.virtual.VirtualReferenceOptionsPanel;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.configuration.observer.ISaveButtonObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.collection.VirtualForeignKeysStatus;
-import com.databasepreservation.common.client.models.status.formatters.Formatter;
 import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.AuthenticationService;
-import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -166,23 +154,19 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
    * rebuild.
    */
   private void fetchProjectedDatabase() {
-    CollectionService.Util.call((ConfigurationContext context) -> {
-      if (context != null && context.getProjectedDatabase() != null) {
-        this.database = context.getProjectedDatabase();
-        this.collectionStatus = context.getCollectionStatus();
-        this.isInitialized = true;
+    ConfigurationStateController.getInstance().fetchProjectedDatabase(database.getUuid(), (projectedDb, status) -> {
+      this.database = projectedDb;
+      this.collectionStatus = status;
+      this.isInitialized = true;
 
-        configurationStatusPanel.setDatabase(this.database);
+      configurationStatusPanel.setDatabase(this.database);
 
-        // Sync the Sidebar with the newly projected schema (so Virtual Tables/Columns
-        // appear)
-        if (this.sidebar != null) {
-          this.sidebar.reset(this.database, this.collectionStatus);
-        }
-
-        rebuildUI();
+      if (this.sidebar != null) {
+        this.sidebar.reset(this.database, this.collectionStatus);
       }
-    }).getConfigurationContext(database.getUuid(), database.getUuid());
+
+      rebuildUI();
+    });
   }
 
   /**
@@ -325,83 +309,121 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     }
   }
 
-  /**
-   * Validates local state, flushes UI caches to the state object, and persists it
-   * to the backend. Leverages the ConfigurationContext endpoint to instantly
-   * retrieve the generated Shadow Schema.
-   */
   private void saveChanges(boolean hasChanges) {
-    if (hasChanges) {
-      if (validateUniqueInputs()) {
-        if (validateCheckboxes()) {
-
-          // Flush local UI edits to the status object securely across all open instances
-          instances.forEach((key, object) -> {
-            if (key.startsWith(database.getUuid())) {
-              object.applyEditableValuesToState();
-            }
-          });
-
-          UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
-            @Override
-            public void onSuccess(User user) {
-              AuthenticationService.Util.call((Boolean authEnabled) -> {
-                if (!authEnabled || user.isAdmin()) {
-
-                  // Context Projection endpoint
-                  CollectionService.Util.callDetailed((ConfigurationContext context) -> {
-                    database = context.getProjectedDatabase();
-                    collectionStatus = context.getCollectionStatus();
-                    configurationStatusPanel.setDatabase(database);
-                    ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
-
-                    if (sidebar != null) {
-                      sidebar.reset(database, collectionStatus);
-                    }
-
-                    changes = false;
-                    isInitialized = true;
-                    Toast.showInfo(messages.columnManagementPageTitle(),
-                      messages.columnManagementPageToastDescription());
-
-                    rebuildUI();
-
-                  }, errorMessage -> {
-                    Dialogs.showConfigurationDependencyErrors(errorMessage.get(DefaultMethodCallback.MESSAGE_KEY),
-                      errorMessage.get(DefaultMethodCallback.DETAILS_KEY), messages.basicActionClose());
-                  }).updateConfigurationContext(database.getUuid(), database.getUuid(), collectionStatus);
-
-                } else {
-                  // Standard property update for non-admin users
-                  CollectionService.Util.call((Boolean result) -> {
-                    ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
-
-                    if (sidebar != null) {
-                      sidebar.reset(database, collectionStatus);
-                    }
-
-                    changes = false;
-                    isInitialized = true;
-                    Toast.showInfo(messages.columnManagementPageTitle(),
-                      messages.columnManagementPageToastDescription());
-                    rebuildUI();
-                  }).updateCollectionCustomizeProperties(database.getUuid(), database.getUuid(), collectionStatus);
-                }
-              }).isAuthenticationEnabled();
-            }
-          });
-
-        } else {
-          Dialogs.showErrors(messages.columnManagementPageTitle(),
-            messages.columnManagementPageDialogErrorDescription(), messages.basicActionClose());
-        }
-      } else {
-        Dialogs.showErrors(messages.columnManagementPageTitle(), messages.columnManagementPageDialogErrorUnique(),
-          messages.basicActionClose());
-      }
-    } else {
+    if (!hasChanges) {
       Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
+    } else if (!validateUniqueInputs()) {
+      Dialogs.showErrors(messages.columnManagementPageTitle(), messages.columnManagementPageDialogErrorUnique(),
+        messages.basicActionClose());
+    } else if (!validateCheckboxes()) {
+      Dialogs.showErrors(messages.columnManagementPageTitle(), messages.columnManagementPageDialogErrorDescription(),
+        messages.basicActionClose());
+    } else {
+      executeSaveChanges();
     }
+  }
+
+  private void executeSaveChanges() {
+    flushEditableValuesToState();
+
+    UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+      @Override
+      public void onSuccess(User user) {
+        processUserAuthenticationForSave(user);
+      }
+    });
+  }
+
+  // Flushes local UI edits to the status object securely
+  private void flushEditableValuesToState() {
+    instances.forEach((key, object) -> {
+      if (key.startsWith(database.getUuid())) {
+        object.applyEditableValuesToState();
+      }
+    });
+  }
+
+  private void processUserAuthenticationForSave(User user) {
+    AuthenticationService.Util.call((Boolean authEnabled) -> {
+      if (!authEnabled || user.isAdmin()) {
+        updateConfigurationContext();
+      } else {
+        updateCollectionCustomizeProperties();
+      }
+    }).isAuthenticationEnabled();
+  }
+
+  private void updateConfigurationContext() {
+    ConfigurationStateController.getInstance().updateConfigurationContext(database.getUuid(), collectionStatus,
+      (projectedDb, status) -> {
+        this.database = projectedDb;
+        this.collectionStatus = status;
+        configurationStatusPanel.setDatabase(this.database);
+        ObserverManager.getCollectionObserver().setCollectionStatus(this.collectionStatus);
+
+        if (sidebar != null) {
+          sidebar.reset(database, collectionStatus);
+        }
+
+        changes = false;
+        isInitialized = true;
+        Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
+
+        rebuildUI();
+      }, (message, details) -> {
+        Dialogs.showConfigurationDependencyErrors(message, details, messages.basicActionClose());
+      });
+  }
+
+  private void updateCollectionCustomizeProperties() {
+    ConfigurationStateController.getInstance().updateCollectionCustomizeProperties(database.getUuid(), collectionStatus,
+      () -> {
+        ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
+
+        if (sidebar != null) {
+          sidebar.reset(database, collectionStatus);
+        }
+
+        changes = false;
+        isInitialized = true;
+        Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
+        rebuildUI();
+      });
+  }
+
+  private boolean validateUniqueInputs() {
+    boolean isUnique = true;
+    for (Map.Entry<String, ColumnsManagementPanel> entry : instances.entrySet()) {
+      if (isUnique && entry.getKey().startsWith(database.getUuid())) {
+        Set<String> uniques = new HashSet<>();
+        for (StatusHelper value : entry.getValue().editableValues.values()) {
+          if (isUnique && !uniques.add(value.getLabel())) {
+            isUnique = false;
+          }
+        }
+      }
+    }
+    return isUnique;
+  }
+
+  private boolean validateCheckboxes() {
+    boolean isValid = true;
+    for (Map.Entry<String, ColumnsManagementPanel> entry : instances.entrySet()) {
+      if (isValid && entry.getKey().startsWith(database.getUuid())) {
+        int countDetails = 0, countTable = 0;
+        for (StatusHelper helper : entry.getValue().editableValues.values()) {
+          if (!helper.isShowInDetails())
+            countDetails++;
+          if (!helper.isShowInTable())
+            countTable++;
+        }
+        TableStatus ts = collectionStatus.getTableStatusByTableId(tableId);
+        if (ts != null && (ts.getColumns().size() - countDetails <= 0 || ts.getColumns().size() - countTable <= 0)) {
+          isValid = false;
+        }
+      }
+    }
+    return isValid;
   }
 
   private BasicTablePanel<ColumnStatus> populateTableAdmin(final TableStatus tableStatus) {
@@ -519,8 +541,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   // ==============================================================================================
 
   /**
-   * Evaluates the column type and delegates the
-   * dialog creation to specific, single-responsibility private methods.
+   * Evaluates the column type and delegates the dialog creation to specific
+   * private methods.
    */
   private Column<ColumnStatus, String> getOptionsColumn() {
     Column<ColumnStatus, String> options = new ButtonColumn<ColumnStatus>() {
@@ -539,195 +561,12 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     options.setFieldUpdater((index, columnStatus, value) -> {
       TableStatus tableStatus = collectionStatus.getTableStatusByTableId(tableId);
 
-      if (columnStatus.isVirtual()) {
-        openVirtualColumnDialog(tableStatus, columnStatus);
-      } else if (ViewerType.dbTypes.NESTED.equals(columnStatus.getType())) {
-        openNestedColumnDialog(tableStatus, columnStatus);
-      } else if (ViewerType.dbTypes.CLOB.equals(columnStatus.getType())) {
-        openClobColumnDialog(tableStatus, columnStatus);
-      } else if (ViewerType.dbTypes.BINARY.equals(columnStatus.getType())) {
-        openBinaryColumnDialog(tableStatus, columnStatus);
-      } else if (ViewerType.dbTypes.NUMERIC_FLOATING_POINT.equals(columnStatus.getType())) {
-        openNumericColumnDialog(tableStatus, columnStatus);
-      } else {
-        openStandardColumnDialog(tableStatus, columnStatus);
-      }
+      // Delegation to Factory prevents OCP violations in the main UI Panel
+      ColumnDialogFactory.openDialog(database, collectionStatus, tableStatus, columnStatus, messages,
+        this::saveChanges);
     });
+
     return options;
-  }
-
-  private void openVirtualColumnDialog(TableStatus tableStatus, ColumnStatus columnStatus) {
-    VirtualColumnOptionsPanel colPanel = VirtualColumnOptionsPanel.createInstance(tableStatus, columnStatus);
-    ForeignKeysStatus fkStatus = collectionStatus.getForeignKeyByTableAndColumnId(tableStatus.getUuid(),
-      columnStatus.getId());
-    VirtualReferenceOptionsPanel refPanel = VirtualReferenceOptionsPanel.createInstance(database, collectionStatus,
-      tableStatus, columnStatus, fkStatus);
-
-    Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
-      messages.basicActionCancel(), messages.basicActionDelete(), Arrays.asList(colPanel, refPanel),
-      new DefaultAsyncCallback<Dialogs.DialogAction>() {
-        @Override
-        public void onSuccess(Dialogs.DialogAction action) {
-          ColumnStatus column = tableStatus.getColumnById(columnStatus.getId());
-          ColumnStatus updatedColStatus = colPanel.getColumnStatus();
-          ForeignKeysStatus updatedFkStatus = refPanel.getVirtualReferenceStatus();
-          VirtualForeignKeysStatus virtualFkStatus = (updatedFkStatus != null)
-            ? updatedFkStatus.getVirtualForeignKeysStatus()
-            : null;
-
-          if (action.equals(Dialogs.DialogAction.SAVE)) {
-            if (updatedFkStatus != null) {
-              if (virtualFkStatus != null) {
-                virtualFkStatus.setProcessingState(ProcessingState.TO_PROCESS);
-                virtualFkStatus.setLastUpdatedDate(new Date());
-              }
-              tableStatus.addOrUpdateForeignKeyStatus(updatedFkStatus);
-            }
-            updatedColStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_PROCESS);
-            column.setDescription(updatedColStatus.getDescription());
-            column.setCustomDescription(updatedColStatus.getDescription());
-            column.setVirtualColumnStatus(updatedColStatus.getVirtualColumnStatus());
-
-            collectionStatus.setNeedsToBeProcessed(true);
-            saveChanges(true);
-
-          } else if (action.equals(Dialogs.DialogAction.REMOVE)) {
-            if (fkStatus != null && fkStatus.getVirtualForeignKeysStatus() != null) {
-              fkStatus.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_REMOVE);
-              fkStatus.getVirtualForeignKeysStatus().setLastUpdatedDate(new Date());
-              tableStatus.addOrUpdateForeignKeyStatus(fkStatus);
-            }
-            updatedColStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_REMOVE);
-            column.setVirtualColumnStatus(updatedColStatus.getVirtualColumnStatus());
-
-            collectionStatus.setNeedsToBeProcessed(true);
-            saveChanges(true);
-          }
-        }
-      });
-  }
-
-  private void openNestedColumnDialog(TableStatus tableStatus, ColumnStatus columnStatus) {
-    NestedColumnOptionsPanel panel = (NestedColumnOptionsPanel) NestedColumnOptionsPanel.createInstance(columnStatus);
-    Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
-      messages.basicActionCancel(), panel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
-        @Override
-        public void onSuccess(Dialogs.DialogAction value) {
-          if (value.equals(Dialogs.DialogAction.SAVE)) {
-            String multiValueTableName = panel.getMultiValueTableName();
-            String targetReferenceUuid = columnStatus.getNestedColumns().getReferenceUuid();
-
-            if (targetReferenceUuid != null) {
-              for (ColumnStatus col : tableStatus.getColumns()) {
-                if (col.getNestedColumns() != null
-                  && targetReferenceUuid.equals(col.getNestedColumns().getReferenceUuid())) {
-                  col.updateNestedColumnsMultiValueTableName(multiValueTableName);
-                }
-              }
-            }
-            ColumnStatus col = tableStatus.getColumnById(columnStatus.getId());
-            col.updateSearchListTemplate(panel.getSearchTemplate());
-            col.updateDetailsTemplate(panel.getDetailsTemplate());
-            col.updateExportTemplate(panel.getExportTemplate());
-            col.updateNestedColumnsQuantityList(panel.getQuantityInList());
-            saveChanges(true);
-          }
-        }
-      });
-  }
-
-  private void openClobColumnDialog(TableStatus tableStatus, ColumnStatus columnStatus) {
-    ClobColumnOptionsPanel panel = (ClobColumnOptionsPanel) ClobColumnOptionsPanel.createInstance(tableStatus,
-      tableStatus.getColumnById(columnStatus.getId()));
-    Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
-      messages.basicActionCancel(), panel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
-        @Override
-        public void onSuccess(Dialogs.DialogAction value) {
-          if (value.equals(Dialogs.DialogAction.SAVE)) {
-            ColumnStatus col = tableStatus.getColumnById(columnStatus.getId());
-            col.updateExportTemplate(panel.getExportTemplate());
-            col.updateSearchListTemplate(panel.getSearchTemplate());
-            col.updateDetailsTemplate(panel.getDetailsTemplate());
-            col.updateDetailsShowContent(panel.showContentInDetails());
-            col.getSearchStatus().getList().setShowContent(panel.showContentInList());
-            col.setApplicationType(panel.getApplicationType());
-            saveChanges(true);
-          }
-        }
-      });
-  }
-
-  private void openBinaryColumnDialog(TableStatus tableStatus, ColumnStatus columnStatus) {
-    BinaryColumnOptionsPanel panel = (BinaryColumnOptionsPanel) BinaryColumnOptionsPanel.createInstance(tableStatus,
-      tableStatus.getColumnById(columnStatus.getId()));
-    Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
-      messages.basicActionCancel(), panel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
-        @Override
-        public void onSuccess(Dialogs.DialogAction value) {
-          if (value.equals(Dialogs.DialogAction.SAVE)) {
-            ColumnStatus col = tableStatus.getColumnById(columnStatus.getId());
-            col.updateExportTemplate(panel.getExportTemplate());
-            col.updateSearchListTemplate(panel.getSearchTemplate());
-            col.updateDetailsTemplate(panel.getDetailsTemplate());
-            col.setApplicationType(panel.getApplicationType());
-            saveChanges(true);
-          }
-        }
-      });
-  }
-
-  private void openNumericColumnDialog(TableStatus tableStatus, ColumnStatus columnStatus) {
-    NumericColumnOptionsPanel panel = (NumericColumnOptionsPanel) NumericColumnOptionsPanel
-      .createInstance(collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId()));
-    Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "400px", messages.basicActionSave(),
-      messages.basicActionCancel(), panel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
-        @Override
-        public void onSuccess(Dialogs.DialogAction value) {
-          if (value.equals(Dialogs.DialogAction.SAVE)) {
-            if (panel.validate()) {
-              Formatter formatter = panel.getFormatter();
-              collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId()).setFormatter(formatter);
-              saveChanges(true);
-            } else {
-              Dialogs.showErrors(messages.columnManagementPageTitle(),
-                messages.columnManagementPageDialogErrorValueMustBeAnInteger(), messages.basicActionClose());
-            }
-          }
-        }
-      });
-  }
-
-  private void openStandardColumnDialog(TableStatus tableStatus, ColumnStatus columnStatus) {
-    ForeignKeysStatus fkStatus = collectionStatus.getForeignKeyByTableAndColumnId(tableStatus.getUuid(),
-      columnStatus.getId());
-    VirtualReferenceOptionsPanel panel = VirtualReferenceOptionsPanel.createInstance(database, collectionStatus,
-      tableStatus, columnStatus, fkStatus);
-
-    Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
-      messages.basicActionCancel(), messages.basicActionDelete(), Arrays.asList(panel),
-      new DefaultAsyncCallback<Dialogs.DialogAction>() {
-        @Override
-        public void onSuccess(Dialogs.DialogAction value) {
-          ForeignKeysStatus updatedFkStatus = panel.getVirtualReferenceStatus();
-          if (updatedFkStatus != null) {
-            if (value.equals(Dialogs.DialogAction.SAVE)) {
-              updatedFkStatus.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_PROCESS);
-              updatedFkStatus.getVirtualForeignKeysStatus().setLastUpdatedDate(new Date());
-              tableStatus.addOrUpdateForeignKeyStatus(updatedFkStatus);
-              collectionStatus.setNeedsToBeProcessed(true);
-              saveChanges(true);
-            } else if (value.equals(Dialogs.DialogAction.REMOVE)) {
-              if (fkStatus != null && fkStatus.getVirtualForeignKeysStatus() != null) {
-                fkStatus.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_REMOVE);
-                fkStatus.getVirtualForeignKeysStatus().setLastUpdatedDate(new Date());
-                tableStatus.addOrUpdateForeignKeyStatus(fkStatus);
-              }
-              collectionStatus.setNeedsToBeProcessed(true);
-              saveChanges(true);
-            }
-          }
-        }
-      });
   }
 
   private Column<ColumnStatus, ColumnStatus> getOrderColumn() {
@@ -924,38 +763,6 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     list.set(clickedIndex, relative);
     list.set(relativeToClickIndex, clicked);
     changes = true;
-  }
-
-  private boolean validateUniqueInputs() {
-    for (Map.Entry<String, ColumnsManagementPanel> entry : instances.entrySet()) {
-      if (entry.getKey().startsWith(database.getUuid())) {
-        Set<String> uniques = new HashSet<>();
-        for (StatusHelper value : entry.getValue().editableValues.values()) {
-          if (!uniques.add(value.getLabel()))
-            return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  private boolean validateCheckboxes() {
-    for (Map.Entry<String, ColumnsManagementPanel> entry : instances.entrySet()) {
-      if (entry.getKey().startsWith(database.getUuid())) {
-        int countDetails = 0, countTable = 0;
-        for (StatusHelper helper : entry.getValue().editableValues.values()) {
-          if (!helper.isShowInDetails())
-            countDetails++;
-          if (!helper.isShowInTable())
-            countTable++;
-        }
-        TableStatus ts = collectionStatus.getTableStatusByTableId(tableId);
-        if (ts != null && (ts.getColumns().size() - countDetails <= 0 || ts.getColumns().size() - countTable <= 0)) {
-          return false;
-        }
-      }
-    }
-    return true;
   }
 
   private void handleCancelEvent(boolean changes) {

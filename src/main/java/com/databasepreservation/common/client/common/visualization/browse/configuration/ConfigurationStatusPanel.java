@@ -234,6 +234,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   }
 
   private void startPolling(String jobUUID) {
+    stopPolling();
     isStoppingPolling = false;
 
     this.setVisible(true);
