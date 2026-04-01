@@ -103,6 +103,7 @@ import com.databasepreservation.common.client.models.structure.ViewerUserStructu
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.filter.solr.TermsFilterParameter;
+import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
@@ -220,8 +221,13 @@ public class SolrUtils {
     query.setParam("qf", (queryFields != null) ? String.join(" ", queryFields) : "");
     query.setParam("hl", highlighting);
     query.setParam("hl.fl", (highlightedFields != null) ? String.join(" ", highlightedFields) : "");
-    query.setParam("hl.tag.pre", "<b>");
-    query.setParam("hl.tag.post", "</b>");
+    query.setParam("hl.tag.pre", ViewerConfiguration.getInstance().getViewerConfigurationAsString("<b>",
+      ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_PRE));
+    query.setParam("hl.tag.post", ViewerConfiguration.getInstance().getViewerConfigurationAsString("</b>",
+      ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_POST));
+    query.setParam("hl.encoder", "html");
+    query.setParam("hl.fragsize", ViewerConfiguration.getInstance().getViewerConfigurationAsString("50",
+      ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_FRAGSIZE));
 
     parseAndConfigureFacets(facets, query);
 
