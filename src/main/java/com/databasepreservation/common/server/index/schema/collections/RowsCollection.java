@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
 import com.databasepreservation.common.client.models.structure.ViewerMimeType;
@@ -115,7 +114,6 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     doc.setField(SOLR_ROWS_TABLE_UUID, row.getTableUUID());
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
       String solrColumnName = cellEntry.getKey();
-      ColumnStatus columnStatus = collectionStatus.getColumnByTableIdAndColumn(row.getTableId(), solrColumnName);
       if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_STRING_MULTI)) {
         doc.addField(solrColumnName, cellEntry.getValue().getListValue());
       } else {
@@ -129,6 +127,10 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
       else if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_BOOLEAN)) {
         doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_BOOLEAN, ViewerConstants.SOLR_DYN_STRING),
           SolrUtils.getSolrBooleanValue(cellEntry.getValue().getValue()).toString());
+      }
+      else if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_LONG)) {
+        doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_LONG, ViewerConstants.SOLR_DYN_STRING),
+          cellEntry.getValue().getValue());
       }
     }
 
