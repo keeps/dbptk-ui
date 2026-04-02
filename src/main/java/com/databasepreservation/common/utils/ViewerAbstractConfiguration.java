@@ -35,7 +35,6 @@ public abstract class ViewerAbstractConfiguration {
 
   public abstract Path getLobPath();
 
-
   /*
    * Base property retrieval methods
    * ____________________________________________________________________________________________________________________
@@ -58,6 +57,10 @@ public abstract class ViewerAbstractConfiguration {
 
   public int getViewerConfigurationAsInt(String... keyParts) {
     return getViewerConfigurationAsInt(0, keyParts);
+  }
+
+  public Long getViewerConfigurationAsLong(Long defaultValue, String... keyParts) {
+    return configuration.getLong(getConfigurationKey(keyParts), defaultValue);
   }
 
   public boolean getViewerConfigurationAsBoolean(boolean defaultValue, String... keyParts) {

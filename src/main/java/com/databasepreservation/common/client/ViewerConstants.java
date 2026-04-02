@@ -775,9 +775,17 @@ public class ViewerConstants {
   public static final String PROPERTY_OCR_TIKA_URL = "ocr.tika.url";
   public static final String PROPERTY_OCR_TIKA_VOLUME_PATH = "ocr.tika.filesystem.volume.path";
   public static final String PROPERTY_OCR_TIKA_POLICY_EXTRACT_DEFAULT = "ocr.policy.extractByDefault";
+  public static final String PROPERTY_OCR_TIKA_TIMEOUT = "ocr.tika.timeout.seconds";
   public static final String TIKA_REQUEST_FILE_PARAMETER = "file";
   public static final String TIKA_FORM_ENDPOINT = "/tika/form";
   public static final String TIKA_EXTRACT_ENDPOINT = "/tika";
+
+  public static final String PROPERTY_OCR_EXTERNAL_SERVICE_URL = "ocr.external.service.url";
+  public static final String PROPERTY_OCR_EXTERNAL_SERVICE_ID_PATTERN = "ocr.external.service.id.pattern";
+  public static final String PROPERTY_OCR_EXTERNAL_SERVICE_USER = "ocr.external.service.user";
+  public static final String PROPERTY_OCR_EXTERNAL_SERVICE_PASSWORD = "ocr.external.service.password";
+  public static final String PROPERTY_OCR_EXTERNAL_SERVICE_TIMEOUT = "ocr.external.service.timeout.seconds";
+  public static final String PROPERTY_OCR_EXTERNAL_SERVICE_EXTENSIONS = "ocr.external.service.extensions";
 
   /**
    * Search highlighting

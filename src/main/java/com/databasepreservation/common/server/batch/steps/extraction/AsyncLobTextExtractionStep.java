@@ -1,19 +1,26 @@
 package com.databasepreservation.common.server.batch.steps.extraction;
 
 import java.io.IOException;
+import java.net.http.HttpClient;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -21,9 +28,11 @@ import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.batch.components.readers.SolrItemReader;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.AbstractIndexingStepDefinition;
+import com.databasepreservation.common.server.batch.core.AsyncChunkStepDefinition;
 import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.PartitionableStep;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
@@ -35,10 +44,14 @@ import com.databasepreservation.common.server.batch.steps.partition.TablePartiti
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Component
-public class LobTextExtractionStep extends AbstractIndexingStepDefinition<ViewerRow, RowLobTextUpdate>
-  implements PartitionableStep {
+public class AsyncLobTextExtractionStep extends AbstractIndexingStepDefinition<ViewerRow, RowLobTextUpdate>
+  implements AsyncChunkStepDefinition<ViewerRow, RowLobTextUpdate>, PartitionableStep {
 
   private final Map<String, FileSystem> partitionResources = new ConcurrentHashMap<>();
+
+  @Autowired
+  @Qualifier(BatchConstants.TASK_EXECUTOR_BEAN_NAME)
+  private TaskExecutor taskExecutor;
 
   @Override
   public String getDisplayName() {
@@ -96,18 +109,62 @@ public class LobTextExtractionStep extends AbstractIndexingStepDefinition<Viewer
     return new SolrItemReader<>(solrManager, context.getDatabaseUUID(), filter, fieldsToReturn, ViewerRow.class);
   }
 
+  private LobTextExtractor buildExtractorStrategy() {
+    ViewerConfiguration config = ViewerConfiguration.getInstance();
+
+    // 1. Setup shared HttpClient
+    HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build();
+
+    // 2. Build Local Strategy (Always built as fallback for non-images)
+    String tikaUrl = config.getViewerConfigurationAsString(null, ViewerConstants.PROPERTY_OCR_TIKA_URL);
+    String volumePath = config.getViewerConfigurationAsString(null, ViewerConstants.PROPERTY_OCR_TIKA_VOLUME_PATH);
+    long localTimeout = config.getViewerConfigurationAsLong(300L, ViewerConstants.PROPERTY_OCR_TIKA_TIMEOUT);
+    LobTextExtractor localExtractor = new LocalTikaExtractor(httpClient, tikaUrl, volumePath, localTimeout);
+
+    // 3. Build External Strategy (If configured)
+    String externalUrl = config.getViewerConfigurationAsString(null, ViewerConstants.PROPERTY_OCR_EXTERNAL_SERVICE_URL);
+    LobTextExtractor externalExtractor = null;
+
+    if (externalUrl != null && !externalUrl.isBlank()) {
+      String pattern = config.getViewerConfigurationAsString(null,
+        ViewerConstants.PROPERTY_OCR_EXTERNAL_SERVICE_ID_PATTERN);
+      String user = config.getViewerConfigurationAsString(null, ViewerConstants.PROPERTY_OCR_EXTERNAL_SERVICE_USER);
+      String pass = config.getViewerConfigurationAsString(null, ViewerConstants.PROPERTY_OCR_EXTERNAL_SERVICE_PASSWORD);
+      long extTimeout = config.getViewerConfigurationAsLong(600L,
+        ViewerConstants.PROPERTY_OCR_EXTERNAL_SERVICE_TIMEOUT);
+      externalExtractor = new ExternalServiceExtractor(httpClient, externalUrl, pattern, user, pass, extTimeout);
+    }
+
+    // 4. Read routing extensions from properties
+    List<String> configuredExtensions = config
+      .getViewerConfigurationAsList(ViewerConstants.PROPERTY_OCR_EXTERNAL_SERVICE_EXTENSIONS);
+    Set<String> externalExtensions;
+
+    if (configuredExtensions != null && !configuredExtensions.isEmpty()) {
+      externalExtensions = configuredExtensions.stream().map(String::toLowerCase).collect(Collectors.toSet());
+    } else {
+      externalExtensions = Collections.emptySet();
+    }
+
+    // 5. Return the Router
+    return new RoutingLobTextExtractor(externalExtractor, localExtractor, externalExtensions);
+  }
+
   @Override
   public ItemProcessor<ViewerRow, RowLobTextUpdate> createProcessor(JobContext context,
     ExecutionContext partitionContext) {
     String tableId = partitionContext.getString(BatchConstants.TABLE_ID_KEY);
     String dbVersion = partitionContext.getString(BatchConstants.DB_VERSION_KEY);
     FileSystem fs = partitionResources.get(tableId);
-    return new LobTextExtractionProcessor(context, tableId, fs, dbVersion);
+
+    // Inject the resolved strategy into the processor
+    LobTextExtractor extractor = buildExtractorStrategy();
+    return new AsyncLobTextExtractionProcessor(context, tableId, fs, dbVersion, extractor);
   }
 
   @Override
   public ItemWriter<RowLobTextUpdate> createWriter(JobContext context) {
-    return new SolrLobTextItemWriter(solrManager, context);
+    return new AsyncSolrLobTextItemWriter(solrManager, context, taskExecutor);
   }
 
   @Override

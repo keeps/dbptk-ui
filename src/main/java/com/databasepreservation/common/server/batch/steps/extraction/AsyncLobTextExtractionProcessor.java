@@ -20,34 +20,31 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.batch.context.JobContext;
+import com.databasepreservation.common.server.batch.exceptions.DataTransformationException;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class LobTextExtractionProcessor implements ItemProcessor<ViewerRow, RowLobTextUpdate> {
+public class AsyncLobTextExtractionProcessor implements ItemProcessor<ViewerRow, RowLobTextUpdate> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(LobTextExtractionProcessor.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AsyncLobTextExtractionProcessor.class);
 
-  private final String tableId;
   private final TableStatus tableStatus;
   private final JobContext jobContext;
-
   private final List<ColumnStatus> columnsToExtract;
   private final List<ColumnStatus> columnsToCleanup;
-
   private final FileSystem siardZipFs;
   private final String dbVersion;
+  private final LobTextExtractor extractorStrategy;
 
-  private final String externalIdPattern;
-
-  public LobTextExtractionProcessor(JobContext context, String tableId, FileSystem siardZipFs, String dbVersion) {
-    this.tableId = tableId;
+  public AsyncLobTextExtractionProcessor(JobContext context, String tableId, FileSystem siardZipFs, String dbVersion,
+    LobTextExtractor extractorStrategy) {
     this.siardZipFs = siardZipFs;
     this.dbVersion = dbVersion;
     this.jobContext = context;
+    this.extractorStrategy = extractorStrategy;
 
     this.tableStatus = context.getCollectionStatus().getTables().stream().filter(t -> t.getId().equals(tableId))
       .findFirst().orElseThrow(() -> new IllegalStateException("Table not found in collection status: " + tableId));
@@ -58,11 +55,6 @@ public class LobTextExtractionProcessor implements ItemProcessor<ViewerRow, RowL
 
     this.columnsToCleanup = tableStatus.getColumns().stream().filter(LobTextExtractionStepUtils::isMarkedForCleanup)
       .collect(Collectors.toList());
-
-    // Read the template pattern from configuration (e.g.,
-    // "{db}:{collection}:{schema}:{table}:{row}:{col}{ext}")
-    this.externalIdPattern = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
-      "ocr.external.service.id.pattern");
   }
 
   @Override
@@ -76,6 +68,10 @@ public class LobTextExtractionProcessor implements ItemProcessor<ViewerRow, RowL
     String tableName = (viewerTable != null) ? viewerTable.getName() : tableStatus.getName();
     String databaseUUID = jobContext.getDatabaseUUID();
 
+    for (ColumnStatus lobColumn : columnsToCleanup) {
+      updateItem.markForClear(lobColumn.getId());
+    }
+
     for (ColumnStatus lobColumn : columnsToExtract) {
       ViewerCell lobCell = row.getCells().get(lobColumn.getId());
 
@@ -84,38 +80,32 @@ public class LobTextExtractionProcessor implements ItemProcessor<ViewerRow, RowL
 
         Path completeLobPath = resolveLobPath(lobColumn, lobCell);
 
-        String fileName = completeLobPath.getFileName().toString();
-        String extension = "";
-        int dotIndex = fileName.lastIndexOf('.');
-        if (dotIndex > 0) {
-          extension = fileName.substring(dotIndex).toLowerCase();
-        }
+        LobTextExtractor.ExtractionContext ctx = new LobTextExtractor.ExtractionContext(databaseUUID, schemaName,
+          tableName, row.getUuid(), lobColumn.getColumnIndex());
 
-        if (extension.equals(".tif")) {
-          extension = ".tiff";
-        }
+        StringBuilder extractedTextAggregator = new StringBuilder();
 
-        String extractionId = null;
-        if (externalIdPattern != null && !externalIdPattern.isBlank()) {
-          extractionId = externalIdPattern.replace("{db}", databaseUUID).replace("{collection}", databaseUUID)
-            .replace("{schema}", schemaName).replace("{table}", tableName).replace("{row}", row.getUuid())
-            .replace("{col}", String.valueOf(lobColumn.getColumnIndex())).replace("{ext}", extension);
-        }
-
-        Set<Path> allLobFilePaths;
         try (Stream<Path> walkStream = Files.walk(completeLobPath, FileVisitOption.FOLLOW_LINKS)) {
-          allLobFilePaths = walkStream.filter(file -> !Files.isDirectory(file)).collect(Collectors.toSet());
+          Set<Path> allLobFilePaths = walkStream.filter(file -> !Files.isDirectory(file)).collect(Collectors.toSet());
+
+          for (Path lobFilePath : allLobFilePaths) {
+            try {
+              String text = extractorStrategy.extractText(lobFilePath, ctx);
+              if (text != null && !text.isBlank()) {
+                extractedTextAggregator.append(text).append("\n");
+              }
+            } catch (Exception e) {
+              LOGGER.error("Failed to extract text from LOB {} on row {}", lobFilePath, updateItem.getUuid(), e);
+              throw new DataTransformationException("Text extraction failed for LOB: " + lobFilePath, e);
+            }
+          }
         }
 
-        for (Path lobFilePath : allLobFilePaths) {
-          updateItem.addTarget(lobColumn.getId(),
-            new RowLobTextUpdate.LobExtractionTarget(lobFilePath.toString(), extractionId));
+        String finalExtractedText = extractedTextAggregator.toString().trim();
+        if (!finalExtractedText.isEmpty()) {
+          updateItem.addText(lobColumn.getId(), finalExtractedText);
         }
       }
-    }
-
-    for (ColumnStatus lobColumn : columnsToCleanup) {
-      updateItem.markForClear(lobColumn.getId());
     }
 
     return updateItem.hasUpdates() ? updateItem : null;
