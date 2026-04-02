@@ -1,5 +1,7 @@
 package com.databasepreservation.common.server.batch.core;
 
+import java.util.concurrent.Future;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ChunkListener;
@@ -16,6 +18,8 @@ import org.springframework.batch.core.step.builder.SimpleStepBuilder;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.builder.TaskletStepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.integration.async.AsyncItemProcessor;
+import org.springframework.batch.integration.async.AsyncItemWriter;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -89,7 +93,10 @@ public class StepFactory {
 
     // 2. Build the core worker step (What it does: Chunk or Tasklet)
     Step workerStep;
-    if (definition instanceof ChunkStepDefinition<?, ?> chunkDef) {
+    if (definition instanceof AsyncChunkStepDefinition<?, ?> asyncDef) {
+      LOGGER.info("Building Async Chunk-oriented step for: {}", workerName);
+      workerStep = buildAsyncChunkStep(asyncDef, workerName, context, executionPolicy, isPartitioned);
+    } else if (definition instanceof ChunkStepDefinition<?, ?> chunkDef) {
       LOGGER.info("Building Chunk-oriented step for: {}", workerName);
       workerStep = buildChunkStep(chunkDef, workerName, context, executionPolicy, isPartitioned);
     } else if (definition instanceof TaskletStepDefinition taskletDef) {
@@ -107,6 +114,40 @@ public class StepFactory {
 
     // Otherwise, return the simple step directly
     return workerStep;
+  }
+
+  /**
+   * Builds an Asynchronous Chunk-oriented step wrapping the StepScope proxies in
+   * AsyncItemProcessor and AsyncItemWriter.
+   */
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private Step buildAsyncChunkStep(AsyncChunkStepDefinition<?, ?> definition, String stepName, JobContext context,
+    ExecutionPolicy executionPolicy, boolean isPartitionedWorker) {
+
+    StepBuilder stepBuilder = new StepBuilder(stepName, jobRepository);
+    int chunkSize = executionPolicy.getChunkSize();
+
+    // Wrap the standard proxy processor
+    AsyncItemProcessor asyncProcessor = new AsyncItemProcessor();
+    asyncProcessor.setDelegate((ItemProcessor) proxyProcessor);
+    asyncProcessor.setTaskExecutor(taskExecutor);
+
+    // Wrap the standard proxy writer
+    AsyncItemWriter asyncWriter = new AsyncItemWriter();
+    asyncWriter.setDelegate((ItemWriter) proxyWriter);
+
+    // Build the chunk flow indicating that the output of the processor is a Future
+    SimpleStepBuilder<?, ?> simpleBuilder = stepBuilder.<Object, Future<Object>> chunk(chunkSize, transactionManager);
+
+    simpleBuilder.reader((ItemReader) proxyReader);
+    simpleBuilder.processor((ItemProcessor) asyncProcessor);
+    simpleBuilder.writer((ItemWriter) asyncWriter);
+
+    FaultTolerantStepBuilder<?, ?> faultTolerantBuilder = simpleBuilder.faultTolerant();
+    applyErrorPolicy(faultTolerantBuilder, definition.getErrorPolicy());
+    applyListeners(faultTolerantBuilder, definition, context, isPartitionedWorker);
+
+    return faultTolerantBuilder.build();
   }
 
   /**

@@ -9,6 +9,7 @@ import com.databasepreservation.common.server.batch.core.StepDefinition;
 import com.databasepreservation.common.server.batch.steps.denormalization.DenormalizationCleanupStep;
 import com.databasepreservation.common.server.batch.steps.denormalization.DenormalizationStep;
 import com.databasepreservation.common.server.batch.steps.extraction.LobTextExtractionStep;
+import com.databasepreservation.common.server.batch.steps.extraction.async.AsyncLobTextExtractionStep;
 import com.databasepreservation.common.server.batch.steps.metadata.FinalizeSchemaMetadataStep;
 import com.databasepreservation.common.server.batch.steps.virtual.column.VirtualColumnStep;
 import com.databasepreservation.common.server.batch.steps.virtual.reference.VirtualReferenceStep;
@@ -28,11 +29,13 @@ public class DataTransformationJob implements JobDefinition {
   private final DenormalizationStep denormalizationStep;
   private final DenormalizationCleanupStep denormalizationCleanupStep;
   private final FinalizeSchemaMetadataStep finalizeMetadataStep;
+  private final AsyncLobTextExtractionStep asyncLobTextExtractionStep;
 
   public DataTransformationJob(VirtualColumnStep virtualColumnStep, VirtualTableDeletionStep virtualTableDeletionStep,
     VirtualTableStep virtualTableStep, VirtualReferenceStep virtualReferenceStep,
     LobTextExtractionStep lobTextExtractionStep, DenormalizationStep denormalizationStep,
-    DenormalizationCleanupStep denormalizationCleanupStep, FinalizeSchemaMetadataStep finalizeMetadataStep) {
+    DenormalizationCleanupStep denormalizationCleanupStep, FinalizeSchemaMetadataStep finalizeMetadataStep,
+    AsyncLobTextExtractionStep asyncLobTextExtractionStep) {
     this.virtualColumnStep = virtualColumnStep;
     this.virtualTableDeletionStep = virtualTableDeletionStep;
     this.virtualTableStep = virtualTableStep;
@@ -41,6 +44,7 @@ public class DataTransformationJob implements JobDefinition {
     this.denormalizationStep = denormalizationStep;
     this.denormalizationCleanupStep = denormalizationCleanupStep;
     this.finalizeMetadataStep = finalizeMetadataStep;
+    this.asyncLobTextExtractionStep = asyncLobTextExtractionStep;
   }
 
   @Override
@@ -51,6 +55,6 @@ public class DataTransformationJob implements JobDefinition {
   @Override
   public List<StepDefinition> getSteps() {
     return List.of(virtualColumnStep, virtualTableDeletionStep, virtualTableStep, virtualReferenceStep,
-      lobTextExtractionStep, denormalizationStep, denormalizationCleanupStep, finalizeMetadataStep);
+      asyncLobTextExtractionStep, denormalizationStep, denormalizationCleanupStep, finalizeMetadataStep);
   }
 }
