@@ -533,6 +533,9 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           columnHighlightedNames
             .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_BOOLEAN, ViewerConstants.SOLR_DYN_STRING));
           break;
+        case NUMERIC_FLOATING_POINT:
+          columnHighlightedNames
+            .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_LONG, ViewerConstants.SOLR_DYN_STRING));
         default:
           columnHighlightedNames.add(configColumn.getId());
           break;
@@ -715,6 +718,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           fieldsToReturn.add(booleanStringId);
           queryFields.add(booleanStringId);
           highlightFields.add(booleanStringId);
+        } else if (column.getId().endsWith(ViewerConstants.SOLR_DYN_LONG)) {
+          String longStringId = column.getId().replace(ViewerConstants.SOLR_DYN_LONG, ViewerConstants.SOLR_DYN_STRING);
+          fieldsToReturn.add(column.getId());
+          fieldsToReturn.add(longStringId);
+          queryFields.add(longStringId);
+          highlightFields.add(longStringId);
         } else if (column.getId().matches("lob.+_s")
           // Return, query, and highlight both fields
           && column.getLobTextExtractionStatus().getExtractedAndIndexedText()) {
