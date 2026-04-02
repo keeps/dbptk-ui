@@ -635,7 +635,7 @@ public class CollectionResource implements CollectionService {
       final IndexResult<ViewerRow> viewerRowIndexResult = ViewerFactory.getSolrManager().findRows(databaseUUID, filter,
         findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn,
         findRequest.extraParameters, findRequest.defType, findRequest.filterQuery, findRequest.queryFields,
-        findRequest.highlighting, findRequest.highlightedFields);
+        findRequest.highlighting, findRequest.highlightedFields, findRequest.highlightQuery);
       count = viewerRowIndexResult.getTotalCount();
       return viewerRowIndexResult;
     } catch (GenericException | RequestNotValidException | AuthorizationException e) {

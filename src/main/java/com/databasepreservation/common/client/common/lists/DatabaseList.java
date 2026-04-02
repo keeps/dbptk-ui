@@ -286,7 +286,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets(),
       false, new ArrayList<>(), new HashMap<>(), ViewerConstants.SOLR_EDISMAX, new Filter(), queryFields, false,
-      List.of());
+      List.of(), null);
 
     DatabaseService.Util.call(callback).find(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
   }

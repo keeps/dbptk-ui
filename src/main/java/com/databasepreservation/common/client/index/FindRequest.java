@@ -49,6 +49,8 @@ public class FindRequest extends CountRequest {
   public boolean highlighting;
   /** highlighted fields */
   public List<String> highlightedFields;
+  /** highlight query */
+  public Filter highlightQuery;
 
   public Map<String, String> extraParameters;
 
@@ -162,13 +164,14 @@ public class FindRequest extends CountRequest {
   public FindRequest(final String classToReturn, final Filter filter, final Sorter sorter, final Sublist sublist,
     final Facets facets, final boolean exportFacets, final List<String> fieldsToReturn,
     final Map<String, String> extraParameters, String defType, Filter filterQuery, List<String> queryFields,
-    boolean highlighting, List<String> highlightedFields) {
+    boolean highlighting, List<String> highlightedFields, Filter highlightQuery) {
     this(classToReturn, filter, sorter, sublist, facets, exportFacets, fieldsToReturn, extraParameters);
     this.defType = defType;
     this.filterQuery = filterQuery;
     this.queryFields = queryFields;
     this.highlighting = highlighting;
     this.highlightedFields = highlightedFields;
+    this.highlightQuery = highlightQuery;
   }
 
 }

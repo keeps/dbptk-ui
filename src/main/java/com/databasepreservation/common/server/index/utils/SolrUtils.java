@@ -187,13 +187,13 @@ public class SolrUtils {
     Sorter sorter, Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters)
     throws GenericException, RequestNotValidException {
     return find(index, collection, filter, sorter, sublist, facets, fieldsToReturn, extraParameters, new ArrayList<>(),
-      "lucene", List.of(), false, List.of());
+      "lucene", List.of(), false, List.of(), null);
   }
 
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
     Sorter sorter, Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters,
     List<Filter> filterQueries, String defType, List<String> queryFields, boolean highlighting,
-    List<String> highlightedFields) throws GenericException, RequestNotValidException {
+    List<String> highlightedFields, Filter highlightQuery) throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
 
@@ -219,15 +219,21 @@ public class SolrUtils {
 
     query.setParam("defType", defType);
     query.setParam("qf", (queryFields != null) ? String.join(" ", queryFields) : "");
-    query.setParam("hl", highlighting);
-    query.setParam("hl.fl", (highlightedFields != null) ? String.join(" ", highlightedFields) : "");
-    query.setParam("hl.tag.pre", ViewerConfiguration.getInstance().getViewerConfigurationAsString("<b>",
-      ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_PRE));
-    query.setParam("hl.tag.post", ViewerConfiguration.getInstance().getViewerConfigurationAsString("</b>",
-      ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_POST));
-    query.setParam("hl.encoder", "html");
-    query.setParam("hl.fragsize", ViewerConfiguration.getInstance().getViewerConfigurationAsString("50",
-      ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_FRAGSIZE));
+
+    if (highlighting) {
+      query.setParam("hl", highlighting);
+      query.setParam("hl.fl", (highlightedFields != null) ? String.join(" ", highlightedFields) : "");
+      query.setParam("hl.tag.pre", ViewerConfiguration.getInstance().getViewerConfigurationAsString("<b>",
+        ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_PRE));
+      query.setParam("hl.tag.post", ViewerConfiguration.getInstance().getViewerConfigurationAsString("</b>",
+        ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_POST));
+      query.setParam("hl.encoder", "html");
+      query.setParam("hl.fragsize", ViewerConfiguration.getInstance().getViewerConfigurationAsString("50",
+        ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_FRAGSIZE));
+      if (highlightQuery != null) {
+        query.setParam("hl.q", parseFilter(highlightQuery));
+      }
+    }
 
     parseAndConfigureFacets(facets, query);
 
@@ -328,11 +334,12 @@ public class SolrUtils {
 
   public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters, String defType,
-    Filter filterQuery, List<String> queryFields, boolean highlighting, List<String> highlightedFields)
+    Filter filterQuery, List<String> queryFields, boolean highlighting, List<String> highlightedFields,
+    Filter highlightQuery)
     throws GenericException, RequestNotValidException {
     return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets, fieldsToReturn,
       extraParameters, (filterQuery != null) ? List.of(filterQuery) : Collections.emptyList(), defType, queryFields,
-      highlighting, highlightedFields);
+      highlighting, highlightedFields, highlightQuery);
   }
 
   public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, Filter filter,

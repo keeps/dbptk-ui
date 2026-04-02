@@ -201,14 +201,14 @@ public class DatabaseRowsSolrManager {
     Sublist sublist, Facets facets, List<String> fieldsToReturn, List<Filter> filterQueries)
     throws GenericException, RequestNotValidException {
     return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,
-      fieldsToReturn, new HashMap<>(), filterQueries, "lucene", List.of(), false, List.of());
+      fieldsToReturn, new HashMap<>(), filterQueries, "lucene", List.of(), false, List.of(), null);
   }
 
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets, List<String> fieldsToReturn, String defType, List<Filter> filterQueries,
     List<String> queryFields) throws GenericException, RequestNotValidException {
     return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,
-      fieldsToReturn, new HashMap<>(), filterQueries, defType, queryFields, false, List.of());
+      fieldsToReturn, new HashMap<>(), filterQueries, defType, queryFields, false, List.of(), null);
   }
 
   public <T extends IsIndexed> IndexResult<T> findHits(Class<T> classToReturn, String alias, Filter filter,
@@ -264,10 +264,10 @@ public class DatabaseRowsSolrManager {
 
   public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
     Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters, String defType, Filter filterQuery,
-    List<String> queryFields, boolean highlighing, List<String> highlightedFields)
+    List<String> queryFields, boolean highlighing, List<String> highlightedFields, Filter highlightQuery)
     throws GenericException, RequestNotValidException {
     return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets, fieldsToReturn, extraParameters,
-      defType, filterQuery, queryFields, highlighing, highlightedFields);
+      defType, filterQuery, queryFields, highlighing, highlightedFields, highlightQuery);
   }
 
   public IterableIndexResult findAllRows(String databaseUUID, final Filter filter, final Sorter sorter,

@@ -248,7 +248,8 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     List<String> queryFields = List.of(ViewerConstants.INDEX_SEARCH);
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets(),
-      false, List.of(), new HashMap<>(), ViewerConstants.SOLR_EDISMAX, new Filter(), queryFields, false, List.of());
+      false, List.of(), new HashMap<>(), ViewerConstants.SOLR_EDISMAX, new Filter(), queryFields, false, List.of(),
+      null);
 
     if (getDataTrigger) {
       DatabaseService.Util.call(callback).findAll(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());

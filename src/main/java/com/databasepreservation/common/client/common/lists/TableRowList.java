@@ -38,6 +38,7 @@ import com.databasepreservation.common.client.common.visualization.browse.config
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.EDismaxSimplerQueryFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.OneOfManyFilterParameter;
 import com.databasepreservation.common.client.index.select.SelectedItemsList;
@@ -682,9 +683,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       tableFilterQuery = new Filter();
     }
 
+    Filter highlightQuery = new Filter();
+    filter.getParameters().stream().filter(EDismaxSimplerQueryFilterParameter.class::isInstance)
+      .forEach(highlightQuery::add);
+
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
       getFacets(), false, fieldsToReturn, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery, queryFields,
-      true, highlightFields);
+      true, highlightFields, highlightQuery);
 
     CollectionService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(),
       table.getSchemaName(), table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
@@ -830,7 +835,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), rowsFilter, currentSorter, sublist,
       getFacets(), false, fieldsToReturn, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery,
-      fieldsToReturn, false, List.of());
+      fieldsToReturn, false, List.of(), null);
 
     CollectionService.Util.call(new MethodCallback<IndexResult<ViewerRow>>() {
       @Override
@@ -1032,7 +1037,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
       Facets.NONE, false, fieldsToSolr, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery, fieldsToSolr,
-      false, List.of());
+      false, List.of(), null);
 
     return RestUtils.createExportTableUri(database.getUuid(), table.getSchemaName(), table.getName(), findRequest,
       zipFilename, filename, description, exportLobs, fieldsToHeader);
