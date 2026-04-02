@@ -120,11 +120,20 @@ public class SolrLobTextItemWriter implements ItemWriter<RowLobTextUpdate> {
   }
 
   private String extractTextViaExternalService(String externalRecordId) throws Exception {
+    if (externalRecordId == null || externalRecordId.isBlank()) {
+      throw new DataTransformationException("External Record ID is missing but external OCR service is configured.");
+    }
+
     String encodedId = URLEncoder.encode(externalRecordId, StandardCharsets.UTF_8);
 
-    // Replace the {id} placeholder with the actual encoded ID
-    String requestUrl = externalOcrServiceUrl.contains("{id}") ? externalOcrServiceUrl.replace("{id}", encodedId)
-      : externalOcrServiceUrl + encodedId;
+    String requestUrl;
+    if (externalOcrServiceUrl.contains("{id}")) {
+      requestUrl = externalOcrServiceUrl.replace("{id}", encodedId);
+    } else {
+      requestUrl = externalOcrServiceUrl.endsWith("/") || externalOcrServiceUrl.endsWith("=")
+        ? externalOcrServiceUrl + encodedId
+        : externalOcrServiceUrl + "/" + encodedId;
+    }
 
     HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().uri(URI.create(requestUrl))
       .timeout(Duration.ofMinutes(10)).GET();

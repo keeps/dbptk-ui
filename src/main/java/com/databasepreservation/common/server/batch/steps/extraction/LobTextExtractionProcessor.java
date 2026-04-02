@@ -20,6 +20,7 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.batch.context.JobContext;
 
@@ -40,6 +41,8 @@ public class LobTextExtractionProcessor implements ItemProcessor<ViewerRow, RowL
   private final FileSystem siardZipFs;
   private final String dbVersion;
 
+  private final String externalIdPattern;
+
   public LobTextExtractionProcessor(JobContext context, String tableId, FileSystem siardZipFs, String dbVersion) {
     this.tableId = tableId;
     this.siardZipFs = siardZipFs;
@@ -55,6 +58,11 @@ public class LobTextExtractionProcessor implements ItemProcessor<ViewerRow, RowL
 
     this.columnsToCleanup = tableStatus.getColumns().stream().filter(LobTextExtractionStepUtils::isMarkedForCleanup)
       .collect(Collectors.toList());
+
+    // Read the template pattern from configuration (e.g.,
+    // "{db}:{collection}:{schema}:{table}:{row}:{col}{ext}")
+    this.externalIdPattern = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
+      "ocr.external.service.id.pattern");
   }
 
   @Override
@@ -87,9 +95,12 @@ public class LobTextExtractionProcessor implements ItemProcessor<ViewerRow, RowL
           extension = ".tiff";
         }
 
-        // Generate a unique identifier for potential external extraction services
-        String extractionId = String.format("%s:%s:%s:%s:%s:%d%s", databaseUUID, databaseUUID, schemaName, tableName,
-          row.getUuid(), lobColumn.getColumnIndex(), extension);
+        String extractionId = null;
+        if (externalIdPattern != null && !externalIdPattern.isBlank()) {
+          extractionId = externalIdPattern.replace("{db}", databaseUUID).replace("{collection}", databaseUUID)
+            .replace("{schema}", schemaName).replace("{table}", tableName).replace("{row}", row.getUuid())
+            .replace("{col}", String.valueOf(lobColumn.getColumnIndex())).replace("{ext}", extension);
+        }
 
         Set<Path> allLobFilePaths;
         try (Stream<Path> walkStream = Files.walk(completeLobPath, FileVisitOption.FOLLOW_LINKS)) {
