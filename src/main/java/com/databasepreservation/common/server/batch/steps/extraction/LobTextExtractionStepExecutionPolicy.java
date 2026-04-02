@@ -21,7 +21,7 @@ public class LobTextExtractionStepExecutionPolicy implements ExecutionPolicy {
 
   @Override
   public int getChunkSize() {
-    return 3;
+    return 10;
   }
 
   @Override
