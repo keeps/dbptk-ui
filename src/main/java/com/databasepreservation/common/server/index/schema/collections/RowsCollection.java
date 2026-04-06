@@ -106,7 +106,6 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   public SolrInputDocument toSolrDocument(ViewerRow row) throws ViewerException, RequestNotValidException,
     GenericException, NotFoundException, AuthorizationDeniedException {
 
-
     SolrInputDocument doc = super.toSolrDocument(row);
 
     doc.setField(ViewerConstants.SOLR_ROWS_DATABASE_UUID, row.getDatabaseUUID());
@@ -123,13 +122,14 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
       if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_DATE)) {
         doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_DATE, ViewerConstants.SOLR_DYN_TEXT_GENERAL),
           cellEntry.getValue().getValue());
-      }
-      else if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_BOOLEAN)) {
+      } else if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_BOOLEAN)) {
         doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_BOOLEAN, ViewerConstants.SOLR_DYN_STRING),
           SolrUtils.getSolrBooleanValue(cellEntry.getValue().getValue()).toString());
-      }
-      else if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_LONG)) {
+      } else if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_LONG)) {
         doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_LONG, ViewerConstants.SOLR_DYN_STRING),
+          cellEntry.getValue().getValue());
+      } else if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_INT)) {
+        doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_INT, ViewerConstants.SOLR_DYN_STRING),
           cellEntry.getValue().getValue());
       }
     }

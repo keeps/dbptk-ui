@@ -288,7 +288,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         return new HTML(SafeHtmlUtils.fromSafeConstant(snippet));
       }
     }
-    String snippetWithFullText = String.join("\n", snippets) + "\n\n" + "<em>" + cellValue + "</em>";
+    String snippetWithFullText = "<p>" + String.join("\n", snippets) + "</p><p><em>" + cellValue + "</em></p>";
     return new HTML(SafeHtmlUtils.fromSafeConstant(snippetWithFullText));
   }
 
@@ -534,8 +534,27 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
             .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_BOOLEAN, ViewerConstants.SOLR_DYN_STRING));
           break;
         case NUMERIC_FLOATING_POINT:
-          columnHighlightedNames
-            .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_LONG, ViewerConstants.SOLR_DYN_STRING));
+          if (configColumn.getId().endsWith(ViewerConstants.SOLR_DYN_FLOAT)) {
+            columnHighlightedNames
+              .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_FLOAT, ViewerConstants.SOLR_DYN_STRING));
+          } else if (configColumn.getId().endsWith(ViewerConstants.SOLR_DYN_DOUBLE)) {
+            columnHighlightedNames
+              .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_DOUBLE, ViewerConstants.SOLR_DYN_STRING));
+          } else {
+            columnHighlightedNames.add(configColumn.getId());
+          }
+          break;
+        case NUMERIC_INTEGER:
+          if (configColumn.getId().endsWith(ViewerConstants.SOLR_DYN_INT)) {
+            columnHighlightedNames
+              .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_INT, ViewerConstants.SOLR_DYN_STRING));
+          } else if (configColumn.getId().endsWith(ViewerConstants.SOLR_DYN_LONG)) {
+            columnHighlightedNames
+              .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_LONG, ViewerConstants.SOLR_DYN_STRING));
+          } else {
+            columnHighlightedNames.add(configColumn.getId());
+          }
+          break;
         default:
           columnHighlightedNames.add(configColumn.getId());
           break;
@@ -720,6 +739,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           highlightFields.add(booleanStringId);
         } else if (column.getId().endsWith(ViewerConstants.SOLR_DYN_LONG)) {
           String longStringId = column.getId().replace(ViewerConstants.SOLR_DYN_LONG, ViewerConstants.SOLR_DYN_STRING);
+          fieldsToReturn.add(column.getId());
+          fieldsToReturn.add(longStringId);
+          queryFields.add(longStringId);
+          highlightFields.add(longStringId);
+        } else if (column.getId().endsWith(ViewerConstants.SOLR_DYN_INT)) {
+          String longStringId = column.getId().replace(ViewerConstants.SOLR_DYN_INT, ViewerConstants.SOLR_DYN_STRING);
           fieldsToReturn.add(column.getId());
           fieldsToReturn.add(longStringId);
           queryFields.add(longStringId);
