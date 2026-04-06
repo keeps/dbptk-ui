@@ -50,6 +50,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -128,7 +129,22 @@ public class TextExtractionPanel extends ContentPanel {
 
     btnCancel.addClickHandler(event -> HistoryManager.gotoAdvancedConfiguration(database.getUuid()));
 
-    btnSave.addClickHandler(clickEvent -> saveTextExtractionChanges());
+    btnSave.addClickHandler(clickEvent -> {
+      Dialogs.showConfirmDialog(messages.textExtractionWarningTitle(), messages.textExtractionWarningMessage(),
+        messages.basicActionCancel(), messages.basicActionProceed(), new AsyncCallback<Boolean>() {
+          @Override
+          public void onSuccess(Boolean result) {
+            if (Boolean.TRUE.equals(result)) {
+              saveTextExtractionChanges();
+            }
+          }
+
+          @Override
+          public void onFailure(Throwable caught) {
+            // Optionally handle dialog failure (e.g., log or ignore)
+          }
+        });
+    });
 
     content.add(CommonClientUtils.wrapOnDiv("navigation-panel-buttons",
       CommonClientUtils.wrapOnDiv("btn-item", btnSave), CommonClientUtils.wrapOnDiv("btn-item", btnCancel)));
