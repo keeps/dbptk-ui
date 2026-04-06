@@ -7,150 +7,7 @@
  */
 package com.databasepreservation.common.server.index.schema.collections;
 
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_CONTENT_TYPE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_BROWSE_LOAD_DATE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PERMISSIONS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PERMISSIONS_EXPIRY;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PERMISSIONS_GROUP;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_PATH;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_SIZE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_VERSION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_STATUS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATED_AT;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATE_VERSION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATION_ERRORS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATION_FAILED;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATION_PASSED;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATION_SKIPPED;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATION_WARNINGS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATOR_REPORT_PATH;
-
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVER;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVER_CONTACT;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_DATA_OWNER;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_ORIGIN_TIMESPAN;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_LOB_FOLDER;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_PRODUCER_APPLICATION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVAL_DATE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_CLIENT_MACHINE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_DATABASE_PRODUCT;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA_DATABASE_USER;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_SCHEMAS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_SCHEMA;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SCHEMA_UUID;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SCHEMA_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SCHEMA_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SCHEMA_FOLDER;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_USERS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_USER;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_USER_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_USER_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_ROLES;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_ROLE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_ROLE_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_ROLE_ADMIN;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_ROLE_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PRIVILEGES;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PRIVILEGE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PRIVILEGE_TYPE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PRIVILEGE_GRANTOR;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PRIVILEGE_GRANTEE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PRIVILEGE_OBJECT;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PRIVILEGE_OPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PRIVILEGE_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TABLES;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TABLE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_UUID;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_SOURCE_TYPE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_ID;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_FOLDER;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_ROWS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_SCHEMA_UUID;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_SCHEMA_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_NAME_WITHOUT_PREFIX;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_CUSTOM_VIEW;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_MATERIALIZED_VIEW;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_VIEWS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_VIEW;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VIEW_UUID;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VIEW_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VIEW_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VIEW_QUERY;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VIEW_QUERY_ORIGINAL;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VIEW_SCHEMA_UUID;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VIEW_SCHEMA_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_COLUMNS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_COLUMN;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_SOLR_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_SOURCE_TYPE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_TYPE_ORIGINAL;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_TYPE_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_TYPE_DB;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_DEFAULT_VALUE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_NILLABLE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_AUTO_INCREMENT;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_INDEX;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PRIMARY_KEYS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PRIMARY_KEY;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PK_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PK_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PK_COLUMN_INDEXES;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEYS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEY;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_SOURCE_TYPE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_REFERENCED_TABLE_UUID;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_REFERENCED_TABLE_ID;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_MATCH_TYPE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_DELETE_ACTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_UPDATE_ACTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_REFERENCE_SOURCE_IDX;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_REFERENCE_REF_IDX;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_CANDIDATE_KEYS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_CANDIDATE_KEY;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CK_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CK_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CK_COLUMN_INDEXES;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_CHECK_CONSTRAINTS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_CHECK_CONSTRAINT;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CHECK_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CHECK_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CHECK_CONDITION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TRIGGERS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TRIGGER;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TRIGGER_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TRIGGER_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TRIGGER_ACTION_TIME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TRIGGER_EVENT;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TRIGGER_ALIAS_LIST;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TRIGGER_ACTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_ROUTINES;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_ROUTINE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_ROUTINE_UUID;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_ROUTINE_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_ROUTINE_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_ROUTINE_SOURCE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_ROUTINE_BODY;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_ROUTINE_CHARACTERISTIC;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_ROUTINE_RETURN_TYPE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PARAMETERS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_PARAMETER;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PARAMETER_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PARAMETER_MODE;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PARAMETER_DESCRIPTION;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PARAMETER_TYPE_ORIGINAL;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PARAMETER_TYPE_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PARAMETER_TYPE_DB;
+import static com.databasepreservation.common.client.ViewerConstants.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -225,7 +82,8 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_DATA_OWNER, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_ORIGIN_TIMESPAN, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_LOB_FOLDER, Field.TYPE_TEXT_GEN_SORT));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_PRODUCER_APPLICATION, Field.TYPE_TEXT_GEN_SORT));
+    fields
+      .add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_PRODUCER_APPLICATION, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_ARCHIVAL_DATE, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_CLIENT_MACHINE, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_DATABASE_PRODUCT, Field.TYPE_TEXT_GEN_SORT));
@@ -452,7 +310,9 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
             for (ViewerTable table : schema.getTables()) {
               SolrInputDocument tableDoc = createChildDoc(SOLR_DATABASES_CONTENT_TYPE_TABLE);
               tableDoc.addField(SOLR_DATABASES_TABLE_UUID, table.getUuid());
-              tableDoc.addField(SOLR_DATABASES_TABLE_SOURCE_TYPE, table.getSourceType().toString());
+              if (table.getSourceType() != null) {
+                tableDoc.addField(SOLR_DATABASES_TABLE_SOURCE_TYPE, table.getSourceType().toString());
+              }
               tableDoc.addField(SOLR_DATABASES_TABLE_ID, table.getId());
               tableDoc.addField(SOLR_DATABASES_TABLE_NAME, table.getName());
               tableDoc.addField(SOLR_DATABASES_TABLE_DESCRIPTION, table.getDescription());
@@ -618,7 +478,9 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
   private static SolrInputDocument buildColumnDoc(ViewerColumn column) {
     SolrInputDocument doc = createChildDoc(SOLR_DATABASES_CONTENT_TYPE_COLUMN);
     doc.addField(SOLR_DATABASES_COLUMN_SOLR_NAME, column.getSolrName());
-    doc.addField(SOLR_DATABASES_COLUMN_SOURCE_TYPE, column.getSourceType().toString());
+    if (column.getSourceType() != null) {
+      doc.addField(SOLR_DATABASES_COLUMN_SOURCE_TYPE, column.getSourceType().toString());
+    }
     doc.addField(SOLR_DATABASES_COLUMN_NAME, column.getDisplayName());
     doc.addField(SOLR_DATABASES_COLUMN_DESCRIPTION, column.getDescription());
     doc.addField(SOLR_DATABASES_COLUMN_DEFAULT_VALUE, column.getDefaultValue());
@@ -648,7 +510,9 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
   private static SolrInputDocument buildForeignKeyDoc(ViewerForeignKey fk) {
     SolrInputDocument doc = createChildDoc(SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEY);
     doc.addField(SOLR_DATABASES_FK_NAME, fk.getName());
-    doc.addField(SOLR_DATABASES_FK_SOURCE_TYPE, fk.getSourceType().toString());
+    if (fk.getSourceType() != null) {
+      doc.addField(SOLR_DATABASES_FK_SOURCE_TYPE, fk.getSourceType().toString());
+    }
     doc.addField(SOLR_DATABASES_FK_DESCRIPTION, fk.getDescription());
     doc.addField(SOLR_DATABASES_FK_REFERENCED_TABLE_UUID, fk.getReferencedTableUUID());
     doc.addField(SOLR_DATABASES_FK_REFERENCED_TABLE_ID, fk.getReferencedTableId());

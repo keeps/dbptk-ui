@@ -166,8 +166,6 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
 
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);
 
-    GWT.log("Filter: " + filter);
-
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets());
     CollectionService.Util.call(callback).findSavedSearches(getDatabaseUUID(), getDatabaseUUID(), findRequest,
       LocaleInfo.getCurrentLocale().getLocaleName());

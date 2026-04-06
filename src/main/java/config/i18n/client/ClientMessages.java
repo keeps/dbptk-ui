@@ -1810,4 +1810,8 @@ public interface ClientMessages extends Messages {
    * Configuration Errors
    *******************************************/
   String configErrorTextForMissingProperty(String property);
+
+  String columnManagementTextSourceTypeInfo();
+
+  String columnManagementTextNoCompatibleColumns();
 }

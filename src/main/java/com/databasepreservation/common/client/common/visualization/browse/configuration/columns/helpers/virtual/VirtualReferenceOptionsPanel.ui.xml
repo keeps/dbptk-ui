@@ -25,6 +25,14 @@
                     <ui:text from='{messages.columnManagementLabelForRelationship}'/>
                 </g:Label>
 
+                <!-- Info alert for source column type and type restriction -->
+                <g:FlowPanel addStyleNames="alert alert-info margin-bottom-10">
+                    <g:Label ui:field="sourceColumnTypeLabel"/>
+                    <g:InlineLabel>
+                        <ui:text from='{messages.columnManagementTextSourceTypeInfo}'/>
+                    </g:InlineLabel>
+                </g:FlowPanel>
+
                 <g:FlowPanel>
                     <g:HTML addStyleNames="form-label">
                         <ui:text from='{messages.columnManagementLabelForReferencedTable}'/>
@@ -39,6 +47,10 @@
                     </g:HTML>
                     <g:ListBox ui:field="referencedColumnListBox" addStyleNames="form-control"/>
                     <g:Label ui:field="errorReferencedColumn" addStyleNames="dialog-input-error-text" visible="false"/>
+                    <!-- Warning for no compatible columns -->
+                    <g:Label ui:field="noCompatibleColumnsMessage" addStyleNames="alert alert-warning margin-top-5" visible="false">
+                        <ui:text from='{messages.columnManagementTextNoCompatibleColumns}'/>
+                    </g:Label>
                 </g:FlowPanel>
 
             </g:FlowPanel>
