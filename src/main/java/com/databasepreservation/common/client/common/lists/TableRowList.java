@@ -505,6 +505,9 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
    * @return This cell's highlighted snippets, or an empty list if none exist
    */
   private List<String> getCellHighlights(ViewerRow row, ColumnStatus configColumn) {
+    if (row == null) {
+      return new ArrayList<>();
+    }
     Map<String, List<String>> rowHighlights = getResult().getHighlightingInfo().get(row.getUuid());
     List<String> cellHighlights = new ArrayList<>();
     if (rowHighlights != null) {
