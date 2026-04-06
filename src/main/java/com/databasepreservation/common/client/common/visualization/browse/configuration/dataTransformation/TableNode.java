@@ -7,11 +7,14 @@
  */
 package com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.structure.ViewerCandidateKey;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
@@ -43,10 +46,6 @@ public class TableNode {
     this.collectionStatus = collectionStatus;
   }
 
-  /**
-   * Adds all tables referenced by foreign keys as children and also adds tables
-   * that have references to this
-   */
   public void setupChildren() {
     processDirectForeignKeys();
     processInverseForeignKeys();
@@ -63,10 +62,55 @@ public class TableNode {
   private void processDirectForeignKeyIfValid(ViewerForeignKey fk) {
     ViewerTable referencedTable = metadata.getTable(fk.getReferencedTableUUID());
 
-    // Process only if valid and not creating a loop
     if (referencedTable != null && this.searchTop(referencedTable) == null) {
-      addChildNode(fk, referencedTable, this.parentIsMultiValue(this));
+      boolean isMultiValue = this.parentIsMultiValue(this) || !isTargetUnique(fk, referencedTable);
+      addChildNode(fk, referencedTable, isMultiValue);
     }
+  }
+
+  /**
+   * Evaluates if the foreign key target guarantees uniqueness. Virtual keys must
+   * explicitly match the target's Primary or Candidate Keys.
+   */
+  private boolean isTargetUnique(ViewerForeignKey fk, ViewerTable referencedTable) {
+    if (!ViewerSourceType.VIRTUAL.equals(fk.getSourceType())) {
+      return true;
+    }
+
+    if (fk.getReferences() == null || fk.getReferences().isEmpty()) {
+      return false;
+    }
+
+    List<Integer> referencedIndexes = new ArrayList<>();
+    for (ViewerReference ref : fk.getReferences()) {
+      referencedIndexes.add(ref.getReferencedColumnIndex());
+    }
+
+    if (referencedTable.getPrimaryKey() != null) {
+      List<Integer> pkIndexes = referencedTable.getPrimaryKey().getColumnIndexesInViewerTable();
+      if (matchesKey(referencedIndexes, pkIndexes)) {
+        return true;
+      }
+    }
+
+    if (referencedTable.getCandidateKeys() != null) {
+      for (ViewerCandidateKey candidateKey : referencedTable.getCandidateKeys()) {
+        List<Integer> ckIndexes = candidateKey.getColumnIndexesInViewerTable();
+        if (matchesKey(referencedIndexes, ckIndexes)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  private boolean matchesKey(List<Integer> referencedIndexes, List<Integer> keyIndexes) {
+    if (keyIndexes == null || keyIndexes.isEmpty()) {
+      return false;
+    }
+
+    return keyIndexes.size() == referencedIndexes.size() && keyIndexes.containsAll(referencedIndexes);
   }
 
   private void processInverseForeignKeys() {
