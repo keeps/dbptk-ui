@@ -1799,6 +1799,12 @@ public interface ClientMessages extends Messages {
 
   String textExtractionPageToastDescription();
 
+  String textExtractionWarningTitle();
+
+  String textExtractionWarningMessage();
+
+  String basicActionProceed();
+
   /********************************************
    * Resources
    *******************************************/
