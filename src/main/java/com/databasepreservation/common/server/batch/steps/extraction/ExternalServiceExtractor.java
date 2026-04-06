@@ -54,7 +54,8 @@ public class ExternalServiceExtractor implements LobTextExtractor {
       requestBuilder.header("Authorization", authHeader);
     }
 
-    HttpResponse<String> response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+    HttpResponse<String> response = httpClient.send(requestBuilder.build(),
+      HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
     if (response.statusCode() >= 200 && response.statusCode() < 300) {
       return response.body();
     }

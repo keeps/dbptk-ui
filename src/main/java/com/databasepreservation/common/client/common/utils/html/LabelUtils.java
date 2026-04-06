@@ -8,6 +8,8 @@
 package com.databasepreservation.common.client.common.utils.html;
 
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
+import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
@@ -128,5 +130,33 @@ public class LabelUtils {
         .fromSafeConstant("<span class='label-default btn-margin-right'>" + permission + " " + FontAwesomeIconManager
           .getTag("fas fa-exclamation-circle", messages.SIARDHomePageDialogDetailsForUnknownPermission()) + CLOSE_SPAN);
     }
+  }
+
+  /**
+   * Generates a badge label for LOB text extraction status. Logic differentiates
+   * between successful extraction, processing states, empty results (No Text
+   * Found), and technical failures.
+   */
+  public static SafeHtml getLobExtractionStatusLabel(LobTextExtractionStatus status) {
+    String style = "label-default";
+    String labelText = "Not Indexed";
+    ProcessingState state = status.getProcessingState();
+
+    if (status.getExtractedAndIndexedText()) {
+      style = "label-success";
+      labelText = "Indexed";
+    } else if (ProcessingState.PROCESSED.equals(state) && !status.getExtractedAndIndexedText()) {
+      // Successfully processed but resulted in empty text (e.g., images)
+      style = "label-info";
+      labelText = "No Text Found";
+    } else if (ProcessingState.PROCESSING.equals(state) || ProcessingState.PENDING_METADATA.equals(state)) {
+      style = "label-warning";
+      labelText = "Processing...";
+    } else if (ProcessingState.FAILED.equals(state)) {
+      style = "label-danger";
+      labelText = "Failed";
+    }
+
+    return SafeHtmlUtils.fromSafeConstant("<span class='" + style + "'>" + labelText + "</span>");
   }
 }

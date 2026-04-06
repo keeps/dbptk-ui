@@ -6,14 +6,20 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.job.builder.SimpleJobBuilder;
+import org.springframework.batch.core.job.flow.Flow;
+import org.springframework.batch.core.job.flow.FlowExecutionStatus;
+import org.springframework.batch.core.job.flow.JobExecutionDecider;
+import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -115,7 +121,8 @@ public class JobOrchestrator {
     contextRegistry.register(databaseUUID, context);
 
     // Calculate the Total Workload for progress tracking
-    long totalWorkload = calculateTotalWorkload(jobDefinition.getSteps(), context);
+    long totalWorkload = calculateTotalWorkload(jobDefinition.getSteps(), context)
+      + calculateTotalWorkload(jobDefinition.getPostProcessingSteps(), context);
     context.getJobProgressAggregator().setTotalItems(totalWorkload);
 
     LOGGER.info("[ORCHESTRATOR] Building Job '{}' for database {}. Total Workload estimated: {}",
@@ -125,22 +132,61 @@ public class JobOrchestrator {
     JobBuilder jobBuilder = new JobBuilder(jobDefinition.getName() + "-" + databaseUUID, jobRepository);
     jobBuilder.listener(new JobStatusListener(context, contextRegistry, jobRepository));
 
-    SimpleJobBuilder flowBuilder = null;
     List<String> includedStepNames = new ArrayList<>();
-    int executableStepsCount = 0;
 
-    // Add Steps that should be executed according to their policy
-    for (StepDefinition definition : jobDefinition.getSteps()) {
+    // Isolate logic in independent flows
+    Flow mainFlow = buildFlow(jobDefinition.getSteps(), context, "mainFlow", includedStepNames);
+    Flow postProcessingFlow = buildFlow(jobDefinition.getPostProcessingSteps(), context, "postProcessingFlow",
+      includedStepNames);
+
+    context.setTotalSteps(includedStepNames.isEmpty() ? 1 : includedStepNames.size());
+    context.setStepNames(includedStepNames);
+
+    LOGGER.info("[ORCHESTRATOR] Job flow built with {} executable steps.", includedStepNames.size());
+
+    // Evaluate structural boundary conditions
+    if (mainFlow == null && postProcessingFlow == null)
+      return jobBuilder.start(createNoOpStep()).build();
+    if (mainFlow == null)
+      return jobBuilder.start(postProcessingFlow).end().build();
+    if (postProcessingFlow == null)
+      return jobBuilder.start(mainFlow).end().build();
+
+    JobExecutionDecider failureDecider = (jobExecution, stepExecution) -> {
+      boolean hasFailure = jobExecution.getStepExecutions().stream()
+        .anyMatch(se -> se.getStatus() == BatchStatus.FAILED);
+      return new FlowExecutionStatus(hasFailure ? "FAILED" : "COMPLETED");
+    };
+
+    // Ensures postProcessingFlow runs unconditionally.
+    // If mainFlow fails, it runs postProcessingFlow and then forces the Job to
+    // fail.
+    Flow executionFlow = new FlowBuilder<SimpleFlow>("executionFlow").start(mainFlow).on("FAILED")
+      .to(postProcessingFlow).from(mainFlow).on("*").to(postProcessingFlow).from(postProcessingFlow).on("*")
+      .to(failureDecider).from(failureDecider).on("FAILED").to(createFailStep()).from(failureDecider).on("*").end()
+      .build();
+
+    return jobBuilder.start(executionFlow).end().build();
+  }
+
+  // Helper method to dynamically construct sequential Flows
+  private Flow buildFlow(List<StepDefinition> definitions, JobContext context, String flowName,
+    List<String> includedStepNames) {
+    if (definitions == null || definitions.isEmpty())
+      return null;
+
+    FlowBuilder<SimpleFlow> flowBuilder = new FlowBuilder<>(flowName);
+    boolean hasExecutableSteps = false;
+
+    for (StepDefinition definition : definitions) {
       if (definition.getExecutionPolicy().shouldExecute(context)) {
-
         LOGGER.info("[ORCHESTRATOR] [+] INCLUDED step: {}", definition.getDisplayName());
         includedStepNames.add(definition.getDisplayName());
 
         Step step = stepFactory.build(definition, context);
-        executableStepsCount++;
-
-        if (flowBuilder == null) {
-          flowBuilder = jobBuilder.start(step);
+        if (!hasExecutableSteps) {
+          flowBuilder.start(step);
+          hasExecutableSteps = true;
         } else {
           flowBuilder.next(step);
         }
@@ -149,15 +195,16 @@ public class JobOrchestrator {
           definition.getDisplayName());
       }
     }
+    return hasExecutableSteps ? flowBuilder.build() : null;
+  }
 
-    // Set the dynamically calculated values back into the context
-    context.setTotalSteps(executableStepsCount == 0 ? 1 : executableStepsCount);
-    context.setStepNames(includedStepNames);
-    context.getJobProgressAggregator().setTotalItems(totalWorkload);
-
-    LOGGER.info("[ORCHESTRATOR] Job flow built with {} executable steps.", executableStepsCount);
-
-    return (flowBuilder != null) ? flowBuilder.build() : jobBuilder.start(createNoOpStep()).build();
+  // Creates a Step that forces the Job to fail after post-processing if the main
+  // flow failed.
+  private Step createFailStep() {
+    return new StepBuilder("failStep", jobRepository).tasklet((contribution, chunkContext) -> {
+      contribution.setExitStatus(ExitStatus.FAILED);
+      throw new BatchJobException("Main flow failed. Post-processing executed successfully.");
+    }, new ResourcelessTransactionManager()).build();
   }
 
   /**
@@ -188,7 +235,12 @@ public class JobOrchestrator {
 
       List<String> plannedSteps = new ArrayList<>();
 
-      for (StepDefinition definition : jobDefinition.getSteps()) {
+      List<StepDefinition> allSteps = new ArrayList<>(jobDefinition.getSteps());
+      if (jobDefinition.getPostProcessingSteps() != null) {
+        allSteps.addAll(jobDefinition.getPostProcessingSteps());
+      }
+
+      for (StepDefinition definition : allSteps) {
         if (definition.getExecutionPolicy().shouldExecute(context)) {
           plannedSteps.add(definition.getDisplayName());
         }

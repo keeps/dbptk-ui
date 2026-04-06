@@ -121,6 +121,17 @@ public class AsyncLobTextExtractionProcessor implements ItemProcessor<ViewerRow,
       } else {
         String siardSchemaFolder = tableStatus.getSchemaFolder();
         String siardTableFolder = tableStatus.getTableFolder();
+
+        if (tableStatus.getVirtualTableStatus() != null
+          && tableStatus.getVirtualTableStatus().getSourceTableUUID() != null) {
+          String sourceTableUUID = tableStatus.getVirtualTableStatus().getSourceTableUUID();
+          TableStatus sourceTable = jobContext.getCollectionStatus().getTableStatus(sourceTableUUID);
+          if (sourceTable != null) {
+            siardSchemaFolder = sourceTable.getSchemaFolder();
+            siardTableFolder = sourceTable.getTableFolder();
+          }
+        }
+
         String siardLobFolder = ViewerConstants.SIARD_LOB_FOLDER_PREFIX + (lobColumn.getColumnIndex() + 1);
         String zipFileEntry = "/content/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/"
           + lobCell.getValue();

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
+import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.VirtualForeignKeysStatus;
@@ -67,6 +68,8 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
   public ExecutionPolicy getExecutionPolicy() {
     return context -> {
       boolean hasVirtuals = false;
+      boolean hasLobs = false;
+
       if (context.getCollectionStatus().getTables() != null) {
         hasVirtuals = context.getCollectionStatus().getTables().stream()
           .anyMatch(table -> (table.getVirtualTableStatus() != null
@@ -78,6 +81,10 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
               .anyMatch(fk -> fk.isVirtual() && fk.getVirtualForeignKeysStatus() != null
                 && (fk.getVirtualForeignKeysStatus().isPendingMetadata()
                   || fk.getVirtualForeignKeysStatus().shouldProcess()))));
+
+        hasLobs = context.getCollectionStatus().getTables().stream().filter(t -> t.getColumns() != null)
+          .flatMap(t -> t.getColumns().stream()).map(ColumnStatus::getLobTextExtractionStatus)
+          .anyMatch(status -> status != null && (status.isPendingMetadata() || status.shouldProcess()));
       }
 
       boolean hasDenormalizations = false;
@@ -88,7 +95,7 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
             && (config.getState() == ViewerJobStatus.PENDING_METADATA || config.shouldProcess()));
       }
 
-      return hasVirtuals || hasDenormalizations;
+      return hasVirtuals || hasDenormalizations || hasLobs;
     };
   }
 
@@ -109,7 +116,10 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
       // 2. Process Completed Denormalizations Metadata
       processDenormalization(context);
 
-      // 3. Mark the overall collection status as fully processed
+      // 3. Process Completed Lob Text Extractions Metadata
+      processLobTextExtractions(context);
+
+      // 4. Mark the overall collection status as fully processed
       context.getCollectionStatus().setNeedsToBeProcessed(false);
 
       metadataService.updateAndPersistMetadata(context);
@@ -269,6 +279,36 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
             virtualTableStatus.getId());
         }
       }
+    }
+  }
+
+  /**
+   * Finalizes the state of LOB text extraction metadata. Successfully processed
+   * columns are marked as PROCESSED regardless of whether text was found.
+   */
+  private void processLobTextExtractions(JobContext context) {
+    if (context.getCollectionStatus().getTables() != null) {
+      context.getCollectionStatus().getTables().forEach(table -> {
+        if (table.getColumns() != null) {
+          table.getColumns().forEach(column -> {
+            LobTextExtractionStatus status = column.getLobTextExtractionStatus();
+
+            if (status != null
+              && (status.isPendingMetadata() || status.getProcessingState() == ProcessingState.TO_PROCESS
+                || status.getProcessingState() == ProcessingState.TO_REMOVE)) {
+
+              if (status.getProcessingState() == ProcessingState.TO_REMOVE) {
+                // Clear state if the user explicitly requested removal
+                status.setProcessingState(null);
+                status.setExtractedAndIndexedText(false);
+              } else {
+                // Mark as processed to move out of PENDING/TO_PROCESS states
+                status.markAsProcessed();
+              }
+            }
+          });
+        }
+      });
     }
   }
 }

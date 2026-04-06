@@ -58,6 +58,13 @@ public interface StepDefinition {
     return 1L;
   }
 
+  /**
+   * Lifecycle hook executed before the step starts. Can be used for setup or
+   * validation.
+   *
+   * @param context
+   * @throws BatchJobException
+   */
   default void onStepStarted(JobContext context) throws BatchJobException {
   }
 

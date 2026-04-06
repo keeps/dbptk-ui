@@ -1,5 +1,6 @@
 package com.databasepreservation.common.server.batch.core;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.util.ClassUtils;
@@ -43,5 +44,17 @@ public interface JobDefinition {
    * @return An ordered list of {@link StepDefinition}s.
    */
   List<StepDefinition> getSteps();
+
+  /**
+   * Optionally defines a set of post-processing steps that should be executed
+   * after the main steps have completed, regardless of their success or failure.
+   * These steps can be used for cleanup, notifications, or any finalization tasks
+   * that must run even if the main job encounters errors.
+   *
+   * @return A list of post-processing {@link StepDefinition}s (default is empty).
+   */
+  default List<StepDefinition> getPostProcessingSteps() {
+    return Collections.emptyList();
+  }
 
 }
