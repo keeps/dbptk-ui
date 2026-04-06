@@ -24,6 +24,7 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -41,7 +42,9 @@ import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -58,6 +61,10 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class TextExtractionPanel extends ContentPanel {
+
+  interface TableManagementPanelUiBinder extends UiBinder<Widget, TextExtractionPanel> {
+  }
+
   private static final TableManagementPanelUiBinder binder = GWT.create(TableManagementPanelUiBinder.class);
   private static final Map<String, TextExtractionPanel> instances = new HashMap<>();
   private final ClientMessages messages = GWT.create(ClientMessages.class);
@@ -164,15 +171,20 @@ public class TextExtractionPanel extends ContentPanel {
 
   // Checks current processing state
   private boolean isCurrentlyExtracting(LobTextExtractionStatus status) {
-    boolean isExtracting = false;
-    if (status != null && status.getProcessingState() != null) {
-      ProcessingState state = status.getProcessingState();
-      if (ProcessingState.PROCESSING.equals(state) || ProcessingState.PROCESSED.equals(state)
-        || ProcessingState.TO_PROCESS.equals(state)) {
-        isExtracting = true;
-      }
+    if (status == null || status.getProcessingState() == null) {
+      return false;
     }
-    return isExtracting;
+
+    ProcessingState state = status.getProcessingState();
+
+    if (ProcessingState.TO_REMOVE.equals(state)) {
+      return false;
+    }
+
+    // Must strictly match the visual representation logic (determineCheckboxState)
+    return status.getExtractedAndIndexedText() || ProcessingState.TO_PROCESS.equals(state)
+      || ProcessingState.PROCESSING.equals(state) || ProcessingState.PENDING_METADATA.equals(state)
+      || ProcessingState.FAILED.equals(state);
   }
 
   // Updates the column status state
@@ -221,8 +233,14 @@ public class TextExtractionPanel extends ContentPanel {
     final ViewerTable viewerTable) {
 
     selectionTablePanel.createTable(new FlowPanel(), Arrays.asList(1, 2), viewerTable.getBinaryColumns().iterator(),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.textExtractionPageTableHeaderTextForExtractPolicy(), 4,
+      // Checkbox: Represents the user intention
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.textExtractionPageTableHeaderTextForExtractPolicy(), 10,
         getCheckboxColumn(selectionTablePanel, viewerTable.getUuid())),
+
+      // Status Column: Represents the physical result
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.batchJobsTextForStatus(), 10,
+        getStatusLabelColumn(viewerTable.getUuid())),
+
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 15,
         new TextColumn<ViewerColumn>() {
           @Override
@@ -230,7 +248,7 @@ public class TextExtractionPanel extends ContentPanel {
             return column.getDisplayName();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForDescription(), 15,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForDescription(), 0,
         new TextColumn<ViewerColumn>() {
           @Override
           public String getValue(ViewerColumn column) {
@@ -249,14 +267,7 @@ public class TextExtractionPanel extends ContentPanel {
 
           ColumnStatus colStatus = collectionStatus.getTableStatus(tableUUID).getColumnById(viewerColumn.getSolrName());
 
-          boolean isExtractEnabled = false;
-          if (colStatus != null && colStatus.getLobTextExtractionStatus() != null
-            && colStatus.getLobTextExtractionStatus().getProcessingState() != null) {
-            isExtractEnabled = colStatus.getLobTextExtractionStatus().getProcessingState()
-              .equals(ProcessingState.PROCESSING)
-              || colStatus.getLobTextExtractionStatus().getProcessingState().equals(ProcessingState.TO_PROCESS)
-              || colStatus.getLobTextExtractionStatus().getProcessingState().equals(ProcessingState.PROCESSED);
-          }
+          boolean isExtractEnabled = determineCheckboxState(colStatus);
 
           selectionTablePanel.getSelectionModel().setSelected(viewerColumn, isExtractEnabled);
         }
@@ -272,6 +283,20 @@ public class TextExtractionPanel extends ContentPanel {
     return column;
   }
 
+  private Column<ViewerColumn, SafeHtml> getStatusLabelColumn(String tableUUID) {
+    return new Column<ViewerColumn, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public SafeHtml getValue(ViewerColumn viewerColumn) {
+        ColumnStatus colStatus = collectionStatus.getTableStatus(tableUUID).getColumnById(viewerColumn.getSolrName());
+        if (colStatus == null || colStatus.getLobTextExtractionStatus() == null) {
+          return SafeHtmlUtils.fromSafeConstant("<span class='label-default'>Not Indexed</span>");
+        }
+
+        return LabelUtils.getLobExtractionStatusLabel(colStatus.getLobTextExtractionStatus());
+      }
+    };
+  }
+
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forTextExtraction(database.getUuid(),
@@ -279,6 +304,16 @@ public class TextExtractionPanel extends ContentPanel {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  interface TableManagementPanelUiBinder extends UiBinder<Widget, TextExtractionPanel> {
+  /**
+   * The checkbox remains selected if the column has a state and is not marked for
+   * removal. This preserves intention even if the job results in "No Text Found".
+   */
+  private boolean determineCheckboxState(ColumnStatus colStatus) {
+    if (colStatus == null || colStatus.getLobTextExtractionStatus() == null) {
+      return false;
+    }
+
+    ProcessingState state = colStatus.getLobTextExtractionStatus().getProcessingState();
+    return state != null && !ProcessingState.TO_REMOVE.equals(state);
   }
 }

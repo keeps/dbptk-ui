@@ -41,36 +41,38 @@ public class AsyncSolrLobTextItemWriter implements ItemWriter<RowLobTextUpdate> 
     String databaseUUID = jobContext.getDatabaseUUID();
     List<CompletableFuture<Void>> solrFutures = new ArrayList<>();
 
-    for (RowLobTextUpdate update : chunk.getItems()) {
+    for (RowLobTextUpdate rowLobTextUpdate : chunk.getItems()) {
 
       // Parallelize Solr cleanup fields
-      for (String columnId : update.getColumnsToClear()) {
+      for (String columnId : rowLobTextUpdate.getColumnsToClear()) {
         solrFutures.add(CompletableFuture.runAsync(() -> {
           try {
-            solrManager.clearExtractedLobTextField(databaseUUID, update.getUuid(), columnId);
-            updateColumnStatusState(update.getTableId(), columnId, false);
+            solrManager.clearExtractedLobTextField(databaseUUID, rowLobTextUpdate.getUuid(), columnId);
+            updateColumnStatusState(rowLobTextUpdate.getTableId(), columnId, false);
           } catch (Exception e) {
-            LOGGER.error("Failed to clear LOB field in Solr. Row: {}, Col: {}", update.getUuid(), columnId, e);
+            LOGGER.error("Failed to clear LOB field in Solr. Row: {}, Col: {}", rowLobTextUpdate.getUuid(), columnId,
+              e);
           }
         }, taskExecutor));
       }
 
       // Parallelize Solr text updates
-      for (Map.Entry<String, String> entry : update.getExtractedTexts().entrySet()) {
+      for (Map.Entry<String, String> entry : rowLobTextUpdate.getExtractedTexts().entrySet()) {
         String columnId = entry.getKey();
         String text = entry.getValue();
 
         solrFutures.add(CompletableFuture.runAsync(() -> {
           try {
-            solrManager.clearExtractedLobTextField(databaseUUID, update.getUuid(), columnId);
-            solrManager.addExtractedTextField(databaseUUID, update.getUuid(), columnId, text);
-            updateColumnStatusState(update.getTableId(), columnId, true);
+            solrManager.clearExtractedLobTextField(databaseUUID, rowLobTextUpdate.getUuid(), columnId);
+            solrManager.addExtractedTextField(databaseUUID, rowLobTextUpdate.getUuid(), columnId, text);
+            updateColumnStatusState(rowLobTextUpdate.getTableId(), columnId, true);
 
             int charCount = text != null ? text.length() : 0;
-            LOGGER.info("[AUDIT] Indexed text for Row: {} | Col: {} | Extracted Characters: {}", update.getUuid(),
-              columnId, charCount);
+            LOGGER.info("[AUDIT] Indexed text for Table: {} | Row: {} | Col: {} | Extracted Characters: {}",
+              rowLobTextUpdate.getTableId(), rowLobTextUpdate.getUuid(), columnId, charCount);
           } catch (Exception e) {
-            LOGGER.error("Failed to persist extracted text in Solr. Row: {}, Col: {}", update.getUuid(), columnId, e);
+            LOGGER.error("Failed to persist extracted text in Solr. Row: {}, Col: {}", rowLobTextUpdate.getUuid(),
+              columnId, e);
           }
         }, taskExecutor));
       }

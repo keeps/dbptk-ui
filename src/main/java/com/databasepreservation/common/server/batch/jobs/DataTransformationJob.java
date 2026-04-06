@@ -51,6 +51,11 @@ public class DataTransformationJob implements JobDefinition {
   @Override
   public List<StepDefinition> getSteps() {
     return List.of(virtualColumnStep, virtualTableDeletionStep, virtualTableStep, virtualReferenceStep,
-      asyncLobTextExtractionStep, denormalizationStep, denormalizationCleanupStep, finalizeMetadataStep);
+      asyncLobTextExtractionStep, denormalizationStep, denormalizationCleanupStep);
+  }
+
+  @Override
+  public List<StepDefinition> getPostProcessingSteps() {
+    return List.of(finalizeMetadataStep);
   }
 }

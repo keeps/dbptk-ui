@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,7 +53,8 @@ public class LocalTikaExtractor implements LobTextExtractor {
       }));
     }
 
-    HttpResponse<String> response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+    HttpResponse<String> response = httpClient.send(requestBuilder.build(),
+      HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
     return response.body();
   }
 }

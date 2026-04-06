@@ -50,11 +50,10 @@ public class LobTextExtractionStepUtils {
       tableStatus.getColumns().stream().filter(c -> shouldProcess(c) || isMarkedForCleanup(c)).forEach(c -> {
         LobTextExtractionStatus status = c.getLobTextExtractionStatus();
 
-        if (isMarkedForCleanup(c)) {
-          status.setProcessingState(ProcessingState.TO_REMOVE);
-        } else {
+        if (!isMarkedForCleanup(c)) {
           status.markAsPendingMetadata();
         }
+
         status.setLastExecutionDate(now);
       });
     }
