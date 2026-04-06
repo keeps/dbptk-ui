@@ -66,6 +66,7 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABA
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TABLES;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_TABLE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_UUID;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_SOURCE_TYPE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_ID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_NAME;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TABLE_DESCRIPTION;
@@ -88,6 +89,7 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABA
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_COLUMNS;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_COLUMN;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_SOLR_NAME;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_SOURCE_TYPE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_NAME;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_DESCRIPTION;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_COLUMN_TYPE_ORIGINAL;
@@ -105,6 +107,7 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABA
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEYS;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEY;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_NAME;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_SOURCE_TYPE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_DESCRIPTION;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_REFERENCED_TABLE_UUID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_FK_REFERENCED_TABLE_ID;
@@ -249,6 +252,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_UUID, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_ID, Field.TYPE_STRING));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_SOURCE_TYPE, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_NAME, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_DESCRIPTION, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TABLE_FOLDER, Field.TYPE_STRING));
@@ -268,6 +272,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VIEW_SCHEMA_NAME, Field.TYPE_STRING));
 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_COLUMN_SOLR_NAME, Field.TYPE_STRING));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_COLUMN_SOURCE_TYPE, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_COLUMN_NAME, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_COLUMN_DESCRIPTION, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_COLUMN_TYPE_ORIGINAL, Field.TYPE_STRING));
@@ -284,6 +289,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
       .setRequired(false).setMultiValued(true));
 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_FK_NAME, Field.TYPE_STRING));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_FK_SOURCE_TYPE, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_FK_DESCRIPTION, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_FK_REFERENCED_TABLE_UUID, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_FK_REFERENCED_TABLE_ID, Field.TYPE_STRING));
@@ -446,6 +452,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
             for (ViewerTable table : schema.getTables()) {
               SolrInputDocument tableDoc = createChildDoc(SOLR_DATABASES_CONTENT_TYPE_TABLE);
               tableDoc.addField(SOLR_DATABASES_TABLE_UUID, table.getUuid());
+              tableDoc.addField(SOLR_DATABASES_TABLE_SOURCE_TYPE, table.getSourceType().toString());
               tableDoc.addField(SOLR_DATABASES_TABLE_ID, table.getId());
               tableDoc.addField(SOLR_DATABASES_TABLE_NAME, table.getName());
               tableDoc.addField(SOLR_DATABASES_TABLE_DESCRIPTION, table.getDescription());
@@ -611,6 +618,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
   private static SolrInputDocument buildColumnDoc(ViewerColumn column) {
     SolrInputDocument doc = createChildDoc(SOLR_DATABASES_CONTENT_TYPE_COLUMN);
     doc.addField(SOLR_DATABASES_COLUMN_SOLR_NAME, column.getSolrName());
+    doc.addField(SOLR_DATABASES_COLUMN_SOURCE_TYPE, column.getSourceType().toString());
     doc.addField(SOLR_DATABASES_COLUMN_NAME, column.getDisplayName());
     doc.addField(SOLR_DATABASES_COLUMN_DESCRIPTION, column.getDescription());
     doc.addField(SOLR_DATABASES_COLUMN_DEFAULT_VALUE, column.getDefaultValue());
@@ -640,6 +648,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
   private static SolrInputDocument buildForeignKeyDoc(ViewerForeignKey fk) {
     SolrInputDocument doc = createChildDoc(SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEY);
     doc.addField(SOLR_DATABASES_FK_NAME, fk.getName());
+    doc.addField(SOLR_DATABASES_FK_SOURCE_TYPE, fk.getSourceType().toString());
     doc.addField(SOLR_DATABASES_FK_DESCRIPTION, fk.getDescription());
     doc.addField(SOLR_DATABASES_FK_REFERENCED_TABLE_UUID, fk.getReferencedTableUUID());
     doc.addField(SOLR_DATABASES_FK_REFERENCED_TABLE_ID, fk.getReferencedTableId());

@@ -198,6 +198,7 @@ public class ViewerConstants {
   public static final String SOLR_DATABASES_CONTENT_TYPE_TABLES = "tables";
   public static final String SOLR_DATABASES_CONTENT_TYPE_TABLE = "table";
   public static final String SOLR_DATABASES_TABLE_UUID = "table_uuid";
+  public static final String SOLR_DATABASES_TABLE_SOURCE_TYPE = "table_source_type";
   public static final String SOLR_DATABASES_TABLE_ID = "table_id";
   public static final String SOLR_DATABASES_TABLE_NAME = "table_name";
   public static final String SOLR_DATABASES_TABLE_DESCRIPTION = "table_description";
@@ -222,6 +223,7 @@ public class ViewerConstants {
   public static final String SOLR_DATABASES_CONTENT_TYPE_COLUMNS = "columns";
   public static final String SOLR_DATABASES_CONTENT_TYPE_COLUMN = "column";
   public static final String SOLR_DATABASES_COLUMN_SOLR_NAME = "column_solr_name";
+  public static final String SOLR_DATABASES_COLUMN_SOURCE_TYPE = "column_source_type";
   public static final String SOLR_DATABASES_COLUMN_NAME = "column_name";
   public static final String SOLR_DATABASES_COLUMN_DESCRIPTION = "column_description";
   public static final String SOLR_DATABASES_COLUMN_TYPE_ORIGINAL = "column_type_original";
@@ -242,6 +244,7 @@ public class ViewerConstants {
   public static final String SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEYS = "foreign_keys";
   public static final String SOLR_DATABASES_CONTENT_TYPE_FOREIGN_KEY = "foreign_key";
   public static final String SOLR_DATABASES_FK_NAME = "fk_name";
+  public static final String SOLR_DATABASES_FK_SOURCE_TYPE = "fk_source_type";
   public static final String SOLR_DATABASES_FK_DESCRIPTION = "fk_description";
   public static final String SOLR_DATABASES_FK_REFERENCED_TABLE_UUID = "fk_referenced_table_uuid";
   public static final String SOLR_DATABASES_FK_REFERENCED_TABLE_ID = "fk_referenced_table_id";
