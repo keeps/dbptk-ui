@@ -50,6 +50,8 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
   Label fkTableLabel, fkColumnsLabel;
   @UiField
   Label errorReferencedTable, errorReferencedColumn;
+  @UiField
+  Label sourceColumnTypeLabel, noCompatibleColumnsMessage;
 
   public static VirtualReferenceOptionsPanel createInstance(ViewerDatabase database, CollectionStatus collectionStatus,
     TableStatus tableStatus, ColumnStatus columnStatus, ForeignKeysStatus foreignKeysStatus) {
@@ -64,6 +66,14 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
     this.collectionStatus = collectionStatus;
     this.currentTableStatus = tableStatus;
     this.currentColumnStatus = columnStatus;
+
+    // Set the source column type label
+    if (sourceColumnTypeLabel != null && currentColumnStatus != null && currentColumnStatus.getType() != null) {
+      sourceColumnTypeLabel.setText("Source Type: " + currentColumnStatus.getType());
+    }
+    if (noCompatibleColumnsMessage != null) {
+      noCompatibleColumnsMessage.setVisible(false);
+    }
 
     setupReferenceTableDropdown();
     bindEvents();
@@ -97,12 +107,36 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel implements 
     referencedColumnListBox.clear();
     referencedColumnListBox.addItem("", "");
 
+    if (noCompatibleColumnsMessage != null) {
+      noCompatibleColumnsMessage.setVisible(false);
+    }
+    referencedColumnListBox.setVisible(true);
+
     String selectedTableId = referencedTableListBox.getSelectedItemText();
+    int compatibleCount = 0;
     if (!selectedTableId.isEmpty()) {
       TableStatus targetTable = collectionStatus.getTableStatusByTableId(selectedTableId);
       if (targetTable != null) {
-        targetTable.getColumns().stream().filter(c -> VirtualOptionsPanelUtils.isSupportedColumnType(c, true))
-          .forEach(c -> referencedColumnListBox.addItem(c.getName(), c.getId()));
+        compatibleCount = (int) targetTable.getColumns().stream()
+          .filter(c -> VirtualOptionsPanelUtils.isSupportedColumnType(c, true))
+          .filter(c -> c.getType() != null && c.getType().equals(currentColumnStatus.getType()))
+          .peek(c -> referencedColumnListBox.addItem(c.getName(), c.getId())).count();
+      }
+      if (compatibleCount == 0) {
+        referencedColumnListBox.setVisible(false);
+        if (noCompatibleColumnsMessage != null) {
+          noCompatibleColumnsMessage.setVisible(true);
+        }
+      } else {
+        referencedColumnListBox.setVisible(true);
+        if (noCompatibleColumnsMessage != null) {
+          noCompatibleColumnsMessage.setVisible(false);
+        }
+      }
+    } else {
+      referencedColumnListBox.setVisible(true);
+      if (noCompatibleColumnsMessage != null) {
+        noCompatibleColumnsMessage.setVisible(false);
       }
     }
   }

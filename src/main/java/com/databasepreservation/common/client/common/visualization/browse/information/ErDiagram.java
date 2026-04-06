@@ -16,7 +16,6 @@ import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
@@ -727,7 +726,6 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     String applicationType, String path)
   /*-{
     (function erdiagramload(){
-        console.log("JSON das Edges:", edgesJson);
         // network container
         var container = $wnd.document.getElementById('erdiagram-' + schemaUUID);
         

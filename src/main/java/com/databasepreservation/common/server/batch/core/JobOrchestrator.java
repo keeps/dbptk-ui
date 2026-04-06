@@ -203,7 +203,7 @@ public class JobOrchestrator {
   private Step createFailStep() {
     return new StepBuilder("failStep", jobRepository).tasklet((contribution, chunkContext) -> {
       contribution.setExitStatus(ExitStatus.FAILED);
-      throw new BatchJobException("Main flow failed. Post-processing executed successfully.");
+      throw new BatchJobException("Main flow failed.");
     }, new ResourcelessTransactionManager()).build();
   }
 

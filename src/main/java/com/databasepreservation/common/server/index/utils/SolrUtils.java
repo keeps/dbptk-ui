@@ -97,6 +97,7 @@ import com.databasepreservation.common.client.models.structure.ViewerRoutine;
 import com.databasepreservation.common.client.models.structure.ViewerRoutineParameter;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerTrigger;
 import com.databasepreservation.common.client.models.structure.ViewerUserStructure;
@@ -1600,6 +1601,8 @@ public class SolrUtils {
     ViewerTable table = new ViewerTable();
     table.setUuid(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_UUID), null));
     table.setId(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_ID), null));
+    table.setSourceType(objectToEnum(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_SOURCE_TYPE), ViewerSourceType.class,
+      ViewerSourceType.NATIVE));
     table.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_NAME), null));
     table.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_DESCRIPTION), null));
     table.setFolder(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_TABLE_FOLDER), null));
@@ -1739,6 +1742,8 @@ public class SolrUtils {
     }
     ViewerColumn viewerColumn = new ViewerColumn();
     viewerColumn.setSolrName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_SOLR_NAME), null));
+    viewerColumn.setSourceType(objectToEnum(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_SOURCE_TYPE),
+      ViewerSourceType.class, ViewerSourceType.NATIVE));
     viewerColumn.setDisplayName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_NAME), null));
     viewerColumn.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_DESCRIPTION), null));
     viewerColumn.setDefaultValue(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_COLUMN_DEFAULT_VALUE), null));
@@ -1792,6 +1797,8 @@ public class SolrUtils {
     }
     ViewerForeignKey viewerForeignKey = new ViewerForeignKey();
     viewerForeignKey.setName(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_FK_NAME), null));
+    viewerForeignKey.setSourceType(objectToEnum(doc.get(ViewerConstants.SOLR_DATABASES_FK_SOURCE_TYPE),
+      ViewerSourceType.class, ViewerSourceType.NATIVE));
     viewerForeignKey.setDescription(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_FK_DESCRIPTION), null));
     viewerForeignKey
       .setReferencedTableUUID(objectToString(doc.get(ViewerConstants.SOLR_DATABASES_FK_REFERENCED_TABLE_UUID), null));

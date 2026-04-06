@@ -44,7 +44,6 @@ public class MetadataEditSidebar extends Composite {
   private static Map<String, MetadataEditSidebar> instances = new HashMap<>();
   private static Map<String, SidebarHyperlink> list = new HashMap<>();
 
-
   /**
    * Creates a new MetadataEditSidebar
    *
@@ -58,7 +57,8 @@ public class MetadataEditSidebar extends Composite {
     }
 
     MetadataEditSidebar instance = instances.get(databaseUUID);
-    if (instance == null || instance.database == null || !ViewerDatabaseStatus.AVAILABLE.equals(instance.database.getStatus())) {
+    if (instance == null || instance.database == null
+      || !ViewerDatabaseStatus.AVAILABLE.equals(instance.database.getStatus())) {
       instance = new MetadataEditSidebar(databaseUUID);
       instances.put(databaseUUID, instance);
     } else {
@@ -68,8 +68,8 @@ public class MetadataEditSidebar extends Composite {
   }
 
   /**
-   * Creates a new (dummy) MetadataEditSidebar that is not visible. This method exists
-   * so that pages can opt for not using a sidebar at all.
+   * Creates a new (dummy) MetadataEditSidebar that is not visible. This method
+   * exists so that pages can opt for not using a sidebar at all.
    *
    * @return a new invisible MetadataEditSidebar
    */
@@ -99,8 +99,8 @@ public class MetadataEditSidebar extends Composite {
   private boolean initialized = false;
 
   /**
-   * Clone constructor, because the same MetadataEditSidebar can not be child in more
-   * than one widget
+   * Clone constructor, because the same MetadataEditSidebar can not be child in
+   * more than one widget
    *
    * @param other
    *          the MetadataEditSidebar used in another widget
@@ -132,7 +132,6 @@ public class MetadataEditSidebar extends Composite {
     if (ViewerDatabaseStatus.AVAILABLE.equals(db.getStatus())
       || ViewerDatabaseStatus.METADATA_ONLY.equals(db.getStatus())) {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUuid()))) {
-        GWT.log("initialize");
         initialized = true;
         database = db;
         databaseUUID = db.getUuid();
@@ -153,7 +152,8 @@ public class MetadataEditSidebar extends Composite {
     SidebarHyperlink databaseLink = new SidebarHyperlink(messages.menusidebar_database(),
       HistoryManager.linkToDatabaseMetadata(database.getUuid()));
     databaseLink.setH5().setIndent0();
-    databaseLink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE, messages.menusidebar_database()));
+    databaseLink.setTextBySafeHTML(
+      FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE, messages.menusidebar_database()));
     list.put(database.getUuid(), databaseLink);
     sidebarGroup.add(databaseLink);
 
@@ -161,14 +161,17 @@ public class MetadataEditSidebar extends Composite {
     SidebarHyperlink usersLink = new SidebarHyperlink(messages.menusidebar_usersRoles(),
       HistoryManager.linkToDatabaseMetadataUsers(database.getUuid()));
     usersLink.setH5().setIndent0();
-    usersLink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE_USERS, messages.menusidebar_usersRoles()));
+    usersLink.setTextBySafeHTML(
+      FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE_USERS, messages.menusidebar_usersRoles()));
     list.put(HistoryManager.ROUTE_DATABASE_USERS, usersLink);
     sidebarGroup.add(usersLink);
 
     for (final ViewerSchema schema : metadata.getSchemas()) {
 
       /* Schemas */
-      sidebarGroup.add(new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA, schema.getName())).setH5().setIndent0());
+      sidebarGroup
+        .add(new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA, schema.getName()))
+          .setH5().setIndent0());
 
       /* Tables */
       SidebarItem tableHeader = createSidebarSubItemHeaderSafeHMTL(messages.sidebarMenuTextForTables(),
@@ -179,7 +182,8 @@ public class MetadataEditSidebar extends Composite {
         SidebarHyperlink tableLink = new SidebarHyperlink(table.getName(),
           HistoryManager.linkToDesktopMetadataTable(database.getUuid(), table.getUuid()));
         tableLink.setH6().setIndent2();
-        tableLink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName()));
+        tableLink
+          .setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName()));
         list.put(table.getUuid(), tableLink);
         sidebarGroup.add(tableLink);
         tableItems.add(tableLink);
@@ -196,7 +200,8 @@ public class MetadataEditSidebar extends Composite {
         SidebarHyperlink viewLink = new SidebarHyperlink(view.getName(),
           HistoryManager.linTokDesktopMetadataView(database.getUuid(), schema.getUuid(), view.getUuid()));
         viewLink.setH6().setIndent2();
-        viewLink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, view.getName()));
+        viewLink.setTextBySafeHTML(
+          FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, view.getName()));
         list.put(view.getUuid(), viewLink);
         sidebarGroup.add(viewLink);
         viewsItems.add(viewLink);
@@ -212,7 +217,8 @@ public class MetadataEditSidebar extends Composite {
         SidebarHyperlink routineLink = new SidebarHyperlink(routine.getName(),
           HistoryManager.linkToDesktopMetadataRoutine(database.getUuid(), schema.getUuid(), routine.getUuid()));
         routineLink.setH6().setIndent2();
-        routineLink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_ROUTINES, routine.getName()));
+        routineLink.setTextBySafeHTML(
+          FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_ROUTINES, routine.getName()));
         list.put(routine.getUuid(), routineLink);
         routineItems.add(routineLink);
       }
@@ -308,8 +314,6 @@ public class MetadataEditSidebar extends Composite {
 
           for (Widget value : fp) {
             SidebarItem sb = (SidebarItem) value;
-
-            GWT.log(sb.getText());
 
             if (sb.getText().toLowerCase().contains(searchValue.toLowerCase())) {
               sb.setVisible(true);
