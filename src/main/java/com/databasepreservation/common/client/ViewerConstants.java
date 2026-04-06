@@ -796,6 +796,7 @@ public class ViewerConstants {
   public static final String PROPERTY_SEARCH_HIGHLIGHT_TAG_PRE = "ui.highlight.tag.pre";
   public static final String PROPERTY_SEARCH_HIGHLIGHT_TAG_POST = "ui.highlight.tag.post";
   public static final String PROPERTY_SEARCH_HIGHLIGHT_FRAGSIZE = "ui.highlight.fragsize";
+  public static final String PROPERTY_SEARCH_HIGHLIGHT_MAX_ANALYZED_CHARS = "ui.highlight.maxAnalyzedChars";
 
   /**
    * Show schema name in reference table

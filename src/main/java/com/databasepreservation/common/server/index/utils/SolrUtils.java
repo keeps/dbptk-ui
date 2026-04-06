@@ -228,6 +228,8 @@ public class SolrUtils {
     query.setParam("hl.encoder", "html");
     query.setParam("hl.fragsize", ViewerConfiguration.getInstance().getViewerConfigurationAsString("50",
       ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_FRAGSIZE));
+    query.setParam("hl.maxAnalyzedChars", ViewerConfiguration.getInstance().getViewerConfigurationAsString("51200",
+      ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_MAX_ANALYZED_CHARS));
 
     parseAndConfigureFacets(facets, query);
 
