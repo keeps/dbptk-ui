@@ -79,17 +79,21 @@ public class AsyncLobTextExtractionProcessor implements ItemProcessor<ViewerRow,
         && !lobCell.getValue().startsWith(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX)) {
 
         Path completeLobPath = resolveLobPath(lobColumn, lobCell);
-
-        LobTextExtractor.ExtractionContext ctx = new LobTextExtractor.ExtractionContext(databaseUUID, schemaName,
-          tableName, row.getUuid(), lobColumn.getColumnIndex());
-
         StringBuilder extractedTextAggregator = new StringBuilder();
 
         try (Stream<Path> walkStream = Files.walk(completeLobPath, FileVisitOption.FOLLOW_LINKS)) {
+          // 1. Collect all valid files to determine the extraction strategy
           Set<Path> allLobFilePaths = walkStream.filter(file -> !Files.isDirectory(file)).collect(Collectors.toSet());
+
+          // 2. Mark as multi-file ONLY if the LOB contains more than one physical file
+          boolean isMultiFile = allLobFilePaths.size() > 1;
 
           for (Path lobFilePath : allLobFilePaths) {
             try {
+              String fileName = lobFilePath.getFileName().toString();
+              LobTextExtractor.ExtractionContext ctx = new LobTextExtractor.ExtractionContext(databaseUUID, schemaName,
+                tableName, row.getUuid(), lobColumn.getColumnIndex(), isMultiFile, fileName);
+
               String text = extractorStrategy.extractText(lobFilePath, ctx);
               if (text != null && !text.isBlank()) {
                 extractedTextAggregator.append(text).append("\n");
