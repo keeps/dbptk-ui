@@ -8,6 +8,7 @@ import java.nio.file.Path;
 public interface LobTextExtractor {
   String extractText(Path lobPath, ExtractionContext context) throws Exception;
 
-  record ExtractionContext(String databaseUUID, String schemaName, String tableName, String rowUuid, int columnIndex) {
+  record ExtractionContext(String databaseUUID, String schemaName, String tableName, String rowUuid, int columnIndex,
+    boolean isMultiFile, String fileName) {
   }
 }

@@ -67,7 +67,9 @@ public class ExternalServiceExtractor implements LobTextExtractor {
       return "";
     return externalIdPattern.replace("{db}", ctx.databaseUUID()).replace("{collection}", ctx.databaseUUID())
       .replace("{schema}", ctx.schemaName()).replace("{table}", ctx.tableName()).replace("{row}", ctx.rowUuid())
-      .replace("{col}", String.valueOf(ctx.columnIndex())).replace("{ext}", extension);
+      .replace("{col}", String.valueOf(ctx.columnIndex())).replace("{ext}", extension)
+      .replace("{multifile}", String.valueOf(ctx.isMultiFile()))
+      .replace("{filename}", ctx.fileName() != null ? ctx.fileName() : "");
   }
 
   private String getExtension(Path path) {
