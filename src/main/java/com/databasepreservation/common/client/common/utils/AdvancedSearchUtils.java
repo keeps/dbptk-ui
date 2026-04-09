@@ -98,7 +98,8 @@ public class AdvancedSearchUtils {
                 List<String> fields = new ArrayList<>();
                 fields.add(columnSolrName);
                 fields.add(configTable.getId());
-                fields.add(column.getId());
+                String idWithoutColumnIndex = column.getId().substring(0, column.getId().lastIndexOf("_"));
+                fields.add(idWithoutColumnIndex);
                 SearchField searchField = new SearchField(column.getId() + "-" + nestedColumn.getColumnIndex(), fields,
                   nestedColumn.getCustomName(), viewerTypeToSearchFieldType(nestedType));
                 searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), column.getId()));
