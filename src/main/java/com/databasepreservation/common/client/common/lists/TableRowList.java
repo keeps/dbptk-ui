@@ -251,8 +251,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
                 currentMouseOverRow = row;
                 currentMouseOverColumn = configColumn;
                 hideTimer.cancel();
-                popupPanel.setWidget(createHighlightPopupWidget(snippets,
-                  row.getCells().get(configColumn.getId()).getValue(), configColumn));
+                String cellValue;
+                if (!configColumn.getType().equals(NESTED) || configColumn.getTypeName().contains("BINARY")) {
+                  cellValue = row.getCells().get(configColumn.getId()).getValue();
+                } else {
+                  ViewerTable nestedTable = database.getMetadata()
+                    .getTableById(configColumn.getNestedColumns().getOriginalTable());
+                  cellValue = getTemplateColumnValue(configColumn, nestedTable, row);
+                }
+                popupPanel.setWidget(createHighlightPopupWidget(snippets, cellValue, configColumn));
                 Element el = Element.as(event.getNativeEvent().getEventTarget());
                 popupPanel.setPopupPositionAndShow(new PopupPanel.PositionCallback() {
                   @Override
@@ -298,7 +305,11 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
         SafeHtml value = getValue(object);
         if (value != null) {
-          sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
+          String titleString = "";
+          if (getCellHighlights(object, configColumn).isEmpty()) {
+            titleString = "title=\"" + SafeHtmlUtils.htmlEscape(value.asString());
+          }
+          sb.appendHtmlConstant("<div " + titleString + "\">");
           sb.append(value);
           sb.appendHtmlConstant("</div");
         }
@@ -306,45 +317,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
       @Override
       public SafeHtml getValue(ViewerRow row) {
-        List<String> aggregationList = new ArrayList<>();
-        StringBuilder sb = new StringBuilder();
-        SafeHtml ret = null;
-        if (row.getNestedRowList() != null) {
-
-          String refUuid = configColumn.getNestedColumns().getReferenceUuid();
-          String targetUuid = (refUuid != null && !refUuid.isEmpty()) ? refUuid : configColumn.getId();
-
-          for (ViewerRow nestedRow : row.getNestedRowList()) {
-            if (nestedRow != null && nestedRow.getCells() != null && !nestedRow.getCells().isEmpty()
-              && nestedRow.getNestedUUID().equals(targetUuid)) {
-              Map<String, ViewerCell> cells = nestedRow.getCells();
-
-              // removes the nested prefix of the nested collumn
-              Map<String, ViewerCell> cells_no_nested_prefix = cells.entrySet().stream().collect(Collectors
-                .toMap(entry -> entry.getKey().replace(ViewerConstants.SOLR_ROWS_NESTED_COL, ""), Map.Entry::getValue));
-
-              String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
-              if (template != null && !template.isEmpty()) {
-                String json = JSOUtils.cellsToJson(cells_no_nested_prefix, nestedTable);
-                String s = JavascriptUtils.compileTemplate(template, json);
-                aggregationList.add(s);
-              }
-            }
-          }
-          String separatorText = configColumn.getSearchStatus().getList().getTemplate().getSeparator();
-          if (separatorText != null) {
-            String separator = "";
-            for (String s : aggregationList) {
-              sb.append(separator);
-              sb.append(s);
-              separator = separatorText;
-            }
-            ret = SafeHtmlUtils.fromSafeConstant(sb.toString());
-          } else {
-            ret = SafeHtmlUtils.fromSafeConstant(messages.dataTransformationTableRowList(aggregationList));
-          }
-        }
-        return ret;
+        return SafeHtmlUtils.fromSafeConstant(getTemplateColumnValue(configColumn, nestedTable, row));
       }
 
       @Override
@@ -360,6 +333,48 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         return String.join(" ", styleNames);
       }
     };
+  }
+
+  private String getTemplateColumnValue(ColumnStatus configColumn, ViewerTable nestedTable, ViewerRow row) {
+    List<String> aggregationList = new ArrayList<>();
+    StringBuilder sb = new StringBuilder();
+    String ret = null;
+    if (row.getNestedRowList() != null) {
+
+      String refUuid = configColumn.getNestedColumns().getReferenceUuid();
+      String targetUuid = (refUuid != null && !refUuid.isEmpty()) ? refUuid : configColumn.getId();
+
+      for (ViewerRow nestedRow : row.getNestedRowList()) {
+        if (nestedRow != null && nestedRow.getCells() != null && !nestedRow.getCells().isEmpty()
+          && nestedRow.getNestedUUID().equals(targetUuid)) {
+          Map<String, ViewerCell> cells = nestedRow.getCells();
+
+          // removes the nested prefix of the nested collumn
+          Map<String, ViewerCell> cells_no_nested_prefix = cells.entrySet().stream().collect(Collectors
+            .toMap(entry -> entry.getKey().replace(ViewerConstants.SOLR_ROWS_NESTED_COL, ""), Map.Entry::getValue));
+
+          String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
+          if (template != null && !template.isEmpty()) {
+            String json = JSOUtils.cellsToJson(cells_no_nested_prefix, nestedTable);
+            String s = JavascriptUtils.compileTemplate(template, json);
+            aggregationList.add(s);
+          }
+        }
+      }
+      String separatorText = configColumn.getSearchStatus().getList().getTemplate().getSeparator();
+      if (separatorText != null) {
+        String separator = "";
+        for (String s : aggregationList) {
+          sb.append(separator);
+          sb.append(s);
+          separator = separatorText;
+        }
+        ret = sb.toString();
+      } else {
+        ret = messages.dataTransformationTableRowList(aggregationList);
+      }
+    }
+    return ret;
   }
 
   private Column<ViewerRow, SafeHtml> buildNestedRowDownloadColumn(ColumnStatus configColumn, ViewerTable nestedTable) {
