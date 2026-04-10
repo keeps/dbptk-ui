@@ -8,44 +8,35 @@ import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.scope.context.ChunkContext;
 
 import com.databasepreservation.common.server.batch.context.JobContext;
-import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.JobProgressAggregator;
-import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class SolrProgressFeedListener implements ChunkListener, StepExecutionListener {
-  private static final Logger LOGGER = LoggerFactory.getLogger(SolrProgressFeedListener.class);
-  private final DatabaseRowsSolrManager solrManager;
+public class BatchProgressFeedListener implements ChunkListener, StepExecutionListener {
+  private static final Logger LOGGER = LoggerFactory.getLogger(BatchProgressFeedListener.class);
   private final JobContext jobContext;
 
-  public SolrProgressFeedListener(DatabaseRowsSolrManager solrManager, JobContext jobContext) {
-    this.solrManager = solrManager;
+  public BatchProgressFeedListener(JobContext jobContext) {
     this.jobContext = jobContext;
   }
 
   @Override
   public void afterChunk(ChunkContext chunkContext) {
     StepExecution stepExecution = chunkContext.getStepContext().getStepExecution();
-    String jobUUID = stepExecution.getJobParameters().getString(BatchConstants.JOB_UUID_KEY);
 
     JobProgressAggregator aggregator = jobContext.getJobProgressAggregator();
 
     long globalProcessed = aggregator.addProgress(stepExecution.getId(), stepExecution.getReadCount());
     long globalTotal = aggregator.getTotal();
 
-    long skipCount = stepExecution.getReadSkipCount() + stepExecution.getProcessSkipCount()
+    long stepSkips = stepExecution.getReadSkipCount() + stepExecution.getProcessSkipCount()
       + stepExecution.getWriteSkipCount();
+    long globalSkips = aggregator.addSkips(stepExecution.getId(), stepSkips);
 
-    if (jobUUID != null && globalProcessed > 0) {
-      try {
-        LOGGER.debug("[PROGRESS] [{}] {}/{} items processed", stepExecution.getStepName(), globalProcessed,
-          globalTotal);
-        solrManager.editBatchJob(jobUUID, globalTotal, globalProcessed, skipCount, jobContext);
-      } catch (Exception e) {
-        LOGGER.warn("[PROGRESS] WARNING: Failed to update Solr progress for job {}", jobUUID, e);
-      }
+    if (globalProcessed > 0) {
+      LOGGER.debug("[PROGRESS] [{}] {}/{} items processed | {} skips", stepExecution.getStepName(), globalProcessed,
+        globalTotal, globalSkips);
     }
   }
 

@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import javax.sql.DataSource;
 
 import org.apereo.cas.client.session.SingleSignOutHttpSessionListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -223,14 +224,11 @@ public class DBVTK {
    * H2 Datasource
    *********************/
   @Bean
-  public DataSource dataSource() {
-    DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
-    dataSourceBuilder.driverClassName("org.h2.Driver");
-    dataSourceBuilder
-      .url("jdbc:h2:file:" + ViewerConfiguration.getInstance().getH2Path().normalize().toAbsolutePath().toString());
-    dataSourceBuilder.username("sa");
-    dataSourceBuilder.password("");
-    return dataSourceBuilder.build();
+  public DataSource dataSource(@Value("${spring.datasource.url}") String url,
+    @Value("${spring.datasource.username}") String username, @Value("${spring.datasource.password}") String password,
+    @Value("${spring.datasource.driver-class-name}") String driver) {
+
+    return DataSourceBuilder.create().url(url).username(username).password(password).driverClassName(driver).build();
   }
 
   @Configuration

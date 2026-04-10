@@ -1,10 +1,5 @@
 package com.databasepreservation.common.server.batch.listeners;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -12,13 +7,10 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 
-import com.databasepreservation.common.client.models.structure.ViewerJobStepExecution;
-import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.StepDefinition;
 import com.databasepreservation.common.server.batch.core.TaskletStepDefinition;
-import com.databasepreservation.common.server.controller.JobController;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -36,21 +28,19 @@ public class StepStatusListener implements StepExecutionListener {
 
   @Override
   public void beforeStep(StepExecution stepExecution) {
-    try {
-
-      if (stepExecution.getStepName().contains(BatchConstants.PARTITION_PREFIX)
-        || stepExecution.getStepName().contains(BatchConstants.PARTITION_WORKER_NAME)) {
-        return;
-      }
-      context.incrementStepNumber();
-      context.setCurrentStepName(definition.getDisplayName());
-
-      JobController.editSolrBatchJob(stepExecution.getJobExecution(), context);
-      LOGGER.info("[STEP] [{}/{}] STARTED: {} for database: {}", context.getCurrentStepNumber(),
-        context.getTotalSteps(), definition.getName(), context.getDatabaseUUID());
-    } catch (GenericException | NotFoundException e) {
-      LOGGER.error("[STEP] ERROR: Cannot update Step on SOLR for {}", context.getDatabaseUUID(), e);
+    if (stepExecution.getStepName().contains(BatchConstants.PARTITION_PREFIX)
+      || stepExecution.getStepName().contains(BatchConstants.PARTITION_WORKER_NAME)) {
+      return;
     }
+
+    context.incrementStepNumber();
+    context.setCurrentStepName(definition.getDisplayName());
+
+    stepExecution.getExecutionContext().putString(BatchConstants.CONTEXT_STEP_DISPLAY_NAME_KEY,
+      definition.getDisplayName());
+
+    LOGGER.info("[STEP] [{}/{}] STARTED: {} for database: {}", context.getCurrentStepNumber(), context.getTotalSteps(),
+      definition.getName(), context.getDatabaseUUID());
   }
 
   @Override
@@ -58,26 +48,10 @@ public class StepStatusListener implements StepExecutionListener {
     try {
       definition.onStepCompleted(context, stepExecution.getStatus());
 
-      long duration = 0;
-      LocalDateTime startTime = stepExecution.getStartTime();
-      if (startTime != null) {
-        LocalDateTime endTime = stepExecution.getEndTime() != null ? stepExecution.getEndTime() : LocalDateTime.now();
-        duration = ChronoUnit.MILLIS.between(startTime, endTime);
-      }
-
-      long processed = stepExecution.getWriteCount();
-      long skips = stepExecution.getSkipCount();
-
       if (definition instanceof TaskletStepDefinition && stepExecution.getStatus() == BatchStatus.COMPLETED) {
-        processed = definition.calculateWorkload(context);
+        long processed = definition.calculateWorkload(context);
         context.getJobProgressAggregator().addProgress(stepExecution.getId(), processed);
       }
-
-      ViewerJobStepExecution stepDetails = new ViewerJobStepExecution(definition.getDisplayName(),
-        stepExecution.getStatus().name(), processed, skips, duration);
-
-      String jobUUID = stepExecution.getJobExecution().getJobParameters().getString(BatchConstants.JOB_UUID_KEY);
-      ViewerFactory.getSolrManager().appendBatchJobStepExecution(jobUUID, stepDetails);
 
       LOGGER.info("[STEP] [{}/{}] FINISHED: {} with status: {}. Total items: {}", context.getCurrentStepNumber(),
         context.getTotalSteps(), definition.getName(), stepExecution.getExitStatus().getExitCode(),

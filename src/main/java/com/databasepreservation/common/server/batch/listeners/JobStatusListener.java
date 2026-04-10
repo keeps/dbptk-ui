@@ -23,7 +23,6 @@ import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.BatchErrorExtractor;
 import com.databasepreservation.common.server.batch.exceptions.BatchJobException;
 import com.databasepreservation.common.server.controller.JobController;
-import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -44,21 +43,23 @@ public class JobStatusListener implements JobExecutionListener {
   @Override
   public void beforeJob(JobExecution jobExecution) {
     try {
-      JobController.editSolrBatchJob(jobExecution, jobContext);
+      jobExecution.getExecutionContext().put(BatchConstants.CONTEXT_STEP_DISPLAY_NAMES_KEY, jobContext.getStepNames());
+      jobExecution.getExecutionContext().putLong(BatchConstants.CONTEXT_TOTAL_WORKLOAD_KEY,
+        jobContext.getJobProgressAggregator().getTotal());
+
+      JobController.addMinimalSolrBatchJob(jobExecution.getJobParameters(), jobContext);
       LOGGER.info("[JOB] STARTED for database: {}", jobContext.getDatabaseUUID());
     } catch (GenericException | NotFoundException e) {
-      LOGGER.error("[JOB] ERROR: Cannot update job on SOLR for {}", jobContext.getDatabaseUUID(), e);
+      LOGGER.error("[JOB] ERROR: Cannot create initial job on SOLR", e);
     }
   }
 
   @Override
   public void afterJob(JobExecution jobExecution) {
     String databaseUUID = jobContext.getDatabaseUUID();
-    String jobUUID = jobExecution.getJobParameters().getString(BatchConstants.JOB_UUID_KEY);
 
     try {
       if (jobExecution.getStatus() == BatchStatus.FAILED) {
-        DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
         Set<String> uniqueErrors = new HashSet<>();
 
         for (Throwable t : jobExecution.getAllFailureExceptions()) {
@@ -68,16 +69,13 @@ public class JobStatusListener implements JobExecutionListener {
             if (jobExecution.getExecutionContext().containsKey("ERR_" + cleanErrorMsg.hashCode())) {
               LOGGER.error("[JOB] FAILED for database {}. Cause already saved by item listener: {}", databaseUUID,
                 cleanErrorMsg);
-              continue;
+              JobController.appendErrorToContext(jobExecution, cleanErrorMsg);
             }
-
-            LOGGER.error("[JOB] FAILED for database {}. Cause: {}", databaseUUID, cleanErrorMsg);
-            solrManager.appendBatchJobError(jobUUID, cleanErrorMsg);
           }
         }
       }
 
-      JobController.editSolrBatchJob(jobExecution, jobContext);
+      JobController.saveFinalJobToSolr(jobExecution);
 
       if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
         persistJobChanges(databaseUUID);

@@ -1,6 +1,7 @@
 package com.databasepreservation.common.server.batch.steps.metadata;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ import com.databasepreservation.common.server.batch.core.TaskletStepDefinition;
 import com.databasepreservation.common.server.batch.policy.ErrorPolicy;
 import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
 import com.databasepreservation.common.server.batch.steps.denormalization.DenormalizationStepUtils;
+import com.databasepreservation.common.server.batch.steps.virtual.VirtualSchemaBuilderUtils;
 
 /**
  * The central and atomic synchronization point for all schema metadata
@@ -48,11 +50,6 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
 
   public FinalizeSchemaMetadataStep(SchemaMetadataService metadataService) {
     this.metadataService = metadataService;
-  }
-
-  @Override
-  public long calculateWorkload(JobContext context) {
-    return 0;
   }
 
   @Override
@@ -140,7 +137,7 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
         processDeletions(table, metadata);
 
         if (table.getVirtualTableStatus() != null && table.getVirtualTableStatus().isPendingMetadata()) {
-          synchronizeInheritedForeignKeysInStatus(context, table);
+          synchronizeInheritedForeignKeysInStatus(context, table, metadata);
           table.getVirtualTableStatus().markAsProcessed();
         }
 
@@ -226,7 +223,8 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
     }
   }
 
-  private void synchronizeInheritedForeignKeysInStatus(JobContext context, TableStatus virtualTableStatus) {
+  private void synchronizeInheritedForeignKeysInStatus(JobContext context, TableStatus virtualTableStatus,
+    ViewerMetadata metadata) {
     if (!virtualTableStatus.getVirtualTableStatus().getUseSourceTableForeignKeys())
       return;
 
@@ -271,12 +269,24 @@ public class FinalizeSchemaMetadataStep implements TaskletStepDefinition {
 
           VirtualForeignKeysStatus vFkStatus = new VirtualForeignKeysStatus();
           vFkStatus.setProcessingState(ProcessingState.PROCESSED);
-          vFkStatus.setLastExecutionDate(new java.util.Date());
+          vFkStatus.setLastExecutionDate(new Date());
           newFk.setVirtualForeignKeysStatus(vFkStatus);
 
           virtualTableStatus.getForeignKeys().add(newFk);
           LOGGER.info("Inherited foreign key '{}' synchronized to virtual TableStatus '{}'", newFk.getName(),
             virtualTableStatus.getId());
+
+          ViewerTable sourceViewerTable = metadata.getTable(virtualTableStatus.getUuid());
+          ViewerTable targetViewerTable = metadata.getTable(newFk.getReferencedTableUUID());
+
+          if (sourceViewerTable != null && targetViewerTable != null) {
+            if (sourceViewerTable.getForeignKeys() == null) {
+              sourceViewerTable.setForeignKeys(new ArrayList<>());
+            }
+
+            sourceViewerTable.getForeignKeys()
+              .add(VirtualSchemaBuilderUtils.buildViewerForeignKey(newFk, sourceViewerTable, targetViewerTable));
+          }
         }
       }
     }

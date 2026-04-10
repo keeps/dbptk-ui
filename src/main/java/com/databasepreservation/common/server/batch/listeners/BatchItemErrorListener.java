@@ -9,27 +9,22 @@ import org.springframework.batch.core.listener.ItemListenerSupport;
 import org.springframework.batch.item.Chunk;
 
 import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.BatchErrorExtractor;
-import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.controller.JobController;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class SolrItemErrorListener<T, O> extends ItemListenerSupport<T, O> implements StepExecutionListener {
-  private static final Logger LOGGER = LoggerFactory.getLogger(SolrItemErrorListener.class);
-  private final DatabaseRowsSolrManager solrManager;
-  private String jobUUID;
+public class BatchItemErrorListener<T, O> extends ItemListenerSupport<T, O> implements StepExecutionListener {
+  private static final Logger LOGGER = LoggerFactory.getLogger(BatchItemErrorListener.class);
   private String stepName;
   private JobExecution jobExecution;
 
-  public SolrItemErrorListener(DatabaseRowsSolrManager solrManager) {
-    this.solrManager = solrManager;
+  public BatchItemErrorListener() {
   }
 
   @Override
   public void beforeStep(StepExecution stepExecution) {
-    this.jobUUID = stepExecution.getJobParameters().getString(BatchConstants.JOB_UUID_KEY);
     this.stepName = stepExecution.getStepName();
     this.jobExecution = stepExecution.getJobExecution();
   }
@@ -56,12 +51,12 @@ public class SolrItemErrorListener<T, O> extends ItemListenerSupport<T, O> imple
 
   private void logAndAppendError(String formattedMessage, Exception ex) {
     LOGGER.error("[ITEM ERROR] {}", formattedMessage, ex);
-    if (jobUUID != null) {
-      solrManager.appendBatchJobError(jobUUID, formattedMessage);
-      if (jobExecution != null) {
-        String cleanError = BatchErrorExtractor.extractMeaningfulError(ex);
-        jobExecution.getExecutionContext().put("ERR_" + cleanError.hashCode(), true);
-      }
+
+    if (jobExecution != null) {
+      JobController.appendErrorToContext(jobExecution, formattedMessage);
+
+      String cleanError = BatchErrorExtractor.extractMeaningfulError(ex);
+      jobExecution.getExecutionContext().put("ERR_" + cleanError.hashCode(), true);
     }
   }
 }

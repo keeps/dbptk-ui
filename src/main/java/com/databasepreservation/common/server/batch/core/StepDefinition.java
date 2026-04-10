@@ -52,10 +52,10 @@ public interface StepDefinition {
    * 
    * @param context
    *          The current job context.
-   * @return The total number of items or units of work (default 1).
+   * @return The total number of items or units of work (default 0).
    */
   default long calculateWorkload(JobContext context) {
-    return 1L;
+    return 0L;
   }
 
   /**

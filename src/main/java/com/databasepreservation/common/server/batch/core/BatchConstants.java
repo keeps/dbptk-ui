@@ -24,4 +24,10 @@ public class BatchConstants {
   public static final String DB_PATH_KEY = "dbPath";
   public static final String DENORMALIZATION_ENTRY_ID_KEY = "denormalizeEntryID";
   public static final String JOB_DISPLAY_NAME_KEY = "jobDisplayName";
+
+  // Execution Context Keys (State & UI Data)
+  public static final String CONTEXT_TOTAL_WORKLOAD_KEY = "contextTotalWorkload";
+  public static final String CONTEXT_STEP_DISPLAY_NAMES_KEY = "contextStepDisplayNames";
+  public static final String CONTEXT_STEP_DISPLAY_NAME_KEY = "contextStepDisplayName";
+  public static final String CONTEXT_JOB_ERRORS_KEY = "contextJobErrorsList";
 }
