@@ -860,29 +860,49 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     if (!network) return false;
 
     var foundNodeId = null;
+    var foundNodeColor = null;
     var searchTerm = tableName.toLowerCase();
-    var nodes = network.body.data.nodes;
+    var nodesDataset = network.body.data.nodes;
 
-    nodes.forEach(function(node) {
+    nodesDataset.forEach(function(node) {
         var label = (node.label || "").toLowerCase();
         if (label === searchTerm) {
             foundNodeId = node.id;
+            foundNodeColor = node.color;
         }
     });
 
     if (foundNodeId === null) {
-        nodes.forEach(function(node) {
+        nodesDataset.forEach(function(node) {
             if (foundNodeId === null) {
                 var label = (node.label || "").toLowerCase();
                 if (label.indexOf(searchTerm) !== -1) {
                     foundNodeId = node.id;
+                    foundNodeColor = node.color;
                 }
             }
         });
     }
 
     if (foundNodeId) {
-        network.selectNodes([foundNodeId]);
+        if (container.lastSearchedNodeId && container.lastSearchedNodeColor) {
+            nodesDataset.update({
+                id: container.lastSearchedNodeId,
+                color: container.lastSearchedNodeColor
+            });
+        }
+
+        container.lastSearchedNodeId = foundNodeId;
+        container.lastSearchedNodeColor = foundNodeColor;
+
+        nodesDataset.update({
+            id: foundNodeId,
+            color: {
+                border: "#948e3e",
+                background: "#e5e394"
+            }
+        });
+
         network.focus(foundNodeId, {
             scale: 0.9,
             animation: { duration: 1000, easingFunction: "easeInOutQuad" }
@@ -896,6 +916,15 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     var container = $wnd.document.getElementById('erdiagram-' + schemaUUID);
     var network = container.network;
     if (network) {
+        if (container.lastSearchedNodeId && container.lastSearchedNodeColor) {
+             network.body.data.nodes.update({
+                 id: container.lastSearchedNodeId,
+                 color: container.lastSearchedNodeColor
+             });
+             container.lastSearchedNodeId = null;
+             container.lastSearchedNodeColor = null;
+        }
+
         network.unselectAll();
         network.fit({
             animation: {
