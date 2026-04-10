@@ -22,7 +22,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
@@ -33,6 +32,7 @@ import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.controller.JobController;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
 
 /**
  * Initializes batch cleanup routines on application startup. Ensures that any
@@ -134,14 +134,15 @@ public class BatchCleanupInitializer implements ApplicationListener<ContextRefre
         .add(new SimpleFilterParameter(ViewerConstants.SOLR_BATCH_JOB_STATUS, ViewerJobStatus.STARTED.name()));
       Filter filter = new Filter(new OrFiltersParameters(orParameters));
 
-      // 2. Query Solr for active jobs
-      IndexResult<ViewerJob> orphanJobs = solrManager.find(ViewerJob.class, filter, new Sorter(), null, null, null);
+      // 2. Query Solr for ALL active jobs
+      try (IterableDatabaseResult<ViewerJob> orphanJobs = solrManager.findAll(ViewerJob.class, filter, new Sorter(),
+        new ArrayList<>())) {
 
-      if (orphanJobs != null && orphanJobs.getResults() != null && !orphanJobs.getResults().isEmpty()) {
         Map<String, List<ViewerJob>> jobsByDatabase = new HashMap<>();
+        int orphansCount = 0;
 
-        // 3. Process orphans and group by Database UUID for batch updating
-        for (ViewerJob orphanJob : orphanJobs.getResults()) {
+        // 3. Iterate over all results safely
+        for (ViewerJob orphanJob : orphanJobs) {
           LOGGER.warn("Solr Orphan Job detected! Job UUID: {}. Forcing status to FAILED.", orphanJob.getUuid());
 
           orphanJob.setStatus(ViewerJobStatus.FAILED);
@@ -149,14 +150,19 @@ public class BatchCleanupInitializer implements ApplicationListener<ContextRefre
           orphanJob.getErrorDetails().add(ZOMBIE_ERROR_MSG);
 
           jobsByDatabase.computeIfAbsent(orphanJob.getDatabaseUuid(), k -> new ArrayList<>()).add(orphanJob);
+          orphansCount++;
         }
 
         // 4. Persist the fixed statuses back to Solr
-        for (Map.Entry<String, List<ViewerJob>> entry : jobsByDatabase.entrySet()) {
-          solrManager.insertBatchDocuments(entry.getKey(), entry.getValue(), DatabaseRowsSolrManager.WriteMode.UPDATE);
+        if (orphansCount > 0) {
+          for (Map.Entry<String, List<ViewerJob>> entry : jobsByDatabase.entrySet()) {
+            solrManager.insertBatchDocuments(entry.getKey(), entry.getValue(),
+              DatabaseRowsSolrManager.WriteMode.UPDATE);
+          }
+          LOGGER.info("Successfully cleaned up {} orphan job(s) from Solr.", orphansCount);
+        } else {
+          LOGGER.info("No orphan jobs found in Solr.");
         }
-
-        LOGGER.info("Successfully cleaned up {} orphan job(s) from Solr.", orphanJobs.getResults().size());
       }
     } catch (Exception e) {
       LOGGER.error("Failed to clean orphan jobs from Solr during Phase 2 cleanup.", e);
