@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -68,6 +67,7 @@ import com.databasepreservation.common.client.models.structure.ViewerRoutine;
 import com.databasepreservation.common.client.models.structure.ViewerRoutineParameter;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerTrigger;
 import com.databasepreservation.common.client.models.structure.ViewerType;
@@ -689,7 +689,11 @@ public class ToolkitStructure2ViewerStructure {
           suffix = ViewerConstants.SOLR_DYN_TDATETIME;
       }
     } else if (type instanceof SimpleTypeEnumeration) {
-      suffix = ViewerConstants.SOLR_DYN_STRING;
+      if (isPrimaryKey || isForeignKey) {
+        suffix = ViewerConstants.SOLR_DYN_STRING;
+      } else {
+        suffix = ViewerConstants.SOLR_DYN_TEXT_GENERAL;
+      }
     } else if (type instanceof SimpleTypeInterval) {
       suffix = ViewerConstants.SOLR_DYN_DATES; // TODO: review chosen type
     } else if (type instanceof SimpleTypeNumericApproximate) {
@@ -711,7 +715,7 @@ public class ToolkitStructure2ViewerStructure {
       throw new ViewerException("Unknown type: " + type.toString());
     }
 
-    return prefix + index + (isPrimaryKey || isForeignKey ? ViewerConstants.SOLR_DYN_STRING : suffix);
+    return prefix + index + suffix;
   }
 
   private static ViewerType getType(Type type) throws ViewerException {
