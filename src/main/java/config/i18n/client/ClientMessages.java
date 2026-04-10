@@ -1493,6 +1493,8 @@ public interface ClientMessages extends Messages {
 
   String configurationStatusPanelLabelForJobsBtn();
 
+  String configurationStatusPanelTextForReadyToStart();
+
   String configurationStatusPanelTextForInitializing();
 
   String configurationStatusPanelTextForProcessing();

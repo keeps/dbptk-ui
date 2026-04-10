@@ -29,6 +29,9 @@ import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.exceptions.AuthorizationException;
 import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.batch.context.JobContext;
+import com.databasepreservation.common.server.batch.context.JobContextRegistry;
+import com.databasepreservation.common.server.batch.core.JobProgressAggregator;
 import com.databasepreservation.common.server.controller.JobController;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.I18nUtility;
@@ -49,6 +52,9 @@ public class JobResource implements JobService {
 
   @Autowired
   private JobExplorer jobExplorer;
+
+  @Autowired
+  private JobContextRegistry jobContextRegistry;
 
   @Override
   public IndexResult<ViewerJob> find(FindRequest findRequest, String locale) {
@@ -108,6 +114,40 @@ public class JobResource implements JobService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, state);
+    }
+  }
+
+  @Override
+  public ViewerJob retrieveLiveProgress(String databaseUUID, String jobUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+
+      // 1. Retrieve the base job state from Solr
+      ViewerJob job = ViewerFactory.getSolrManager().retrieve(ViewerJob.class, jobUUID);
+
+      // 2. Fetch live progress from RAM if the job is actively running
+      JobContext context = jobContextRegistry.get(databaseUUID);
+      if (context != null) {
+        JobProgressAggregator aggregator = context.getJobProgressAggregator();
+        job.setRowsToProcess(aggregator.getTotal());
+        job.setProcessRows(aggregator.getProcessed());
+        job.setSkipCount(aggregator.getSkipped());
+        job.setCurrentStepName(context.getCurrentStepName());
+        job.setCurrentStepNumber(context.getCurrentStepNumber());
+        job.setTotalSteps(context.getTotalSteps());
+        job.setStepNames(context.getStepNames());
+      }
+
+      return job;
+    } catch (GenericException | AuthorizationException | NotFoundException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, jobUUID);
     }
   }
 }

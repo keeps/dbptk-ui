@@ -31,8 +31,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.listeners.PartitionStatusListener;
-import com.databasepreservation.common.server.batch.listeners.SolrItemErrorListener;
-import com.databasepreservation.common.server.batch.listeners.SolrProgressFeedListener;
+import com.databasepreservation.common.server.batch.listeners.BatchItemErrorListener;
+import com.databasepreservation.common.server.batch.listeners.BatchProgressFeedListener;
 import com.databasepreservation.common.server.batch.listeners.StepStatusListener;
 import com.databasepreservation.common.server.batch.policy.ErrorPolicy;
 import com.databasepreservation.common.server.batch.policy.ExecutionPolicy;
@@ -236,12 +236,12 @@ public class StepFactory {
   private void applyListeners(AbstractTaskletStepBuilder builder, StepDefinition definition, JobContext context,
     boolean isPartitionedWorker) {
 
-    SolrProgressFeedListener progressListener = new SolrProgressFeedListener(solrManager, context);
+    BatchProgressFeedListener progressListener = new BatchProgressFeedListener(context);
 
     builder.listener((StepExecutionListener) progressListener);
     builder.listener((ChunkListener) progressListener);
 
-    SolrItemErrorListener<Object, Object> errorListener = new SolrItemErrorListener<>(solrManager);
+    BatchItemErrorListener<Object, Object> errorListener = new BatchItemErrorListener<>();
     builder.listener((StepExecutionListener) errorListener);
     builder.listener((ItemReadListener<Object>) errorListener);
     builder.listener((ItemProcessListener<Object, Object>) errorListener);

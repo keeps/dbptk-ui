@@ -96,7 +96,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   private Timer progressTimer;
   private boolean jobFinishedSuccessfully = false;
   private boolean isStoppingPolling = false;
-  private boolean isAuthorized = false; // Controle de acesso por roles
+  private boolean isAuthorized = false;
   private CollectionStatus collectionStatus;
   private ViewerDatabase database;
   private List<String> plannedSteps = new ArrayList<>();
@@ -113,7 +113,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
     messageLabel.setText(messages.configurationStatusPanelLabelForTitle());
 
-    readyToStartLabel.setText(messages.configurationStatusPanelTextForInitializing());
+    readyToStartLabel.setText(messages.configurationStatusPanelTextForReadyToStart());
     elapsedTimePlaceholderLabel.setText(messages.configurationStatusPanelTextForElapsedTime("--m --s"));
 
     alertPanel.setVisible(false);
@@ -293,7 +293,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
       btnApplyConfiguration.setEnabled(true);
       Dialogs.showErrors(messages.configurationStatusPanelDialogTitleForError(), errorMessage,
         messages.basicActionClose());
-    }).retrieve(jobUUID);
+    }).retrieveLiveProgress(database.getUuid(), jobUUID);
   }
 
   private void handleJobSuccess(ViewerJob job) {

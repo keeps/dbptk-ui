@@ -1,19 +1,13 @@
-/**
- * The contents of this file are subject to the license and copyright
- * detailed in the LICENSE file at the root of the source
- * tree and available online at
- *
- * https://github.com/keeps/dbptk-ui
- */
 package com.databasepreservation.common.server.controller;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-import com.databasepreservation.common.server.batch.core.BatchConstants;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -21,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobRepository;
@@ -29,9 +24,11 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
+import com.databasepreservation.common.client.models.structure.ViewerJobStepExecution;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.batch.context.JobContext;
+import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
 /**
@@ -40,45 +37,122 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 public class JobController {
   private static final Logger LOGGER = LoggerFactory.getLogger(JobController.class);
 
-  private static ViewerJob createViewerJob(JobExecution jobExecution, JobContext jobContext) {
+  /**
+   * Thread-safe method to append errors to the Spring Batch ExecutionContext
+   * during concurrent step executions.
+   */
+  @SuppressWarnings("unchecked")
+  public static synchronized void appendErrorToContext(JobExecution jobExecution, String errorMessage) {
+    if (jobExecution == null || errorMessage == null)
+      return;
+
+    List<String> errors = (List<String>) jobExecution.getExecutionContext().get(BatchConstants.CONTEXT_JOB_ERRORS_KEY);
+    if (errors == null) {
+      errors = new ArrayList<>();
+    }
+
+    if (!errors.contains(errorMessage)) {
+      errors.add(errorMessage);
+      jobExecution.getExecutionContext().put(BatchConstants.CONTEXT_JOB_ERRORS_KEY, errors);
+    }
+  }
+
+  /**
+   * Builds the final ViewerJob fully hydrated from the Spring Batch JobExecution.
+   * This is used both at the end of a live job and during the reindex process.
+   */
+  @SuppressWarnings("unchecked")
+  private static ViewerJob buildCompleteViewerJobFromExecution(JobExecution jobExecution) {
     ViewerJob viewerJob = new ViewerJob();
-    viewerJob.setUuid(jobExecution.getJobParameters().getString(BatchConstants.JOB_UUID_KEY));
-    viewerJob.setDatabaseUuid(jobExecution.getJobParameters().getString(BatchConstants.DATABASE_UUID_KEY));
-    viewerJob
-      .setCollectionUuid(jobExecution.getJobParameters().getString(BatchConstants.COLLECTION_UUID_KEY));
+    JobParameters params = jobExecution.getJobParameters();
+
+    viewerJob.setUuid(params.getString(BatchConstants.JOB_UUID_KEY));
+    viewerJob.setDatabaseUuid(params.getString(BatchConstants.DATABASE_UUID_KEY));
+    viewerJob.setCollectionUuid(params.getString(BatchConstants.COLLECTION_UUID_KEY));
     viewerJob.setJobId(jobExecution.getJobId());
-    viewerJob.setName(jobExecution.getJobParameters().getString(BatchConstants.JOB_DISPLAY_NAME_KEY));
+    viewerJob.setName(params.getString(BatchConstants.JOB_DISPLAY_NAME_KEY));
+    viewerJob.setStatus(ViewerJobStatus.valueOf(jobExecution.getStatus().name()));
+
     viewerJob.setCreateTime(convertToDate(jobExecution.getCreateTime()));
     viewerJob.setStartTime(convertToDate(jobExecution.getStartTime()));
     viewerJob.setEndTime(convertToDate(jobExecution.getEndTime()));
-    viewerJob.setStatus(ViewerJobStatus.valueOf(jobExecution.getStatus().name()));
     viewerJob.setExitCode(jobExecution.getExitStatus().getExitCode());
+
     if (!jobExecution.getAllFailureExceptions().isEmpty()) {
       viewerJob.setExitDescription(jobExecution.getAllFailureExceptions().get(0).getMessage());
     }
 
-    if (jobContext != null) {
-      viewerJob.setStepNames(jobContext.getStepNames());
-      viewerJob.setCurrentStepName(jobContext.getCurrentStepName());
-      viewerJob.setCurrentStepNumber(jobContext.getCurrentStepNumber());
-      viewerJob.setTotalSteps(jobContext.getTotalSteps());
+    // Errors from ExecutionContext
+    List<String> contextErrors = (List<String>) jobExecution.getExecutionContext()
+      .get(BatchConstants.CONTEXT_JOB_ERRORS_KEY);
+    if (contextErrors != null) {
+      viewerJob.setErrorDetails(contextErrors);
     }
 
-    return viewerJob;
-  }
+    // Hydrate steps, duration, and aggregates directly from Spring Batch
+    // StepExecutions
+    long totalProcessed = 0;
+    long totalSkips = 0;
+    List<ViewerJobStepExecution> stepDetails = new ArrayList<>();
+    List<String> executedStepNames = new ArrayList<>();
 
-  private static ViewerJob createCompleteViewerJob(JobExecution jobExecution) throws GenericException {
-    ViewerJob viewerJob = createViewerJob(jobExecution, null);
-    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    for (StepExecution step : jobExecution.getStepExecutions()) {
+      // We ignore internal partition workers for the UI summary
+      if (!step.getStepName().contains(BatchConstants.PARTITION_PREFIX)
+        && !step.getStepName().contains(BatchConstants.PARTITION_WORKER_NAME)) {
+
+        long duration = 0;
+        if (step.getStartTime() != null) {
+          LocalDateTime end = step.getEndTime() != null ? step.getEndTime() : LocalDateTime.now();
+          duration = ChronoUnit.MILLIS.between(step.getStartTime(), end);
+        }
+
+        long stepProcessed = step.getWriteCount();
+        long stepSkips = step.getSkipCount();
+
+        totalProcessed += stepProcessed;
+        totalSkips += stepSkips;
+
+        String displayName = step.getExecutionContext().getString(BatchConstants.CONTEXT_STEP_DISPLAY_NAME_KEY,
+          step.getStepName());
+        executedStepNames.add(displayName);
+
+        stepDetails
+          .add(new ViewerJobStepExecution(displayName, step.getStatus().name(), stepProcessed, stepSkips, duration));
+      }
+    }
+
+    viewerJob.setProcessRows(totalProcessed);
+    viewerJob.setSkipCount(totalSkips);
+    viewerJob.setStepExecutions(stepDetails);
+
+    if (jobExecution.getExecutionContext().containsKey(BatchConstants.CONTEXT_TOTAL_WORKLOAD_KEY)) {
+      viewerJob.setRowsToProcess(jobExecution.getExecutionContext().getLong(BatchConstants.CONTEXT_TOTAL_WORKLOAD_KEY));
+    } else {
+      viewerJob.setRowsToProcess(totalProcessed);
+    }
+
+    if (jobExecution.getExecutionContext().containsKey(BatchConstants.CONTEXT_STEP_DISPLAY_NAMES_KEY)) {
+      List<String> displayNames = (List<String>) jobExecution.getExecutionContext()
+        .get(BatchConstants.CONTEXT_STEP_DISPLAY_NAMES_KEY);
+      viewerJob.setStepNames(displayNames);
+    } else {
+      viewerJob.setStepNames(executedStepNames);
+    }
+
+    viewerJob.setTotalSteps(viewerJob.getStepNames().size());
+
+    if (!executedStepNames.isEmpty()) {
+      viewerJob.setCurrentStepNumber(executedStepNames.size());
+      viewerJob.setCurrentStepName(executedStepNames.get(executedStepNames.size() - 1));
+    }
+
+    // Fetch Database Name
     try {
+      DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
       ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, viewerJob.getDatabaseUuid());
       viewerJob.setDatabaseName(database.getMetadata().getName());
-      if (viewerJob.getStatus().equals(ViewerJobStatus.COMPLETED)) {
-        long rowsNumber = 0;
-        viewerJob.setRowsToProcess(rowsNumber);
-        viewerJob.setProcessRows(rowsNumber);
-      }
-    } catch (NotFoundException e) {
+    } catch (NotFoundException | GenericException e) {
       viewerJob.setDatabaseName(viewerJob.getDatabaseUuid());
     }
 
@@ -86,76 +160,67 @@ public class JobController {
   }
 
   private static Date convertToDate(LocalDateTime localDateTime) {
-    if (localDateTime == null) {
+    if (localDateTime == null)
       return null;
-    }
-
     ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
-    Instant instant = zonedDateTime.toInstant();
-    return Date.from(instant);
+    return Date.from(zonedDateTime.toInstant());
   }
 
-  private static ViewerJob createMinimalViewerJob(JobParameters parameters) {
+  public static void addMinimalSolrBatchJob(JobParameters parameters, JobContext context)
+    throws NotFoundException, GenericException {
     ViewerJob viewerJob = new ViewerJob();
     viewerJob.setUuid(parameters.getString(BatchConstants.JOB_UUID_KEY));
     viewerJob.setDatabaseUuid(parameters.getString(BatchConstants.DATABASE_UUID_KEY));
     viewerJob.setCollectionUuid(parameters.getString(BatchConstants.COLLECTION_UUID_KEY));
+    viewerJob.setName(parameters.getString(BatchConstants.JOB_DISPLAY_NAME_KEY));
     viewerJob.setStatus(ViewerJobStatus.STARTING);
-
-    return viewerJob;
-  }
-
-  public static void addMinimalSolrBatchJob(JobParameters parameters, JobContext context) throws NotFoundException, GenericException {
-    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-    ViewerJob viewerJob = createMinimalViewerJob(parameters);
-    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, viewerJob.getDatabaseUuid());
-    viewerJob.setDatabaseName(database.getMetadata().getName());
     viewerJob.setStepNames(context.getStepNames());
     viewerJob.setTotalSteps(context.getTotalSteps());
+
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, viewerJob.getDatabaseUuid());
+    viewerJob.setDatabaseName(database.getMetadata().getName());
+
     solrManager.addBatchJob(viewerJob);
-
-    LOGGER.info("JOB Created in Solr with ID: {} for Database UUID: {}, Collection UUID: {}", viewerJob.getUuid(),
-      viewerJob.getDatabaseUuid(), viewerJob.getCollectionUuid());
+    LOGGER.info("JOB Created in Solr with ID: {} for Database UUID: {}", viewerJob.getUuid(),
+      viewerJob.getDatabaseUuid());
   }
 
-  public static void editSolrBatchJob(JobExecution jobExecution, JobContext context)
-    throws NotFoundException, GenericException {
+  /**
+   * Final push to Solr. Called ONLY when the job completes or fails, guaranteeing
+   * that Solr has the definitive historical snapshot based on the Spring Batch
+   * DB.
+   */
+  public static void saveFinalJobToSolr(JobExecution jobExecution) throws NotFoundException, GenericException {
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-    ViewerJob viewerJob = createViewerJob(jobExecution, context);
-    solrManager.editBatchJob(viewerJob);
-  }
-
-  public static void createSolrBatchJob(JobExecution jobExecution) throws NotFoundException, GenericException {
-    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-    ViewerJob viewerJob = createCompleteViewerJob(jobExecution);
-    solrManager.editBatchJob(viewerJob);
-  }
-
-  public static void setMessageToSolrBatchJob(JobExecution jobExecution, String message)
-    throws NotFoundException, GenericException {
-    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-    ViewerJob viewerJob = createViewerJob(jobExecution, null);
-    viewerJob.setExitDescription(message);
-    solrManager.editBatchJob(viewerJob);
+    ViewerJob finalJob = buildCompleteViewerJobFromExecution(jobExecution);
+    solrManager.editBatchJob(finalJob);
   }
 
   public static void deleteSolrBatchJobs() throws GenericException {
-    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-    solrManager.deleteBatchJob();
+    ViewerFactory.getSolrManager().deleteBatchJob();
   }
 
+  /**
+   * Rebuilds the entire Solr Job History by reading the native Spring Batch
+   * database.
+   */
   public static void reindex(JobRepository jobRepository, JobExplorer jobExplorer)
     throws NotFoundException, GenericException, NoSuchJobException {
+
     deleteSolrBatchJobs();
-    int startIndex = 0;
     int batchSize = ViewerConfiguration.getInstance().getViewerConfigurationAsInt(100,
       ViewerConstants.REINDEX_BATCH_SIZE);
 
     for (String jobName : jobRepository.getJobNames()) {
-      while (startIndex < (int) jobExplorer.getJobInstanceCount(jobName)) {
+      int startIndex = 0;
+      int instanceCount = (int) jobExplorer.getJobInstanceCount(jobName);
+
+      while (startIndex < instanceCount) {
         for (JobInstance jobInstance : jobRepository.findJobInstancesByName(jobName, startIndex, batchSize)) {
           for (JobExecution jobExecution : jobRepository.findJobExecutions(jobInstance)) {
-            JobController.createSolrBatchJob(jobExecution);
+            // Re-hydrate and push to Solr using the unified builder
+            saveFinalJobToSolr(jobExecution);
           }
         }
         startIndex += batchSize;

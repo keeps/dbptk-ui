@@ -14,6 +14,7 @@ import org.springframework.batch.item.ExecutionContext;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
@@ -70,14 +71,26 @@ public class DenormalizationStepPartitionStrategy implements PartitionStrategy {
 
   @Override
   public long calculateWorkload(JobContext context, ExecutionContext partitionContext) {
-    Filter filter = (Filter) partitionContext.get(BatchConstants.FILTER_KEY);
+    String entryID = partitionContext.getString(BatchConstants.DENORMALIZATION_ENTRY_ID_KEY);
+    DenormalizeConfiguration config = context.getDenormalizeConfig(entryID);
 
-    if (filter == null) {
+    if (config == null)
       return 0L;
-    }
 
     try {
-      return solrManager.countRows(context.getDatabaseUUID(), filter);
+      TableStatus targetTable = context.getCollectionStatus().findTableStatusById(config.getTableID());
+      Filter countFilter;
+
+      // If the table is virtual, the rows are not in Solr yet. We count the source
+      // table.
+      if (targetTable != null && targetTable.getVirtualTableStatus() != null) {
+        String sourceTableUUID = targetTable.getVirtualTableStatus().getSourceTableUUID();
+        countFilter = FilterUtils.filterByTableUUID(new Filter(), sourceTableUUID);
+      } else {
+        countFilter = (Filter) partitionContext.get(BatchConstants.FILTER_KEY);
+      }
+
+      return solrManager.countRows(context.getDatabaseUUID(), countFilter);
     } catch (GenericException | RequestNotValidException e) {
       LOGGER.error("Failed to calculate workload: {}", e.getMessage());
       return 0L;

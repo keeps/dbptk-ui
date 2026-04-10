@@ -2,7 +2,9 @@ package com.databasepreservation.common.server.batch.config;
 
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
+import org.springframework.batch.core.repository.ExecutionContextSerializer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -48,5 +50,10 @@ public class BatchJobConfig {
   @Bean
   public DatabaseRowsSolrManager solrManager() {
     return ViewerFactory.getSolrManager();
+  }
+
+  @Bean
+  public ExecutionContextSerializer executionContextSerializer() {
+    return new Jackson2ExecutionContextStringSerializer();
   }
 }

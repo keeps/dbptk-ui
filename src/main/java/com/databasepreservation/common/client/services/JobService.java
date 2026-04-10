@@ -73,4 +73,9 @@ public interface JobService extends DirectRestService {
   @RequestMapping(path = "/reindex", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Reindex all jobs")
   StringResponse reindex();
+
+  @RequestMapping(path = "/live-progress/{databaseUUID}/{jobUUID}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Retrieves a job with live in-memory progress")
+  ViewerJob retrieveLiveProgress(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "jobUUID") String jobUUID);
 }
