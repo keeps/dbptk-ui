@@ -50,6 +50,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
 
   private Column<ViewerJob, SafeHtml> idColumn;
   private Column<ViewerJob, SafeHtml> statusColumn;
+  private Column<ViewerJob, SafeHtml> createTimeColumn;
 
   public JobList() {
     this(new Filter(), null, null, false, false, false);
@@ -91,7 +92,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       }
     };
 
-    Column<ViewerJob, SafeHtml> createTimeColumn = new TooltipColumn<ViewerJob>() {
+    createTimeColumn = new TooltipColumn<ViewerJob>() {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getCreateTime() != null
@@ -184,8 +185,9 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
 
     idColumn.setSortable(true);
     statusColumn.setSortable(true);
+    createTimeColumn.setSortable(true);
 
-    display.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(idColumn, false));
+    display.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(createTimeColumn, false));
   }
 
   @Override
@@ -196,6 +198,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
     Map<Column<ViewerJob, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
     columnSortingKeyMap.put(idColumn, Collections.singletonList(ViewerConstants.SOLR_BATCH_JOB_ID));
     columnSortingKeyMap.put(statusColumn, Collections.singletonList(ViewerConstants.SOLR_BATCH_JOB_STATUS));
+    columnSortingKeyMap.put(createTimeColumn, Collections.singletonList(ViewerConstants.SOLR_BATCH_JOB_CREATE_TIME));
 
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);
     FindRequest findRequest = new FindRequest(ViewerJob.class.getName(), filter, sorter, sublist, getFacets());
