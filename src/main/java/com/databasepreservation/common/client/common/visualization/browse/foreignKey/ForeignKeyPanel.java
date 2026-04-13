@@ -83,8 +83,17 @@ public class ForeignKeyPanel extends RightPanel {
         solrColumnName = columnOrValue;
       } else {
         columnOrValue = columnOrValue.replaceAll(HistoryManager.HISTORY_SEP_ESCAPE, HistoryManager.HISTORY_SEP_REGEX);
-        columnAndValueMapping.put(solrColumnName, columnOrValue);
-        filterParameters.add(new SimpleFilterParameter(solrColumnName, columnOrValue));
+        String rawValue = columnOrValue;
+        String uiValue = columnOrValue;
+
+        boolean isNegativeNumber = columnOrValue.matches("^-?\\d+(\\.\\d+)?$");
+        if (columnOrValue.contains("-") && !isNegativeNumber && !columnOrValue.startsWith("\"")) {
+          uiValue = "\"" + columnOrValue + "\"";
+        }
+
+        columnAndValueMapping.put(solrColumnName, uiValue);
+
+        filterParameters.add(new SimpleFilterParameter(solrColumnName, rawValue));
         solrColumnName = null;
       }
     }
