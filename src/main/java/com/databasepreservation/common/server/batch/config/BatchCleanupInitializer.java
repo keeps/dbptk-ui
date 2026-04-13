@@ -106,7 +106,7 @@ public class BatchCleanupInitializer implements ApplicationListener<ContextRefre
         // 3. Sync the failed status back to Solr
         try {
           if (jobUUID != null) {
-            JobController.saveFinalJobToSolr(execution);
+            JobController.syncJobStateToSolr(execution);
             LOGGER.info("Successfully synced zombie job failure to Solr for Job UUID: {}", jobUUID);
           }
         } catch (Exception e) {

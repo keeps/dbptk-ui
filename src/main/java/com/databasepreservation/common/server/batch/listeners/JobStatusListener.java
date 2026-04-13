@@ -75,7 +75,7 @@ public class JobStatusListener implements JobExecutionListener {
         }
       }
 
-      JobController.saveFinalJobToSolr(jobExecution);
+      JobController.syncJobStateToSolr(jobExecution);
 
       if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
         persistJobChanges(databaseUUID);

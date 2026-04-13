@@ -96,7 +96,7 @@ public class JobOrchestrator {
 
       JobExecution jobExecution = jobLauncher.run(job, jobParameters);
 
-      JobController.saveFinalJobToSolr(jobExecution);
+      JobController.syncJobStateToSolr(jobExecution);
 
       return jobExecution;
     } catch (BatchJobException e) {
