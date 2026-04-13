@@ -89,63 +89,78 @@ public class JobController {
       viewerJob.setErrorDetails(contextErrors);
     }
 
-    // Hydrate steps, duration, and aggregates directly from Spring Batch
-    // StepExecutions
-    long totalProcessed = 0;
+    long dynamicProcessed = 0;
     long totalSkips = 0;
+    int completedSteps = 0;
+    String currentStepName = "";
     List<ViewerJobStepExecution> stepDetails = new ArrayList<>();
     List<String> executedStepNames = new ArrayList<>();
 
+    // Identify which steps are "Masters" to avoid double-counting items
+    java.util.Set<String> masterStepNames = new java.util.HashSet<>();
     for (StepExecution step : jobExecution.getStepExecutions()) {
-      // We ignore internal partition workers for the UI summary
-      if (!step.getStepName().contains(BatchConstants.PARTITION_PREFIX)
-        && !step.getStepName().contains(BatchConstants.PARTITION_WORKER_NAME)) {
+      if (step.getStepName().contains(BatchConstants.PARTITION_WORKER_NAME)) {
+        masterStepNames.add(step.getStepName().split(BatchConstants.PARTITION_WORKER_NAME)[0]);
+      }
+    }
 
+    for (StepExecution step : jobExecution.getStepExecutions()) {
+      boolean isMasterStep = masterStepNames.contains(step.getStepName());
+      boolean isWorkerPartition = step.getStepName().contains(BatchConstants.PARTITION_PREFIX) ||
+        step.getStepName().contains(BatchConstants.PARTITION_WORKER_NAME);
+
+      if (!isMasterStep) {
+        dynamicProcessed += step.getReadCount();
+        totalSkips += step.getSkipCount();
+      }
+
+      if (!isWorkerPartition) {
         long duration = 0;
         if (step.getStartTime() != null) {
           LocalDateTime end = step.getEndTime() != null ? step.getEndTime() : LocalDateTime.now();
           duration = ChronoUnit.MILLIS.between(step.getStartTime(), end);
         }
 
-        long stepProcessed = step.getWriteCount();
-        long stepSkips = step.getSkipCount();
-
-        totalProcessed += stepProcessed;
-        totalSkips += stepSkips;
-
-        String displayName = step.getExecutionContext().getString(BatchConstants.CONTEXT_STEP_DISPLAY_NAME_KEY,
-          step.getStepName());
+        String displayName = step.getExecutionContext().getString(BatchConstants.CONTEXT_STEP_DISPLAY_NAME_KEY, step.getStepName());
         executedStepNames.add(displayName);
 
-        stepDetails
-          .add(new ViewerJobStepExecution(displayName, step.getStatus().name(), stepProcessed, stepSkips, duration));
+        stepDetails.add(new ViewerJobStepExecution(displayName, step.getStatus().name(), step.getWriteCount(), step.getSkipCount(), duration));
+
+        if (step.getStatus() == org.springframework.batch.core.BatchStatus.COMPLETED) {
+          completedSteps++;
+        } else if (step.getStatus() == org.springframework.batch.core.BatchStatus.STARTED) {
+          currentStepName = displayName;
+        }
       }
     }
 
-    viewerJob.setProcessRows(totalProcessed);
+    // Workload Total
+    long totalWorkload = dynamicProcessed;
+    if (jobExecution.getExecutionContext().containsKey(BatchConstants.CONTEXT_TOTAL_WORKLOAD_KEY)) {
+      totalWorkload = jobExecution.getExecutionContext().getLong(BatchConstants.CONTEXT_TOTAL_WORKLOAD_KEY);
+    }
+    viewerJob.setRowsToProcess(totalWorkload);
+
+    // If completed, we set it to 100%. If not, send the dynamic count that is always growing
+    if (jobExecution.getStatus() == org.springframework.batch.core.BatchStatus.COMPLETED) {
+      viewerJob.setProcessRows(totalWorkload);
+      viewerJob.setCurrentStepName("Completed");
+      viewerJob.setCurrentStepNumber(executedStepNames.size());
+    } else {
+      viewerJob.setProcessRows(dynamicProcessed);
+      viewerJob.setCurrentStepName(currentStepName);
+      viewerJob.setCurrentStepNumber(completedSteps + 1);
+    }
+
     viewerJob.setSkipCount(totalSkips);
     viewerJob.setStepExecutions(stepDetails);
 
-    if (jobExecution.getExecutionContext().containsKey(BatchConstants.CONTEXT_TOTAL_WORKLOAD_KEY)) {
-      viewerJob.setRowsToProcess(jobExecution.getExecutionContext().getLong(BatchConstants.CONTEXT_TOTAL_WORKLOAD_KEY));
-    } else {
-      viewerJob.setRowsToProcess(totalProcessed);
-    }
-
     if (jobExecution.getExecutionContext().containsKey(BatchConstants.CONTEXT_STEP_DISPLAY_NAMES_KEY)) {
-      List<String> displayNames = (List<String>) jobExecution.getExecutionContext()
-        .get(BatchConstants.CONTEXT_STEP_DISPLAY_NAMES_KEY);
-      viewerJob.setStepNames(displayNames);
+      viewerJob.setStepNames((List<String>) jobExecution.getExecutionContext().get(BatchConstants.CONTEXT_STEP_DISPLAY_NAMES_KEY));
     } else {
       viewerJob.setStepNames(executedStepNames);
     }
-
     viewerJob.setTotalSteps(viewerJob.getStepNames().size());
-
-    if (!executedStepNames.isEmpty()) {
-      viewerJob.setCurrentStepNumber(executedStepNames.size());
-      viewerJob.setCurrentStepName(executedStepNames.get(executedStepNames.size() - 1));
-    }
 
     // Fetch Database Name
     try {
@@ -191,7 +206,7 @@ public class JobController {
    * that Solr has the definitive historical snapshot based on the Spring Batch
    * DB.
    */
-  public static void saveFinalJobToSolr(JobExecution jobExecution) throws NotFoundException, GenericException {
+  public static void syncJobStateToSolr(JobExecution jobExecution) throws NotFoundException, GenericException {
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     ViewerJob finalJob = buildCompleteViewerJobFromExecution(jobExecution);
     solrManager.editBatchJob(finalJob);
@@ -220,7 +235,7 @@ public class JobController {
         for (JobInstance jobInstance : jobRepository.findJobInstancesByName(jobName, startIndex, batchSize)) {
           for (JobExecution jobExecution : jobRepository.findJobExecutions(jobInstance)) {
             // Re-hydrate and push to Solr using the unified builder
-            saveFinalJobToSolr(jobExecution);
+            syncJobStateToSolr(jobExecution);
           }
         }
         startIndex += batchSize;

@@ -9,6 +9,7 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 
 import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.JobProgressAggregator;
+import com.databasepreservation.common.server.controller.JobController;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -37,6 +38,13 @@ public class BatchProgressFeedListener implements ChunkListener, StepExecutionLi
     if (globalProcessed > 0) {
       LOGGER.debug("[PROGRESS] [{}] {}/{} items processed | {} skips", stepExecution.getStepName(), globalProcessed,
         globalTotal, globalSkips);
+    }
+
+    try {
+      JobController.syncJobStateToSolr(stepExecution.getJobExecution());
+    } catch (Exception e) {
+      LOGGER.warn("[PROGRESS] Failed to save job progress to Solr for job execution id: {}. Error: {}",
+        stepExecution.getJobExecution().getId(), e.getMessage());
     }
   }
 
