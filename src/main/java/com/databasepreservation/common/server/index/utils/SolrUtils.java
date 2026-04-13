@@ -994,7 +994,7 @@ public class SolrUtils {
     if (appendDoubleQuotes) {
       ret.append("\"");
     }
-    ret.append(value.replaceAll("(\")", "\\\\$1"));
+    ret.append(value);
     if (appendDoubleQuotes) {
       ret.append("\"");
     }
