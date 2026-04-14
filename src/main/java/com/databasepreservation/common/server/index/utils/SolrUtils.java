@@ -218,21 +218,23 @@ public class SolrUtils {
       query.setFields(fieldsToReturn.toArray(new String[0]));
     }
 
-    query.setParam("defType", defType);
-    if (defType.equals(ViewerConstants.SOLR_EDISMAX) && queryFields != null) {
-      query.setParam("qf", String.join(" ", queryFields));
+    if (defType != null) {
+      query.setParam("defType", defType);
+      if (defType.equals(ViewerConstants.SOLR_EDISMAX) && queryFields != null) {
+        query.setParam("qf", String.join(" ", queryFields));
+      }
+      query.setParam("hl", highlighting);
+      query.setParam("hl.fl", (highlightedFields != null) ? String.join(" ", highlightedFields) : "");
+      query.setParam("hl.tag.pre", ViewerConfiguration.getInstance().getViewerConfigurationAsString("<b>",
+          ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_PRE));
+      query.setParam("hl.tag.post", ViewerConfiguration.getInstance().getViewerConfigurationAsString("</b>",
+          ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_POST));
+      query.setParam("hl.encoder", "html");
+      query.setParam("hl.fragsize", ViewerConfiguration.getInstance().getViewerConfigurationAsString("50",
+          ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_FRAGSIZE));
+      query.setParam("hl.maxAnalyzedChars", ViewerConfiguration.getInstance().getViewerConfigurationAsString("51200",
+          ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_MAX_ANALYZED_CHARS));
     }
-    query.setParam("hl", highlighting);
-    query.setParam("hl.fl", (highlightedFields != null) ? String.join(" ", highlightedFields) : "");
-    query.setParam("hl.tag.pre", ViewerConfiguration.getInstance().getViewerConfigurationAsString("<b>",
-      ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_PRE));
-    query.setParam("hl.tag.post", ViewerConfiguration.getInstance().getViewerConfigurationAsString("</b>",
-      ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_POST));
-    query.setParam("hl.encoder", "html");
-    query.setParam("hl.fragsize", ViewerConfiguration.getInstance().getViewerConfigurationAsString("50",
-      ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_FRAGSIZE));
-    query.setParam("hl.maxAnalyzedChars", ViewerConfiguration.getInstance().getViewerConfigurationAsString("51200",
-      ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_MAX_ANALYZED_CHARS));
 
     parseAndConfigureFacets(facets, query);
 
