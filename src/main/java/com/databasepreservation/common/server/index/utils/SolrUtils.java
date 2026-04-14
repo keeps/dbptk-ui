@@ -443,6 +443,54 @@ public class SolrUtils {
     return ret;
   }
 
+  public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, Filter filter,
+    Sorter sorter, int pageSize, String cursorMark, List<String> fieldsToReturn, Map<String, String> extraParameters,
+    Filter filterQuery, String defType, List<String> queryFields) throws GenericException, RequestNotValidException {
+
+    Pair<IndexResult<ViewerRow>, String> ret;
+    SolrQuery query = new SolrQuery();
+    query.setParam("q.op", DEFAULT_QUERY_PARSER_OPERATOR);
+
+    applyFiltersToQuery(query, filter, List.of(filterQuery));
+
+    query.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
+    query.setRows(pageSize);
+    final List<SolrQuery.SortClause> sortClauses = parseSorter(sorter);
+    sortClauses.add(SolrQuery.SortClause.asc(RodaConstants.INDEX_UUID));
+    query.setSorts(sortClauses);
+
+    if (!extraParameters.isEmpty()) {
+      List<String> extraFields = new ArrayList<>();
+      for (Map.Entry<String, String> entry : extraParameters.entrySet()) {
+        query.setParam(entry.getKey(), entry.getValue());
+        extraFields.add(entry.getKey());
+      }
+    }
+
+    if (!fieldsToReturn.isEmpty()) {
+      query.setFields(fieldsToReturn.toArray(new String[0]));
+    }
+
+    query.setParam("defType", defType);
+    query.setParam("qf", (queryFields != null) ? String.join(" ", queryFields) : "");
+
+    final RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+
+    try {
+      QueryResponse response = index.query(collection.getIndexName(), query, SolrRequest.METHOD.POST);
+      final IndexResult<ViewerRow> result = queryResponseToIndexResult(response, collection, Facets.NONE);
+      ret = Pair.of(result, response.getNextCursorMark());
+    } catch (SolrServerException | IOException e) {
+      throw new GenericException("Could not query index", e);
+    } catch (SolrException e) {
+      throw new RequestNotValidException(e);
+    } catch (RuntimeException e) {
+      throw new GenericException("Unexpected exception while querying index", e);
+    }
+
+    return ret;
+  }
+
   public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, SolrQuery query,
     Sorter sorter, int pageSize, String cursorMark) throws GenericException, RequestNotValidException {
 

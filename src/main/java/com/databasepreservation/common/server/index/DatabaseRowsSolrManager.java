@@ -273,12 +273,15 @@ public class DatabaseRowsSolrManager {
 
   public IterableIndexResult findAllRows(String databaseUUID, final Filter filter, final Sorter sorter,
     final List<String> fieldsToReturn) {
-    return findAllRows(databaseUUID, filter, sorter, fieldsToReturn, new HashMap<>());
+    return findAllRows(databaseUUID, filter, sorter, fieldsToReturn, new HashMap<>(), new Filter(), List.of(),
+      ViewerConstants.SOLR_LUCENE);
   }
 
   public IterableIndexResult findAllRows(String databaseUUID, final Filter filter, final Sorter sorter,
-    final List<String> fieldsToReturn, Map<String, String> extraParameters) {
-    return new IterableIndexResult(client, databaseUUID, filter, sorter, fieldsToReturn, extraParameters);
+    final List<String> fieldsToReturn, Map<String, String> extraParameters, Filter filterQuery,
+    List<String> queryFields, String defType) {
+    return new IterableIndexResult(client, databaseUUID, filter, sorter, fieldsToReturn, extraParameters, filterQuery,
+      queryFields, defType);
   }
 
   public IterableNestedIndexResult findAllRows(String databaseUUID, SolrQuery query, final Sorter sorter) {
