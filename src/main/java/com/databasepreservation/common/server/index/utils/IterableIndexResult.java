@@ -12,10 +12,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.index.sort.Sorter;
 import org.apache.solr.client.solrj.SolrClient;
-import com.databasepreservation.common.client.index.filter.Filter;
 
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.utils.CloseableIterable;
 
@@ -30,8 +30,10 @@ public class IterableIndexResult implements CloseableIterable<ViewerRow> {
   private final IndexResultIterator iterator;
 
   public IterableIndexResult(final SolrClient solrClient, String databaseUUID, final Filter filter, final Sorter sorter,
-    final List<String> fieldsToReturn, final Map<String, String> extraParameters) {
-    iterator = new IndexResultIterator(solrClient, databaseUUID, filter, sorter, fieldsToReturn, extraParameters);
+    final List<String> fieldsToReturn, final Map<String, String> extraParameters, Filter filterQuery,
+    List<String> queryFields, String defType) {
+    iterator = new IndexResultIterator(solrClient, databaseUUID, filter, sorter, fieldsToReturn, extraParameters,
+      filterQuery, queryFields, defType);
 
     if (PAGE_SIZE > 0) {
       iterator.setPageSize(PAGE_SIZE);

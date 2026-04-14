@@ -12,16 +12,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.index.sort.Sorter;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.params.CursorMarkParams;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import com.databasepreservation.common.client.index.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 
 /**
@@ -50,16 +50,24 @@ public class IndexResultIterator implements Iterator<ViewerRow> {
   private final String databaseUUID;
   private final List<String> fieldsToReturn;
   private final Map<String, String> extraParameters;
+  private final Filter filterQuery;
+  private final List<String> queryFields;
+  private final String defType;
 
   private ViewerRow next = null;
 
-  public IndexResultIterator(SolrClient index, String databaseUUID, Filter filter, Sorter sorter, List<String> fieldsToReturn, Map<String, String> extraParameters) {
+  public IndexResultIterator(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
+    List<String> fieldsToReturn, Map<String, String> extraParameters, Filter filterQuery, List<String> queryFields,
+    String defType) {
     this.index = index;
     this.filter = filter;
     this.sorter = sorter;
     this.databaseUUID = databaseUUID;
     this.fieldsToReturn = fieldsToReturn;
     this.extraParameters = extraParameters;
+    this.filterQuery = filterQuery;
+    this.queryFields = queryFields;
+    this.defType = defType;
 
     getCurrentAndPrepareNext();
   }
@@ -79,7 +87,7 @@ public class IndexResultIterator implements Iterator<ViewerRow> {
       do {
         try {
           Pair<IndexResult<ViewerRow>, String> page = SolrUtils.findRows(index, databaseUUID, filter, sorter, pageSize,
-            cursorMark, fieldsToReturn, extraParameters);
+            cursorMark, fieldsToReturn, extraParameters, filterQuery, defType, queryFields);
           result = page.getFirst();
           nextCursorMark = page.getSecond();
 

@@ -1062,7 +1062,8 @@ public class CollectionResource implements CollectionService {
     final boolean exportDescriptions, String fieldsToHeader) throws GenericException, RequestNotValidException {
     if (findRequest.sublist == null) {
       final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
-        findRequest.fieldsToReturn, findRequest.extraParameters);
+        findRequest.fieldsToReturn, findRequest.extraParameters, findRequest.filterQuery, findRequest.queryFields,
+        findRequest.defType);
       return ApiUtils.okResponse(new ViewerStreamingOutput(new IterableIndexResultsCSVOutputStream(allRows, configTable,
         filename, exportDescriptions, ',', fieldsToHeader, databaseUUID)).toStreamResponse());
     } else {
@@ -1082,9 +1083,9 @@ public class CollectionResource implements CollectionService {
     List<String> fields = findRequest.fieldsToReturn;
     fields.add(ViewerConstants.INDEX_ID);
     final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
-      fields, findRequest.extraParameters);
+      fields, findRequest.extraParameters, findRequest.filterQuery, findRequest.queryFields, findRequest.defType);
     final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
-      fields, findRequest.extraParameters);
+      fields, findRequest.extraParameters, findRequest.filterQuery, findRequest.queryFields, findRequest.defType);
     return ApiUtils
       .okResponse(new StreamResponse(new ZipOutputStreamMultiRow(configurationCollection, database, configTable,
         allRows, clone, zipFilename, filename, findRequest.sublist, exportDescription, fieldsToHeader, databaseUUID)));
