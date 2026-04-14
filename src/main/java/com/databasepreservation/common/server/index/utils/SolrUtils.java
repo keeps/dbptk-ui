@@ -219,7 +219,9 @@ public class SolrUtils {
     }
 
     query.setParam("defType", defType);
-    query.setParam("qf", (queryFields != null) ? String.join(" ", queryFields) : "");
+    if (defType.equals(ViewerConstants.SOLR_EDISMAX) && queryFields != null) {
+      query.setParam("qf", String.join(" ", queryFields));
+    }
     query.setParam("hl", highlighting);
     query.setParam("hl.fl", (highlightedFields != null) ? String.join(" ", highlightedFields) : "");
     query.setParam("hl.tag.pre", ViewerConfiguration.getInstance().getViewerConfigurationAsString("<b>",

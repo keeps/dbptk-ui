@@ -3404,6 +3404,11 @@ td.datePickerMonth, td.datePickerYear {
     align-items: center;
 }
 
+.searchPanelClearButton.disabled {
+    cursor: default;
+    color: rgba(0, 0, 0, 0.25);
+}
+
 .searchButton,
 .searchAdvancedDisclosureButton {
     cursor: pointer;
@@ -3412,6 +3417,15 @@ td.datePickerMonth, td.datePickerYear {
     float: left;
     width: 40px;
     background-color: #089de3;
+}
+
+.searchButton.disabled {
+    background-color: #ddd;
+    cursor: default;
+}
+
+.searchButton.disabled:hover {
+    background-color: #ddd;
 }
 
 .advancedSearchButton {

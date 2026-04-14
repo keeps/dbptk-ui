@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.databasepreservation.common.client.index.filter.EDismaxSimplerQueryFilterParameter;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -722,8 +723,17 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       tableFilterQuery = new Filter();
     }
 
+    String defType;
+    if (filter.getParameters().stream().anyMatch(p -> p instanceof EDismaxSimplerQueryFilterParameter)) {
+      defType = ViewerConstants.SOLR_EDISMAX;
+    }
+    else {
+      defType = ViewerConstants.SOLR_LUCENE;
+      highlightFields.clear();
+    }
+
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
-      getFacets(), false, fieldsToReturn, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery, queryFields,
+      getFacets(), false, fieldsToReturn, extraParameters, defType, tableFilterQuery, queryFields,
       true, highlightFields);
 
     CollectionService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(),
