@@ -12,16 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.search.panel.SearchFieldPanel;
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
-import com.databasepreservation.common.client.index.filter.BoostedSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.EDismaxSimplerQueryFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
-import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -133,7 +128,11 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
         clearCrossButton.setVisible(!searchInputBox.getText().isEmpty());
       }
     });
-    clearCrossButton.addClickHandler(event -> clearSearchInputBox());
+    clearCrossButton.addClickHandler(event -> {
+      if (!searchAdvancedPanel.isVisible()) {
+        clearSearchInputBox();
+      }
+    });
 
     searchInputButton.addClickHandler(event -> doSearch());
     searchAdvancedDisclosureButton.addClickHandler(event -> showSearchAdvancedPanel());
@@ -183,9 +182,17 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
         clearCrossButton.setVisible(!searchInputBox.getText().isEmpty());
       }
     });
-    clearCrossButton.addClickHandler(event -> clearSearchInputBox());
+    clearCrossButton.addClickHandler(event -> {
+      if (!searchAdvancedPanel.isVisible()) {
+        clearSearchInputBox();
+      }
+    });
 
-    searchInputButton.addClickHandler(event -> doSearch());
+    searchInputButton.addClickHandler(event -> {
+      if (!searchAdvancedPanel.isVisible()) {
+        doSearch();
+      }
+    });
     searchAdvancedDisclosureButton.addClickHandler(event -> showSearchAdvancedPanel());
     searchInputListBox.addValueChangeHandler(event -> onChange());
     if (showSearchAdvancedDisclosureButton) {
@@ -214,13 +221,13 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
   private Filter buildSearchFilter() {
     List<FilterParameter> parameters = new ArrayList<>();
 
-    String basicQuery = searchInputBox.getText();
-    if (basicQuery != null && !basicQuery.trim().isEmpty()) {
-      parameters.add(new EDismaxSimplerQueryFilterParameter(basicQuery));
+    if (!searchAdvancedPanel.isVisible()) {
+      String basicQuery = searchInputBox.getText();
+      if (basicQuery != null && !basicQuery.trim().isEmpty()) {
+        parameters.add(new EDismaxSimplerQueryFilterParameter(basicQuery));
+      }
     }
-
-
-    if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
+    else if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
         if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
           SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
@@ -253,8 +260,14 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     searchAdvancedPanel.setVisible(!searchAdvancedPanel.isVisible());
     if (searchAdvancedPanel.isVisible()) {
       searchAdvancedDisclosureButton.addStyleName("open");
+      searchInputBox.setEnabled(false);
+      searchInputButton.addStyleName("disabled");
+      clearCrossButton.addStyleName("disabled");
     } else {
       searchAdvancedDisclosureButton.removeStyleName("open");
+      searchInputBox.setEnabled(true);
+      searchInputButton.removeStyleName("disabled");
+      clearCrossButton.removeStyleName("disabled");
     }
   }
 
@@ -265,6 +278,9 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
 
     if (searchAdvancedPanel.isVisible()) {
       searchAdvancedDisclosureButton.addStyleName("open");
+      searchInputBox.setEnabled(false);
+      searchInputButton.addStyleName("disabled");
+      clearCrossButton.addStyleName("disabled");
     }
   }
 
@@ -273,6 +289,9 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
       searchAdvancedPanel.setVisible(false);
     }
     searchAdvancedDisclosureButton.removeStyleName("open");
+    searchInputBox.setEnabled(true);
+    searchInputButton.removeStyleName("disabled");
+    clearCrossButton.removeStyleName("disabled");
   }
 
   public void setFieldsPanel(FlowPanel fieldsPanel) {
