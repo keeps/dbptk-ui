@@ -1,6 +1,5 @@
 package com.databasepreservation.common.server.batch.listeners;
 
-import com.databasepreservation.common.server.controller.JobController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -12,6 +11,7 @@ import com.databasepreservation.common.server.batch.context.JobContext;
 import com.databasepreservation.common.server.batch.core.BatchConstants;
 import com.databasepreservation.common.server.batch.core.StepDefinition;
 import com.databasepreservation.common.server.batch.core.TaskletStepDefinition;
+import com.databasepreservation.common.server.controller.JobController;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -42,6 +42,12 @@ public class StepStatusListener implements StepExecutionListener {
 
     LOGGER.info("[STEP] [{}/{}] STARTED: {} for database: {}", context.getCurrentStepNumber(), context.getTotalSteps(),
       definition.getName(), context.getDatabaseUUID());
+
+    try {
+      JobController.syncJobStateToSolr(stepExecution.getJobExecution());
+    } catch (Exception e) {
+      LOGGER.warn("[STEP] Failed to sync step start state to Solr for step: {}", definition.getName(), e);
+    }
   }
 
   @Override

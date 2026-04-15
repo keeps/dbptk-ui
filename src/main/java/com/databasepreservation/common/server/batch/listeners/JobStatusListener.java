@@ -47,7 +47,7 @@ public class JobStatusListener implements JobExecutionListener {
       jobExecution.getExecutionContext().putLong(BatchConstants.CONTEXT_TOTAL_WORKLOAD_KEY,
         jobContext.getJobProgressAggregator().getTotal());
 
-      JobController.addMinimalSolrBatchJob(jobExecution.getJobParameters(), jobContext);
+      JobController.syncJobStateToSolr(jobExecution);
       LOGGER.info("[JOB] STARTED for database: {}", jobContext.getDatabaseUUID());
     } catch (GenericException | NotFoundException e) {
       LOGGER.error("[JOB] ERROR: Cannot create initial job on SOLR", e);
