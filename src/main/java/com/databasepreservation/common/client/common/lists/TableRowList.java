@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.databasepreservation.common.client.index.filter.EDismaxSimplerQueryFilterParameter;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -39,6 +38,7 @@ import com.databasepreservation.common.client.common.visualization.browse.config
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.EDismaxSimplerQueryFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.OneOfManyFilterParameter;
 import com.databasepreservation.common.client.index.select.SelectedItemsList;
@@ -545,8 +545,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         case DATETIME:
         case DATETIME_JUST_DATE:
         case DATETIME_JUST_TIME:
-          columnHighlightedNames
-            .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_DATE, ViewerConstants.SOLR_DYN_TEXT_GENERAL));
+          boolean isEdismaxSearch = getFilter().getParameters().stream()
+            .anyMatch(p -> p instanceof EDismaxSimplerQueryFilterParameter);
+          if (isEdismaxSearch) {
+            columnHighlightedNames
+              .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_DATE, ViewerConstants.SOLR_DYN_TEXT_GENERAL));
+          } else {
+            columnHighlightedNames
+              .add(configColumn.getId().replace(ViewerConstants.SOLR_DYN_DATE, ViewerConstants.SOLR_DYN_STRING));
+          }
           break;
         case BOOLEAN:
           columnHighlightedNames
@@ -726,15 +733,14 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     String defType;
     if (filter.getParameters().stream().anyMatch(p -> p instanceof EDismaxSimplerQueryFilterParameter)) {
       defType = ViewerConstants.SOLR_EDISMAX;
-    }
-    else {
+    } else {
       defType = ViewerConstants.SOLR_LUCENE;
-      highlightFields.clear();
+      // highlightFields.clear();
     }
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
-      getFacets(), false, fieldsToReturn, extraParameters, defType, tableFilterQuery, queryFields,
-      true, highlightFields);
+      getFacets(), false, fieldsToReturn, extraParameters, defType, tableFilterQuery, queryFields, true,
+      highlightFields);
 
     CollectionService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(),
       table.getSchemaName(), table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
@@ -747,16 +753,26 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   protected void createFieldLists(List<String> fieldsToReturn, List<String> queryFields, List<String> highlightFields) {
     CollectionStatus status = getObject().getStatus();
     ViewerTable table = getObject().getTable();
+    boolean isEdismaxSearch = getFilter().getParameters().stream()
+      .anyMatch(p -> p instanceof EDismaxSimplerQueryFilterParameter);
+
     for (ColumnStatus column : status.getTableStatus(table.getUuid()).getVisibleColumnsList()) {
       if (column.getNestedColumns() == null) {
         if (column.getId().endsWith(ViewerConstants.SOLR_DYN_DATE)) {
-          String dateStringId = column.getId().replace(ViewerConstants.SOLR_DYN_DATE,
+          String dateTextSortId = column.getId().replace(ViewerConstants.SOLR_DYN_DATE,
             ViewerConstants.SOLR_DYN_TEXT_GENERAL);
-          // Return both fields, but only query and highlight on the text field
+          String dateStringId = column.getId().replace(ViewerConstants.SOLR_DYN_DATE, ViewerConstants.SOLR_DYN_STRING);
+
           fieldsToReturn.add(column.getId());
+          fieldsToReturn.add(dateTextSortId);
           fieldsToReturn.add(dateStringId);
-          highlightFields.add(dateStringId);
-          queryFields.add(dateStringId);
+          queryFields.add(dateTextSortId);
+
+          if (isEdismaxSearch) {
+            highlightFields.add(dateTextSortId);
+          } else {
+            highlightFields.add(dateStringId);
+          }
         } else if (column.getId().endsWith(ViewerConstants.SOLR_DYN_BOOLEAN)) {
           // Return both fields, but only query and highlight on the string field
           String booleanStringId = column.getId().replace(ViewerConstants.SOLR_DYN_BOOLEAN,
