@@ -122,6 +122,8 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
       if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_DATE)) {
         doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_DATE, ViewerConstants.SOLR_DYN_TEXT_GENERAL),
           cellEntry.getValue().getValue());
+        doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_DATE, ViewerConstants.SOLR_DYN_STRING),
+          cellEntry.getValue().getValue());
       } else if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_BOOLEAN)) {
         doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_BOOLEAN, ViewerConstants.SOLR_DYN_STRING),
           SolrUtils.getSolrBooleanValue(cellEntry.getValue().getValue()).toString());

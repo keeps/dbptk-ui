@@ -224,16 +224,30 @@ public class SolrUtils {
         query.setParam("qf", String.join(" ", queryFields));
       }
       query.setParam("hl", highlighting);
-      query.setParam("hl.fl", (highlightedFields != null) ? String.join(" ", highlightedFields) : "");
-      query.setParam("hl.tag.pre", ViewerConfiguration.getInstance().getViewerConfigurationAsString("<b>",
+      if (highlighting) {
+        query.setParam("hl.fl", (highlightedFields != null) ? String.join(" ", highlightedFields) : "");
+
+        String hlQ = buildHighlightQuery(filter, highlightedFields);
+        if (StringUtils.isNotBlank(hlQ)) {
+          query.setParam("hl.q", hlQ);
+          query.setParam("hl.highlightMultiTerm", "true");
+          if (defType.equals(ViewerConstants.SOLR_EDISMAX)) {
+            query.setParam("hl.requireFieldMatch", "false");
+          } else {
+            query.setParam("hl.requireFieldMatch", "true");
+          }
+        }
+
+        query.setParam("hl.tag.pre", ViewerConfiguration.getInstance().getViewerConfigurationAsString("<b>",
           ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_PRE));
-      query.setParam("hl.tag.post", ViewerConfiguration.getInstance().getViewerConfigurationAsString("</b>",
+        query.setParam("hl.tag.post", ViewerConfiguration.getInstance().getViewerConfigurationAsString("</b>",
           ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_TAG_POST));
-      query.setParam("hl.encoder", "html");
-      query.setParam("hl.fragsize", ViewerConfiguration.getInstance().getViewerConfigurationAsString("50",
+        query.setParam("hl.encoder", "html");
+        query.setParam("hl.fragsize", ViewerConfiguration.getInstance().getViewerConfigurationAsString("50",
           ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_FRAGSIZE));
-      query.setParam("hl.maxAnalyzedChars", ViewerConfiguration.getInstance().getViewerConfigurationAsString("51200",
+        query.setParam("hl.maxAnalyzedChars", ViewerConfiguration.getInstance().getViewerConfigurationAsString("51200",
           ViewerConstants.PROPERTY_SEARCH_HIGHLIGHT_MAX_ANALYZED_CHARS));
+      }
     }
 
     parseAndConfigureFacets(facets, query);
@@ -2022,5 +2036,108 @@ public class SolrUtils {
       }
     }
     return filter;
+  }
+
+  /**
+   * Helper method to build a query string for highlighting based on the provided
+   * filter and highlighted fields. It recursively processes the filter parameters
+   * and constructs a query string that can be used for highlighting in Solr. The
+   * method handles different types of filter parameters, including simple
+   * filters, range filters, date filters, and more complex combinations of
+   * filters.
+   */
+
+  private static String buildHighlightQuery(Filter filter, List<String> highlightedFields) {
+    if (filter == null || filter.getParameters() == null) {
+      return "";
+    }
+    List<String> hlQueries = new ArrayList<>();
+    for (FilterParameter param : filter.getParameters()) {
+      buildHighlightQueryRecursive(param, highlightedFields, hlQueries);
+    }
+    return String.join(" OR ", hlQueries).trim();
+  }
+
+  private static void buildHighlightQueryRecursive(FilterParameter parameter, List<String> highlightedFields,
+    List<String> hlQueries) {
+    if (parameter instanceof SimpleFilterParameter) {
+      SimpleFilterParameter p = (SimpleFilterParameter) parameter;
+      String field = findHighlightField(p.getName(), highlightedFields);
+      hlQueries.add(field + ":(" + escapeSolrSpecialChars(p.getValue()) + ")");
+
+    } else if (parameter instanceof LongRangeFilterParameter) {
+      LongRangeFilterParameter p = (LongRangeFilterParameter) parameter;
+      String field = findHighlightField(p.getName(), highlightedFields);
+      String fromBound = p.getFromValue() != null ? String.valueOf(p.getFromValue()) : "*";
+      String toBound = p.getToValue() != null ? String.valueOf(p.getToValue()) : "*";
+      hlQueries.add(field + ":[" + fromBound + " TO " + toBound + "]");
+
+    } else if (parameter instanceof DateRangeFilterParameter) {
+      DateRangeFilterParameter p = (DateRangeFilterParameter) parameter;
+      String field = findHighlightField(p.getName(), highlightedFields);
+      String fromStr = processFromDate(p.getFromValue());
+      String toStr = processToDate(p.getToValue(), p.getGranularity(), false);
+
+      String fromBound = fromStr != null ? fromStr : "*";
+      String toBound = toStr != null ? toStr : "*";
+
+      hlQueries.add(field + ":[" + fromBound + " TO " + toBound + "]");
+
+    } else if (parameter instanceof DateIntervalFilterParameter) {
+      DateIntervalFilterParameter p = (DateIntervalFilterParameter) parameter;
+      String field = findHighlightField(p.getFromName(), highlightedFields);
+      String fromStr = processFromDate(p.getFromValue());
+      String toStr = processToDate(p.getToValue(), p.getGranularity(), false);
+
+      String fromBound = fromStr != null ? fromStr : "*";
+      String toBound = toStr != null ? toStr : "*";
+      hlQueries.add(field + ":[" + fromBound + " TO " + toBound + "]");
+
+    } else if (parameter instanceof BasicSearchFilterParameter) {
+      BasicSearchFilterParameter p = (BasicSearchFilterParameter) parameter;
+      String field = findHighlightField(p.getName(), highlightedFields);
+      hlQueries.add(field + ":(" + escapeSolrSpecialChars(p.getValue()) + ")");
+
+    } else if (parameter instanceof EDismaxSimplerQueryFilterParameter) {
+      String val = escapeSolrSpecialChars(((EDismaxSimplerQueryFilterParameter) parameter).getValue());
+      if (highlightedFields != null && !highlightedFields.isEmpty()) {
+        List<String> edismaxQueries = new ArrayList<>();
+        for (String hlField : highlightedFields) {
+          edismaxQueries.add(hlField + ":(" + val + ")");
+        }
+        hlQueries.add("(" + String.join(" OR ", edismaxQueries) + ")");
+      } else {
+        hlQueries.add("(" + val + ")");
+      }
+
+    } else if (parameter instanceof OrFiltersParameters) {
+      for (FilterParameter p : ((OrFiltersParameters) parameter).getValues()) {
+        buildHighlightQueryRecursive(p, highlightedFields, hlQueries);
+      }
+    } else if (parameter instanceof AndFiltersParameters) {
+      for (FilterParameter p : ((AndFiltersParameters) parameter).getValues()) {
+        buildHighlightQueryRecursive(p, highlightedFields, hlQueries);
+      }
+    }
+  }
+
+  private static String findHighlightField(String filterField, List<String> highlightedFields) {
+    if (filterField == null || highlightedFields == null || highlightedFields.isEmpty()) {
+      return filterField;
+    }
+    if (highlightedFields.contains(filterField)) {
+      return filterField;
+    }
+
+    int lastUnderscore = filterField.lastIndexOf('_');
+    if (lastUnderscore > 0) {
+      String prefix = filterField.substring(0, lastUnderscore + 1);
+      for (String hlField : highlightedFields) {
+        if (hlField.startsWith(prefix)) {
+          return hlField;
+        }
+      }
+    }
+    return filterField;
   }
 }
