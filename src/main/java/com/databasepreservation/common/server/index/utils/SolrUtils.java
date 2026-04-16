@@ -2065,38 +2065,45 @@ public class SolrUtils {
       String field = findHighlightField(p.getName(), highlightedFields);
       hlQueries.add(field + ":(" + escapeSolrSpecialChars(p.getValue()) + ")");
 
-    } else if (parameter instanceof LongRangeFilterParameter) {
-      LongRangeFilterParameter p = (LongRangeFilterParameter) parameter;
-      String field = findHighlightField(p.getName(), highlightedFields);
-      String fromBound = p.getFromValue() != null ? String.valueOf(p.getFromValue()) : "*";
-      String toBound = p.getToValue() != null ? String.valueOf(p.getToValue()) : "*";
-      hlQueries.add(field + ":[" + fromBound + " TO " + toBound + "]");
-
-    } else if (parameter instanceof DateRangeFilterParameter) {
-      DateRangeFilterParameter p = (DateRangeFilterParameter) parameter;
-      String field = findHighlightField(p.getName(), highlightedFields);
-      String fromStr = processFromDate(p.getFromValue());
-      String toStr = processToDate(p.getToValue(), p.getGranularity(), false);
-
-      String fromBound = fromStr != null ? fromStr : "*";
-      String toBound = toStr != null ? toStr : "*";
-
-      hlQueries.add(field + ":[" + fromBound + " TO " + toBound + "]");
-
-    } else if (parameter instanceof DateIntervalFilterParameter) {
-      DateIntervalFilterParameter p = (DateIntervalFilterParameter) parameter;
-      String field = findHighlightField(p.getFromName(), highlightedFields);
-      String fromStr = processFromDate(p.getFromValue());
-      String toStr = processToDate(p.getToValue(), p.getGranularity(), false);
-
-      String fromBound = fromStr != null ? fromStr : "*";
-      String toBound = toStr != null ? toStr : "*";
-      hlQueries.add(field + ":[" + fromBound + " TO " + toBound + "]");
-
+    } else if (parameter instanceof LongRangeFilterParameter ||
+            parameter instanceof DateRangeFilterParameter ||
+            parameter instanceof DateIntervalFilterParameter) {
+      // Range filters are not suitable for highlighting, so we skip them
     } else if (parameter instanceof BasicSearchFilterParameter) {
       BasicSearchFilterParameter p = (BasicSearchFilterParameter) parameter;
-      String field = findHighlightField(p.getName(), highlightedFields);
-      hlQueries.add(field + ":(" + escapeSolrSpecialChars(p.getValue()) + ")");
+
+      if (ViewerConstants.INDEX_SEARCH.equals(p.getName()) ||
+              ViewerConstants.INDEX_LOB_TEXT_SEARCH.equals(p.getName())) {
+
+        String val = escapeSolrSpecialChars(p.getValue());
+        boolean isOcrOnlySearch = ViewerConstants.INDEX_LOB_TEXT_SEARCH.equals(p.getName());
+
+        if (highlightedFields != null && !highlightedFields.isEmpty()) {
+          List<String> virtualQueries = new ArrayList<>();
+
+          for (String hlField : highlightedFields) {
+            boolean isOcrField = hlField.endsWith(ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX);
+
+            if (isOcrOnlySearch && isOcrField) {
+              virtualQueries.add(hlField + ":(" + val + ")");
+            } else if (!isOcrOnlySearch && !isOcrField) {
+              virtualQueries.add(hlField + ":(" + val + ")");
+            }
+          }
+
+          if (!virtualQueries.isEmpty()) {
+            hlQueries.add("(" + String.join(" OR ", virtualQueries) + ")");
+          } else {
+            hlQueries.add("(" + val + ")");
+          }
+        } else {
+          hlQueries.add("(" + val + ")");
+        }
+
+      } else {
+        String field = findHighlightField(p.getName(), highlightedFields);
+        hlQueries.add(field + ":(" + escapeSolrSpecialChars(p.getValue()) + ")");
+      }
 
     } else if (parameter instanceof EDismaxSimplerQueryFilterParameter) {
       String val = escapeSolrSpecialChars(((EDismaxSimplerQueryFilterParameter) parameter).getValue());

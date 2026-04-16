@@ -38,8 +38,12 @@ import com.databasepreservation.common.client.common.visualization.browse.config
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.DateIntervalFilterParameter;
+import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
 import com.databasepreservation.common.client.index.filter.EDismaxSimplerQueryFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.LongRangeFilterParameter;
 import com.databasepreservation.common.client.index.filter.OneOfManyFilterParameter;
 import com.databasepreservation.common.client.index.select.SelectedItemsList;
 import com.databasepreservation.common.client.index.sort.Sorter;
@@ -248,7 +252,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           if (event.getNativeEvent().getType().equals("mouseover")) {
             if (row != currentMouseOverRow || configColumn != currentMouseOverColumn) {
               List<String> snippets = getCellHighlights(row, configColumn);
-              if (!snippets.isEmpty()) {
+              if (!snippets.isEmpty() || hasActiveRangeFilter(configColumn)) {
                 currentMouseOverRow = row;
                 currentMouseOverColumn = configColumn;
                 hideTimer.cancel();
@@ -307,7 +311,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         SafeHtml value = getValue(object);
         if (value != null) {
           String titleString = "";
-          if (getCellHighlights(object, configColumn).isEmpty()) {
+          if (getCellHighlights(object, configColumn).isEmpty() || hasActiveRangeFilter(configColumn)) {
             titleString = "title=\"" + SafeHtmlUtils.htmlEscape(value.asString());
           }
           sb.appendHtmlConstant("<div " + titleString + "\">");
@@ -327,7 +331,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         styleNames.add("nowrap");
         styleNames.add("text-align-left");
 
-        if (!getCellHighlights(row, configColumn).isEmpty()) {
+        if (!getCellHighlights(row, configColumn).isEmpty() || hasActiveRangeFilter(configColumn)) {
           styleNames.add("highlighted-cell");
         }
 
@@ -471,7 +475,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         SafeHtml value = getValue(object);
         if (value != null) {
           String titleString = "";
-          if (getCellHighlights(object, configColumn).isEmpty()) {
+          if (getCellHighlights(object, configColumn).isEmpty() || hasActiveRangeFilter(configColumn)) {
             titleString = "title=\"" + SafeHtmlUtils.htmlEscape(value.asString());
           }
           sb.appendHtmlConstant("<div" + titleString + "\">");
@@ -502,7 +506,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         styleNames.add("nowrap");
         styleNames.add("text-align-left");
 
-        if (!getCellHighlights(row, configColumn).isEmpty()) {
+        if (!getCellHighlights(row, configColumn).isEmpty() || hasActiveRangeFilter(configColumn)) {
           styleNames.add("highlighted-cell");
         }
 
@@ -595,6 +599,34 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     return cellHighlights;
   }
 
+  private boolean hasActiveRangeFilter(ColumnStatus configColumn) {
+    if (getFilter() == null || getFilter().getParameters() == null) {
+      return false;
+    }
+
+    String colId = configColumn.getId();
+    String colIdWithoutSuffix = colId.substring(0, colId.lastIndexOf('_'));
+
+    for (FilterParameter param : getFilter().getParameters()) {
+      if (param instanceof LongRangeFilterParameter || param instanceof DateRangeFilterParameter
+        || param instanceof DateIntervalFilterParameter) {
+
+        String filterName = "";
+        if (param instanceof LongRangeFilterParameter)
+          filterName = ((LongRangeFilterParameter) param).getName();
+        else if (param instanceof DateRangeFilterParameter)
+          filterName = ((DateRangeFilterParameter) param).getName();
+        else if (param instanceof DateIntervalFilterParameter)
+          filterName = ((DateIntervalFilterParameter) param).getFromName();
+
+        if (filterName != null && filterName.startsWith(colIdWithoutSuffix)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   private Column<ViewerRow, SafeHtml> buildDownloadColumn(ColumnStatus configColumn, ViewerDatabase database,
     ViewerTable table, int columnIndex) {
     return new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
@@ -640,7 +672,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         styleNames.add("nowrap");
         styleNames.add("text-align-left");
 
-        if (!getCellHighlights(row, configColumn).isEmpty()) {
+        if (!getCellHighlights(row, configColumn).isEmpty() || hasActiveRangeFilter(configColumn)) {
           styleNames.add("highlighted-cell");
         }
 
@@ -793,6 +825,20 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           fieldsToReturn.add(longStringId);
           queryFields.add(longStringId);
           highlightFields.add(longStringId);
+        } else if (column.getId().endsWith(ViewerConstants.SOLR_DYN_DOUBLE)) {
+          String doubleStringId = column.getId().replace(ViewerConstants.SOLR_DYN_DOUBLE,
+            ViewerConstants.SOLR_DYN_STRING);
+          fieldsToReturn.add(column.getId());
+          fieldsToReturn.add(doubleStringId);
+          queryFields.add(doubleStringId);
+          highlightFields.add(doubleStringId);
+        } else if (column.getId().endsWith(ViewerConstants.SOLR_DYN_FLOAT)) {
+          String floatStringId = column.getId().replace(ViewerConstants.SOLR_DYN_FLOAT,
+            ViewerConstants.SOLR_DYN_STRING);
+          fieldsToReturn.add(column.getId());
+          fieldsToReturn.add(floatStringId);
+          queryFields.add(floatStringId);
+          highlightFields.add(floatStringId);
         } else if (column.getId().matches("lob.+_s")
           // Return, query, and highlight both fields
           && column.getLobTextExtractionStatus().getExtractedAndIndexedText()) {
