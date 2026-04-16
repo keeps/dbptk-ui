@@ -290,11 +290,24 @@ public class RowPanel extends RightPanel {
         }
 
         String refName;
+        TableStatus refTableStatus = status.getTableStatus(ref.refTable.getUuid());
 
-        if (ClientConfigurationManager.getBoolean(true, ViewerConstants.PROPERTY_REFERENCE_TABLE_SHOW_SCHEMA_NAME)) {
-          refName = ref.getSchemaAndTableName();
+        boolean showSchema = ClientConfigurationManager.getBoolean(true,
+          ViewerConstants.PROPERTY_REFERENCE_TABLE_SHOW_SCHEMA_NAME);
+        boolean hasCustomName = refTableStatus != null && ViewerStringUtils.isNotBlank(refTableStatus.getCustomName());
+
+        if (showSchema) {
+          if (hasCustomName) {
+            refName = ref.refTable.getSchemaName() + "." + refTableStatus.getCustomName();
+          } else {
+            refName = ref.getSchemaAndTableName();
+          }
         } else {
-          refName = ref.refTable.getName();
+          if (hasCustomName) {
+            refName = refTableStatus.getCustomName();
+          } else {
+            refName = ref.refTable.getName();
+          }
         }
 
         Hyperlink hyperlink = new Hyperlink(refName,
