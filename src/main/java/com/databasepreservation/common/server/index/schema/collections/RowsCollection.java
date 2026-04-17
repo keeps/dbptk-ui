@@ -13,6 +13,7 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_N
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_ID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_UUID;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -120,10 +121,16 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
         doc.addField(solrColumnName, cellValue);
       }
       if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_DATE)) {
+        String cleanDate = cellEntry.getValue().getValue();
+        if (cleanDate != null) {
+          try {
+            cleanDate = Instant.parse(cleanDate).toString();
+          } catch (java.time.format.DateTimeParseException e) {
+            // Use the original value if it cannot be parsed as an Instant
+          }
+        }
         doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_DATE, ViewerConstants.SOLR_DYN_TEXT_GENERAL),
-          cellEntry.getValue().getValue());
-        doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_DATE, ViewerConstants.SOLR_DYN_STRING),
-          cellEntry.getValue().getValue());
+          cleanDate);
       } else if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_BOOLEAN)) {
         doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_BOOLEAN, ViewerConstants.SOLR_DYN_STRING),
           SolrUtils.getSolrBooleanValue(cellEntry.getValue().getValue()).toString());
@@ -133,6 +140,21 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
       } else if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_INT)) {
         doc.addField(solrColumnName.replace(ViewerConstants.SOLR_DYN_INT, ViewerConstants.SOLR_DYN_STRING),
           cellEntry.getValue().getValue());
+      } else if (solrColumnName.endsWith(ViewerConstants.SOLR_DYN_DOUBLE)
+        || solrColumnName.endsWith(ViewerConstants.SOLR_DYN_FLOAT)) {
+        String cleanNumber = cellEntry.getValue().getValue();
+        if (cleanNumber != null) {
+          try {
+            cleanNumber = new java.math.BigDecimal(cleanNumber).stripTrailingZeros().toPlainString();
+          } catch (NumberFormatException e) {
+            // Use the original value if it cannot be parsed as a number
+          }
+        }
+        String suffixToReplace = solrColumnName.endsWith(ViewerConstants.SOLR_DYN_DOUBLE)
+          ? ViewerConstants.SOLR_DYN_DOUBLE
+          : ViewerConstants.SOLR_DYN_FLOAT;
+
+        doc.addField(solrColumnName.replace(suffixToReplace, ViewerConstants.SOLR_DYN_STRING), cleanNumber);
       }
     }
 
