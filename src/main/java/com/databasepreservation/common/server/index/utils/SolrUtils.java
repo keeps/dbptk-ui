@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
@@ -2039,14 +2041,8 @@ public class SolrUtils {
   }
 
   /**
-   * Helper method to build a query string for highlighting based on the provided
-   * filter and highlighted fields. It recursively processes the filter parameters
-   * and constructs a query string that can be used for highlighting in Solr. The
-   * method handles different types of filter parameters, including simple
-   * filters, range filters, date filters, and more complex combinations of
-   * filters.
+   * Builds a Solr highlight query string based on the provided filter and fields.
    */
-
   private static String buildHighlightQuery(Filter filter, List<String> highlightedFields) {
     if (filter == null || filter.getParameters() == null) {
       return "";
@@ -2060,71 +2056,88 @@ public class SolrUtils {
 
   private static void buildHighlightQueryRecursive(FilterParameter parameter, List<String> highlightedFields,
     List<String> hlQueries) {
+    if (parameter == null)
+      return;
+
     if (parameter instanceof SimpleFilterParameter) {
-      SimpleFilterParameter p = (SimpleFilterParameter) parameter;
-      String field = findHighlightField(p.getName(), highlightedFields);
-      hlQueries.add(field + ":(" + escapeSolrSpecialChars(p.getValue()) + ")");
-
-    } else if (parameter instanceof LongRangeFilterParameter ||
-            parameter instanceof DateRangeFilterParameter ||
-            parameter instanceof DateIntervalFilterParameter) {
-      // Range filters are not suitable for highlighting, so we skip them
+      handleSimpleFilter((SimpleFilterParameter) parameter, highlightedFields, hlQueries);
     } else if (parameter instanceof BasicSearchFilterParameter) {
-      BasicSearchFilterParameter p = (BasicSearchFilterParameter) parameter;
-
-      if (ViewerConstants.INDEX_SEARCH.equals(p.getName()) ||
-              ViewerConstants.INDEX_LOB_TEXT_SEARCH.equals(p.getName())) {
-
-        String val = escapeSolrSpecialChars(p.getValue());
-        boolean isOcrOnlySearch = ViewerConstants.INDEX_LOB_TEXT_SEARCH.equals(p.getName());
-
-        if (highlightedFields != null && !highlightedFields.isEmpty()) {
-          List<String> virtualQueries = new ArrayList<>();
-
-          for (String hlField : highlightedFields) {
-            boolean isOcrField = hlField.endsWith(ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX);
-
-            if (isOcrOnlySearch && isOcrField) {
-              virtualQueries.add(hlField + ":(" + val + ")");
-            } else if (!isOcrOnlySearch && !isOcrField) {
-              virtualQueries.add(hlField + ":(" + val + ")");
-            }
-          }
-
-          if (!virtualQueries.isEmpty()) {
-            hlQueries.add("(" + String.join(" OR ", virtualQueries) + ")");
-          } else {
-            hlQueries.add("(" + val + ")");
-          }
-        } else {
-          hlQueries.add("(" + val + ")");
-        }
-
-      } else {
-        String field = findHighlightField(p.getName(), highlightedFields);
-        hlQueries.add(field + ":(" + escapeSolrSpecialChars(p.getValue()) + ")");
-      }
-
+      handleBasicSearchFilter((BasicSearchFilterParameter) parameter, highlightedFields, hlQueries);
     } else if (parameter instanceof EDismaxSimplerQueryFilterParameter) {
-      String val = escapeSolrSpecialChars(((EDismaxSimplerQueryFilterParameter) parameter).getValue());
-      if (highlightedFields != null && !highlightedFields.isEmpty()) {
-        List<String> edismaxQueries = new ArrayList<>();
-        for (String hlField : highlightedFields) {
-          edismaxQueries.add(hlField + ":(" + val + ")");
-        }
-        hlQueries.add("(" + String.join(" OR ", edismaxQueries) + ")");
-      } else {
-        hlQueries.add("(" + val + ")");
-      }
-
+      handleEDismaxFilter((EDismaxSimplerQueryFilterParameter) parameter, highlightedFields, hlQueries);
+    } else if (parameter instanceof BlockJoinParentFilterParameter) {
+      handleBlockJoinFilter((BlockJoinParentFilterParameter) parameter, highlightedFields, hlQueries);
     } else if (parameter instanceof OrFiltersParameters) {
-      for (FilterParameter p : ((OrFiltersParameters) parameter).getValues()) {
-        buildHighlightQueryRecursive(p, highlightedFields, hlQueries);
-      }
+      ((OrFiltersParameters) parameter).getValues()
+        .forEach(p -> buildHighlightQueryRecursive(p, highlightedFields, hlQueries));
     } else if (parameter instanceof AndFiltersParameters) {
-      for (FilterParameter p : ((AndFiltersParameters) parameter).getValues()) {
-        buildHighlightQueryRecursive(p, highlightedFields, hlQueries);
-      }
+      ((AndFiltersParameters) parameter).getValues()
+        .forEach(p -> buildHighlightQueryRecursive(p, highlightedFields, hlQueries));
+    }
+    // Range and Date filters are intentionally skipped as they do not support
+    // highlighting
+  }
+
+  private static void handleSimpleFilter(SimpleFilterParameter p, List<String> highlightedFields,
+    List<String> hlQueries) {
+    addSingleFieldQuery(p.getName(), p.getValue(), highlightedFields, hlQueries);
+  }
+
+  private static void handleBasicSearchFilter(BasicSearchFilterParameter p, List<String> highlightedFields,
+    List<String> hlQueries) {
+    if (ViewerConstants.INDEX_SEARCH.equals(p.getName()) || ViewerConstants.INDEX_LOB_TEXT_SEARCH.equals(p.getName())) {
+
+      boolean isOcrOnly = ViewerConstants.INDEX_LOB_TEXT_SEARCH.equals(p.getName());
+
+      // Match fields based on whether OCR search was explicitly requested
+      Predicate<String> fieldCondition = field -> isOcrOnly == field
+        .endsWith(ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX);
+      addMultiFieldQuery(p.getValue(), highlightedFields, fieldCondition, hlQueries);
+
+    } else {
+      addSingleFieldQuery(p.getName(), p.getValue(), highlightedFields, hlQueries);
+    }
+  }
+
+  private static void handleEDismaxFilter(EDismaxSimplerQueryFilterParameter p, List<String> highlightedFields,
+    List<String> hlQueries) {
+    // EDismax applies the highlighted term to all available fields
+    addMultiFieldQuery(p.getValue(), highlightedFields, field -> true, hlQueries);
+  }
+
+  private static void handleBlockJoinFilter(BlockJoinParentFilterParameter p, List<String> highlightedFields,
+    List<String> hlQueries) {
+    // BlockJoin queries should only highlight on flattened nested fields
+    Predicate<String> fieldCondition = field -> field.contains("_nst_") && field.endsWith("_txt_sort");
+    addMultiFieldQuery(p.getValue(), highlightedFields, fieldCondition, hlQueries);
+  }
+
+  private static void addSingleFieldQuery(String name, String value, List<String> highlightedFields,
+    List<String> hlQueries) {
+    String field = findHighlightField(name, highlightedFields);
+    hlQueries.add(field + ":(" + escapeSolrSpecialChars(value) + ")");
+  }
+
+  /**
+   * Filters the highlighted fields based on a given condition and appends the
+   * resulting queries.
+   */
+  private static void addMultiFieldQuery(String value, List<String> highlightedFields, Predicate<String> fieldCondition,
+    List<String> hlQueries) {
+    String val = escapeSolrSpecialChars(value);
+
+    if (highlightedFields == null || highlightedFields.isEmpty()) {
+      hlQueries.add("(" + val + ")");
+      return;
+    }
+
+    List<String> subQueries = highlightedFields.stream().filter(fieldCondition).map(field -> field + ":(" + val + ")")
+      .collect(Collectors.toList());
+
+    if (!subQueries.isEmpty()) {
+      hlQueries.add("(" + String.join(" OR ", subQueries) + ")");
+    } else {
+      hlQueries.add("(" + val + ")"); // Safety fallback
     }
   }
 
