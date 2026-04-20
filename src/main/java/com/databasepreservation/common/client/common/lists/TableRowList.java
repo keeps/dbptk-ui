@@ -535,8 +535,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         case NESTED:
           NestedColumnStatus nestedConfigColumn = configColumn.getNestedColumns();
           for (String nestedSolrName : nestedConfigColumn.getNestedSolrNames()) {
-            columnHighlightedNames.add(
-              nestedConfigColumn.getOriginalTable() + "_nst_" + nestedSolrName + ViewerConstants.SOLR_DYN_TEXT_MULTI);
+            String rawName = nestedConfigColumn.getOriginalTable() + "_nst_" + nestedSolrName + ViewerConstants.SOLR_DYN_TEXT_MULTI;
+            columnHighlightedNames.add(rawName.replaceAll("[\" ]", "_"));
           }
           break;
         case BINARY:
@@ -858,11 +858,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         NestedColumnStatus nestedColumn = column.getNestedColumns();
         ArrayList<String> individualNestedFieldNames = new ArrayList<>();
         for (String nestedSolrName : nestedColumn.getNestedSolrNames()) {
-          individualNestedFieldNames
-            .add(nestedColumn.getOriginalTable() + "_nst_" + nestedSolrName + ViewerConstants.SOLR_DYN_TEXT_MULTI);
+          String rawFieldName = nestedColumn.getOriginalTable() + "_nst_" + nestedSolrName + ViewerConstants.SOLR_DYN_TEXT_MULTI;
+          //String safeSolrFieldName = rawFieldName.replaceAll("[^a-zA-Z0-9_]", "_");
+          String safeSolrFieldName = rawFieldName.replaceAll("[\" ]", "_");
+          individualNestedFieldNames.add(safeSolrFieldName);
         }
         highlightFields.addAll(individualNestedFieldNames);
-        queryFields.addAll(individualNestedFieldNames);
       }
     }
   }
