@@ -156,7 +156,8 @@ public class DenormalizationStepUtils {
     List<String> prefixes = new ArrayList<>();
     if (relatedTables != null) {
       for (RelatedTablesConfiguration rt : relatedTables) {
-        prefixes.add(rt.getTableID() + "_" + ViewerConstants.SOLR_ROWS_NESTED_COL);
+        String safeTableId = rt.getTableID().replaceAll("[^a-zA-Z0-9._-]", "?");
+        prefixes.add(safeTableId + "_" + ViewerConstants.SOLR_ROWS_NESTED_COL);
         prefixes.addAll(getRelatedTablePrefixes(rt.getRelatedTables()));
       }
     }
