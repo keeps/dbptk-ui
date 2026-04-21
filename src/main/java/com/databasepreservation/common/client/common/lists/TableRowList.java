@@ -62,7 +62,6 @@ import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
-import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.cell.client.Cell;
@@ -1108,17 +1107,14 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     // prepare parameter: field list
     List<String> fieldsToSolr = new ArrayList<>();
+    List<String> queryFields = new ArrayList<>();
+    List<String> highlightFields = new ArrayList<>();
+
+    createFieldLists(fieldsToSolr, queryFields, highlightFields);
+
     List<String> fieldsToHeader = new ArrayList<>();
     for (ColumnStatus configColumn : visibleColumnsList) {
       if (isColumnVisible(configColumn.getName())) {
-        if (!configColumn.getType().equals(NESTED)) {
-          fieldsToSolr.add(configColumn.getId());
-          if (configColumn.getType().equals(BINARY)) {
-            fieldsToSolr.add(ViewerCelllUtils.getMimeTypeSolrName(configColumn.getId()));
-            fieldsToSolr.add(ViewerCelllUtils.getFileExtensionSolrName(configColumn.getId()));
-            fieldsToSolr.add(ViewerCelllUtils.getStoreTypeSolrColumnName(configColumn.getId()));
-          }
-        }
         fieldsToHeader.add(configColumn.getId());
       }
 
@@ -1148,15 +1144,21 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     }
 
     Filter tableFilterQuery;
-    if (!nested && !wrapper.isNested()) {
+    if (!wrapper.isNested()) {
       tableFilterQuery = FilterUtils.getTableFilter(table.getId());
     } else {
       tableFilterQuery = new Filter();
     }
 
+    String defType;
+    if (getFilter().getParameters().stream().anyMatch(p -> p instanceof EDismaxSimplerQueryFilterParameter)) {
+      defType = ViewerConstants.SOLR_EDISMAX;
+    } else {
+      defType = ViewerConstants.SOLR_LUCENE;
+    }
+
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
-      Facets.NONE, false, fieldsToSolr, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery, fieldsToSolr,
-      false, List.of());
+      Facets.NONE, false, fieldsToSolr, extraParameters, defType, tableFilterQuery, fieldsToSolr, false, List.of());
 
     return RestUtils.createExportTableUri(database.getUuid(), table.getSchemaName(), table.getName(), findRequest,
       zipFilename, filename, description, exportLobs, fieldsToHeader);
