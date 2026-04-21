@@ -23,7 +23,6 @@ import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.UriUtils;
 
 /**
@@ -53,7 +52,8 @@ public class SearchInfo implements Serializable {
    *          map of solr column names to column values, to be used as advanced
    *          search fields
    */
-  public SearchInfo(CollectionStatus status, ViewerTable viewerTable, Map<String, String> solrColumnAndValue, ViewerMetadata metadata) {
+  public SearchInfo(CollectionStatus status, ViewerTable viewerTable, Map<String, String> solrColumnAndValue,
+    ViewerMetadata metadata) {
     defaultFilter = ViewerConstants.DEFAULT_FILTER;
     currentFilter = "";
 
@@ -68,7 +68,13 @@ public class SearchInfo implements Serializable {
       if (ViewerStringUtils.isNotBlank(value)) {
         // try to handle different types in different ways
         if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)) {
-          fieldParameter = new LongRangeFilterParameter(solrColumnName, Long.valueOf(value), Long.valueOf(value));
+          try {
+            Long parsedValue = Double.valueOf(value).longValue();
+            fieldParameter = new LongRangeFilterParameter(solrColumnName, parsedValue, parsedValue);
+          } catch (NumberFormatException e) {
+            // if the value cannot be parsed as a number, we can ignore it and set it as a
+            // BasicSearchFilterParameter
+          }
         } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_DATETIME)) {
           // TODO: handle DATETIME keys
         } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_DATE)) {

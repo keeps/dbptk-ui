@@ -7,9 +7,9 @@
  */
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers;
 
-
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
@@ -27,7 +27,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ClobColumnOptionsPanel extends ColumnOptionsPanel {
+public class ClobColumnOptionsPanel extends ColumnOptionsPanel implements SavableOptionsPanel {
   interface ColumnsOptionsPanelUiBinder extends UiBinder<Widget, ClobColumnOptionsPanel> {
   }
 
@@ -82,24 +82,21 @@ public class ClobColumnOptionsPanel extends ColumnOptionsPanel {
     templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
   }
 
-  @Override
-  public TemplateStatus getSearchTemplate() {
+  private TemplateStatus getSearchTemplate() {
     if (!overallOption.getValue()) {
       return getTemplateStatus(templateToOverallView);
     }
     return new TemplateStatus();
   }
 
-  @Override
-  public TemplateStatus getDetailsTemplate() {
+  private TemplateStatus getDetailsTemplate() {
     if (!detailedOption.getValue()) {
       return getTemplateStatus(templateToDetailedView);
     }
     return new TemplateStatus();
   }
 
-  @Override
-  public TemplateStatus getExportTemplate() {
+  private TemplateStatus getExportTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
     templateStatus.setTemplate(templateToRenderFile.getText());
     return templateStatus;
@@ -175,5 +172,20 @@ public class ClobColumnOptionsPanel extends ColumnOptionsPanel {
     }
 
     return templateStatus;
+  }
+
+  @Override
+  public boolean hasChanges() {
+    return true;
+  }
+
+  @Override
+  public void applyChanges(ColumnStatus column, TableStatus table, CollectionStatus collection) {
+    column.updateExportTemplate(getExportTemplate());
+    column.updateSearchListTemplate(getSearchTemplate());
+    column.updateDetailsTemplate(getDetailsTemplate());
+    column.updateDetailsShowContent(showContentInDetails());
+    column.getSearchStatus().getList().setShowContent(showContentInList());
+    column.setApplicationType(getApplicationType());
   }
 }

@@ -57,13 +57,15 @@ public class NumericIntervalSearchFieldPanel extends SearchFieldPanel {
 
       if (!inputNumericFrom.getValue().isEmpty() || !inputNumericTo.getValue().isEmpty()) {
         if (intervalValid(inputNumericFrom, inputNumericTo)) {
+          Long parsedFromValue = Double.valueOf(inputNumericFrom.getValue()).longValue();
           if (inputNumericTo.getValue().isEmpty()) {
-            filterParameter = new LongRangeFilterParameter(field, Long.valueOf(inputNumericFrom.getValue()), null);
+            filterParameter = new LongRangeFilterParameter(field, parsedFromValue, null);
           } else if (inputNumericFrom.getValue().isEmpty()) {
-            filterParameter = new LongRangeFilterParameter(field, null, Long.valueOf(inputNumericTo.getValue()));
+            Long parsedToValue = Double.valueOf(inputNumericTo.getValue()).longValue();
+            filterParameter = new LongRangeFilterParameter(field, null, parsedToValue);
           } else {
-            filterParameter = new LongRangeFilterParameter(field, Long.valueOf(inputNumericFrom.getValue()),
-              Long.valueOf(inputNumericTo.getValue()));
+            Long parsedToValue = Double.valueOf(inputNumericTo.getValue()).longValue();
+            filterParameter = new LongRangeFilterParameter(field, parsedFromValue, parsedToValue);
           }
         } else {
           Dialogs.showErrors(messages.advancedSearchDialogTitle(),

@@ -14,6 +14,7 @@ import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_VIE
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.ApplicationTypeActions;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
@@ -34,7 +35,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
+public class BinaryColumnOptionsPanel extends ColumnOptionsPanel implements SavableOptionsPanel {
   interface ColumnsOptionsPanelUiBinder extends UiBinder<Widget, BinaryColumnOptionsPanel> {
   }
 
@@ -91,7 +92,6 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     return new BinaryColumnOptionsPanel(tableConfiguration, columnConfiguration);
   }
 
-  @Override
   public TemplateStatus getSearchTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
     if (ViewerStringUtils.isBlank(this.displayList.getText())) {
@@ -107,8 +107,7 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     return templateStatus;
   }
 
-  @Override
-  public TemplateStatus getDetailsTemplate() {
+  private TemplateStatus getDetailsTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
     if (ViewerStringUtils.isBlank(this.detailsList.getText())) {
       if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
@@ -122,14 +121,13 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     return templateStatus;
   }
 
-  @Override
-  public TemplateStatus getExportTemplate() {
+  private TemplateStatus getExportTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
     templateStatus.setTemplate(this.templateList.getText());
     return templateStatus;
   }
 
-  public String getApplicationType() {
+  private String getApplicationType() {
     if (autoDetectRadioBtn.getValue()) {
       return ViewerCelllUtils.getAutoDetectMimeTypeTemplate();
     } else {
@@ -195,5 +193,18 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     });
 
     applicationTypePanel.addStyleName("dialog-blog-mime-type-panel");
+  }
+
+  @Override
+  public boolean hasChanges() {
+    return true;
+  }
+
+  @Override
+  public void applyChanges(ColumnStatus column, TableStatus table, CollectionStatus collection) {
+    column.updateExportTemplate(getExportTemplate());
+    column.updateSearchListTemplate(getSearchTemplate());
+    column.updateDetailsTemplate(getDetailsTemplate());
+    column.setApplicationType(getApplicationType());
   }
 }

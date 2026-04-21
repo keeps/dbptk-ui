@@ -1758,6 +1758,8 @@ public interface ClientMessages extends Messages {
 
   SafeHtml columnManagementCustomizeColumnTextForWidthDescription(String link);
 
+  String columnManagementLabelForPresentation();
+
   String columnManagementButtonTextForAddVirtualColumn();
 
   String columnManagementLabelForVirtualColumn();
@@ -1775,6 +1777,28 @@ public interface ClientMessages extends Messages {
   String columnManagementLabelForReferencedColumnsTemplate();
 
   String columnManagementLabelFkDetected();
+
+  String columnManagementTextFkDetectedDescription();
+
+  String columnManagementTextSourceType(String type);
+
+  String columnManagementLabelForTargetColumn();
+
+  String columnManagementErrorTargetColumnRequired();
+
+  String columnManagementErrorVirtualColumnNameRequired();
+
+  String columnManagementErrorVirtualColumnNameNoSpaces();
+
+  String columnManagementErrorVirtualColumnNameInvalidChars();
+
+  String columnManagementErrorVirtualColumnNameDuplicate();
+
+  String columnManagementErrorVirtualColumnTemplateRequired();
+
+  String columnManagementErrorVirtualColumnTypeMismatch();
+
+  String columnManagementDialogConfirmDeleteVirtualColumn();
 
   /********************************************
    * Column Management Panel - Binary Column

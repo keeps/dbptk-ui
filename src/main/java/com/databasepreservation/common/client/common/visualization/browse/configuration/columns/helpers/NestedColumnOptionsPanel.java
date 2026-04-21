@@ -8,7 +8,9 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.core.client.GWT;
@@ -27,7 +29,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
+public class NestedColumnOptionsPanel extends ColumnOptionsPanel implements SavableOptionsPanel {
   interface ColumnsOptionsPanelUiBinder extends UiBinder<Widget, NestedColumnOptionsPanel> {
   }
 
@@ -55,23 +57,20 @@ public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
     return new NestedColumnOptionsPanel(columnStatus);
   }
 
-  @Override
-  public TemplateStatus getSearchTemplate() {
+  private TemplateStatus getSearchTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
     templateStatus.setTemplate(templateList.getText());
     templateStatus.setSeparator(items.getText());
     return templateStatus;
   }
 
-  @Override
-  public TemplateStatus getDetailsTemplate() {
+  private TemplateStatus getDetailsTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
     templateStatus.setTemplate(templateDetail.getText());
     return templateStatus;
   }
 
-  @Override
-  public TemplateStatus getExportTemplate() {
+  private TemplateStatus getExportTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
     templateStatus.setTemplate(templateExport.getText());
     return templateStatus;
@@ -155,5 +154,29 @@ public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
     }
 
     return hintPanel;
+  }
+
+  @Override
+  public boolean hasChanges() {
+    return true;
+  }
+
+  @Override
+  public void applyChanges(ColumnStatus column, TableStatus tableStatus, CollectionStatus collection) {
+    String multiValueTableName = getMultiValueTableName();
+    String targetReferenceUuid = column.getNestedColumns().getReferenceUuid();
+
+    if (targetReferenceUuid != null) {
+      for (ColumnStatus col : tableStatus.getColumns()) {
+        if (col.getNestedColumns() != null && targetReferenceUuid.equals(col.getNestedColumns().getReferenceUuid())) {
+          col.updateNestedColumnsMultiValueTableName(multiValueTableName);
+        }
+      }
+    }
+
+    column.updateSearchListTemplate(getSearchTemplate());
+    column.updateDetailsTemplate(getDetailsTemplate());
+    column.updateExportTemplate(getExportTemplate());
+    column.updateNestedColumnsQuantityList(getQuantityInList());
   }
 }
