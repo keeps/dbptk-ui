@@ -1068,7 +1068,8 @@ public class CollectionResource implements CollectionService {
         filename, exportDescriptions, ',', fieldsToHeader, databaseUUID)).toStreamResponse());
     } else {
       final IndexResult<ViewerRow> rows = solrManager.findRows(databaseUUID, findRequest.filter, findRequest.sorter,
-        findRequest.sublist, null, findRequest.fieldsToReturn, findRequest.extraParameters);
+        findRequest.sublist, null, findRequest.fieldsToReturn, findRequest.extraParameters, findRequest.defType,
+        findRequest.filterQuery, findRequest.queryFields, false, List.of());
 
       return ApiUtils.okResponse(new ViewerStreamingOutput(
         new ResultsCSVOutputStream(rows, configTable, filename, exportDescriptions, ',', fieldsToHeader, databaseUUID))

@@ -181,7 +181,9 @@ public abstract class ZipOutputStream extends CSVOutputStream {
           }
         }
         if (columnMapping != null) {
-          for (ViewerRow originalRow : nestedRows.get(columnMapping.getKey().getId())) {
+          String columnMappingKeyId = columnMapping.getKey().getId().substring(0,
+            columnMapping.getKey().getId().lastIndexOf("_"));
+          for (ViewerRow originalRow : nestedRows.get(columnMappingKeyId)) {
             ViewerCell originalCell = originalRow.getCells().get(columnMapping.getValue().getId());
             if (originalCell != null) {
               if (isSiardDK) {
