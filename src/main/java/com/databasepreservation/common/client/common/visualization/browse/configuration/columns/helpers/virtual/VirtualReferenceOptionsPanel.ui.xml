@@ -1,60 +1,43 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:w='urn:import:com.databasepreservation.common.client.widgets'>
+
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
 
     <g:FlowPanel ui:field="content">
         <g:FlowPanel addStyleNames="dialog-customize-columns-options">
-            <g:FlowPanel ui:field="fkReferencePanel" visible="false" addStyleNames="alert alert-info">
-                <g:FlowPanel>
-                    <g:HTML>
-                        <i class="fa fa-info-circle"></i>
-                        <strong>
-                            <ui:text from='{messages.columnManagementLabelFkDetected}'/>
-                        </strong>
-                    </g:HTML>
-                </g:FlowPanel>
 
-                <g:FlowPanel>
-                    <g:Label ui:field="fkTableLabel" addStyleNames="font-bold margin-bottom-5"/>
-                    <g:Label ui:field="fkColumnsLabel" addStyleNames="font-bold"/>
-                </g:FlowPanel>
-            </g:FlowPanel>
+            <w:Alert ui:field="fkReferencePanel" />
 
             <g:FlowPanel ui:field="virtualReferencePanel" addStyleNames="form-helper">
-                <g:Label addStyleNames="dialog-form-separator">
-                    <ui:text from='{messages.columnManagementLabelForRelationship}'/>
-                </g:Label>
 
-                <!-- Info alert for source column type and type restriction -->
-                <g:FlowPanel addStyleNames="alert alert-info margin-bottom-10">
-                    <g:Label ui:field="sourceColumnTypeLabel"/>
-                    <g:InlineLabel>
-                        <ui:text from='{messages.columnManagementTextSourceTypeInfo}'/>
-                    </g:InlineLabel>
-                </g:FlowPanel>
+                <w:Alert ui:field="virtualInfoAlert"/>
 
-                <g:FlowPanel>
+                <g:FlowPanel addStyleNames="field">
                     <g:HTML addStyleNames="form-label">
                         <ui:text from='{messages.columnManagementLabelForReferencedTable}'/>
                     </g:HTML>
-                    <g:ListBox ui:field="referencedTableListBox" addStyleNames="form-control"/>
+                    <g:ListBox ui:field="referencedTableListBox" addStyleNames="form-textbox"/>
                     <g:Label ui:field="errorReferencedTable" addStyleNames="dialog-input-error-text" visible="false"/>
                 </g:FlowPanel>
 
-                <g:FlowPanel>
+                <g:FlowPanel addStyleNames="field">
                     <g:HTML addStyleNames="form-label">
-                        Target Column
+                        <ui:text from='{messages.columnManagementLabelForTargetColumn}'/>
                     </g:HTML>
-                    <g:ListBox ui:field="referencedColumnListBox" addStyleNames="form-control"/>
+                    <g:ListBox ui:field="referencedColumnListBox" addStyleNames="form-textbox"/>
                     <g:Label ui:field="errorReferencedColumn" addStyleNames="dialog-input-error-text" visible="false"/>
-                    <!-- Warning for no compatible columns -->
-                    <g:Label ui:field="noCompatibleColumnsMessage" addStyleNames="alert alert-warning margin-top-5" visible="false">
-                        <ui:text from='{messages.columnManagementTextNoCompatibleColumns}'/>
-                    </g:Label>
+
+                    <w:Alert ui:field="noCompatibleColumnsMessage" addStyleNames="errormessage" />
+                </g:FlowPanel>
+
+                <g:FlowPanel addStyleNames="dialog-tab-footer-actions">
+                    <g:Button ui:field="btnRemoveRelationship" addStyleNames="btn btn-outline-danger btn-erase" visible="false">
+                        <ui:text from='{messages.basicActionClear}'/>
+                    </g:Button>
                 </g:FlowPanel>
 
             </g:FlowPanel>
         </g:FlowPanel>
-
     </g:FlowPanel>
 </ui:UiBinder>

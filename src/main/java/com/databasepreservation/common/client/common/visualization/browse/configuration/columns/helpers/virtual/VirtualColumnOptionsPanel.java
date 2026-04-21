@@ -8,6 +8,7 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.virtual;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,9 +16,11 @@ import org.jetbrains.annotations.NotNull;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.SavableOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidatableOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ValidationUiUtils;
 import com.databasepreservation.common.client.models.status.collection.AdvancedStatus;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.DetailsStatus;
 import com.databasepreservation.common.client.models.status.collection.ExportStatus;
@@ -50,7 +53,8 @@ import config.i18n.client.ClientMessages;
  *
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements ValidatableOptionsPanel {
+public class VirtualColumnOptionsPanel extends ColumnOptionsPanel
+  implements ValidatableOptionsPanel, SavableOptionsPanel {
 
   interface VirtualColumnOptionsPanelUiBinder extends UiBinder<Widget, VirtualColumnOptionsPanel> {
   }
@@ -69,6 +73,8 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
   Label errorVirtualColumnName, errorTemplateSourceColumns;
   @UiField
   FlowPanel templateSourceColumnsHint;
+
+  private Runnable immediateRemovalCallback;
 
   public static VirtualColumnOptionsPanel createInstance(TableStatus tableStatus, ColumnStatus columnStatus) {
     return new VirtualColumnOptionsPanel(tableStatus, columnStatus);
@@ -171,28 +177,30 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
     // Validate column name (Mutually exclusive conditions)
     if (ViewerStringUtils.isBlank(nameValue)) {
       ValidationUiUtils.showError(virtualColumnName, errorVirtualColumnName,
-        messages.columnManagementLabelForVirtualColumnName() + " is required.");
+        messages.columnManagementErrorVirtualColumnNameRequired());
       isValid = false;
     } else if (nameValue.contains(" ")) {
-      ValidationUiUtils.showError(virtualColumnName, errorVirtualColumnName, "Column name cannot contain spaces.");
+      ValidationUiUtils.showError(virtualColumnName, errorVirtualColumnName,
+        messages.columnManagementErrorVirtualColumnNameNoSpaces());
       isValid = false;
     } else if (!nameValue.matches("^[a-zA-Z0-9_]+$")) {
       ValidationUiUtils.showError(virtualColumnName, errorVirtualColumnName,
-        "Only letters, numbers and underscores are allowed.");
+        messages.columnManagementErrorVirtualColumnNameInvalidChars());
       isValid = false;
     } else if (isDuplicateColumnName(nameValue)) {
-      ValidationUiUtils.showError(virtualColumnName, errorVirtualColumnName, "A column with this name already exists.");
+      ValidationUiUtils.showError(virtualColumnName, errorVirtualColumnName,
+        messages.columnManagementErrorVirtualColumnNameDuplicate());
       isValid = false;
     }
 
     // Validate template logic
     if (ViewerStringUtils.isBlank(templateSourceColumns.getText())) {
       ValidationUiUtils.showError(templateSourceColumns, errorTemplateSourceColumns,
-        messages.columnManagementLabelForSourceColumnsTemplate() + " is required.");
+        messages.columnManagementErrorVirtualColumnTemplateRequired());
       isValid = false;
     } else if (hasTypeMismatchError()) {
       ValidationUiUtils.showError(templateSourceColumns, errorTemplateSourceColumns,
-        "Type mismatch: This column was created as a Number/Date, but your new template generates Text. Please delete this virtual column to avoid errors.");
+        messages.columnManagementErrorVirtualColumnTypeMismatch());
       isValid = false;
     }
 
@@ -291,17 +299,48 @@ public class VirtualColumnOptionsPanel extends ColumnOptionsPanel implements Val
   }
 
   @Override
-  public TemplateStatus getSearchTemplate() {
-    return null;
+  public boolean hasChanges() {
+    if (originalStatus == null || ViewerStringUtils.isBlank(originalStatus.getName())) {
+      return true; // New column
+    }
+
+    boolean nameChanged = !virtualColumnName.getText().equals(originalStatus.getName());
+    boolean descChanged = !virtualColumnDescription.getText().equals(originalStatus.getDescription());
+    boolean templateChanged = !templateSourceColumns.getText()
+      .equals(originalStatus.getVirtualColumnStatus().getTemplateStatus().getTemplate());
+
+    return nameChanged || descChanged || templateChanged;
   }
 
   @Override
-  public TemplateStatus getDetailsTemplate() {
-    return null;
+  public void applyChanges(ColumnStatus columnStatus, TableStatus tableStatus, CollectionStatus collectionStatus) {
+    ColumnStatus updated = getColumnStatus();
+
+    // Update basic metadata
+    columnStatus.setName(updated.getName());
+    columnStatus.setCustomName(updated.getCustomName());
+    columnStatus.setDescription(updated.getDescription());
+    columnStatus.setCustomDescription(updated.getCustomDescription());
+
+    // Update virtual technical status
+    columnStatus.setVirtualColumnStatus(updated.getVirtualColumnStatus());
+    columnStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_PROCESS);
+    columnStatus.getVirtualColumnStatus().setLastUpdatedDate(new Date());
+
+    // Ensure Solr ID is consistent with type if it's a new column
+    if (ViewerStringUtils.isBlank(columnStatus.getId())) {
+      columnStatus.setId(updated.getId());
+      columnStatus.setType(updated.getType());
+      columnStatus.setSourceType(updated.getSourceType());
+    }
   }
 
   @Override
-  public TemplateStatus getExportTemplate() {
-    return null;
+  public boolean requiresProcessing() {
+    return true;
+  }
+
+  public void setImmediateRemovalCallback(Runnable callback) {
+    this.immediateRemovalCallback = callback;
   }
 }

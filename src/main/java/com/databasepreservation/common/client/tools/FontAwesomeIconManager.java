@@ -89,6 +89,7 @@ public class FontAwesomeIconManager {
   public static final String DRAFT = "drafting-compass";
   public static final String LINK = "link";
   public static final String PAPERCLIP = "paperclip";
+  public static final String LOCK = "lock";
 
   public static String getTag(String icon) {
     return "<i class=\"fa fa-" + icon + "\"></i>";

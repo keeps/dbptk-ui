@@ -12,10 +12,8 @@ import java.util.List;
 
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.CustomizeProperties;
-import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTML;
@@ -79,7 +77,8 @@ public class CustomizeColumnOptionsPanel extends ColumnOptionsPanel {
     units.add(Style.Unit.MM);
 
     widthContent.setText(columnConfiguration.getSearchStatus().getList().getCustomizeProperties().getWidth());
-    widthDescription.setHTML(messages.columnManagementCustomizeColumnTextForWidthDescription("https://www.w3schools.com/cssref/css_units.asp"));
+    widthDescription.setHTML(messages
+      .columnManagementCustomizeColumnTextForWidthDescription("https://www.w3schools.com/cssref/css_units.asp"));
 
     setupNumericTextBox(widthContent);
     setupUnitListBox(columnConfiguration);
@@ -101,20 +100,5 @@ public class CustomizeColumnOptionsPanel extends ColumnOptionsPanel {
       }
       index++;
     }
-  }
-
-  @Override
-  public TemplateStatus getSearchTemplate() {
-    return null;
-  }
-
-  @Override
-  public TemplateStatus getDetailsTemplate() {
-    return null;
-  }
-
-  @Override
-  public TemplateStatus getExportTemplate() {
-    return null;
   }
 }

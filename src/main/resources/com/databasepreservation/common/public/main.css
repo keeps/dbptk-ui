@@ -3897,3 +3897,42 @@ rgba(0, 0, 0, .125);
     from { transform: translateY(20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+
+
+/************************************************
+* Column Configuration Dialog Tabs (Metadata Style)
+ ************************************************/
+.column-config-dialog .browseItemMetadata.gwt-TabPanel {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.column-config-dialog .metadata-edit-tab .gwt-TabPanelBottom {
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 65vh;
+    padding-right: 5px;
+}
+
+/************************************************
+* Virtual Reference Panel Specific Styles
+ ************************************************/
+
+.dialog-fk-path-container {
+    margin-top: 10px;
+    padding: 0 10px;
+    background-color: white;
+    border-radius: 4px;
+    border: 1px solid #d6d8db;
+    line-height: 40px;
+}
+
+.dialog-tab-footer-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.margin-right-5 {
+    margin-right: 5px;
+}

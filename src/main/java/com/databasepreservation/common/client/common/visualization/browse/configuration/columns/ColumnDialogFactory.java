@@ -1,17 +1,20 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.BinaryColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ClobColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NestedColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NumericColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.SavableOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.TabbedColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.virtual.VirtualColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.virtual.VirtualReferenceOptionsPanel;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -19,270 +22,145 @@ import com.databasepreservation.common.client.models.status.collection.ColumnSta
 import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.formatters.Formatter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
 /**
- * Registry Factory that encapsulates the creation and callback logic for Column
- * Options Dialogs.
+ * Dynamic pipeline factory for building and processing Column Configuration
+ * dialogs.
+ *
+ * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class ColumnDialogFactory {
 
-  public interface DialogHandler {
-    void open(ViewerDatabase database, CollectionStatus collectionStatus, TableStatus tableStatus,
-      ColumnStatus columnStatus, ClientMessages messages, Consumer<Boolean> saveCallback);
-  }
-
-  private static final Map<ViewerType.dbTypes, DialogHandler> handlers = new HashMap<>();
-  private static final DialogHandler VIRTUAL_HANDLER = createVirtualHandler();
-  private static final DialogHandler DEFAULT_HANDLER = createStandardHandler();
-
-  static {
-    handlers.put(ViewerType.dbTypes.NESTED, createNestedHandler());
-    handlers.put(ViewerType.dbTypes.CLOB, createClobHandler());
-    handlers.put(ViewerType.dbTypes.BINARY, createBinaryHandler());
-    handlers.put(ViewerType.dbTypes.NUMERIC_FLOATING_POINT, createNumericHandler());
-  }
-
-  // Prevents instantiation
   private ColumnDialogFactory() {
   }
 
   public static void openDialog(ViewerDatabase database, CollectionStatus collectionStatus, TableStatus tableStatus,
     ColumnStatus columnStatus, ClientMessages messages, Consumer<Boolean> saveCallback) {
-    if (columnStatus.isVirtual()) {
-      VIRTUAL_HANDLER.open(database, collectionStatus, tableStatus, columnStatus, messages, saveCallback);
-      return;
+
+    List<ColumnOptionsPanel> panels = new ArrayList<>();
+
+    // 1. Type-Specific Formatting Tab (Numeric, Clob, Binary, Nested)
+    ColumnOptionsPanel typePanel = getTypeSpecificPanel(tableStatus, columnStatus, collectionStatus);
+    if (typePanel != null) {
+      panels.add(typePanel);
     }
 
-    DialogHandler handler = handlers.getOrDefault(columnStatus.getType(), DEFAULT_HANDLER);
-    handler.open(database, collectionStatus, tableStatus, columnStatus, messages, saveCallback);
-  }
+    // 2. Virtual Definition Tab
+    if (columnStatus.isVirtual()) {
+      panels.add(VirtualColumnOptionsPanel.createInstance(tableStatus, columnStatus));
+    }
 
-  // --- Handlers Configuration ---
-
-  private static DialogHandler createVirtualHandler() {
-    return (database, collectionStatus, tableStatus, columnStatus, messages, saveCallback) -> {
-      VirtualColumnOptionsPanel colPanel = VirtualColumnOptionsPanel.createInstance(tableStatus, columnStatus);
+    // 3. Relationship Tab (Allowed for primitive types)
+    if (isRelationshipAllowed(columnStatus.getType())) {
       ForeignKeysStatus fkStatus = collectionStatus.getForeignKeyByTableAndColumnId(tableStatus.getUuid(),
         columnStatus.getId());
-      VirtualReferenceOptionsPanel refPanel = VirtualReferenceOptionsPanel.createInstance(database, collectionStatus,
-        tableStatus, columnStatus, fkStatus);
+      panels.add(
+        VirtualReferenceOptionsPanel.createInstance(database, collectionStatus, tableStatus, columnStatus, fkStatus));
+    }
 
-      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
-        messages.basicActionCancel(), messages.basicActionDelete(), Arrays.asList(colPanel, refPanel),
-        new DefaultAsyncCallback<Dialogs.DialogAction>() {
-          @Override
-          public void onSuccess(Dialogs.DialogAction action) {
-            processVirtualColumnSaveAction(action, tableStatus, columnStatus, colPanel, refPanel, fkStatus,
-              collectionStatus, saveCallback);
-          }
-        });
-    };
+    if (panels.isEmpty())
+      return;
+
+    // 4. UI Assembly
+    final TabbedColumnOptionsPanel container = new TabbedColumnOptionsPanel();
+    for (ColumnOptionsPanel p : panels) {
+      container.addTab(getTabLabel(p, messages), p);
+    }
+
+    // 5. UX: Global Delete button is ONLY shown if the column itself is virtual
+    String deleteBtnText = columnStatus.isVirtual() ? messages.basicActionDelete() : null;
+
+    Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
+      messages.basicActionCancel(), deleteBtnText, Arrays.asList(container),
+      new DefaultAsyncCallback<Dialogs.DialogAction>() {
+        @Override
+        public void onSuccess(Dialogs.DialogAction action) {
+          handleGlobalAction(action, container, columnStatus, tableStatus, collectionStatus, saveCallback);
+        }
+      });
   }
 
-  private static DialogHandler createNestedHandler() {
-    return (database, collectionStatus, tableStatus, columnStatus, messages, saveCallback) -> {
-      NestedColumnOptionsPanel panel = (NestedColumnOptionsPanel) NestedColumnOptionsPanel.createInstance(columnStatus);
-      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
-        messages.basicActionCancel(), panel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
-          @Override
-          public void onSuccess(Dialogs.DialogAction action) {
-            processNestedColumnSaveAction(action, tableStatus, columnStatus, panel, saveCallback);
-          }
-        });
-    };
-  }
-
-  private static DialogHandler createClobHandler() {
-    return (database, collectionStatus, tableStatus, columnStatus, messages, saveCallback) -> {
-      ClobColumnOptionsPanel panel = (ClobColumnOptionsPanel) ClobColumnOptionsPanel.createInstance(tableStatus,
-        tableStatus.getColumnById(columnStatus.getId()));
-      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
-        messages.basicActionCancel(), panel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
-          @Override
-          public void onSuccess(Dialogs.DialogAction action) {
-            processClobColumnSaveAction(action, tableStatus, columnStatus, panel, saveCallback);
-          }
-        });
-    };
-  }
-
-  private static DialogHandler createBinaryHandler() {
-    return (database, collectionStatus, tableStatus, columnStatus, messages, saveCallback) -> {
-      BinaryColumnOptionsPanel panel = (BinaryColumnOptionsPanel) BinaryColumnOptionsPanel.createInstance(tableStatus,
-        tableStatus.getColumnById(columnStatus.getId()));
-      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
-        messages.basicActionCancel(), panel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
-          @Override
-          public void onSuccess(Dialogs.DialogAction action) {
-            processBinaryColumnSaveAction(action, tableStatus, columnStatus, panel, saveCallback);
-          }
-        });
-    };
-  }
-
-  private static DialogHandler createNumericHandler() {
-    return (database, collectionStatus, tableStatus, columnStatus, messages, saveCallback) -> {
-      NumericColumnOptionsPanel panel = (NumericColumnOptionsPanel) NumericColumnOptionsPanel
-        .createInstance(collectionStatus.getColumnByTableIdAndColumn(tableStatus.getId(), columnStatus.getId()));
-      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "400px", messages.basicActionSave(),
-        messages.basicActionCancel(), panel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
-          @Override
-          public void onSuccess(Dialogs.DialogAction action) {
-            processNumericColumnSaveAction(action, tableStatus, columnStatus, panel, collectionStatus, messages,
-              saveCallback);
-          }
-        });
-    };
-  }
-
-  private static DialogHandler createStandardHandler() {
-    return (database, collectionStatus, tableStatus, columnStatus, messages, saveCallback) -> {
-      ForeignKeysStatus fkStatus = collectionStatus.getForeignKeyByTableAndColumnId(tableStatus.getUuid(),
-        columnStatus.getId());
-      VirtualReferenceOptionsPanel panel = VirtualReferenceOptionsPanel.createInstance(database, collectionStatus,
-        tableStatus, columnStatus, fkStatus);
-
-      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
-        messages.basicActionCancel(), messages.basicActionDelete(), Arrays.asList(panel),
-        new DefaultAsyncCallback<Dialogs.DialogAction>() {
-          @Override
-          public void onSuccess(Dialogs.DialogAction action) {
-            processStandardColumnSaveAction(action, tableStatus, panel, fkStatus, collectionStatus, saveCallback);
-          }
-        });
-    };
-  }
-
-  private static void processVirtualColumnSaveAction(Dialogs.DialogAction action, TableStatus tableStatus,
-    ColumnStatus columnStatus, VirtualColumnOptionsPanel colPanel, VirtualReferenceOptionsPanel refPanel,
-    ForeignKeysStatus fkStatus, CollectionStatus collectionStatus, Consumer<Boolean> saveCallback) {
-    ColumnStatus column = tableStatus.getColumnById(columnStatus.getId());
-    ColumnStatus updatedColStatus = colPanel.getColumnStatus();
-    ForeignKeysStatus updatedFkStatus = refPanel.getVirtualReferenceStatus();
+  private static void handleGlobalAction(Dialogs.DialogAction action, TabbedColumnOptionsPanel container,
+    ColumnStatus col, TableStatus table, CollectionStatus status, Consumer<Boolean> callback) {
 
     if (Dialogs.DialogAction.SAVE.equals(action)) {
-      if (updatedFkStatus != null) {
-        if (updatedFkStatus.getVirtualForeignKeysStatus() != null) {
-          updatedFkStatus.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_PROCESS);
-          updatedFkStatus.getVirtualForeignKeysStatus().setLastUpdatedDate(new Date());
-        }
-        tableStatus.addOrUpdateForeignKeyStatus(updatedFkStatus);
-      }
-      updatedColStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_PROCESS);
-      column.setDescription(updatedColStatus.getDescription());
-      column.setCustomDescription(updatedColStatus.getDescription());
-      column.setVirtualColumnStatus(updatedColStatus.getVirtualColumnStatus());
+      boolean stateChanged = false;
+      boolean requiresBatchJob = false;
 
-      collectionStatus.setNeedsToBeProcessed(true);
-      saveCallback.accept(true);
+      for (Widget p : container.getPanels()) {
+        if (p instanceof SavableOptionsPanel) {
+          SavableOptionsPanel savablePanel = (SavableOptionsPanel) p;
+
+          if (savablePanel.hasChanges()) {
+            savablePanel.applyChanges(col, table, status);
+            stateChanged = true;
+
+            if (savablePanel.requiresProcessing()) {
+              requiresBatchJob = true;
+            }
+          }
+        }
+      }
+      if (stateChanged) {
+        if (requiresBatchJob) {
+          status.setNeedsToBeProcessed(true);
+        }
+        callback.accept(true);
+      }
 
     } else if (Dialogs.DialogAction.REMOVE.equals(action)) {
+      // Cascading global delete (Virtual Column + its Relations)
+      if (col.isVirtual() && col.getVirtualColumnStatus() != null) {
+        col.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_REMOVE);
+      }
+
+      ForeignKeysStatus fkStatus = status.getForeignKeyByTableAndColumnId(table.getUuid(), col.getId());
       if (fkStatus != null && fkStatus.getVirtualForeignKeysStatus() != null) {
         fkStatus.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_REMOVE);
         fkStatus.getVirtualForeignKeysStatus().setLastUpdatedDate(new Date());
-        tableStatus.addOrUpdateForeignKeyStatus(fkStatus);
+        table.addOrUpdateForeignKeyStatus(fkStatus);
       }
-      updatedColStatus.getVirtualColumnStatus().setProcessingState(ProcessingState.TO_REMOVE);
-      column.setVirtualColumnStatus(updatedColStatus.getVirtualColumnStatus());
 
-      collectionStatus.setNeedsToBeProcessed(true);
-      saveCallback.accept(true);
+      status.setNeedsToBeProcessed(true);
+      callback.accept(true);
     }
   }
 
-  private static void processNestedColumnSaveAction(Dialogs.DialogAction action, TableStatus tableStatus,
-    ColumnStatus columnStatus, NestedColumnOptionsPanel panel, Consumer<Boolean> saveCallback) {
-    if (Dialogs.DialogAction.SAVE.equals(action)) {
-      String multiValueTableName = panel.getMultiValueTableName();
-      String targetReferenceUuid = columnStatus.getNestedColumns().getReferenceUuid();
+  private static ColumnOptionsPanel getTypeSpecificPanel(TableStatus table, ColumnStatus col, CollectionStatus status) {
+    ViewerType.dbTypes type = col.getType();
+    if (type == null)
+      return null;
 
-      if (targetReferenceUuid != null) {
-        for (ColumnStatus col : tableStatus.getColumns()) {
-          if (col.getNestedColumns() != null && targetReferenceUuid.equals(col.getNestedColumns().getReferenceUuid())) {
-            col.updateNestedColumnsMultiValueTableName(multiValueTableName);
-          }
-        }
-      }
-      ColumnStatus col = tableStatus.getColumnById(columnStatus.getId());
-      col.updateSearchListTemplate(panel.getSearchTemplate());
-      col.updateDetailsTemplate(panel.getDetailsTemplate());
-      col.updateExportTemplate(panel.getExportTemplate());
-      col.updateNestedColumnsQuantityList(panel.getQuantityInList());
-
-      saveCallback.accept(true);
+    switch (type) {
+      case NESTED:
+        return NestedColumnOptionsPanel.createInstance(col);
+      case CLOB:
+        return ClobColumnOptionsPanel.createInstance(table, col);
+      case BINARY:
+        return BinaryColumnOptionsPanel.createInstance(table, col);
+      case NUMERIC_FLOATING_POINT:
+      case NUMERIC_INTEGER:
+        return NumericColumnOptionsPanel.createInstance(status.getColumnByTableIdAndColumn(table.getId(), col.getId()));
+      default:
+        return null;
     }
   }
 
-  private static void processClobColumnSaveAction(Dialogs.DialogAction action, TableStatus tableStatus,
-    ColumnStatus columnStatus, ClobColumnOptionsPanel panel, Consumer<Boolean> saveCallback) {
-    if (Dialogs.DialogAction.SAVE.equals(action)) {
-      ColumnStatus col = tableStatus.getColumnById(columnStatus.getId());
-      col.updateExportTemplate(panel.getExportTemplate());
-      col.updateSearchListTemplate(panel.getSearchTemplate());
-      col.updateDetailsTemplate(panel.getDetailsTemplate());
-      col.updateDetailsShowContent(panel.showContentInDetails());
-      col.getSearchStatus().getList().setShowContent(panel.showContentInList());
-      col.setApplicationType(panel.getApplicationType());
-
-      saveCallback.accept(true);
-    }
+  private static boolean isRelationshipAllowed(ViewerType.dbTypes type) {
+    return type != null && !ViewerType.dbTypes.NESTED.equals(type) && !ViewerType.dbTypes.CLOB.equals(type)
+      && !ViewerType.dbTypes.BINARY.equals(type);
   }
 
-  private static void processBinaryColumnSaveAction(Dialogs.DialogAction action, TableStatus tableStatus,
-    ColumnStatus columnStatus, BinaryColumnOptionsPanel panel, Consumer<Boolean> saveCallback) {
-    if (Dialogs.DialogAction.SAVE.equals(action)) {
-      ColumnStatus col = tableStatus.getColumnById(columnStatus.getId());
-      col.updateExportTemplate(panel.getExportTemplate());
-      col.updateSearchListTemplate(panel.getSearchTemplate());
-      col.updateDetailsTemplate(panel.getDetailsTemplate());
-      col.setApplicationType(panel.getApplicationType());
-
-      saveCallback.accept(true);
-    }
-  }
-
-  private static void processNumericColumnSaveAction(Dialogs.DialogAction action, TableStatus tableStatus,
-    ColumnStatus columnStatus, NumericColumnOptionsPanel panel, CollectionStatus collectionStatus,
-    ClientMessages messages, Consumer<Boolean> saveCallback) {
-    if (Dialogs.DialogAction.SAVE.equals(action)) {
-      if (panel.validate()) {
-        Formatter formatter = panel.getFormatter();
-        collectionStatus.getColumnByTableIdAndColumn(tableStatus.getId(), columnStatus.getId()).setFormatter(formatter);
-        saveCallback.accept(true);
-      } else {
-        Dialogs.showErrors(messages.columnManagementPageTitle(),
-          messages.columnManagementPageDialogErrorValueMustBeAnInteger(), messages.basicActionClose());
-      }
-    }
-  }
-
-  private static void processStandardColumnSaveAction(Dialogs.DialogAction action, TableStatus tableStatus,
-    VirtualReferenceOptionsPanel panel, ForeignKeysStatus fkStatus, CollectionStatus collectionStatus,
-    Consumer<Boolean> saveCallback) {
-    ForeignKeysStatus updatedFkStatus = panel.getVirtualReferenceStatus();
-
-    if (updatedFkStatus != null) {
-      if (Dialogs.DialogAction.SAVE.equals(action)) {
-        updatedFkStatus.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_PROCESS);
-        updatedFkStatus.getVirtualForeignKeysStatus().setLastUpdatedDate(new Date());
-        tableStatus.addOrUpdateForeignKeyStatus(updatedFkStatus);
-        collectionStatus.setNeedsToBeProcessed(true);
-        saveCallback.accept(true);
-
-      } else if (Dialogs.DialogAction.REMOVE.equals(action)) {
-        if (fkStatus != null && fkStatus.getVirtualForeignKeysStatus() != null) {
-          fkStatus.getVirtualForeignKeysStatus().setProcessingState(ProcessingState.TO_REMOVE);
-          fkStatus.getVirtualForeignKeysStatus().setLastUpdatedDate(new Date());
-          tableStatus.addOrUpdateForeignKeyStatus(fkStatus);
-        }
-        collectionStatus.setNeedsToBeProcessed(true);
-        saveCallback.accept(true);
-      }
-    }
+  private static String getTabLabel(ColumnOptionsPanel p, ClientMessages clientMessages) {
+    if (p instanceof VirtualColumnOptionsPanel)
+      return clientMessages.columnManagementLabelForVirtualColumn();
+    if (p instanceof VirtualReferenceOptionsPanel)
+      return clientMessages.columnManagementLabelForRelationship();
+    return clientMessages.columnManagementLabelForPresentation();
   }
 }

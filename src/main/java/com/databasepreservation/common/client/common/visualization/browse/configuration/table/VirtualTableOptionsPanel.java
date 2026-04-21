@@ -19,7 +19,6 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
 import com.databasepreservation.common.client.models.status.collection.VirtualTableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -404,20 +403,5 @@ public class VirtualTableOptionsPanel extends ColumnOptionsPanel implements Vali
     statusToReturn.setVirtualTableStatus(virtualTableStatus);
 
     return statusToReturn;
-  }
-
-  @Override
-  public TemplateStatus getSearchTemplate() {
-    return null;
-  }
-
-  @Override
-  public TemplateStatus getDetailsTemplate() {
-    return null;
-  }
-
-  @Override
-  public TemplateStatus getExportTemplate() {
-    return null;
   }
 }

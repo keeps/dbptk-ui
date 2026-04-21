@@ -9,10 +9,9 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 
 import java.math.BigDecimal;
 
-import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
 import com.databasepreservation.common.client.models.status.formatters.Formatter;
 import com.databasepreservation.common.client.models.status.formatters.NumberFormatter;
 import com.databasepreservation.common.client.tools.NumberFormatUtils;
@@ -34,8 +33,10 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class NumericColumnOptionsPanel extends ColumnOptionsPanel {
+public class NumericColumnOptionsPanel extends ColumnOptionsPanel implements SavableOptionsPanel {
   private static final BigDecimal DEFAULT_PREVIEW_VALUE = new BigDecimal("3453.34");
+
+  private final ColumnStatus originalConfig;
 
   interface ColumnsOptionsPanelUiBinder extends UiBinder<Widget, NumericColumnOptionsPanel> {
   }
@@ -92,6 +93,7 @@ public class NumericColumnOptionsPanel extends ColumnOptionsPanel {
 
   private NumericColumnOptionsPanel(ColumnStatus columnConfiguration) {
     initWidget(binder.createAndBindUi(this));
+    this.originalConfig = columnConfiguration;
     description.setHTML(messages.columnManagementNumericFormatterTextForDescription());
     previewDescription.setHTML(messages.columnManagementNumericFormatterTextForPreviewDescription());
 
@@ -253,17 +255,12 @@ public class NumericColumnOptionsPanel extends ColumnOptionsPanel {
   }
 
   @Override
-  public TemplateStatus getSearchTemplate() {
-    return null;
+  public boolean hasChanges() {
+    return !getFormatter().equals(originalConfig.getFormatter());
   }
 
   @Override
-  public TemplateStatus getDetailsTemplate() {
-    return null;
-  }
-
-  @Override
-  public TemplateStatus getExportTemplate() {
-    return null;
+  public void applyChanges(ColumnStatus columnStatus, TableStatus tableStatus, CollectionStatus collectionStatus) {
+    columnStatus.setFormatter(getFormatter());
   }
 }
