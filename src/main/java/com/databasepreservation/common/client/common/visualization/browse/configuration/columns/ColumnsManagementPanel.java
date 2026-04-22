@@ -258,8 +258,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         VirtualColumnOptionsPanel virtualColumnOptionsPanel = VirtualColumnOptionsPanel
           .createInstance(currentTableStatus, new ColumnStatus());
 
-        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionAdd(),
-          messages.basicActionCancel(), Arrays.asList(virtualColumnOptionsPanel),
+        Dialogs.showDialogColumnConfiguration(messages.columnManagementLabelForVirtualColumn(), "600px",
+          messages.basicActionAdd(), messages.basicActionCancel(), Arrays.asList(virtualColumnOptionsPanel),
           new DefaultAsyncCallback<Dialogs.DialogAction>() {
             @Override
             public void onSuccess(Dialogs.DialogAction value) {

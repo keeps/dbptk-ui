@@ -1762,6 +1762,8 @@ public interface ClientMessages extends Messages {
 
   String columnManagementButtonTextForAddVirtualColumn();
 
+  String columnManagementButtonTextForDeleteVirtualColumn();
+
   String columnManagementLabelForVirtualColumn();
 
   String columnManagementLabelForVirtualColumnName();
