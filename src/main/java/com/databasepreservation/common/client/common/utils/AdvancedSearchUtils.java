@@ -98,8 +98,12 @@ public class AdvancedSearchUtils {
                 List<String> fields = new ArrayList<>();
                 fields.add(columnSolrName);
                 fields.add(configTable.getId());
-                String idWithoutColumnIndex = column.getId().substring(0, column.getId().lastIndexOf("_"));
-                fields.add(idWithoutColumnIndex);
+                int lastIndex = column.getId().lastIndexOf("_");
+                if (lastIndex != -1) {
+                  fields.add(column.getId().substring(0, lastIndex));
+                } else {
+                  fields.add(column.getId());
+                }
                 SearchField searchField = new SearchField(column.getId() + "-" + nestedColumn.getColumnIndex(), fields,
                   nestedColumn.getCustomName(), viewerTypeToSearchFieldType(nestedType));
                 searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), column.getId()));
@@ -114,7 +118,8 @@ public class AdvancedSearchUtils {
     return map;
   }
 
-  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status, ViewerMetadata metadata) {
+  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status,
+    ViewerMetadata metadata) {
     List<SearchField> searchFields = new ArrayList<>();
 
     for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
