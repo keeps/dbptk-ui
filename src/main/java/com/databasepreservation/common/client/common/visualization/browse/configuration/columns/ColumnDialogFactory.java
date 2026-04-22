@@ -73,7 +73,8 @@ public class ColumnDialogFactory {
     }
 
     // 5. UX: Global Delete button is ONLY shown if the column itself is virtual
-    String deleteBtnText = columnStatus.isVirtual() ? messages.basicActionDelete() : null;
+    String deleteBtnText = columnStatus.isVirtual() ? messages.columnManagementButtonTextForDeleteVirtualColumn()
+      : null;
 
     Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "600px", messages.basicActionSave(),
       messages.basicActionCancel(), deleteBtnText, Arrays.asList(container),
