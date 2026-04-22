@@ -535,7 +535,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         case NESTED:
           NestedColumnStatus nestedConfigColumn = configColumn.getNestedColumns();
           for (String nestedSolrName : nestedConfigColumn.getNestedSolrNames()) {
-            String rawName = nestedConfigColumn.getOriginalTable() + "_nst_" + nestedSolrName + ViewerConstants.SOLR_DYN_TEXT_MULTI;
+            String rawName = nestedConfigColumn.getOriginalTable() + "_nst_" + nestedSolrName
+              + ViewerConstants.SOLR_DYN_TEXT_MULTI;
             columnHighlightedNames.add(rawName.replaceAll("[\" ]", "_"));
           }
           break;
@@ -603,8 +604,11 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       return false;
     }
 
-    String colId = configColumn.getId();
-    String colIdWithoutSuffix = colId.substring(0, colId.lastIndexOf('_'));
+    String colIdWithoutSuffix = configColumn.getId();
+    int lastIndex = configColumn.getId().lastIndexOf("_");
+    if (lastIndex != -1) {
+      colIdWithoutSuffix = configColumn.getId().substring(0, configColumn.getId().lastIndexOf('_'));
+    }
 
     for (FilterParameter param : getFilter().getParameters()) {
       if (param instanceof LongRangeFilterParameter || param instanceof DateRangeFilterParameter
@@ -838,8 +842,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           fieldsToReturn.add(floatStringId);
           queryFields.add(floatStringId);
           highlightFields.add(floatStringId);
-        } else if (column.getId().matches("lob.+_s")
-          // Return, query, and highlight both fields
+        } else if (column.getId().matches("lob.+_s") && column.getLobTextExtractionStatus() != null
+        // Return, query, and highlight both fields
           && column.getLobTextExtractionStatus().getExtractedAndIndexedText()) {
           String ocrStringId = "ocr_" + column.getId() + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX;
           fieldsToReturn.add(ocrStringId);
@@ -858,8 +862,9 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         NestedColumnStatus nestedColumn = column.getNestedColumns();
         ArrayList<String> individualNestedFieldNames = new ArrayList<>();
         for (String nestedSolrName : nestedColumn.getNestedSolrNames()) {
-          String rawFieldName = nestedColumn.getOriginalTable() + "_nst_" + nestedSolrName + ViewerConstants.SOLR_DYN_TEXT_MULTI;
-          //String safeSolrFieldName = rawFieldName.replaceAll("[^a-zA-Z0-9_]", "_");
+          String rawFieldName = nestedColumn.getOriginalTable() + "_nst_" + nestedSolrName
+            + ViewerConstants.SOLR_DYN_TEXT_MULTI;
+          // String safeSolrFieldName = rawFieldName.replaceAll("[^a-zA-Z0-9_]", "_");
           String safeSolrFieldName = rawFieldName.replaceAll("[\" ]", "_");
           individualNestedFieldNames.add(safeSolrFieldName);
         }
