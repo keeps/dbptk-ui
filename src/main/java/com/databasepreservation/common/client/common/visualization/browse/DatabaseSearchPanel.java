@@ -254,7 +254,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
       header.addStyleName("underlineClickable");
       header.add(CommonClientUtils.getHeader(tableStatus, table, "h3", database.getMetadata().getSchemas().size() > 1));
 
-      MetadataField instance = MetadataField.createInstance(table.getDescription());
+      MetadataField instance = MetadataField.createInstance(tableStatus.getCustomDescription());
       instance.setCSS("table-row-description", "font-size-description");
       description = new SimplePanel();
       description.setVisible(false);
