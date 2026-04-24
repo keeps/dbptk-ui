@@ -312,6 +312,7 @@ public class RowPanel extends RightPanel {
 
         Hyperlink hyperlink = new Hyperlink(refName,
           URL.decode(HistoryManager.linkToForeignKey(database.getUuid(), ref.refTable.getId(), columnNamesAndValues)));
+        hyperlink.setTitle(ref.getTableDescription());
         hyperlink.addStyleName("related-records-link");
         b.appendHtmlConstant(hyperlink.toString());
         firstRef = false;
@@ -433,13 +434,11 @@ public class RowPanel extends RightPanel {
     }
 
     if (relatedTo != null && !relatedTo.isEmpty()) {
-      rowField.addRelatedTo(getForeignKeyHTML(messages.references_isRelatedTo(), relatedTo, row),
-        getRelatedDescriptionTooltip(relatedTo), "field");
+      rowField.addRelatedTo(getForeignKeyHTML(messages.references_isRelatedTo(), relatedTo, row), "field");
     }
 
     if (referencedBy != null && !referencedBy.isEmpty()) {
-      rowField.addReferencedBy(getForeignKeyHTML(messages.references_isReferencedBy(), referencedBy, row),
-        getRelatedDescriptionTooltip(referencedBy), "field");
+      rowField.addReferencedBy(getForeignKeyHTML(messages.references_isReferencedBy(), referencedBy, row), "field");
     }
 
     if (showNullValues) {
