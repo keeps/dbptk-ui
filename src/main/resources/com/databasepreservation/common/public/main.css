@@ -2181,6 +2181,30 @@ html, body {
     text-transform: lowercase;
 }
 
+.btn-warning {
+    background-color: #f0ad4e;
+    border-color: #f0ad4e;
+    color: #fff;
+}
+
+.btn-warning:hover {
+    background-color: #ec971f;
+    border-color: #ec971f;
+    color: #fff;
+}
+
+.btn-link-warning {
+    color: #f0ad4e;
+    background-color: transparent;
+    border: none;
+}
+
+.btn-link-warning:hover {
+    color: #ec971f;
+    text-decoration: underline;
+    background-color: transparent;
+}
+
 /**********************************************
 		         Dialog ExternalLob
 ***********************************************/
@@ -2355,6 +2379,13 @@ html, body {
     font-size: 1.6rem;
     font-weight: 300;
     border-bottom 1px solid #089de3;
+}
+
+/**********************************************
+		         Dialog Warnings
+***********************************************/
+.dialog-persist-warnings .Caption {
+    background-color: #f0ad4e;
 }
 
 /**********************************************
