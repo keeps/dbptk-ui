@@ -71,6 +71,27 @@ public class Alert extends FlowPanel {
     }
     add(messageLabel);
 
+    setType(type);
+
+    if (dismissible) {
+      Button button = new Button();
+      button.addStyleName("close");
+      SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+      safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant("<span>")).appendHtmlConstant("&times")
+        .appendHtmlConstant("</span>");
+      button.setHTML(safeHtmlBuilder.toSafeHtml());
+      button.addClickHandler(event -> {
+        this.setVisible(false);
+      });
+      add(button);
+    }
+
+    if (widget != null) {
+      add(widget);
+    }
+  }
+
+  public void setType(MessageAlertType type) {
     switch (type) {
       case SECONDARY:
         setStyleName("alert alert-secondary");
@@ -97,23 +118,6 @@ public class Alert extends FlowPanel {
       default:
         setStyleName("alert alert-primary");
         break;
-    }
-
-    if (dismissible) {
-      Button button = new Button();
-      button.addStyleName("close");
-      SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
-      safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant("<span>")).appendHtmlConstant("&times")
-        .appendHtmlConstant("</span>");
-      button.setHTML(safeHtmlBuilder.toSafeHtml());
-      button.addClickHandler(event -> {
-        this.setVisible(false);
-      });
-      add(button);
-    }
-
-    if (widget != null) {
-      add(widget);
     }
   }
 }

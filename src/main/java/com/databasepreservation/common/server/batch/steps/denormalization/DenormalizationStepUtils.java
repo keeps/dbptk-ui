@@ -31,6 +31,14 @@ public class DenormalizationStepUtils {
     TableStatus targetTableStatus = collectionStatus.getTableStatus(tableUUID);
 
     if (targetTableStatus != null) {
+
+      List<ColumnStatus> previousNestedColumns = new ArrayList<>();
+      if (targetTableStatus.getColumns() != null) {
+        previousNestedColumns = targetTableStatus.getColumns().stream()
+          .filter(c -> ViewerType.dbTypes.NESTED.equals(c.getType()) || c.getNestedColumns() != null)
+          .collect(Collectors.toList());
+      }
+
       removeDenormalizationColumns(targetTableStatus);
 
       List<RelatedTablesConfiguration> relatedTables = config.getRelatedTables();
@@ -39,7 +47,7 @@ public class DenormalizationStepUtils {
         ViewerTable rootTable = database.getMetadata().getTable(tableUUID);
         path.add(rootTable.getName());
 
-        processRelatedTable(database, targetTableStatus, relatedTable, path);
+        processRelatedTable(database, targetTableStatus, relatedTable, path, previousNestedColumns);
       }
 
       collectionStatus.setNeedsToBeProcessed(false);
@@ -47,7 +55,7 @@ public class DenormalizationStepUtils {
   }
 
   private static void processRelatedTable(ViewerDatabase database, TableStatus targetTableStatus,
-    RelatedTablesConfiguration relatedTable, List<String> path) {
+    RelatedTablesConfiguration relatedTable, List<String> path, List<ColumnStatus> previousNestedColumns) {
 
     ViewerTable currentTableMeta = database.getMetadata().getTable(relatedTable.getTableUUID());
     path.add(currentTableMeta.getName());
@@ -59,18 +67,19 @@ public class DenormalizationStepUtils {
 
       for (Map.Entry<Integer, List<RelatedColumnConfiguration>> entry : groupedColumns.entrySet()) {
         createAndAddColumnForGroup(targetTableStatus, relatedTable, path, currentTableMeta, entry.getKey(),
-          entry.getValue());
+          entry.getValue(), previousNestedColumns);
       }
     }
 
     List<RelatedTablesConfiguration> innerTables = relatedTable.getRelatedTables();
     for (RelatedTablesConfiguration inner : innerTables) {
-      processRelatedTable(database, targetTableStatus, inner, new ArrayList<>(path));
+      processRelatedTable(database, targetTableStatus, inner, new ArrayList<>(path), previousNestedColumns);
     }
   }
 
   private static void createAndAddColumnForGroup(TableStatus targetTableStatus, RelatedTablesConfiguration relatedTable,
-    List<String> path, ViewerTable currentTableMeta, Integer groupId, List<RelatedColumnConfiguration> groupColumns) {
+    List<String> path, ViewerTable currentTableMeta, Integer groupId, List<RelatedColumnConfiguration> groupColumns,
+    List<ColumnStatus> previousNestedColumns) {
 
     List<String> names = new ArrayList<>();
     List<String> solrNames = new ArrayList<>();
@@ -104,7 +113,20 @@ public class DenormalizationStepUtils {
     columnStatus.setNullable(removeBrackets(nullables));
     columnStatus.setType(ViewerType.dbTypes.NESTED);
 
-    applyTemplates(columnStatus, names);
+    ColumnStatus previousStatus = previousNestedColumns.stream().filter(c -> c.getId().equals(columnStatus.getId()))
+      .findFirst().orElse(null);
+
+    if (previousStatus != null) {
+      columnStatus.setCustomName(previousStatus.getCustomName());
+      columnStatus.setCustomDescription(previousStatus.getCustomDescription());
+      columnStatus.setFormatter(previousStatus.getFormatter());
+      columnStatus.setApplicationType(previousStatus.getApplicationType());
+      columnStatus.setExportStatus(previousStatus.getExportStatus());
+      columnStatus.setSearchStatus(previousStatus.getSearchStatus());
+      columnStatus.setDetailsStatus(previousStatus.getDetailsStatus());
+    } else {
+      applyTemplates(columnStatus, names);
+    }
 
     targetTableStatus.addColumnStatus(columnStatus);
   }

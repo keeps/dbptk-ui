@@ -8,11 +8,13 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.api.v1.utils.ConfigurationContext;
 import com.databasepreservation.common.api.v1.utils.JobResponse;
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.common.UserLogin;
+import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
@@ -67,11 +69,15 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   Button btnApplyConfiguration;
   @UiField
   Button btnGoToJobs;
+  @UiField
+  Button btnMigrateAndReindex;
 
   @UiField
   FlowPanel progressPanel;
   @UiField
   HTMLPanel progressBar;
+  @UiField
+  FlowPanel outdatedStatePanel;
 
   @UiField
   HTML statusBadge;
@@ -117,7 +123,6 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
     elapsedTimePlaceholderLabel.setText(messages.configurationStatusPanelTextForElapsedTime("--m --s"));
 
     alertPanel.setVisible(false);
-    toggleProgressMode(false);
     ObserverManager.getCollectionObserver().addObserver(this);
     initHandlers();
 
@@ -216,9 +221,42 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
       }
     });
 
+    btnMigrateAndReindex.addClickHandler(clickEvent -> {
+
+      CommonDialogs.showConfirmDialog(messages.configurationStatusPanelLabelForUpgradeTitle(),
+        messages.configurationStatusPanelWarningMessageForUpgrade(), messages.basicActionCancel(),
+        messages.basicActionProceed(), CommonDialogs.Level.WARNING, "500px", new DefaultAsyncCallback<Boolean>() {
+          @Override
+          public void onSuccess(Boolean result) {
+            if (Boolean.TRUE.equals(result)) {
+              btnMigrateAndReindex.setEnabled(false);
+              startMigrationProcess();
+            }
+          }
+        });
+    });
+
     btnGoToJobs.addClickHandler(clickEvent -> {
       HistoryManager.gotoJobs();
     });
+  }
+
+  private void startMigrationProcess() {
+    CollectionService.Util.callDetailed((Boolean migrated) -> {
+      HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
+
+      CollectionService.Util.call((StringResponse resultUUID) -> {
+      }, errorMessage -> {
+        btnMigrateAndReindex.setEnabled(true);
+        Dialogs.showErrors(messages.configurationStatusPanelDialogTitleForError(), errorMessage,
+          messages.basicActionClose());
+      }).reindexCollection(database.getUuid(), database.getUuid());
+
+    }, errorMessage -> {
+      btnMigrateAndReindex.setEnabled(true);
+      Dialogs.showErrors(errorMessage.get(DefaultMethodCallback.MESSAGE_KEY),
+        errorMessage.get(DefaultMethodCallback.DETAILS_KEY), messages.basicActionClose());
+    }).migrateConfigurations(database.getUuid(), database.getUuid());
   }
 
   private void runJob() {
@@ -239,8 +277,9 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
     this.setVisible(true);
     alertPanel.setVisible(true);
+    alertPanel.setType(Alert.MessageAlertType.INFO);
 
-    toggleProgressMode(true);
+    setActivePanel(false, true, false);
     updateProgressVisuals(null);
 
     progressTimer = new Timer() {
@@ -289,8 +328,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
       GWT.log("[ConfigurationStatusPanel] Error polling job status: " + errorMessage);
       isStoppingPolling = true;
       stopPolling();
-      toggleProgressMode(false);
-      btnApplyConfiguration.setEnabled(true);
+      updateVisualState();
       Dialogs.showErrors(messages.configurationStatusPanelDialogTitleForError(), errorMessage,
         messages.basicActionClose());
     }).retrieveLiveProgress(database.getUuid(), jobUUID);
@@ -340,15 +378,14 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
     Dialogs.showJobDetailsDialog(messages.jobDetailsTitleFailed(), job, messages.basicActionClose(), null);
 
-    toggleProgressMode(false);
-    btnApplyConfiguration.setEnabled(true);
-
     if (this.collectionStatus != null) {
       this.collectionStatus.setNeedsToBeProcessed(true);
       CollectionService.Util.call((ConfigurationContext context) -> {
         this.collectionStatus = context.getCollectionStatus();
         updateVisualState();
       }).updateConfigurationContext(database.getUuid(), database.getUuid(), this.collectionStatus);
+    } else {
+      updateVisualState();
     }
   }
 
@@ -439,9 +476,10 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
     return seconds + "s";
   }
 
-  private void toggleProgressMode(boolean showProgress) {
-    initialStatePanel.setVisible(!showProgress);
+  private void setActivePanel(boolean showInitial, boolean showProgress, boolean showOutdated) {
+    initialStatePanel.setVisible(showInitial);
     progressPanel.setVisible(showProgress);
+    outdatedStatePanel.setVisible(showOutdated);
   }
 
   @Override
@@ -471,6 +509,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   private void updateVisualState() {
     if (collectionStatus != null) {
       boolean needsProcess = collectionStatus.isNeedsToBeProcessed();
+      boolean isOutdated = isConfigurationOutdated();
 
       if (jobFinishedSuccessfully) {
         this.setVisible(true);
@@ -478,14 +517,18 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
         return;
       }
 
-      this.setVisible(needsProcess);
-      alertPanel.setVisible(needsProcess);
+      this.setVisible(isOutdated || needsProcess);
+      alertPanel.setVisible(isOutdated || needsProcess);
 
-      if (needsProcess && !isStoppingPolling) {
-        toggleProgressMode(false);
+      if (isOutdated && !isStoppingPolling) {
+        setActivePanel(false, false, true);
+        alertPanel.setType(Alert.MessageAlertType.WARNING);
+        btnMigrateAndReindex.setEnabled(true);
+
+      } else if (needsProcess && !isStoppingPolling) {
+        setActivePanel(true, false, false);
+        alertPanel.setType(Alert.MessageAlertType.INFO);
         btnApplyConfiguration.setEnabled(true);
-        statusBadge.setHTML("");
-
         fetchPendingPlanFromServer();
       }
     }
@@ -551,5 +594,9 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
       stepsContainer.add(stepBadge);
     }
+  }
+
+  private boolean isConfigurationOutdated() {
+    return collectionStatus != null && collectionStatus.isOutdated();
   }
 }

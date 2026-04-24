@@ -352,4 +352,9 @@ public class CollectionStatus implements Serializable {
       return null;
     return this.tables.stream().filter(t -> t.getId().equals(tableId)).findFirst().orElse(null);
   }
+
+  @JsonIgnore
+  public boolean isOutdated() {
+    return version == null || !this.version.equals(ViewerConstants.COLLECTION_STATUS_VERSION);
+  }
 }

@@ -255,6 +255,58 @@ public class CollectionResource implements CollectionService {
     return false;
   }
 
+  @Override
+  public StringResponse reindexCollection(String databaseUUID, String collectionUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
+
+      final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
+      ViewerFactory.getConfigurationManager().migrateAllConfigurationsToLatest(database);
+
+      CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
+        .getConfigurationCollection(databaseUUID, collectionUUID);
+
+      if (collectionStatus == null) {
+        throw new GenericException("Collection configuration not found for databaseUUID: " + databaseUUID
+          + " and collectionUUID: " + collectionUUID);
+      }
+
+      final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
+
+      if (SolrClientFactory.get().deleteCollection(collectionName)) {
+        Filter savedSearchFilter = new Filter(
+          new SimpleFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
+        SolrUtils.delete(ViewerFactory.getSolrClient(), SolrDefaultCollectionRegistry.get(SavedSearch.class),
+          savedSearchFilter);
+      }
+
+      if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
+        return new StringResponse(databaseUUID);
+      }
+
+      String resultUUID = SIARDController.loadFromLocal(database.getPath(), databaseUUID, database.getVersion());
+
+      if (collectionStatus != null && collectionStatus.getSavedSearches() != null) {
+        for (SavedSearch savedSearch : collectionStatus.getSavedSearches()) {
+          ViewerFactory.getSolrManager().addSavedSearch(savedSearch);
+        }
+      }
+
+      return new StringResponse(resultUUID);
+
+    } catch (Exception e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+    }
+  }
+
   /*******************************************************************************
    * Collection Resource - Config Sub-resource
    ******************************************************************************/
@@ -394,6 +446,35 @@ public class CollectionResource implements CollectionService {
       throw new RESTException(e);
     } finally {
       // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+    }
+  }
+
+  @Override
+  public Boolean migrateConfigurations(String databaseUUID, String collectionUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
+
+      final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
+      ViewerFactory.getConfigurationManager().migrateAllConfigurationsToLatest(database);
+
+      CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
+        .getConfigurationCollection(databaseUUID, collectionUUID);
+
+      if (collectionStatus == null) {
+        throw new GenericException("Collection configuration not found for databaseUUID: " + databaseUUID
+          + " and collectionUUID: " + collectionUUID);
+      }
+      return true;
+    } catch (Exception e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
     }
   }

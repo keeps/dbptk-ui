@@ -18,6 +18,7 @@ import com.databasepreservation.common.client.models.status.IsProcessable;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -27,7 +28,7 @@ public class DenormalizeConfiguration implements Serializable, IsProcessable {
   private static final long serialVersionUID = -2179137349609216271L;
   private String id;
   private String uuid;
-  private String version;
+  private String version = ViewerConstants.DENORMALIZATION_STATUS_VERSION;
   private ViewerJobStatus state;
   private Long job;
   private String tableUUID;
@@ -157,5 +158,10 @@ public class DenormalizeConfiguration implements Serializable, IsProcessable {
 
   public void setLastExecutionDate(Date lastExecutionDate) {
     this.lastExecutionDate = lastExecutionDate;
+  }
+
+  @JsonIgnore
+  public boolean isOutdated() {
+    return version == null || !this.version.equals(ViewerConstants.DENORMALIZATION_STATUS_VERSION);
   }
 }

@@ -693,9 +693,9 @@ public class ViewerConstants {
   /*
    * Status
    */
-  public static final String DATABASE_STATUS_VERSION = "1.0.0";
-  public static final String COLLECTION_STATUS_VERSION = "1.0.0";
-  public static final String DENORMALIZATION_STATUS_VERSION = "1.0.0";
+  public static final String DATABASE_STATUS_VERSION = "2.0.0";
+  public static final String COLLECTION_STATUS_VERSION = "2.0.0";
+  public static final String DENORMALIZATION_STATUS_VERSION = "2.0.0";
 
   /**
    * Template Engine

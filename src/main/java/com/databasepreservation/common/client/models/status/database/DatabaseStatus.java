@@ -17,6 +17,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -169,5 +170,10 @@ public class DatabaseStatus implements Serializable {
 
   public void setPermissions(Map<String, AuthorizationDetails> permissions) {
     this.permissions = permissions;
+  }
+
+  @JsonIgnore
+  public boolean isOutdated() {
+    return version == null || !this.version.equals(ViewerConstants.DATABASE_STATUS_VERSION);
   }
 }

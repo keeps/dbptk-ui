@@ -31,14 +31,13 @@ public class CommonDialogs {
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(true);
     dialogBox.setWidth("400px");
-    dialogBox.setPopupPosition(0,0);
+    dialogBox.setPopupPosition(0, 0);
     dialogBox.setHeight("400px");
     dialogBox.show();
   }
 
-  public static void showConfirmDialog(String title, SafeHtml message, String cancelButtonText, String confirmButtonText,
-                                       Level level, String width,
-                                       final AsyncCallback<Boolean> callback) {
+  public static void showConfirmDialog(String title, SafeHtml message, String cancelButtonText,
+    String confirmButtonText, Level level, String width, final AsyncCallback<Boolean> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
 
@@ -51,8 +50,8 @@ public class CommonDialogs {
 
     layout.add(messageLabel);
     layout.add(footer);
-    footer.add(confirmButton);
     footer.add(cancelButton);
+    footer.add(confirmButton);
 
     dialogBox.setWidget(layout);
     dialogBox.setWidth(width);
@@ -72,12 +71,12 @@ public class CommonDialogs {
 
     switch (level) {
       case WARNING:
-        dialogBox.addStyleName("wui-dialog-confirm");
+        dialogBox.addStyleName("dialog-persist-warnings");
         layout.addStyleName("wui-dialog-layout");
         footer.addStyleName("wui-dialog-layout-footer");
         messageLabel.addStyleName("wui-dialog-message");
-        cancelButton.addStyleName("btn btn-link");
-        confirmButton.addStyleName("btn btn-primary");
+        cancelButton.addStyleName("btn btn-link-warning");
+        confirmButton.addStyleName("btn btn-warning");
         break;
       case DANGER:
         dialogBox.addStyleName("dialog-persist-errors");
