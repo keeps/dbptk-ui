@@ -98,30 +98,28 @@ public class RowField extends Composite {
   }
 
   public void addRelatedTo(SafeHtml safeHtml) {
-    addRelatedTo(safeHtml, null, null);
+    addRelatedTo(safeHtml, null);
   }
 
-  public void addRelatedTo(SafeHtml safeHtml, String tooltip, String css) {
+  public void addRelatedTo(SafeHtml safeHtml, String css) {
     FlowPanel panel = new FlowPanel();
     if (css != null) {
       panel.addStyleName(css);
     }
     panel.add(new HTML(safeHtml));
-    panel.setTitle(tooltip);
     main.add(panel);
   }
 
   public void addReferencedBy(SafeHtml safeHtml) {
-    addReferencedBy(safeHtml, null, null);
+    addReferencedBy(safeHtml, null);
   }
 
-  public void addReferencedBy(SafeHtml safeHtml, String tooltip, String css) {
+  public void addReferencedBy(SafeHtml safeHtml, String css) {
     FlowPanel panel = new FlowPanel();
     if (css != null) {
       panel.addStyleName(css);
     }
     panel.add(new HTML(safeHtml));
-    panel.setTitle(tooltip);
     main.add(panel);
   }
 }
