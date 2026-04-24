@@ -195,7 +195,8 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     MultiWordSuggestOracle oracle = (MultiWordSuggestOracle) searchBox.getSuggestOracle();
     oracle.clear();
     for (ViewerTable viewerTable : schema.getTables()) {
-      oracle.add(viewerTable.getName());
+      TableStatus tableStatusByTableId = collectionStatus.getTableStatusByTableId(viewerTable.getId());
+      oracle.add(tableStatusByTableId.getCustomName());
 
       if (path.equals(HistoryManager.ROUTE_DATA_TRANSFORMATION)
         && (viewerTable.isMaterializedView() || viewerTable.isCustomView())) {
