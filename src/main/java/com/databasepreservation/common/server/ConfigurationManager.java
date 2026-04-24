@@ -47,6 +47,8 @@ import com.databasepreservation.common.client.models.structure.ViewerSourceType;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.exceptions.DependencyViolationException;
 import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.configuration.migration.ConfigurationMigrator;
+import com.databasepreservation.common.server.configuration.migration.ConfigurationMigratorUtils;
 import com.databasepreservation.common.server.configuration.validation.ConfigurationIntegrityValidator;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
@@ -223,6 +225,8 @@ public class ConfigurationManager {
     synchronized (denormalizeStatusFileLock) {
       try {
         Path denormalizeStatusFile = getDenormalizeStatusPath(databaseUUID, denormalizeConfiguration.getTableUUID());
+        validateConfigurationVersionBeforeSave(denormalizeStatusFile, ViewerConstants.DENORMALIZATION_STATUS_VERSION);
+
         if (FSUtils.exists(denormalizeStatusFile)) {
           JsonTransformer.writeObjectToFile(denormalizeConfiguration, denormalizeStatusFile);
         } else {
@@ -389,6 +393,8 @@ public class ConfigurationManager {
         Path databaseFile = databaseDirectoryPath
           .resolve(ViewerConstants.DATABASE_STATUS_PREFIX + databaseId + ViewerConstants.JSON_EXTENSION);
 
+        validateConfigurationVersionBeforeSave(databaseFile, ViewerConstants.DATABASE_STATUS_VERSION);
+
         // verify if file exists
         if (FSUtils.exists(databaseFile)) {
           final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
@@ -457,6 +463,9 @@ public class ConfigurationManager {
   public void updateDatabaseStatus(DatabaseStatus status) throws ViewerException {
     synchronized (databaseStatusFileLock) {
       Path statusFile = getDatabaseStatusPath(status.getId());
+
+      validateConfigurationVersionBeforeSave(statusFile, ViewerConstants.DATABASE_STATUS_VERSION);
+
       JsonTransformer.writeObjectToFile(status, statusFile);
     }
   }
@@ -464,6 +473,10 @@ public class ConfigurationManager {
   public void updateCollectionStatus(String databaseUUID, CollectionStatus updatedStatus)
     throws ViewerException, IllegalAccessException {
     synchronized (collectionStatusFileLock) {
+
+      Path statusFile = getCollectionStatusPath(databaseUUID, updatedStatus.getId());
+      ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
+      validateConfigurationVersionBeforeSave(statusFile, ViewerConstants.COLLECTION_STATUS_VERSION);
 
       try {
         CollectionStatus oldStatus = getCollectionStatus(databaseUUID, updatedStatus.getId());
@@ -473,8 +486,6 @@ public class ConfigurationManager {
           "Failed to validate the collection status update due to integrity violation: " + e.getMessage(), e);
       }
 
-      Path statusFile = getCollectionStatusPath(databaseUUID, updatedStatus.getId());
-      ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
       JsonTransformer.writeObjectToFile(updatedStatus, statusFile);
     }
   }
@@ -559,6 +570,11 @@ public class ConfigurationManager {
   public void updateCollectionCustomizeProperties(String databaseUUID, CollectionStatus status)
     throws ViewerException, IllegalAccessException, GenericException {
     synchronized (collectionStatusFileLock) {
+      Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
+      ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
+
+      validateConfigurationVersionBeforeSave(statusFile, ViewerConstants.COLLECTION_STATUS_VERSION);
+
       CollectionStatus updatingStatus = getCollectionStatus(databaseUUID, status.getId());
       for (TableStatus table : status.getTables()) {
         for (ColumnStatus column : table.getColumns()) {
@@ -566,8 +582,7 @@ public class ConfigurationManager {
             .updateCustomizeProperties(column.getSearchStatus().getList().getCustomizeProperties());
         }
       }
-      Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
-      ParameterSanitization.checkPathIsWithin(ViewerConfiguration.getInstance().getDatabasesPath(), statusFile);
+
       JsonTransformer.writeObjectToFile(updatingStatus, statusFile);
     }
   }
@@ -727,6 +742,69 @@ public class ConfigurationManager {
       } catch (NotFoundException | GenericException e) {
         // Do nothing
       }
+    }
+  }
+
+  private void validateConfigurationVersionBeforeSave(Path statusFile, String targetSystemVersion)
+    throws ViewerException {
+    if (FSUtils.exists(statusFile)) {
+      try {
+        if (ConfigurationMigratorUtils.isFileOutdated(statusFile, targetSystemVersion)) {
+          throw new ViewerException(
+            "The configuration file is outdated. Please run the migration process before saving changes.");
+        }
+      } catch (IOException e) {
+        throw new ViewerException(
+          "Could not read configuration file to verify its version: " + statusFile.getFileName(), e);
+      }
+    }
+  }
+
+  /**
+   * Orchestrates the migration of all configuration files for a specific database
+   * to the latest versions supported by the system.
+   */
+  public void migrateAllConfigurationsToLatest(ViewerDatabase database) throws GenericException {
+    String databaseUUID = database.getUuid();
+    Path databaseDir = ViewerFactory.getViewerConfiguration().getDatabasesPath().resolve(databaseUUID);
+
+    if (!FSUtils.exists(databaseDir)) {
+      return;
+    }
+
+    try {
+      ConfigurationMigrator migrator = new ConfigurationMigrator(database);
+
+      // Migrate DatabaseStatus file
+      Path dbStatusFile = getDatabaseStatusPath(databaseUUID);
+      if (FSUtils.exists(dbStatusFile)) {
+        migrator.migrateDatabaseStatus(dbStatusFile);
+      }
+
+      // Migrate CollectionStatus file
+      Path colStatusFile = getCollectionStatusPath(databaseUUID,
+        ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID);
+      if (FSUtils.exists(colStatusFile)) {
+        migrator.migrateCollectionStatus(colStatusFile);
+      }
+
+      // Migrate all DenormalizeConfiguration files found in the directory
+      try (java.util.stream.Stream<Path> stream = Files.list(databaseDir)) {
+        stream.filter(filePath -> {
+          String fileName = filePath.getFileName().toString();
+          return fileName.startsWith(ViewerConstants.DENORMALIZATION_STATUS_PREFIX)
+            && fileName.endsWith(ViewerConstants.JSON_EXTENSION);
+        }).forEach(filePath -> {
+          try {
+            migrator.migrateDenormalizeConfiguration(filePath);
+          } catch (IOException e) {
+            LOGGER.error("Error upgrading denormalization configuration file: " + filePath.toAbsolutePath(), e);
+          }
+        });
+      }
+
+    } catch (IOException e) {
+      throw new GenericException("Error during configuration migration for database UUID: " + databaseUUID, e);
     }
   }
 }

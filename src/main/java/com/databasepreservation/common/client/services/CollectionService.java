@@ -90,6 +90,11 @@ public interface CollectionService extends DirectRestService {
   Boolean deleteCollection(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID);
 
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/reindex", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Reindexes a database collection by deleting the existing one and creating a new one")
+  StringResponse reindexCollection(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID);
+
   /*******************************************************************************
    * Collection Resource - Config Sub-resource
    *******************************************************************************/
@@ -116,16 +121,21 @@ public interface CollectionService extends DirectRestService {
     @PathVariable(name = "collectionUUID") String collectionUUID,
     @Parameter(name = "collectionStatus", required = true) @RequestBody CollectionStatus status);
 
-  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/configContext", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/context", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Gets the internal collection configuration AND the projected database schema")
   ConfigurationContext getConfigurationContext(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID);
 
-  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/configContext", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/context", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Updates the internal collection configuration and returns the new projected context")
   ConfigurationContext updateConfigurationContext(@PathVariable(name = "databaseUUID") String databaseUUID,
     @PathVariable(name = "collectionUUID") String collectionUUID,
     @Parameter(name = "collectionStatus", required = true) @RequestBody CollectionStatus status);
+
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/migrate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Migrates all configuration JSON files for a database to the latest system version")
+  Boolean migrateConfigurations(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID);
 
   /*******************************************************************************
    * Collection Resource - Config Sub-resource - Denormalization Sub-resource

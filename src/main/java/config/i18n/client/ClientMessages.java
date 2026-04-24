@@ -1521,6 +1521,14 @@ public interface ClientMessages extends Messages {
 
   String configurationStatusPanelTextForStepProgress(String stepName, int progress, Long processed, Long total);
 
+  String configurationStatusPanelLabelForUpgradeTitle();
+
+  SafeHtml configurationStatusPanelWarningMessageForUpgrade();
+
+  String configurationStatusPanelTextForUpgrade();
+
+  String configurationStatusPanelLabelForUpgradeBtn();
+
   /********************************************
    * Advanced Configuration
    *******************************************/
