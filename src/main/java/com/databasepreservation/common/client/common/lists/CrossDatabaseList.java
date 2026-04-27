@@ -245,7 +245,7 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Map<Column<ViewerDatabase, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);
 
-    List<String> queryFields = List.of(ViewerConstants.INDEX_SEARCH);
+    List<String> queryFields = List.of(ViewerConstants.INDEX_SEARCH, ViewerConstants.INDEX_LOB_TEXT_SEARCH);
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets(),
       false, List.of(), new HashMap<>(), ViewerConstants.SOLR_EDISMAX, new Filter(), queryFields, false, List.of());
