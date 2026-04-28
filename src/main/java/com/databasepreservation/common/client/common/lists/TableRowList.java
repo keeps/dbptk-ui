@@ -694,7 +694,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         String viewerPdf = com.google.gwt.core.client.GWT.getHostPageBaseURL() + "webjars/pdf-js/web/viewer.html?file="
           + exportLobUri;
         json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
-          ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, viewerPdf, ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, viewerPdf);
+          ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, "", ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, viewerPdf);
       } else if (ClientConfigurationManager.getBoolean(false, ViewerConstants.VIEWER_ENABLED)) {
         json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_openLOBViewer(),
           ViewerConstants.TEMPLATE_IIIF_VIEWER_LINK, RestUtils.createUVLob(),
