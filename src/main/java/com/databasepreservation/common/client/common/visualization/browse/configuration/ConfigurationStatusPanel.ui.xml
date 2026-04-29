@@ -67,6 +67,12 @@
                 </g:FlowPanel>
             </g:FlowPanel>
 
+            <g:FlowPanel ui:field="readOnlyWarningPanel" visible="false" addStyleNames="read-only-config-state-panel">
+                <g:FlowPanel addStyleNames="config-header">
+                    <g:Label ui:field="readOnlyMessageLabel" addStyleNames="config-title-text text-warning"/>
+                </g:FlowPanel>
+            </g:FlowPanel>
+
         </g:FlowPanel>
     </a:Alert>
 

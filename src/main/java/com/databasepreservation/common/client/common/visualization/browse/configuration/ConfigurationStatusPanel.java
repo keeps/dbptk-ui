@@ -99,6 +99,11 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   @UiField
   Label elapsedTimePlaceholderLabel;
 
+  @UiField
+  FlowPanel readOnlyWarningPanel;
+  @UiField
+  Label readOnlyMessageLabel;
+
   private Timer progressTimer;
   private boolean jobFinishedSuccessfully = false;
   private boolean isStoppingPolling = false;
@@ -137,8 +142,8 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
         AuthenticationService.Util.call((Boolean authenticationIsEnabled) -> {
           isAuthorized = !authenticationIsEnabled || user.isAdmin();
 
-          if (isAuthorized && database != null) {
-            refreshStatusFromServer(true);
+          if (database != null) {
+            refreshStatusFromServer(isAuthorized);
           }
         }).isAuthenticationEnabled();
       }
@@ -147,9 +152,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
 
   public void setDatabase(ViewerDatabase database) {
     this.database = database;
-    if (isAuthorized) {
-      refreshStatusFromServer(true);
-    }
+    refreshStatusFromServer(isAuthorized);
   }
 
   @Override
@@ -279,7 +282,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
     alertPanel.setVisible(true);
     alertPanel.setType(Alert.MessageAlertType.INFO);
 
-    setActivePanel(false, true, false);
+    setActivePanel(false, true, false, false);
     updateProgressVisuals(null);
 
     progressTimer = new Timer() {
@@ -476,10 +479,11 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
     return seconds + "s";
   }
 
-  private void setActivePanel(boolean showInitial, boolean showProgress, boolean showOutdated) {
+  private void setActivePanel(boolean showInitial, boolean showProgress, boolean showOutdated, boolean showReadOnly) {
     initialStatePanel.setVisible(showInitial);
     progressPanel.setVisible(showProgress);
     outdatedStatePanel.setVisible(showOutdated);
+    readOnlyWarningPanel.setVisible(showReadOnly);
   }
 
   @Override
@@ -501,9 +505,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   @Override
   protected void onAttach() {
     super.onAttach();
-    if (isAuthorized) {
-      refreshStatusFromServer(true);
-    }
+    refreshStatusFromServer(isAuthorized);
   }
 
   private void updateVisualState() {
@@ -512,24 +514,37 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
       boolean isOutdated = isConfigurationOutdated();
 
       if (jobFinishedSuccessfully) {
-        this.setVisible(true);
-        alertPanel.setVisible(true);
+        this.setVisible(isAuthorized);
+        alertPanel.setVisible(isAuthorized);
         return;
       }
 
       this.setVisible(isOutdated || needsProcess);
       alertPanel.setVisible(isOutdated || needsProcess);
 
-      if (isOutdated && !isStoppingPolling) {
-        setActivePanel(false, false, true);
-        alertPanel.setType(Alert.MessageAlertType.WARNING);
-        btnMigrateAndReindex.setEnabled(true);
+      if (!isAuthorized) {
+        if ((isOutdated || needsProcess) && !isStoppingPolling) {
+          setActivePanel(false, false, false, true);
+          alertPanel.setType(Alert.MessageAlertType.WARNING);
 
-      } else if (needsProcess && !isStoppingPolling) {
-        setActivePanel(true, false, false);
-        alertPanel.setType(Alert.MessageAlertType.INFO);
-        btnApplyConfiguration.setEnabled(true);
-        fetchPendingPlanFromServer();
+          if (needsProcess) {
+            readOnlyMessageLabel.setText(messages.configurationStatusPanelLabelForTitleForNonAdminUser());
+          } else if (isOutdated) {
+            readOnlyMessageLabel.setText(messages.configurationStatusPanelTextForUpgradeForNonAdmin());
+          }
+        }
+      } else {
+        if (isOutdated && !isStoppingPolling) {
+          setActivePanel(false, false, true, false);
+          alertPanel.setType(Alert.MessageAlertType.WARNING);
+          btnMigrateAndReindex.setEnabled(true);
+
+        } else if (needsProcess && !isStoppingPolling) {
+          setActivePanel(true, false, false, false);
+          alertPanel.setType(Alert.MessageAlertType.INFO);
+          btnApplyConfiguration.setEnabled(true);
+          fetchPendingPlanFromServer();
+        }
       }
     }
   }
