@@ -134,6 +134,7 @@ public class ViewerConstants {
    * DATABASE FIELDS
    */
   public static final String SOLR_DATABASES_STATUS = "status";
+  public static final String SOLR_DATABASES_CONFIGURATION_STATUS = "configurationStatus";
   public static final String SOLR_DATABASES_BROWSE_LOAD_DATE = "browse_loaded_date";
   public static final String SOLR_DATABASES_AVAILABLE_TO_SEARCH_ALL = "available_to_search_all";
   public static final String SOLR_DATABASES_METADATA = "metadata";
@@ -548,6 +549,7 @@ public class ViewerConstants {
   public static final String SEARCH_FIELD_TYPE_DATE = RodaConstants.SEARCH_FIELD_TYPE_DATE + "justdate";
   public static final String SEARCH_FIELD_TYPE_TIME = RodaConstants.SEARCH_FIELD_TYPE_DATE + "justtime";
   public static final String SEARCH_FIELD_TYPE_NESTED = SOLR_ROWS_NESTED;
+  public static final String SEARCH_FIELD_TYPE_CONTROLLED = RodaConstants.SEARCH_FIELD_TYPE_CONTROLLED;
 
   /*
    * Misc

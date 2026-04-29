@@ -10,6 +10,7 @@ package com.databasepreservation.common.client.common.utils.html;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseConfigurationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
@@ -93,6 +94,29 @@ public class LabelUtils {
 
     return SafeHtmlUtils
       .fromSafeConstant("<span class='" + style + "'>" + Humanize.databaseStatus(status) + CLOSE_SPAN);
+  }
+
+  public static SafeHtml getDatabaseConfigurationStatus(ViewerDatabaseConfigurationStatus status) {
+    String style;
+    switch (status) {
+      case ERROR:
+        style = "label-danger label-error";
+        break;
+      case UP_TO_DATE:
+        style = "label-success";
+        break;
+      case PENDING_JOBS:
+      case RUNNING_JOBS:
+        style = "label-info";
+        break;
+      case OUTDATED:
+      default:
+        style = "label-default";
+        break;
+    }
+
+    return SafeHtmlUtils
+      .fromSafeConstant("<span class='" + style + "'>" + Humanize.databaseConfigurationStatus(status) + CLOSE_SPAN);
   }
 
   public static SafeHtml getJobStatus(ViewerJobStatus status) {

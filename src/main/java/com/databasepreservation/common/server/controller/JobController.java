@@ -22,6 +22,7 @@ import org.springframework.batch.core.repository.JobRepository;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseConfigurationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerJobStepExecution;
@@ -106,8 +107,8 @@ public class JobController {
 
     for (StepExecution step : jobExecution.getStepExecutions()) {
       boolean isMasterStep = masterStepNames.contains(step.getStepName());
-      boolean isWorkerPartition = step.getStepName().contains(BatchConstants.PARTITION_PREFIX) ||
-        step.getStepName().contains(BatchConstants.PARTITION_WORKER_NAME);
+      boolean isWorkerPartition = step.getStepName().contains(BatchConstants.PARTITION_PREFIX)
+        || step.getStepName().contains(BatchConstants.PARTITION_WORKER_NAME);
 
       if (!isMasterStep) {
         dynamicProcessed += step.getReadCount();
@@ -121,10 +122,12 @@ public class JobController {
           duration = ChronoUnit.MILLIS.between(step.getStartTime(), end);
         }
 
-        String displayName = step.getExecutionContext().getString(BatchConstants.CONTEXT_STEP_DISPLAY_NAME_KEY, step.getStepName());
+        String displayName = step.getExecutionContext().getString(BatchConstants.CONTEXT_STEP_DISPLAY_NAME_KEY,
+          step.getStepName());
         executedStepNames.add(displayName);
 
-        stepDetails.add(new ViewerJobStepExecution(displayName, step.getStatus().name(), step.getWriteCount(), step.getSkipCount(), duration));
+        stepDetails.add(new ViewerJobStepExecution(displayName, step.getStatus().name(), step.getWriteCount(),
+          step.getSkipCount(), duration));
 
         if (step.getStatus() == org.springframework.batch.core.BatchStatus.COMPLETED) {
           completedSteps++;
@@ -141,7 +144,8 @@ public class JobController {
     }
     viewerJob.setRowsToProcess(totalWorkload);
 
-    // If completed, we set it to 100%. If not, send the dynamic count that is always growing
+    // If completed, we set it to 100%. If not, send the dynamic count that is
+    // always growing
     if (jobExecution.getStatus() == org.springframework.batch.core.BatchStatus.COMPLETED) {
       viewerJob.setProcessRows(totalWorkload);
       viewerJob.setCurrentStepName("Completed");
@@ -156,7 +160,8 @@ public class JobController {
     viewerJob.setStepExecutions(stepDetails);
 
     if (jobExecution.getExecutionContext().containsKey(BatchConstants.CONTEXT_STEP_DISPLAY_NAMES_KEY)) {
-      viewerJob.setStepNames((List<String>) jobExecution.getExecutionContext().get(BatchConstants.CONTEXT_STEP_DISPLAY_NAMES_KEY));
+      viewerJob.setStepNames(
+        (List<String>) jobExecution.getExecutionContext().get(BatchConstants.CONTEXT_STEP_DISPLAY_NAMES_KEY));
     } else {
       viewerJob.setStepNames(executedStepNames);
     }
@@ -210,6 +215,17 @@ public class JobController {
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     ViewerJob finalJob = buildCompleteViewerJobFromExecution(jobExecution);
     solrManager.editBatchJob(finalJob);
+
+    if (finalJob.getStatus().isRunning()) {
+      solrManager.updateDatabaseConfigurationStatus(finalJob.getDatabaseUuid(),
+        ViewerDatabaseConfigurationStatus.RUNNING_JOBS);
+    } else if (finalJob.getStatus().equals(ViewerJobStatus.COMPLETED)) {
+      solrManager.updateDatabaseConfigurationStatus(finalJob.getDatabaseUuid(),
+        ViewerDatabaseConfigurationStatus.UP_TO_DATE);
+    } else if (finalJob.getStatus().failed()) {
+      solrManager.updateDatabaseConfigurationStatus(finalJob.getDatabaseUuid(),
+        ViewerDatabaseConfigurationStatus.ERROR);
+    }
   }
 
   public static void deleteSolrBatchJobs() throws GenericException {

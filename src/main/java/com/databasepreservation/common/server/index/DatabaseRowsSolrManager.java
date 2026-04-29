@@ -50,6 +50,7 @@ import com.databasepreservation.common.client.models.authorization.Authorization
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseConfigurationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
@@ -547,6 +548,10 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.AVAILABLE.toString()),
       Pair.of(ViewerConstants.SOLR_DATABASES_BROWSE_LOAD_DATE, new DateTime().toString()));
     ViewerFactory.getConfigurationManager().updateDatabaseStatus(databaseUUID, ViewerDatabaseStatus.AVAILABLE);
+  }
+
+  public void updateDatabaseConfigurationStatus(final String databaseUUID, ViewerDatabaseConfigurationStatus status) {
+    updateDatabaseFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_CONFIGURATION_STATUS, status.toString()));
   }
 
   @SafeVarargs

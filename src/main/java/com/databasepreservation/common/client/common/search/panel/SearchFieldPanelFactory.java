@@ -33,6 +33,12 @@ public class SearchFieldPanelFactory {
         return new BooleanSearchFieldPanel(searchField);
       case ViewerConstants.SEARCH_FIELD_TYPE_NESTED:
         return new NestedSearchFieldPanel(searchField);
+      case ViewerConstants.SEARCH_FIELD_TYPE_CONTROLLED:
+        if (searchField.getId().equals(ViewerConstants.SOLR_DATABASES_STATUS)) {
+          return new DatabaseStatusSearchFieldPanel(searchField);
+        } else if (searchField.getId().equals(ViewerConstants.SOLR_DATABASES_CONFIGURATION_STATUS)) {
+          return new DatabaseConfigStatusSearchFieldPanel(searchField);
+        }
       case ViewerConstants.SEARCH_FIELD_TYPE_SUGGEST:
       default:
         return new TextSearchFieldPanel(searchField);

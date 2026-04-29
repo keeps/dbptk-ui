@@ -74,6 +74,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   private Column<ViewerDatabase, SafeHtml> versionColumn;
   private Column<ViewerDatabase, SafeHtml> validColumn;
   private Column<ViewerDatabase, SafeHtml> statusColumn;
+  private Column<ViewerDatabase, SafeHtml> configurationStatusColumn;
   private Column<ViewerDatabase, String> openColumn;
 
   public DatabaseList() {
@@ -192,6 +193,15 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     };
     statusColumn.setSortable(true);
 
+    configurationStatusColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null ? LabelUtils.getDatabaseConfigurationStatus(database.getConfigurationStatus())
+          : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
+      }
+    };
+    configurationStatusColumn.setSortable(true);
+
     openColumn = new ButtonColumn<ViewerDatabase>() {
       @Override
       public String getValue(ViewerDatabase object) {
@@ -216,6 +226,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
             addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE,
               5);
             addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
+            addColumn(configurationStatusColumn, messages.managePageTableHeaderTextForDatabaseConfigurationStatus(),
+              true, TextAlign.NONE, 5);
             addColumn(openColumn, messages.managePageTableHeaderTextForActions(), true, TextAlign.NONE, 5);
           }
         }
@@ -231,6 +243,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       addColumn(versionColumn, messages.managePageTableHeaderTextForSIARDVersion(), true, TextAlign.NONE, 4);
       addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE, 5);
       addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
+      addColumn(configurationStatusColumn, messages.managePageTableHeaderTextForDatabaseConfigurationStatus(), true,
+        TextAlign.NONE, 5);
       addColumn(openColumn, messages.managePageTableHeaderTextForActions(), true, TextAlign.NONE, 5);
     }
 

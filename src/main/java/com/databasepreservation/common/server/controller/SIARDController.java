@@ -33,7 +33,6 @@ import org.joda.time.DateTime;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
@@ -69,6 +68,7 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseConfigurationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
@@ -94,7 +94,6 @@ import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
-import com.databasepreservation.common.server.storage.fs.FSUtils;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
@@ -687,6 +686,7 @@ public class SIARDController {
       ViewerDatabase viewerDatabase = new ViewerDatabase();
 
       viewerDatabase.setStatus(ViewerDatabaseStatus.METADATA_ONLY);
+      viewerDatabase.setConfigurationStatus(ViewerDatabaseConfigurationStatus.UP_TO_DATE);
       viewerDatabase.setUuid(databaseUUID);
 
       viewerDatabase.setPath(siardPath.toAbsolutePath().toString());
@@ -1180,16 +1180,15 @@ public class SIARDController {
       if (directories != null) {
         for (File directory : directories) {
           String databaseId = directory.getName();
-          final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseId);
-          Path databaseFile = databaseDirectoryPath
-            .resolve(ViewerConstants.DATABASE_STATUS_PREFIX + databaseId + ViewerConstants.JSON_EXTENSION);
-          if (FSUtils.exists(databaseFile)) {
-            final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
-            if (databaseStatus != null) {
-              ViewerDatabase viewerDatabase = buildViewerDatabase(databaseStatus);
-              solrManager.addDatabaseMetadata(viewerDatabase);
-            }
+          final DatabaseStatus databaseStatus = ViewerFactory.getConfigurationManager().getDatabaseStatus(databaseId);
+          List<CollectionStatus> collectionStatuses = new ArrayList<>();
+          for (String collection : databaseStatus.getCollections()) {
+            collectionStatuses
+              .add(ViewerFactory.getConfigurationManager().getConfigurationCollection(databaseId, collection));
           }
+
+          ViewerDatabase viewerDatabase = buildViewerDatabase(databaseStatus, collectionStatuses);
+          solrManager.addDatabaseMetadata(viewerDatabase);
         }
       } else {
         throw new GenericException("Error listing directories in " + databasesDir);
@@ -1199,7 +1198,8 @@ public class SIARDController {
     }
   }
 
-  public static ViewerDatabase buildViewerDatabase(DatabaseStatus databaseStatus) {
+  private static ViewerDatabase buildViewerDatabase(DatabaseStatus databaseStatus,
+    List<CollectionStatus> collectionStatuses) {
     ViewerDatabase viewerDatabase = new ViewerDatabase();
     Path siardPath = Paths.get(databaseStatus.getSiardStatus().getLocation());
     viewerDatabase.setUuid(databaseStatus.getId());
@@ -1216,12 +1216,30 @@ public class SIARDController {
     viewerDatabase.setValidationSkipped(databaseStatus.getValidationStatus().getIndicators().getSkipped());
     viewerDatabase.setValidationWarnings(databaseStatus.getValidationStatus().getIndicators().getWarnings());
     viewerDatabase.setStatus(databaseStatus.getStatus());
+    viewerDatabase.setConfigurationStatus(getDatabaseConfigurationStatus(databaseStatus, collectionStatuses));
     viewerDatabase.setVersion(databaseStatus.getSiardVersion());
     viewerDatabase.setVersion(databaseStatus.getSiardVersion());
     viewerDatabase.setMetadata(databaseStatus.getMetadata());
     viewerDatabase.setPermissions(databaseStatus.getPermissions());
 
     return viewerDatabase;
+  }
+
+  private static ViewerDatabaseConfigurationStatus getDatabaseConfigurationStatus(DatabaseStatus databaseStatus,
+    List<CollectionStatus> collectionStatuses) {
+    if (databaseStatus.isOutdated()) {
+      return ViewerDatabaseConfigurationStatus.OUTDATED;
+    }
+
+    for (CollectionStatus collectionStatus : collectionStatuses) {
+      if (collectionStatus.isOutdated()) {
+        return ViewerDatabaseConfigurationStatus.OUTDATED;
+      } else if (collectionStatus.isNeedsToBeProcessed()) {
+        return ViewerDatabaseConfigurationStatus.PENDING_JOBS;
+      }
+    }
+
+    return ViewerDatabaseConfigurationStatus.UP_TO_DATE;
   }
 
   public static void deleteSIARDFileFromPath(String siardPath, String databaseUUID) throws GenericException {

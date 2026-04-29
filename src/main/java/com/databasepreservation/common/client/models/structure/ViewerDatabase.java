@@ -42,6 +42,7 @@ public class ViewerDatabase extends IsIndexed {
   private boolean isAvailableToSearchAll;
 
   private long searchHits = -1;
+  private ViewerDatabaseConfigurationStatus configurationStatus;
 
   public ViewerDatabase() {
   }
@@ -235,5 +236,13 @@ public class ViewerDatabase extends IsIndexed {
 
   public void setSearchHits(long searchHits) {
     this.searchHits = searchHits;
+  }
+
+  public ViewerDatabaseConfigurationStatus getConfigurationStatus() {
+    return configurationStatus;
+  }
+
+  public void setConfigurationStatus(ViewerDatabaseConfigurationStatus configurationStatus) {
+    this.configurationStatus = configurationStatus;
   }
 }
