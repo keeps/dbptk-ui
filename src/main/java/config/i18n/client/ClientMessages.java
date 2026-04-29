@@ -1501,6 +1501,8 @@ public interface ClientMessages extends Messages {
    *******************************************/
   String configurationStatusPanelLabelForTitle();
 
+  String configurationStatusPanelLabelForTitleForNonAdminUser();
+
   String configurationStatusPanelLabelForJobsBtn();
 
   String configurationStatusPanelTextForReadyToStart();
@@ -1536,6 +1538,8 @@ public interface ClientMessages extends Messages {
   SafeHtml configurationStatusPanelWarningMessageForUpgrade();
 
   String configurationStatusPanelTextForUpgrade();
+
+  String configurationStatusPanelTextForUpgradeForNonAdmin();
 
   String configurationStatusPanelLabelForUpgradeBtn();
 
