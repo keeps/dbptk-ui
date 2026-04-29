@@ -840,7 +840,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           highlightFields.add(floatStringId);
         } else if (column.getId().matches("lob.+_s")
           // Return, query, and highlight both fields
-          && column.getLobTextExtractionStatus().getExtractedAndIndexedText()) {
+          && column.getLobTextExtractionStatus() != null && column.getLobTextExtractionStatus().getExtractedAndIndexedText()) {
           String ocrStringId = "ocr_" + column.getId() + "_" + ViewerConstants.SOLR_ROWS_EXTRACTED_TEXT_SUFFIX;
           fieldsToReturn.add(ocrStringId);
           highlightFields.add(ocrStringId);
