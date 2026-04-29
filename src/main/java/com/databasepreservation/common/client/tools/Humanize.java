@@ -13,6 +13,7 @@ import com.databasepreservation.common.client.models.activity.logs.LogEntryState
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.formatters.NoFormatter;
 import com.databasepreservation.common.client.models.status.formatters.NumberFormatter;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseConfigurationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
@@ -202,6 +203,23 @@ public class Humanize {
         return messages.humanizedTextForSolrRemoving();
       case ERROR:
         return messages.humanizedTextForSolrError();
+      default:
+        return "";
+    }
+  }
+
+  public static String databaseConfigurationStatus(ViewerDatabaseConfigurationStatus status) {
+    switch (status) {
+      case OUTDATED:
+        return messages.humanizedTextForSolrOutdated();
+      case UP_TO_DATE:
+        return messages.humanizedTextForSolrUpToDate();
+      case ERROR:
+        return messages.humanizedTextForSolrError();
+      case PENDING_JOBS:
+        return messages.humanizedTextForSolrPendingJobs();
+      case RUNNING_JOBS:
+        return messages.humanizedTextForSolrRunningJobs();
       default:
         return "";
     }

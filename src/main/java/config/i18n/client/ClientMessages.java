@@ -482,6 +482,14 @@ public interface ClientMessages extends Messages {
 
   String humanizedTextForSolrError();
 
+  String humanizedTextForSolrOutdated();
+
+  String humanizedTextForSolrUpToDate();
+
+  String humanizedTextForSolrPendingJobs();
+
+  String humanizedTextForSolrRunningJobs();
+
   String humanizedTextForJobStatusFailed();
 
   String humanizedTextForJobStatusCompleted();
@@ -725,6 +733,8 @@ public interface ClientMessages extends Messages {
   String managePageTableHeaderTextForSIARDValidationStatus();
 
   String managePageTableHeaderTextForDatabaseStatus();
+
+  String managePageTableHeaderTextForDatabaseConfigurationStatus();
 
   String managePageTableHeaderTextForActions();
 

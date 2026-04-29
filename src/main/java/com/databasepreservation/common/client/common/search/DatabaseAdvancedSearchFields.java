@@ -30,11 +30,24 @@ public class DatabaseAdvancedSearchFields extends FlowPanel {
       messages.schema_tableName());
     addSearchField("{!parent which='content_type:database'}" + ViewerConstants.SOLR_DATABASES_COLUMN_NAME,
       messages.columnName());
+
+    addSearchEnumSearchField(ViewerConstants.SOLR_DATABASES_STATUS,
+      messages.managePageTableHeaderTextForDatabaseStatus());
+    addSearchEnumSearchField(ViewerConstants.SOLR_DATABASES_CONFIGURATION_STATUS,
+      messages.managePageTableHeaderTextForDatabaseConfigurationStatus());
   }
 
   private void addSearchField(String solrField, String label) {
     SearchField field = new SearchField(solrField, Collections.singletonList(solrField), label,
       ViewerConstants.SEARCH_FIELD_TYPE_TEXT);
+    SearchFieldPanel panel = SearchFieldPanelFactory.getSearchFieldPanel(field);
+    panel.setup();
+    add(panel);
+  }
+
+  private void addSearchEnumSearchField(String solrField, String label) {
+    SearchField field = new SearchField(solrField, Collections.singletonList(solrField), label,
+      ViewerConstants.SEARCH_FIELD_TYPE_CONTROLLED);
     SearchFieldPanel panel = SearchFieldPanelFactory.getSearchFieldPanel(field);
     panel.setup();
     add(panel);

@@ -28,6 +28,7 @@ import com.databasepreservation.common.client.models.structure.ViewerCandidateKe
 import com.databasepreservation.common.client.models.structure.ViewerCheckConstraint;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseConfigurationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
@@ -74,6 +75,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     List<Field> fields = new ArrayList<>(super.getFields());
 
     fields.add(new Field(SOLR_DATABASES_STATUS, Field.TYPE_STRING).setIndexed(true).setRequired(true));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_CONFIGURATION_STATUS, Field.TYPE_STRING));
 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_NAME, Field.TYPE_TEXT_GEN_SORT));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_METADATA_DESCRIPTION, Field.TYPE_TEXT_GEN_SORT));
@@ -240,6 +242,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     SolrInputDocument doc = super.toSolrDocument(object);
 
     doc.addField(SOLR_DATABASES_STATUS, object.getStatus().toString());
+    doc.addField(SOLR_DATABASES_CONFIGURATION_STATUS, object.getConfigurationStatus().toString());
 
     ViewerMetadata meta = object.getMetadata();
     populateMetadataInDocument(meta, doc, false);
@@ -584,6 +587,8 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
 
     viewerDatabase.setStatus(SolrUtils.objectToEnum(doc.get(SOLR_DATABASES_STATUS), ViewerDatabaseStatus.class,
       ViewerDatabaseStatus.INGESTING));
+    viewerDatabase.setConfigurationStatus(SolrUtils.objectToEnum(doc.get(SOLR_DATABASES_CONFIGURATION_STATUS),
+      ViewerDatabaseConfigurationStatus.class, ViewerDatabaseConfigurationStatus.OUTDATED));
 
     ViewerMetadata metadata = new ViewerMetadata();
 

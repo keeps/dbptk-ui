@@ -33,18 +33,16 @@ import com.databasepreservation.common.client.models.authorization.Authorization
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.ForeignKeysStatus;
-import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.ProcessingState;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseConfigurationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSourceType;
-import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.exceptions.DependencyViolationException;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.configuration.migration.ConfigurationMigrator;
@@ -144,73 +142,6 @@ public class ConfigurationManager {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         collectionStatus.addDenormalization(denormalizationUUID);
-        // Update collection
-        collectionStatus.setNeedsToBeProcessed(true);
-        updateCollectionStatus(databaseUUID, collectionStatus);
-      }
-    } catch (GenericException | ViewerException e) {
-      throw new GenericException("Failed to manipulate the JSON file", e);
-    }
-  }
-
-  public void removeDenormalization(String databaseUUID, String denormalizationUUID)
-    throws GenericException, IllegalAccessException {
-    try {
-      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
-      if (databaseStatus.getCollections().size() >= 1) {
-        final String collectionId = databaseStatus.getCollections().get(0);
-        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
-        collectionStatus.getDenormalizations().remove(denormalizationUUID);
-        // Update collection
-        collectionStatus.setNeedsToBeProcessed(true);
-        updateCollectionStatus(databaseUUID, collectionStatus);
-      }
-    } catch (GenericException | ViewerException e) {
-      throw new GenericException("Failed to manipulate the JSON file", e);
-    }
-  }
-
-  public void addDenormalizationColumns(String databaseUUID, String tableUUID, ViewerColumn column,
-    NestedColumnStatus nestedId, String template, String originalType, String typeName, String nullable)
-    throws GenericException, IllegalAccessException {
-    try {
-      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
-      if (!databaseStatus.getCollections().isEmpty()) {
-        final String collectionId = databaseStatus.getCollections().get(0);
-        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
-        TableStatus table = collectionStatus.getTableStatus(tableUUID);
-
-        int order = table.getLastColumnOrder();
-        ColumnStatus columnStatus = StatusUtils.getColumnStatus(column, true, ++order);
-        columnStatus.setNestedColumns(nestedId);
-        columnStatus.setOriginalType(originalType);
-        columnStatus.setTypeName(typeName);
-        columnStatus.setNullable(nullable);
-        columnStatus.setType(ViewerType.dbTypes.NESTED);
-        table.addColumnStatus(columnStatus);
-        columnStatus.getExportStatus().getTemplateStatus().setTemplate(template);
-        columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(template);
-        columnStatus.getSearchStatus().getList().getTemplate().setTemplate(template);
-
-        // Update collection
-        collectionStatus.setNeedsToBeProcessed(true);
-        updateCollectionStatus(databaseUUID, collectionStatus);
-      }
-    } catch (GenericException | ViewerException e) {
-      throw new GenericException("Failed to manipulate the JSON file", e);
-    }
-  }
-
-  public void removeDenormalizationColumns(String databaseUUID, String tableUUID)
-    throws GenericException, IllegalAccessException {
-    try {
-      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
-      if (databaseStatus.getCollections().size() >= 1) {
-        final String collectionId = databaseStatus.getCollections().get(0);
-        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
-        TableStatus table = collectionStatus.getTableStatus(tableUUID);
-        table.getColumns().removeIf(c -> c.getNestedColumns() != null);
-        table.reorderColumns();
         // Update collection
         collectionStatus.setNeedsToBeProcessed(true);
         updateCollectionStatus(databaseUUID, collectionStatus);
@@ -487,6 +418,14 @@ public class ConfigurationManager {
       }
 
       JsonTransformer.writeObjectToFile(updatedStatus, statusFile);
+
+      if (updatedStatus.isNeedsToBeProcessed()) {
+        ViewerFactory.getSolrManager().updateDatabaseConfigurationStatus(databaseUUID,
+          ViewerDatabaseConfigurationStatus.PENDING_JOBS);
+      } else {
+        ViewerFactory.getSolrManager().updateDatabaseConfigurationStatus(databaseUUID,
+          ViewerDatabaseConfigurationStatus.UP_TO_DATE);
+      }
     }
   }
 
