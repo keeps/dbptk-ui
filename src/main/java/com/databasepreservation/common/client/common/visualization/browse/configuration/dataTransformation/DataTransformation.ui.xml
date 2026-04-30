@@ -1,12 +1,10 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:c='urn:import:com.databasepreservation.common.client.common'
-             xmlns:cp='urn:import:com.databasepreservation.common.client.common.visualization.browse.configuration'>
+             xmlns:c='urn:import:com.databasepreservation.common.client.common'>
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
     <g:FlowPanel ui:field="content">
-        <cp:ConfigurationStatusPanel ui:field="configurationStatusPanel"/>
-        <g:SimplePanel ui:field="message" />
-        <g:FlowPanel ui:field="toolBar" addStyleNames="data-transformation-toolbar sticky-flow" />
+        <g:SimplePanel ui:field="message"/>
+        <g:FlowPanel ui:field="toolBar" addStyleNames="data-transformation-toolbar sticky-flow"/>
         <g:FlowPanel ui:field="rootTablePanel">
             <c:LoadingDiv visible="false" ui:field="loading"/>
         </g:FlowPanel>

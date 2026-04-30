@@ -13,9 +13,9 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.NavigationPanel;
+import com.databasepreservation.common.client.common.StatusAwareContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
@@ -44,7 +44,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class AdvancedConfiguration extends ContentPanel {
+public class AdvancedConfiguration extends StatusAwareContentPanel {
   private ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface AdvancedConfigurationUiBinder extends UiBinder<Widget, AdvancedConfiguration> {
@@ -59,9 +59,6 @@ public class AdvancedConfiguration extends ContentPanel {
   SimplePanel description;
 
   @UiField
-  ConfigurationStatusPanel configurationStatusPanel;
-
-  @UiField
   Button btnReset;
 
   private static Map<String, AdvancedConfiguration> instances = new HashMap<>();
@@ -74,7 +71,7 @@ public class AdvancedConfiguration extends ContentPanel {
   private AdvancedConfiguration(ViewerDatabase database) {
     initWidget(binder.createAndBindUi(this));
     this.database = database;
-    configurationStatusPanel.setDatabase(database);
+    updateStatusPanel(database);
 
     init();
   }

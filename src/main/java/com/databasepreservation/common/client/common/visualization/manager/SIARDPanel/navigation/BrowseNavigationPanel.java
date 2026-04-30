@@ -42,6 +42,7 @@ public class BrowseNavigationPanel {
   private Button btnConfiguration;
   private boolean btnIngestClicked = false;
   private MetadataField browsingStatus = null;
+  private MetadataField configurationStatus = null;
 
   public static BrowseNavigationPanel getInstance(ViewerDatabase database) {
     return instances.computeIfAbsent(database.getUuid(), k -> new BrowseNavigationPanel(database));
@@ -178,8 +179,12 @@ public class BrowseNavigationPanel {
     browsingStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForBrowseStatus(),
       LabelUtils.getDatabaseStatus(database.getStatus()));
     browsingStatus.setCSS(null, "label-field", "value-field");
-
     browse.addToInfoPanel(browsingStatus);
+
+    configurationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForBrowseConfigurationStatus(),
+      LabelUtils.getDatabaseConfigurationStatus(database.getConfigurationStatus()));
+    configurationStatus.setCSS(null, "label-field", "value-field");
+    browse.addToInfoPanel(configurationStatus);
 
     return browse;
   }
@@ -187,6 +192,7 @@ public class BrowseNavigationPanel {
   public void update(ViewerDatabase database) {
     this.database = database;
     browsingStatus.updateText(LabelUtils.getDatabaseStatus(database.getStatus()));
+    configurationStatus.updateText(LabelUtils.getDatabaseConfigurationStatus(database.getConfigurationStatus()));
 
     if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
       btnBrowse.setVisible(true);

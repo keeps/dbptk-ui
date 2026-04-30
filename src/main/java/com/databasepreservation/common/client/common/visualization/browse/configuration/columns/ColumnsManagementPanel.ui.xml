@@ -1,13 +1,11 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:cp='urn:import:com.databasepreservation.common.client.common.visualization.browse.configuration'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <g:FlowPanel>
-        <cp:ConfigurationStatusPanel ui:field="configurationStatusPanel"/>
         <g:FlowPanel ui:field="content" addStyleNames="management">
             <g:FlowPanel addStyleNames="structure-header" ui:field="mainHeader">
                 <g:FlowPanel addStyleNames="data-transformation-toolbar-actions">
-                    <g:Button ui:field="btnGotoTable" addStyleNames="btn btn-table" />
+                    <g:Button ui:field="btnGotoTable" addStyleNames="btn btn-table"/>
                 </g:FlowPanel>
             </g:FlowPanel>
         </g:FlowPanel>

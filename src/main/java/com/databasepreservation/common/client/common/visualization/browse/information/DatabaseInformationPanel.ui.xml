@@ -1,18 +1,16 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:cp='urn:import:com.databasepreservation.common.client.common.visualization.browse.configuration'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <g:FlowPanel ui:field="mainPanel">
-        <cp:ConfigurationStatusPanel ui:field="configurationStatusPanel"/>
         <g:FlowPanel addStyleNames="structure-header" ui:field="header"/>
         <g:SimplePanel ui:field="description" addStyleNames="table-row-description"/>
 
         <g:FlowPanel addStyleNames="card">
-            <g:SimplePanel ui:field="cardTitle" addStyleNames="card-header" />
-            <g:FlowPanel ui:field="metadataContent" />
+            <g:SimplePanel ui:field="cardTitle" addStyleNames="card-header"/>
+            <g:FlowPanel ui:field="metadataContent"/>
         </g:FlowPanel>
         <g:FlowPanel ui:field="dataContentCard" addStyleNames="card">
-            <g:FlowPanel ui:field="dataContent" />
+            <g:FlowPanel ui:field="dataContent"/>
         </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.common.client.ObserverManager;
-import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
+import com.databasepreservation.common.client.common.StatusAwareContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
@@ -25,7 +25,6 @@ import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
@@ -61,7 +60,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class TextExtractionPanel extends ContentPanel {
+public class TextExtractionPanel extends StatusAwareContentPanel {
 
   interface TableManagementPanelUiBinder extends UiBinder<Widget, TextExtractionPanel> {
   }
@@ -81,14 +80,11 @@ public class TextExtractionPanel extends ContentPanel {
   @UiField
   FlowPanel content;
 
-  @UiField
-  ConfigurationStatusPanel configurationStatusPanel;
-
   private TextExtractionPanel(ViewerDatabase database, CollectionStatus collectionStatus) {
     initWidget(binder.createAndBindUi(this));
     this.database = database;
     this.collectionStatus = collectionStatus;
-    configurationStatusPanel.setDatabase(database);
+    updateStatusPanel(database);
 
     init();
   }

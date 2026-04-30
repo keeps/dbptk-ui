@@ -13,12 +13,11 @@ import java.util.Map;
 import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.StatusAwareRightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -47,7 +46,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DatabaseInformationPanel extends RightPanel {
+public class DatabaseInformationPanel extends StatusAwareRightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, DatabaseInformationPanel> instances = new HashMap<>();
 
@@ -85,15 +84,12 @@ public class DatabaseInformationPanel extends RightPanel {
   @UiField
   SimplePanel cardTitle;
 
-  @UiField
-  ConfigurationStatusPanel configurationStatusPanel;
-
   private DatabaseInformationPanel(ViewerDatabase database, CollectionStatus status) {
     this.database = database;
     this.status = status;
     initWidget(uiBinder.createAndBindUi(this));
 
-    configurationStatusPanel.setDatabase(database);
+    updateStatusPanel(database);
     init();
   }
 

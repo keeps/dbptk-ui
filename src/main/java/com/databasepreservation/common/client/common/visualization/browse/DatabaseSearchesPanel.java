@@ -8,7 +8,7 @@
 package com.databasepreservation.common.client.common.visualization.browse;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.StatusAwareRightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.SavedSearchList;
 import com.databasepreservation.common.client.common.search.SavedSearch;
@@ -32,7 +32,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DatabaseSearchesPanel extends RightPanel {
+public class DatabaseSearchesPanel extends StatusAwareRightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface DatabaseSearchesPanelUiBinder extends UiBinder<Widget, DatabaseSearchesPanel> {
@@ -83,6 +83,8 @@ public class DatabaseSearchesPanel extends RightPanel {
         HistoryManager.gotoSavedSearch(selected.getDatabaseUUID(), selected.getUuid());
       }
     });
+
+    updateStatusPanel(database);
 
     content.add(savedSearchList);
   }
