@@ -122,7 +122,7 @@ public class ViewerConstants {
    */
   public static final String INDEX_ID = "uuid";
   public static final String INDEX_SEARCH = "search";
-  public static final String INDEX_LOB_TEXT_SEARCH = "ocrSearch";
+  public static final String INDEX_LOB_TEXT_SEARCH = "ocrSearch_txt_sort";
   public static final String INDEX_WILDCARD = "*";
 
   /*
