@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.StatusAwareRightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
@@ -36,7 +36,6 @@ import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.CustomizeColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.virtual.VirtualColumnOptionsPanel;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
@@ -84,7 +83,8 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ColumnsManagementPanel extends RightPanel implements ICollectionStatusObserver, ISaveButtonObserver {
+public class ColumnsManagementPanel extends StatusAwareRightPanel
+  implements ICollectionStatusObserver, ISaveButtonObserver {
 
   private static final String FA_FW = "fa-fw";
   private ClientMessages messages = GWT.create(ClientMessages.class);
@@ -95,8 +95,6 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   FlowPanel content;
   @UiField
   Button btnGotoTable;
-  @UiField
-  ConfigurationStatusPanel configurationStatusPanel;
 
   interface ColumnsManagementPanelUiBinder extends UiBinder<Widget, ColumnsManagementPanel> {
   }
@@ -136,7 +134,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     this.collectionStatus = collectionStatus;
     this.tableId = tableId;
     this.sidebar = sidebar;
-    configurationStatusPanel.setDatabase(database);
+    updateStatusPanel(database);
 
     initStaticElements();
   }
@@ -159,7 +157,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       this.collectionStatus = status;
       this.isInitialized = true;
 
-      configurationStatusPanel.setDatabase(this.database);
+      updateStatusPanel(this.database);
 
       if (this.sidebar != null) {
         this.sidebar.reset(this.database, this.collectionStatus);
@@ -358,7 +356,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       (projectedDb, status) -> {
         this.database = projectedDb;
         this.collectionStatus = status;
-        configurationStatusPanel.setDatabase(this.database);
+        updateStatusPanel(this.database);
         ObserverManager.getCollectionObserver().setCollectionStatus(this.collectionStatus);
 
         if (sidebar != null) {

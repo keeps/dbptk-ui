@@ -1471,6 +1471,7 @@ html, body {
     text-align: left;
     font-weight: bold;
     min-width: 100px;
+    margin-right: 5px;
 }
 
 .value-field {

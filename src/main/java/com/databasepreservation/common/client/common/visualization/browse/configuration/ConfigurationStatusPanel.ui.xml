@@ -59,7 +59,9 @@
             <g:FlowPanel ui:field="outdatedStatePanel" visible="false" addStyleNames="outdate-config-state-panel">
                 <g:FlowPanel addStyleNames="config-header">
                     <g:FlowPanel addStyleNames="job-title-panel">
-                        <g:Label addStyleNames="config-title-text"><ui:text from='{messages.configurationStatusPanelTextForUpgrade}'/></g:Label>
+                        <g:Label addStyleNames="config-title-text">
+                            <ui:text from='{messages.configurationStatusPanelTextForUpgrade}'/>
+                        </g:Label>
                     </g:FlowPanel>
                     <g:Button ui:field="btnMigrateAndReindex" addStyleNames="btn btn-warning btn-play">
                         <ui:text from='{messages.configurationStatusPanelLabelForUpgradeBtn}'/>
@@ -69,7 +71,7 @@
 
             <g:FlowPanel ui:field="readOnlyWarningPanel" visible="false" addStyleNames="read-only-config-state-panel">
                 <g:FlowPanel addStyleNames="config-header">
-                    <g:Label ui:field="readOnlyMessageLabel" addStyleNames="config-title-text text-warning"/>
+                    <g:HTML ui:field="readOnlyMessageHtml" addStyleNames="config-title-text text-warning"/>
                 </g:FlowPanel>
             </g:FlowPanel>
 

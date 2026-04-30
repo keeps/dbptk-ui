@@ -17,13 +17,12 @@ import com.databasepreservation.common.api.v1.utils.ConfigurationContext;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.LoadingDiv;
-import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.StatusAwareRightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.ConfigurationStatusPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
@@ -62,7 +61,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DataTransformation extends RightPanel implements ICollectionStatusObserver {
+public class DataTransformation extends StatusAwareRightPanel implements ICollectionStatusObserver {
 
   interface DataTransformerUiBinder extends UiBinder<Widget, DataTransformation> {
   }
@@ -88,9 +87,6 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
   @UiField
   LoadingDiv loading;
-
-  @UiField
-  ConfigurationStatusPanel configurationStatusPanel;
 
   private ViewerDatabase database;
   private ViewerTable table;
@@ -139,7 +135,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     this.tableId = tableId;
     this.isInitialized = false;
 
-    this.configurationStatusPanel.setDatabase(this.database);
+    updateStatusPanel(this.database);
 
     if (this.tableId == null) {
       this.isInformation = true;
@@ -187,7 +183,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
         this.collectionStatus = context.getCollectionStatus();
         this.isInitialized = true;
 
-        configurationStatusPanel.setDatabase(this.database);
+        updateStatusPanel(this.database);
 
         if (this.sidebar != null) {
           this.sidebar.reset(this.database, this.collectionStatus);
@@ -505,7 +501,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
           ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
 
           isInitialized = true;
-          configurationStatusPanel.setDatabase(database);
+          updateStatusPanel(database);
 
           if (sidebar != null) {
             sidebar.reset(database, collectionStatus);

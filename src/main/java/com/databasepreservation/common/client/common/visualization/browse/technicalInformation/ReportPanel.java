@@ -10,9 +10,8 @@ package com.databasepreservation.common.client.common.visualization.browse.techn
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.StatusAwareRightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
@@ -31,7 +30,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ReportPanel extends RightPanel {
+public class ReportPanel extends StatusAwareRightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface ReportPanelUiBinder extends UiBinder<Widget, ReportPanel> {
@@ -58,6 +57,7 @@ public class ReportPanel extends RightPanel {
   private ReportPanel(ViewerDatabase database) {
     initWidget(uiBinder.createAndBindUi(this));
     this.database = database;
+    updateStatusPanel(database);
 
     content.add(new MarkdownWidgetWrapper(database.getUuid()));
     configureHeader();
@@ -75,7 +75,7 @@ public class ReportPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDatabaseReport(database.getUuid(), database.getMetadata().getName()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+      BreadcrumbManager.forDatabaseReport(database.getUuid(), database.getMetadata().getName()));
   }
 }

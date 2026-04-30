@@ -875,6 +875,8 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageLabelForBrowseStatus();
 
+  String SIARDHomePageLabelForBrowseConfigurationStatus();
+
   String SIARDHomePageTextForSIARDValid(String name);
 
   String SIARDHomePageTextForSIARDInvalid(String name);

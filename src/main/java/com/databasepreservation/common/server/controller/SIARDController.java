@@ -1174,6 +1174,9 @@ public class SIARDController {
 
   public static void reindexDatabasesOnPath(Path databasesDirectoryPath) throws ModuleException, GenericException {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    // TODO: Needs to replace this implementation with a asynchronous job that
+    // reindexes the databases one by one, to avoid performance issues when there
+    // are many databases to reindex
     File databasesDir = databasesDirectoryPath.toFile();
     if (databasesDir.exists() && databasesDir.isDirectory()) {
       File[] directories = databasesDir.listFiles(File::isDirectory);
@@ -1181,13 +1184,10 @@ public class SIARDController {
         for (File directory : directories) {
           String databaseId = directory.getName();
           final DatabaseStatus databaseStatus = ViewerFactory.getConfigurationManager().getDatabaseStatus(databaseId);
-          List<CollectionStatus> collectionStatuses = new ArrayList<>();
-          for (String collection : databaseStatus.getCollections()) {
-            collectionStatuses
-              .add(ViewerFactory.getConfigurationManager().getConfigurationCollection(databaseId, collection));
-          }
+          CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
+            .getConfigurationCollection(databaseId, databaseId);
 
-          ViewerDatabase viewerDatabase = buildViewerDatabase(databaseStatus, collectionStatuses);
+          ViewerDatabase viewerDatabase = buildViewerDatabase(databaseStatus, collectionStatus);
           solrManager.addDatabaseMetadata(viewerDatabase);
         }
       } else {
@@ -1198,8 +1198,7 @@ public class SIARDController {
     }
   }
 
-  private static ViewerDatabase buildViewerDatabase(DatabaseStatus databaseStatus,
-    List<CollectionStatus> collectionStatuses) {
+  private static ViewerDatabase buildViewerDatabase(DatabaseStatus databaseStatus, CollectionStatus collectionStatus) {
     ViewerDatabase viewerDatabase = new ViewerDatabase();
     Path siardPath = Paths.get(databaseStatus.getSiardStatus().getLocation());
     viewerDatabase.setUuid(databaseStatus.getId());
@@ -1216,7 +1215,7 @@ public class SIARDController {
     viewerDatabase.setValidationSkipped(databaseStatus.getValidationStatus().getIndicators().getSkipped());
     viewerDatabase.setValidationWarnings(databaseStatus.getValidationStatus().getIndicators().getWarnings());
     viewerDatabase.setStatus(databaseStatus.getStatus());
-    viewerDatabase.setConfigurationStatus(getDatabaseConfigurationStatus(databaseStatus, collectionStatuses));
+    viewerDatabase.setConfigurationStatus(getDatabaseConfigurationStatus(databaseStatus, collectionStatus));
     viewerDatabase.setVersion(databaseStatus.getSiardVersion());
     viewerDatabase.setVersion(databaseStatus.getSiardVersion());
     viewerDatabase.setMetadata(databaseStatus.getMetadata());
@@ -1226,17 +1225,15 @@ public class SIARDController {
   }
 
   private static ViewerDatabaseConfigurationStatus getDatabaseConfigurationStatus(DatabaseStatus databaseStatus,
-    List<CollectionStatus> collectionStatuses) {
+    CollectionStatus collectionStatus) {
     if (databaseStatus.isOutdated()) {
       return ViewerDatabaseConfigurationStatus.OUTDATED;
     }
 
-    for (CollectionStatus collectionStatus : collectionStatuses) {
-      if (collectionStatus.isOutdated()) {
-        return ViewerDatabaseConfigurationStatus.OUTDATED;
-      } else if (collectionStatus.isNeedsToBeProcessed()) {
-        return ViewerDatabaseConfigurationStatus.PENDING_JOBS;
-      }
+    if (collectionStatus.isOutdated()) {
+      return ViewerDatabaseConfigurationStatus.OUTDATED;
+    } else if (collectionStatus.isNeedsToBeProcessed()) {
+      return ViewerDatabaseConfigurationStatus.PENDING_JOBS;
     }
 
     return ViewerDatabaseConfigurationStatus.UP_TO_DATE;

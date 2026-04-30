@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.StatusAwareRightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.fields.MetadataField;
@@ -44,7 +44,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class RoutinesPanel extends RightPanel {
+public class RoutinesPanel extends StatusAwareRightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface SchemaRoutinesUiBinder extends UiBinder<Widget, RoutinesPanel> {
@@ -68,6 +68,7 @@ public class RoutinesPanel extends RightPanel {
   private RoutinesPanel(ViewerDatabase database) {
     this.database = database;
     initWidget(uiBinder.createAndBindUi(this));
+    updateStatusPanel(database);
     init();
   }
 

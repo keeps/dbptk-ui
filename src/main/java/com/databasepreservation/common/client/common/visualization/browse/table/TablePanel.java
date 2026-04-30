@@ -14,7 +14,7 @@ import java.util.Map;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.StatusAwareRightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
@@ -49,7 +49,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class TablePanel extends RightPanel implements ICollectionStatusObserver, IColumnVisibilityObserver {
+public class TablePanel extends StatusAwareRightPanel implements ICollectionStatusObserver, IColumnVisibilityObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TablePanel> instances = new HashMap<>();
   private static final String SEPARATOR = "/";
@@ -206,6 +206,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   private void init() {
     ObserverManager.getCollectionObserver().addObserver(this);
     ObserverManager.getColumnVisibilityObserver().addObserver(this);
+    updateStatusPanel(this.database);
 
     if (HistoryManager.ROUTE_TABLE.equals(route)) {
       foreignKeyNavigator.setVisible(false);

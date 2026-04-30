@@ -15,7 +15,7 @@ import java.util.Map;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.LoadingDiv;
-import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.StatusAwareRightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.TableRowList;
@@ -58,7 +58,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DatabaseSearchPanel extends RightPanel implements ICollectionStatusObserver {
+public class DatabaseSearchPanel extends StatusAwareRightPanel implements ICollectionStatusObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, DatabaseSearchPanel> instances = new HashMap<>();
   private final CollectionStatus status;
@@ -119,6 +119,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
     initWidget(uiBinder.createAndBindUi(this));
 
     ObserverManager.getCollectionObserver().addObserver(this);
+    updateStatusPanel(database);
 
     mainHeader.setWidget(CommonClientUtils.getHeaderHTML(
       FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_SEARCH), messages.searchAllRecords(), "h1"));

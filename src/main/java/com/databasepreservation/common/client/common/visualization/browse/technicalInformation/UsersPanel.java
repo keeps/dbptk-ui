@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.StatusAwareRightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
@@ -38,7 +38,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class UsersPanel extends RightPanel {
+public class UsersPanel extends StatusAwareRightPanel {
   private static final ClientMessages messages = com.google.gwt.core.shared.GWT.create(ClientMessages.class);
   private static Map<String, UsersPanel> instances = new HashMap<>();
 
@@ -63,6 +63,7 @@ public class UsersPanel extends RightPanel {
     initWidget(uiBinder.createAndBindUi(this));
 
     this.database = database;
+    updateStatusPanel(database);
     init();
   }
 
@@ -88,7 +89,6 @@ public class UsersPanel extends RightPanel {
     privileges.addStyleName("card");
     privileges.add(getBasicTablePanelForPrivileges(metadata));
 
-
     content.add(users);
     content.add(roles);
     content.add(privileges);
@@ -96,8 +96,8 @@ public class UsersPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDatabaseUsers(database.getMetadata().getName(), database.getUuid()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+      BreadcrumbManager.forDatabaseUsers(database.getMetadata().getName(), database.getUuid()));
   }
 
   private BasicTablePanel<ViewerUserStructure> getBasicTablePanelForUsers(ViewerMetadata metadata) {

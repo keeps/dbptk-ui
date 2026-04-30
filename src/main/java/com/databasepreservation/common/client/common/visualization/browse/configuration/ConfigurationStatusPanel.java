@@ -38,6 +38,7 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -102,7 +103,7 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
   @UiField
   FlowPanel readOnlyWarningPanel;
   @UiField
-  Label readOnlyMessageLabel;
+  HTML readOnlyMessageHtml;
 
   private Timer progressTimer;
   private boolean jobFinishedSuccessfully = false;
@@ -528,9 +529,11 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
           alertPanel.setType(Alert.MessageAlertType.WARNING);
 
           if (needsProcess) {
-            readOnlyMessageLabel.setText(messages.configurationStatusPanelLabelForTitleForNonAdminUser());
+            readOnlyMessageHtml
+              .setHTML(SafeHtmlUtils.fromSafeConstant(messages.configurationStatusPanelLabelForTitleForNonAdminUser()));
           } else if (isOutdated) {
-            readOnlyMessageLabel.setText(messages.configurationStatusPanelTextForUpgradeForNonAdmin());
+            readOnlyMessageHtml
+              .setHTML(SafeHtmlUtils.fromSafeConstant(messages.configurationStatusPanelTextForUpgradeForNonAdmin()));
           }
         }
       } else {
