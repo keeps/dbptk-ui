@@ -229,6 +229,11 @@ public class TableStatus implements Serializable {
   }
 
   @JsonIgnore
+  public ColumnStatus getColumnByName(String name) {
+    return columns.stream().filter(c -> c.getName().equals(name)).findFirst().orElse(null);
+  }
+
+  @JsonIgnore
   public ColumnStatus getColumnByIndex(int index) {
     return columns.stream().filter(c -> c.getColumnIndex() == index).findFirst().orElse(null);
   }

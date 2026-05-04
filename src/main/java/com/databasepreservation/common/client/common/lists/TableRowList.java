@@ -35,6 +35,8 @@ import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.TableRowListWrapper;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
+import com.databasepreservation.common.client.common.visualization.preferences.LocalColumnPreferences;
+import com.databasepreservation.common.client.common.visualization.preferences.LocalPreferencesManager;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
@@ -49,6 +51,7 @@ import com.databasepreservation.common.client.index.select.SelectedItemsList;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.CustomizeProperties;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -68,6 +71,7 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -120,16 +124,42 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   /**
    * Checks if the column should be displayed. When uncertain, show it.
    *
-   * @param column
-   *          the column
+   * @param columnId
+   *          the column ID
    * @return the visible state
    */
-  protected boolean isColumnVisible(String column) {
-    // NULL -> true (show)
-    // true -> true (show)
-    // false -> false (hide)
-    Boolean visibleState = columnDisplayNameToVisibleState.get(column);
-    return visibleState == null || visibleState;
+  protected boolean isColumnVisible(String columnId) {
+    com.databasepreservation.common.client.common.utils.TableRowListWrapper wrapper = getObject();
+    ViewerDatabase db = wrapper.getDatabase();
+    ViewerTable vTable = wrapper.getTable();
+    CollectionStatus collStatus = wrapper.getStatus();
+
+    TableStatus tableStatus = collStatus.getTableStatusByTableId(vTable.getId());
+    if (tableStatus != null) {
+      ColumnStatus colStatus = tableStatus.getColumnById(columnId);
+      if (colStatus != null) {
+        LocalColumnPreferences prefs = LocalPreferencesManager.getColumnPreferences(db.getUuid(), vTable.getId(),
+          colStatus.getId());
+        if (prefs.getShow() != null) {
+          return prefs.getShow();
+        }
+
+        if (columnDisplayNameToVisibleState != null) {
+          Boolean visibleState = columnDisplayNameToVisibleState.get(colStatus.getName());
+          if (visibleState != null) {
+            return visibleState;
+          }
+        }
+        return true;
+      }
+    }
+
+    if (columnDisplayNameToVisibleState != null) {
+      Boolean visibleState = columnDisplayNameToVisibleState.get(columnId);
+      return visibleState == null || visibleState;
+    }
+
+    return true;
   }
 
   private Map<String, Integer> getColumnWithBinary(TableStatus table) {
@@ -149,7 +179,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   @Override
   protected void configureDisplay(CellTable<ViewerRow> display) {
     this.display = display;
-    TableRowListWrapper wrapper = getObject();
+    com.databasepreservation.common.client.common.utils.TableRowListWrapper wrapper = getObject();
     final ViewerTable table = wrapper.getTable();
     final ViewerDatabase database = wrapper.getDatabase();
     final CollectionStatus status = wrapper.getStatus();
@@ -167,62 +197,53 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     }
 
     for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
+      Column<ViewerRow, SafeHtml> columnToAdd = null;
+      boolean isSortable = false;
+
+      // 1. COLUMN INSTANTIATION
       if (!NESTED.equals(configColumn.getType())) {
-        // Treat as non nested
         if (BINARY.equals(configColumn.getType())) {
-          Column<ViewerRow, SafeHtml> binaryColumn = buildDownloadColumn(configColumn, database, table,
-            configColumn.getColumnIndex());
-          binaryColumn.setSortable(true); // add to configuration file sortable options
-          addColumn(configColumn, binaryColumn);
-          configColumns.put(configColumn, binaryColumn);
+          columnToAdd = buildDownloadColumn(configColumn, database, table, configColumn.getColumnIndex());
+          isSortable = true;
         } else if (CLOB.equals(configColumn.getType())) {
           if (configColumn.getSearchStatus().getList().isShowContent()) {
-            Column<ViewerRow, SafeHtml> column = buildSimpleColumn(configColumn);
-            column.setSortable(true);
-            addColumn(configColumn, column);
-            configColumns.put(configColumn, column);
+            columnToAdd = buildSimpleColumn(configColumn);
           } else {
-            Column<ViewerRow, SafeHtml> binaryColumn = buildDownloadColumn(configColumn, database, table,
-              configColumn.getColumnIndex());
-            binaryColumn.setSortable(true); // add to configuration file sortable options
-            addColumn(configColumn, binaryColumn);
-            configColumns.put(configColumn, binaryColumn);
+            columnToAdd = buildDownloadColumn(configColumn, database, table, configColumn.getColumnIndex());
           }
+          isSortable = true;
         } else {
-          Column<ViewerRow, SafeHtml> column = buildSimpleColumn(configColumn);
-          column.setSortable(true);
-          addColumn(configColumn, column);
-          configColumns.put(configColumn, column);
+          columnToAdd = buildSimpleColumn(configColumn);
+          isSortable = true;
         }
       } else {
-        // Treat as nested
-        // this is the table of nested document
         ViewerTable nestedTable = database.getMetadata()
           .getTableById(configColumn.getNestedColumns().getOriginalTable());
         if (configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
-          Column<ViewerRow, SafeHtml> binaryColumn = buildNestedRowDownloadColumn(configColumn, nestedTable);
-          binaryColumn.setSortable(false); // add to configuration file sortable options
-          addColumn(configColumn, binaryColumn);
-          configColumns.put(configColumn, binaryColumn);
+          columnToAdd = buildNestedRowDownloadColumn(configColumn, nestedTable);
         } else {
-          Column<ViewerRow, SafeHtml> templateColumn = buildTemplateColumn(configColumn, nestedTable);
-          templateColumn.setSortable(false);
-          addColumn(configColumn, templateColumn);
-          configColumns.put(configColumn, templateColumn);
+          columnToAdd = buildTemplateColumn(configColumn, nestedTable);
+        }
+        isSortable = false;
+      }
+
+      if (columnToAdd != null) {
+        columnToAdd.setSortable(isSortable);
+
+        // 2. CACHE (Always save to map so the toggle works later without recreating the
+        // column)
+        configColumns.put(configColumn, columnToAdd);
+
+        // 3. RENDER (Add to UI only if visible)
+        if (isColumnVisible(configColumn.getId())) {
+          addColumn(configColumn, columnToAdd);
         }
       }
     }
+
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(alert);
     configureCellHighlightPopups();
-
-    // define default sorting
-    // display.getColumnSortList().push(new ColumnSortInfo(datesColumn, false));
-    //
-    // datesColumn.setCellStyleNames("nowrap");
-    //
-    // addStyleName("my-collections-table");
-    // emptyInfo.addStyleName("my-collections-empty-info");
   }
 
   private void configureCellHighlightPopups() {
@@ -888,8 +909,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     if (database.getPath() != null && !database.getPath().isEmpty()) {
       Map<String, Integer> binaryColumns = getColumnWithBinary(
         getObject().getStatus().getTableStatusByTableId(viewerTable.getId()));
-      for (String columnName : binaryColumns.keySet()) {
-        if (isColumnVisible(columnName)) {
+      for (String columnId : binaryColumns.keySet()) {
+        if (isColumnVisible(columnId)) {
           buildZipHelper = true;
         }
       }
@@ -1075,7 +1096,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     configColumns.keySet().forEach(configColumn -> {
       Column<ViewerRow, ?> displayColumn = configColumns.get(configColumn);
-      if (isColumnVisible(configColumn.getName())) {
+      if (isColumnVisible(configColumn.getId())) {
         addColumn(configColumn, displayColumn);
       }
     });
@@ -1083,18 +1104,55 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   }
 
   private void addColumn(ColumnStatus viewerColumn, Column<ViewerRow, ?> displayColumn) {
+    com.databasepreservation.common.client.common.utils.TableRowListWrapper wrapper = getObject();
+    ViewerDatabase db = wrapper.getDatabase();
+    ViewerTable vTable = wrapper.getTable();
+
+    // 1. Initialize with an empty string to force NumberFormatException gracefully
+    // inside AsyncTableCell
+    CustomizeProperties propsToApply = new CustomizeProperties();
+    propsToApply.setWidth("");
+    propsToApply.setUnit(Style.Unit.EM);
+
+    // 2. Global fallback
+    if (viewerColumn.getSearchStatus() != null && viewerColumn.getSearchStatus().getList() != null) {
+      CustomizeProperties globalProps = viewerColumn.getSearchStatus().getList().getCustomizeProperties();
+      if (globalProps != null) {
+        if (globalProps.getWidth() != null) {
+          propsToApply.setWidth(globalProps.getWidth());
+        }
+        if (globalProps.getUnit() != null) {
+          propsToApply.setUnit(globalProps.getUnit());
+        }
+      }
+    }
+
+    // 3. Local preferences override
+    LocalColumnPreferences prefs = LocalPreferencesManager.getColumnPreferences(db.getUuid(), vTable.getId(),
+      viewerColumn.getId());
+
+    if (prefs.getWidth() != null && prefs.getUnit() != null) {
+      propsToApply.setWidth(prefs.getWidth());
+      try {
+        propsToApply.setUnit(Style.Unit.valueOf(prefs.getUnit()));
+      } catch (Exception e) {
+        // Fallback to PX if parsing fails
+        propsToApply.setUnit(Style.Unit.PX);
+      }
+    }
+
+    // 4. Render
     if (ViewerStringUtils.isNotBlank(viewerColumn.getCustomDescription())) {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
         viewerColumn.getCustomDescription(), "column-description-block");
       SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getCustomDescription(),
         viewerColumn.getCustomDescription(), "column-description-block column-description");
       addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
-        TextAlign.LEFT, viewerColumn.getSearchStatus().getList().getCustomizeProperties());
+        TextAlign.LEFT, propsToApply);
     } else {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
         viewerColumn.getCustomDescription(), "column-description-block");
-      addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT,
-        viewerColumn.getSearchStatus().getList().getCustomizeProperties());
+      addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, propsToApply);
     }
   }
 
@@ -1120,7 +1178,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     List<String> fieldsToHeader = new ArrayList<>();
     for (ColumnStatus configColumn : visibleColumnsList) {
-      if (isColumnVisible(configColumn.getName())) {
+      if (isColumnVisible(configColumn.getId())) {
         fieldsToHeader.add(configColumn.getId());
       }
 

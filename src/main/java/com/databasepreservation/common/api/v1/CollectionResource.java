@@ -376,30 +376,6 @@ public class CollectionResource implements CollectionService {
   }
 
   @Override
-  public Boolean updateCollectionCustomizeProperties(String databaseUUID, String collectionUUID,
-    CollectionStatus status) {
-    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-
-    LogEntryState state = LogEntryState.SUCCESS;
-    User user = new User();
-
-    try {
-      user = controllerAssistant.checkRoles(request);
-      ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
-      ViewerFactory.getConfigurationManager().updateCollectionCustomizeProperties(databaseUUID, status);
-    } catch (ViewerException | AuthorizationException | IllegalArgumentException | IllegalAccessException
-      | GenericException e) {
-      state = LogEntryState.FAILURE;
-      throw new RESTException(e);
-    } finally {
-      // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
-    }
-
-    return true;
-  }
-
-  @Override
   public ConfigurationContext getConfigurationContext(String databaseUUID, String collectionUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     LogEntryState state = LogEntryState.SUCCESS;
