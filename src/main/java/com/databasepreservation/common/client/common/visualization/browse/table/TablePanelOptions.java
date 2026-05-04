@@ -10,21 +10,28 @@ package com.databasepreservation.common.client.common.visualization.browse.table
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.CustomizeColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.preferences.LocalColumnPreferences;
+import com.databasepreservation.common.client.common.visualization.preferences.LocalPreferencesManager;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.CustomizeProperties;
+import com.databasepreservation.common.client.models.status.collection.ListStatus;
+import com.databasepreservation.common.client.models.status.collection.SearchStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
@@ -32,13 +39,16 @@ import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -235,29 +245,56 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
     List<ColumnStatus> collect = status.getTableStatusByTableId(table.getId()).getColumns().stream()
       .filter(p -> p.getSearchStatus().getList().isShow()).sorted().collect(Collectors.toList());
 
-    int size = collect.size();
-    Iterator<ColumnStatus> iterator = collect.iterator();
+    for (ColumnStatus col : collect) {
+      LocalColumnPreferences prefs = LocalPreferencesManager.getColumnPreferences(database.getUuid(), table.getId(),
+        col.getId());
+      boolean isSelected = (prefs.getShow() != null) ? prefs.getShow() : true;
+      selectionTablePanel.getSelectionModel().setSelected(col, isSelected);
+    }
 
-    selectionTablePanel.createTable(getToggleSelectPanel(), new ArrayList<>(), iterator,
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderShow(), 4,
-        new Column<ColumnStatus, Boolean>(new CheckboxCell(true, true)) {
-          @Override
-          public Boolean getValue(ColumnStatus viewerColumn) {
-            if (initialLoading.get(viewerColumn.getId())) {
-              selectionTablePanel.getSelectionModel().setSelected(viewerColumn, true);
-              initialLoading.put(viewerColumn.getId(), false);
-            } else {
-              if (selectionTablePanel.getSelectionModel().getSelectedSet().size() == size) {
-                toggleButton(true);
-              }
+    Column<ColumnStatus, Boolean> showColumn = new Column<ColumnStatus, Boolean>(new CheckboxCell(true, true)) {
+      @Override
+      public Boolean getValue(ColumnStatus viewerColumn) {
+        return selectionTablePanel.getSelectionModel().isSelected(viewerColumn);
+      }
+    };
 
-              if (selectionTablePanel.getSelectionModel().getSelectedSet().size() <= 1) {
-                toggleButton(false);
-              }
-            }
-            return selectionTablePanel.getSelectionModel().isSelected(viewerColumn);
-          }
-        }),
+    showColumn.setFieldUpdater((index, column, isSelected) -> {
+      LocalColumnPreferences prefs = LocalPreferencesManager.getColumnPreferences(database.getUuid(), table.getId(),
+        column.getId());
+      prefs.setShow(isSelected);
+      LocalPreferencesManager.saveColumnPreferences(database.getUuid(), table.getId(), column.getId(), prefs);
+      selectionTablePanel.getSelectionModel().setSelected(column, isSelected);
+    });
+
+    selectionTablePanel.getSelectionModel().addSelectionChangeHandler(event -> {
+      for (ColumnStatus col : collect) {
+        boolean isSelected = selectionTablePanel.getSelectionModel().isSelected(col);
+        LocalColumnPreferences prefs = LocalPreferencesManager.getColumnPreferences(database.getUuid(), table.getId(),
+          col.getId());
+        if (prefs.getShow() == null || prefs.getShow() != isSelected) {
+          prefs.setShow(isSelected);
+          LocalPreferencesManager.saveColumnPreferences(database.getUuid(), table.getId(), col.getId(), prefs);
+        }
+      }
+    });
+
+    List<Integer> whitelistedColumns = new ArrayList<>();
+    int visibleIndex = 1;
+    whitelistedColumns.add(visibleIndex++);
+    if (showTechnicalInformation) {
+      whitelistedColumns.add(visibleIndex++);
+    }
+    whitelistedColumns.add(visibleIndex++);
+    whitelistedColumns.add(visibleIndex++);
+    if (showTechnicalInformation) {
+      whitelistedColumns.add(visibleIndex++);
+      whitelistedColumns.add(visibleIndex++);
+      whitelistedColumns.add(visibleIndex++);
+    }
+
+    selectionTablePanel.createTable(getToggleSelectPanel(), whitelistedColumns, collect.iterator(),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderShow(), 4, showColumn),
 
       new MultipleSelectionTablePanel.ColumnInfo<>(SafeHtmlUtils.EMPTY_SAFE_HTML, !showTechnicalInformation, 2.2,
         new Column<ColumnStatus, SafeHtml>(new SafeHtmlCell()) {
@@ -314,7 +351,78 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
               return messages.no();
             }
           }
-        }));
+        }),
+
+      new MultipleSelectionTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+        .getTagWithStyleName(FontAwesomeIconManager.PAINT_BRUSH, messages.basicTableHeaderOptions(), "fa-fw")), false,
+        3, getTableCustomizationColumn()));
+  }
+
+  private Column<ColumnStatus, String> getTableCustomizationColumn() {
+    Column<ColumnStatus, String> option = new com.databasepreservation.common.client.common.lists.columns.ButtonColumn<ColumnStatus>() {
+      @Override
+      public String getValue(ColumnStatus columnStatus) {
+        return messages.basicActionOpen();
+      }
+
+      @Override
+      public void render(Cell.Context context, ColumnStatus object, SafeHtmlBuilder sb) {
+        sb.appendHtmlConstant(
+          "<div class=\"center-cell\"><button class=\"btn btn-cell-action\" type=\"button\" tabindex=\"-1\"><i class=\"fas fa-paint-brush\"></i></button></div>");
+      }
+
+      @Override
+      public void onBrowserEvent(Cell.Context context, com.google.gwt.dom.client.Element elem, ColumnStatus object,
+        com.google.gwt.dom.client.NativeEvent event) {
+        if ("click".equals(event.getType())) {
+          event.stopPropagation();
+        }
+        super.onBrowserEvent(context, elem, object, event);
+      }
+    };
+
+    option.setFieldUpdater((index, columnStatus, value) -> {
+      LocalColumnPreferences prefs = LocalPreferencesManager.getColumnPreferences(database.getUuid(), table.getId(),
+        columnStatus.getId());
+
+      ColumnStatus tempStatus = new ColumnStatus();
+      SearchStatus searchStatus = new SearchStatus();
+      ListStatus listStatus = new ListStatus();
+
+      CustomizeProperties props = new CustomizeProperties();
+      if (prefs.getWidth() != null && prefs.getUnit() != null) {
+        props.setWidth(prefs.getWidth());
+        props.setUnit(Style.Unit.valueOf(prefs.getUnit()));
+      } else if (columnStatus.getSearchStatus() != null && columnStatus.getSearchStatus().getList() != null
+        && columnStatus.getSearchStatus().getList().getCustomizeProperties() != null) {
+        props.setWidth(columnStatus.getSearchStatus().getList().getCustomizeProperties().getWidth());
+        props.setUnit(columnStatus.getSearchStatus().getList().getCustomizeProperties().getUnit());
+      }
+
+      listStatus.setCustomizeProperties(props);
+      searchStatus.setList(listStatus);
+      tempStatus.setSearchStatus(searchStatus);
+
+      CustomizeColumnOptionsPanel optionsPanel = CustomizeColumnOptionsPanel.createInstance(tempStatus);
+
+      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "300px", messages.basicActionSave(),
+        messages.basicActionCancel(), optionsPanel, new DefaultAsyncCallback<Dialogs.DialogAction>() {
+          @Override
+          public void onSuccess(Dialogs.DialogAction action) {
+            if (action.equals(Dialogs.DialogAction.SAVE)) {
+              if (optionsPanel.validate()) {
+                CustomizeProperties newProps = optionsPanel.getProperties();
+                prefs.setWidth(newProps.getWidth());
+                prefs.setUnit(newProps.getUnit().name());
+
+                LocalPreferencesManager.saveColumnPreferences(database.getUuid(), table.getId(), columnStatus.getId(),
+                  prefs);
+              }
+            }
+          }
+        });
+    });
+    return option;
   }
 
   private FlowPanel getToggleSelectPanel() {
@@ -327,6 +435,12 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
       MultiSelectionModel<ColumnStatus> selectionModel = columnsTable.getSelectionModel();
       for (ColumnStatus column : status.getTableStatusByTableId(table.getId()).getColumns()) {
         selectionModel.setSelected(column, allSelected);
+
+        // Persist the bulk selection state to Local Storage
+        LocalColumnPreferences prefs = LocalPreferencesManager.getColumnPreferences(database.getUuid(), table.getId(),
+          column.getId());
+        prefs.setShow(allSelected);
+        LocalPreferencesManager.saveColumnPreferences(database.getUuid(), table.getId(), column.getId(), prefs);
       }
 
       if (allSelected) {
@@ -340,9 +454,24 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
       }
     });
 
+    // Create the Clear/Reset Button
+    Button btnResetLocalPrefs = new Button();
+    btnResetLocalPrefs.setText(messages.basicActionClear());
+    btnResetLocalPrefs.addStyleName("btn btn-danger btn-fixed-width");
+    btnResetLocalPrefs.getElement().getStyle().setProperty("marginLeft", 10, Style.Unit.PX);
+    btnResetLocalPrefs.addClickHandler(event -> {
+      // Clear the user's local preferences for this specific table
+      LocalPreferencesManager.clearTablePreferences(database.getUuid(), table.getId());
+
+      // Refresh the UI to reflect the global defaults again
+      content.clear();
+      refreshCellTable(showTechnicalInformation);
+    });
+
     FlowPanel panel = new FlowPanel();
     panel.getElement().getStyle().setProperty("marginTop", 20, Style.Unit.PX);
     panel.add(btnSelectToggle);
+    panel.add(btnResetLocalPrefs);
 
     FlowPanel technicalInformation = new FlowPanel();
     technicalInformation.addStyleName("advancedOptionsPanel");

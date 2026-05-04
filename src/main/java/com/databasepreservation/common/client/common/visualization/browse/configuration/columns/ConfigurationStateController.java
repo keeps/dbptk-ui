@@ -52,22 +52,4 @@ public class ConfigurationStateController {
       errorCallback.onError(msg, details);
     }).updateConfigurationContext(databaseUuid, databaseUuid, status);
   }
-
-  public void updateCollectionCustomizeProperties(String databaseUuid, CollectionStatus status,
-    UpdateSuccessCallback successCallback) {
-    CollectionService.Util.call((Boolean result) -> {
-      successCallback.onSuccess();
-    }).updateCollectionCustomizeProperties(databaseUuid, databaseUuid, status);
-  }
-
-  public void updateCollectionConfiguration(String databaseUuid, CollectionStatus status,
-    UpdateSuccessCallback successCallback, ErrorCallback errorCallback) {
-    CollectionService.Util.callDetailed((Boolean result) -> {
-      successCallback.onSuccess();
-    }, errorMessage -> {
-      String msg = errorMessage.get(DefaultMethodCallback.MESSAGE_KEY);
-      String details = errorMessage.get(DefaultMethodCallback.DETAILS_KEY);
-      errorCallback.onError(msg, details);
-    }).updateCollectionConfiguration(databaseUuid, databaseUuid, status);
-  }
 }

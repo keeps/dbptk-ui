@@ -198,26 +198,14 @@ public class ColumnsManagementPanel extends StatusAwareRightPanel
       return;
     }
 
-    UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
-      @Override
-      public void onSuccess(User user) {
-        AuthenticationService.Util.call((Boolean authenticationIsEnabled) -> {
-          // Safely remove previous table instance
-          if (cellTable != null) {
-            content.remove(cellTable);
-          }
+    if (cellTable != null) {
+      content.remove(cellTable);
+    }
 
-          if (!authenticationIsEnabled || user.isAdmin()) {
-            cellTable = populateTableAdmin(table);
-          } else {
-            cellTable = populateTableUser(table);
-          }
+    cellTable = populateTableAdmin(table);
 
-          // Insert back right below the description field
-          content.insert(cellTable, 2);
-        }).isAuthenticationEnabled();
-      }
-    });
+    // Insert back right below the description field
+    content.insert(cellTable, 2);
   }
 
   private void configureButtonsPanel(TableStatus table) {
@@ -345,8 +333,6 @@ public class ColumnsManagementPanel extends StatusAwareRightPanel
     AuthenticationService.Util.call((Boolean authEnabled) -> {
       if (!authEnabled || user.isAdmin()) {
         updateConfigurationContext();
-      } else {
-        updateCollectionCustomizeProperties();
       }
     }).isAuthenticationEnabled();
   }
@@ -370,22 +356,6 @@ public class ColumnsManagementPanel extends StatusAwareRightPanel
         rebuildUI();
       }, (message, details) -> {
         Dialogs.showConfigurationDependencyErrors(message, details, messages.basicActionClose());
-      });
-  }
-
-  private void updateCollectionCustomizeProperties() {
-    ConfigurationStateController.getInstance().updateCollectionCustomizeProperties(database.getUuid(), collectionStatus,
-      () -> {
-        ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
-
-        if (sidebar != null) {
-          sidebar.reset(database, collectionStatus);
-        }
-
-        changes = false;
-        isInitialized = true;
-        Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
-        rebuildUI();
       });
   }
 
@@ -454,31 +424,6 @@ public class ColumnsManagementPanel extends StatusAwareRightPanel
         SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SEARCH_PLUS,
           messages.columnManagementPageTooltipForAdvancedSearch(), FA_FW)),
         false, 3, getAdvancedSearchCheckboxColumn()));
-
-    tablePanel.getSelectionModel().addSelectionChangeHandler(event -> {
-      final ColumnStatus selected = tablePanel.getSelectionModel().getSelectedObject();
-      if (selected != null) {
-        tablePanel.getSelectionModel().clear();
-      }
-    });
-
-    return tablePanel;
-  }
-
-  private BasicTablePanel<ColumnStatus> populateTableUser(final TableStatus tableStatus) {
-    Collections.sort(tableStatus.getColumns());
-    BasicTablePanel<ColumnStatus> tablePanel = new BasicTablePanel<>(new FlowPanel(), SafeHtmlUtils.EMPTY_SAFE_HTML,
-      GWT.create(ConfigurationCellTableResources.class), tableStatus.getColumns().iterator(),
-      new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 0,
-        new Column<ColumnStatus, SafeHtml>(new SafeHtmlCell()) {
-          @Override
-          public SafeHtml getValue(ColumnStatus column) {
-            return renderColumnCell(column);
-          }
-        }),
-      new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
-        .getTagWithStyleName(FontAwesomeIconManager.PAINT_BRUSH, messages.basicTableHeaderOptions(), FA_FW)), false, 3,
-        getTableCustomizationColumn()));
 
     tablePanel.getSelectionModel().addSelectionChangeHandler(event -> {
       final ColumnStatus selected = tablePanel.getSelectionModel().getSelectedObject();

@@ -315,7 +315,7 @@ public class MainPanel extends Composite {
       UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
         public void onSuccess(User user) {
-          if (!user.isGuest()) {
+          if (user.isAdmin()) {
             final String databaseUUID = currentHistoryPath.get(1);
             Sidebar sidebar = ColumnsManagementSidebar.getInstance(databaseUUID);
             if (currentHistoryPath.size() == 2) {
@@ -447,7 +447,8 @@ public class MainPanel extends Composite {
               && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_DATABASE_SEARCH)) {
               // #database/<id>/search/<search_value>
               String databaseUUID = currentHistoryPath.get(1);
-              String searchValue = currentHistoryPath.get(3).replaceAll(HistoryManager.HISTORY_SEP_ESCAPE, HistoryManager.HISTORY_SEP_REGEX);
+              String searchValue = currentHistoryPath.get(3).replaceAll(HistoryManager.HISTORY_SEP_ESCAPE,
+                HistoryManager.HISTORY_SEP_REGEX);
               setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, currentHistoryPath.get(2),
                 new RightPanelLoader() {
                   @Override

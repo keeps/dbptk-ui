@@ -220,12 +220,8 @@ public class TablePanel extends StatusAwareRightPanel implements ICollectionStat
       @Override
       public void onSuccess(User user) {
 
-        if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
-          if (user.isAdmin()) {
-            buildMenuAdmin();
-          } else if (!user.isGuest()) {
-            buildMenuUser();
-          }
+        if (user.isAdmin() && ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+          buildMenuAdmin();
         } else if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
           advancedOptions.remove(configurationMenu);
           Button columnsManagementBtn = new Button(messages
@@ -271,18 +267,6 @@ public class TablePanel extends StatusAwareRightPanel implements ICollectionStat
     if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       configurationSubMenuBar.addItem(dataTransformationMenuItem);
     }
-    configurationMenu.addItem(SafeHtmlUtils.fromString(messages.advancedConfigurationLabelForMainTitle()),
-      configurationSubMenuBar);
-    configurationMenu.setStyleName("btn btn-link");
-  }
-
-  private void buildMenuUser() {
-    MenuBar configurationSubMenuBar = new MenuBar(true);
-    MenuItem columnMenuItem = new MenuItem(
-      SafeHtmlUtils.fromString(
-        messages.dataTransformationBtnManageTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
-      () -> HistoryManager.gotoColumnsManagement(database.getUuid(), table.getId()));
-    configurationSubMenuBar.addItem(columnMenuItem);
     configurationMenu.addItem(SafeHtmlUtils.fromString(messages.advancedConfigurationLabelForMainTitle()),
       configurationSubMenuBar);
     configurationMenu.setStyleName("btn btn-link");
