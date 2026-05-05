@@ -38,8 +38,8 @@
     catchall "text" field, and use that for searching.
 -->
 
-<schema name="schema-version-1" version="1.6">
-  <!-- attribute "name" is the name of this schema and is only used for display purposes.
+<schema name="default-config" version="1.7">
+    <!-- attribute "name" is the name of this schema and is only used for display purposes.
        version="x.y" is Solr's version number for the schema syntax and
        semantics.  It should not normally be changed by applications.
 
@@ -55,6 +55,7 @@
        1.5: omitNorms defaults to true for primitive field types
             (int, float, boolean, string...)
        1.6: useDocValuesAsStored defaults to true.
+       1.7: docValues defaults to true, uninvertible defaults to false.
     -->
 
     <!-- Valid attributes for fields:
@@ -109,8 +110,8 @@
          WARNING: The _text_ catch-all field will significantly increase your index size.
          If you don't need it, consider removing it and the corresponding copyField directive.
     -->
-      <!-- docValues are enabled by default for long type so we don't need to index the version field  -->
-     <field name="_version_" type="plong" indexed="false" stored="false"/>
+    <!-- docValues are enabled by default for long type so we don't need to index the version field  -->
+    <field name="_version_" type="plong" indexed="false" stored="false"/>
 
     <!-- If you don't use child/nested documents, then you should remove the next two fields:  -->
     <!-- for nested documents (minimal; points to root document) -->

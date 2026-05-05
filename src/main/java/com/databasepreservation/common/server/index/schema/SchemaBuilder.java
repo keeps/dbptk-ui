@@ -14,11 +14,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.solr.api.ApiBag.ExceptionWithErrObject;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest.MultiUpdate;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest.Update;
+import org.apache.solr.common.SolrErrorWrappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,9 +92,9 @@ public class SchemaBuilder {
     } catch (SolrServerException | IOException e) {
       LOGGER.error("Error bootstraping schemas", e);
       throw new ViewerException("Error bootstraping schemas", e);
-    } catch (ExceptionWithErrObject e) {
+    } catch (SolrErrorWrappingException e) {
       LOGGER.error("Error bootstraping schemas for collection {}", collection);
-      e.getErrs().forEach(m -> m.forEach((k, v) -> LOGGER.error("Error: {} -> {}", k, v)));
+      e.getDetails().forEach(m -> m.forEach((k, v) -> LOGGER.error("Error: {} -> {}", k, v)));
       LOGGER.info("Collection {} details:", collection);
       fields.forEach(f -> LOGGER.info("> {}", f));
       dynamicFields.forEach(f -> LOGGER.info("> {}", f));
