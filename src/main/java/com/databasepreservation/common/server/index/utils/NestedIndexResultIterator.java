@@ -8,15 +8,13 @@
 package com.databasepreservation.common.server.index.utils;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.request.SolrQuery;
 import org.apache.solr.common.params.CursorMarkParams;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import com.databasepreservation.common.client.index.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

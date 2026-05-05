@@ -9,11 +9,9 @@ package com.databasepreservation.common.server.index.utils;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrQuery;
-import com.databasepreservation.common.client.index.filter.Filter;
+import org.apache.solr.client.solrj.request.SolrQuery;
 
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
@@ -29,7 +27,8 @@ public class IterableNestedIndexResult implements CloseableIterable<ViewerRow> {
 
   private final NestedIndexResultIterator iterator;
 
-  public IterableNestedIndexResult(final SolrClient solrClient, String databaseUUID, SolrQuery query, final Sorter sorter) {
+  public IterableNestedIndexResult(final SolrClient solrClient, String databaseUUID, SolrQuery query,
+    final Sorter sorter) {
     iterator = new NestedIndexResultIterator(solrClient, databaseUUID, query, sorter);
 
     if (PAGE_SIZE > 0) {
