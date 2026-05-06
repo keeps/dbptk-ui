@@ -86,7 +86,7 @@ public class CloudSolrClientFactory extends SolrClientFactory<CloudSolrClient> {
       HttpJettySolrClient.Builder http2ClientBuilder = new HttpJettySolrClient.Builder()
         .withBasicAuthCredentials(solrUser, solrPass);
 
-      return new CloudSolrClient.Builder(zkHosts, zkChroot).withInternalClientBuilder(http2ClientBuilder).build();
+      return new CloudSolrClient.Builder(zkHosts, zkChroot).withHttpClientBuilder(http2ClientBuilder).build();
     } else {
       LOGGER.info("Solr basic authentication is DISABLED.");
       return new CloudSolrClient.Builder(zkHosts, zkChroot).build();

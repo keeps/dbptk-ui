@@ -400,36 +400,6 @@
                 <version>${version.jackson}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-client</artifactId>
-                <version>10.0.20</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-http</artifactId>
-                <version>10.0.20</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-alpn-java-client</artifactId>
-                <version>10.0.20</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty.http2</groupId>
-                <artifactId>http2-client</artifactId>
-                <version>10.0.20</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-util</artifactId>
-                <version>10.0.20</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-io</artifactId>
-                <version>10.0.20</version>
-            </dependency>
-            <dependency>
                 <groupId>org.gwtproject</groupId>
                 <artifactId>gwt-dev</artifactId>
                 <version>${version.gwt}</version>
