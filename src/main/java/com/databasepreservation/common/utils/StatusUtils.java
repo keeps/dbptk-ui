@@ -291,7 +291,7 @@ public class StatusUtils {
   public static SiardStatus getSiardStatus(ViewerDatabase database) {
     SiardStatus status = new SiardStatus();
     status.setLocation(database.getPath());
-
+    status.setSize(database.getSize());
     return status;
   }
 

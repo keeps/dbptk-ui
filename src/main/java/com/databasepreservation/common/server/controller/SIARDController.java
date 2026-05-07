@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
-import org.apache.commons.io.FileUtils;
+import com.databasepreservation.common.utils.SiardUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -691,12 +691,7 @@ public class SIARDController {
 
       viewerDatabase.setPath(siardPath.toAbsolutePath().toString());
 
-      if (siardVersion.equals(ViewerConstants.SiardVersion.DK_1007)
-        || siardVersion.equals(ViewerConstants.SiardVersion.DK_128)) {
-        viewerDatabase.setSize(FileUtils.sizeOfDirectory(siardPath.toFile()));
-      } else {
-        viewerDatabase.setSize(siardPath.toFile().length());
-      }
+      viewerDatabase.setSize(SiardUtils.calculateSize(siardPath, siardEdition.getSIARDVersion()));
 
       viewerDatabase.setVersion(siardEdition.getSIARDVersion());
       viewerDatabase.setAvailableToSearchAll(ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(true,
@@ -1198,12 +1193,17 @@ public class SIARDController {
     }
   }
 
-  private static ViewerDatabase buildViewerDatabase(DatabaseStatus databaseStatus, CollectionStatus collectionStatus) {
+  private static ViewerDatabase buildViewerDatabase(DatabaseStatus databaseStatus, CollectionStatus collectionStatus)
+    throws SIARDVersionNotSupportedException {
     ViewerDatabase viewerDatabase = new ViewerDatabase();
     Path siardPath = Paths.get(databaseStatus.getSiardStatus().getLocation());
     viewerDatabase.setUuid(databaseStatus.getId());
     viewerDatabase.setPath(siardPath.toString());
-    viewerDatabase.setSize(databaseStatus.getSiardStatus().getSize());
+    if (databaseStatus.getSiardStatus().getSize() != 0) {
+      viewerDatabase.setSize(databaseStatus.getSiardStatus().getSize());
+    } else {
+      viewerDatabase.setSize(SiardUtils.calculateSize(siardPath, databaseStatus.getSiardVersion()));
+    }
     viewerDatabase.setAvailableToSearchAll(databaseStatus.isAvailableToSearchAll());
     viewerDatabase.setValidationStatus(databaseStatus.getValidationStatus().getValidationStatus());
     viewerDatabase.setValidatorReportPath(databaseStatus.getValidationStatus().getReportLocation());
@@ -1216,7 +1216,6 @@ public class SIARDController {
     viewerDatabase.setValidationWarnings(databaseStatus.getValidationStatus().getIndicators().getWarnings());
     viewerDatabase.setStatus(databaseStatus.getStatus());
     viewerDatabase.setConfigurationStatus(getDatabaseConfigurationStatus(databaseStatus, collectionStatus));
-    viewerDatabase.setVersion(databaseStatus.getSiardVersion());
     viewerDatabase.setVersion(databaseStatus.getSiardVersion());
     viewerDatabase.setMetadata(databaseStatus.getMetadata());
     viewerDatabase.setPermissions(databaseStatus.getPermissions());
