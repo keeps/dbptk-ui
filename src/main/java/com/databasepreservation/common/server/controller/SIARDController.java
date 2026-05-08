@@ -1201,6 +1201,7 @@ public class SIARDController {
     Path siardPath = Paths.get(databaseStatus.getSiardStatus().getLocation());
     viewerDatabase.setUuid(databaseStatus.getId());
     viewerDatabase.setPath(siardPath.toString());
+    // Workaround because the siard size was always 0 on the database file on previous versions
     if (databaseStatus.getSiardStatus().getSize() != 0) {
       viewerDatabase.setSize(databaseStatus.getSiardStatus().getSize());
     } else {

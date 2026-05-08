@@ -1,6 +1,5 @@
 package com.databasepreservation.common.utils;
 
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
 import org.apache.commons.io.FileUtils;
 
@@ -19,6 +18,10 @@ import static com.databasepreservation.common.client.ViewerConstants.SIARD_DK_10
 public class SiardUtils {
 
   public static Long calculateSize(Path siardPath, String siardVersion) throws SIARDVersionNotSupportedException {
+    if (siardPath == null || !siardPath.toFile().exists()) {
+      return 0L;
+    }
+
     if (siardVersion.equals(SIARD_DK_128) || siardVersion.equals(SIARD_DK_1007) || siardVersion.equals(SIARD_DK_128_EXT)
       || siardVersion.equals(SIARD_DK_1007_EXT)) {
       return FileUtils.sizeOfDirectory(siardPath.toFile());
