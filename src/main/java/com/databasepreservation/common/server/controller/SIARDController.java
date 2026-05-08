@@ -1178,12 +1178,14 @@ public class SIARDController {
       if (directories != null) {
         for (File directory : directories) {
           String databaseId = directory.getName();
+          LOGGER.info("Starting to reindex database with id: {}", databaseId);
           final DatabaseStatus databaseStatus = ViewerFactory.getConfigurationManager().getDatabaseStatus(databaseId);
           CollectionStatus collectionStatus = ViewerFactory.getConfigurationManager()
             .getConfigurationCollection(databaseId, databaseId);
 
           ViewerDatabase viewerDatabase = buildViewerDatabase(databaseStatus, collectionStatus);
           solrManager.addDatabaseMetadata(viewerDatabase);
+          LOGGER.info("Finished reindexing database with id: {}", databaseId);
         }
       } else {
         throw new GenericException("Error listing directories in " + databasesDir);
