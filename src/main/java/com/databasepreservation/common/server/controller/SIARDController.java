@@ -1170,7 +1170,8 @@ public class SIARDController {
   private static DatabaseModuleFactory getSIARDImportModuleFactory(String version) {
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     final String moduleName;
-    if (version.equals(ViewerConstants.SIARD_V20) || version.equals(ViewerConstants.SIARD_V21)) {
+    if (version.equals(ViewerConstants.SIARD_V20) || version.equals(ViewerConstants.SIARD_V21)
+      || version.equals(ViewerConstants.SIARD_V22)) {
       moduleName = "siard-2";
     } else if (version.equals(ViewerConstants.SIARD_V10)) {
       moduleName = "siard-1";
