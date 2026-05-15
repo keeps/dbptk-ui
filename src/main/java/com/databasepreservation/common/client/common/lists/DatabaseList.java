@@ -293,6 +293,10 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     if (statusColumn != null) {
       columnSortingKeyMap.put(statusColumn, Collections.singletonList(ViewerConstants.SOLR_DATABASES_STATUS));
     }
+    if (configurationStatusColumn != null) {
+      columnSortingKeyMap.put(configurationStatusColumn,
+        Collections.singletonList(ViewerConstants.SOLR_DATABASES_CONFIGURATION_STATUS));
+    }
 
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);
 
