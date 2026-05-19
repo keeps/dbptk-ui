@@ -249,6 +249,12 @@ public class ConfigurationStatusPanel extends Composite implements ICollectionSt
     CollectionService.Util.callDetailed((Boolean migrated) -> {
       HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
 
+      CollectionService.Util.call((List<CollectionStatus> statusList) -> {
+        if (statusList != null && !statusList.isEmpty()) {
+          ObserverManager.getCollectionObserver().setCollectionStatus(statusList.get(0));
+        }
+      }).getCollectionConfiguration(database.getUuid(), database.getUuid());
+
       CollectionService.Util.call((StringResponse resultUUID) -> {
       }, errorMessage -> {
         btnMigrateAndReindex.setEnabled(true);

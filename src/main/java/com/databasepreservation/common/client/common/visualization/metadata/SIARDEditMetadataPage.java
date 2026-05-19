@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
 
 /**
- * @autor Gabriel Barros <gbarros@keep.pt>
+ * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class SIARDEditMetadataPage extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);

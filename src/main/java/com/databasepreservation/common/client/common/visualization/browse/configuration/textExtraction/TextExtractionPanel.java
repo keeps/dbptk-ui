@@ -26,6 +26,7 @@ import com.databasepreservation.common.client.common.lists.widgets.MultipleSelec
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
+import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.LobTextExtractionStatus;
@@ -58,9 +59,9 @@ import com.google.gwt.view.client.SelectionModel;
 import config.i18n.client.ClientMessages;
 
 /**
- * @author Miguel Guimarães <mguimaraes@keep.pt>
+ * @author Alexandre Flores <aflores@keep.pt>
  */
-public class TextExtractionPanel extends StatusAwareContentPanel {
+public class TextExtractionPanel extends StatusAwareContentPanel implements ICollectionStatusObserver {
 
   interface TableManagementPanelUiBinder extends UiBinder<Widget, TextExtractionPanel> {
   }
@@ -68,8 +69,8 @@ public class TextExtractionPanel extends StatusAwareContentPanel {
   private static final TableManagementPanelUiBinder binder = GWT.create(TableManagementPanelUiBinder.class);
   private static final Map<String, TextExtractionPanel> instances = new HashMap<>();
   private final ClientMessages messages = GWT.create(ClientMessages.class);
-  private final ViewerDatabase database;
-  private final CollectionStatus collectionStatus;
+  private ViewerDatabase database;
+  private CollectionStatus collectionStatus;
   private final Button btnSave = new Button();
   private final Map<String, MultipleSelectionTablePanel<ViewerColumn>> tables = new HashMap<>();
   private final Map<String, Set<String>> initialLoading = new HashMap<>();
@@ -82,6 +83,7 @@ public class TextExtractionPanel extends StatusAwareContentPanel {
 
   private TextExtractionPanel(ViewerDatabase database, CollectionStatus collectionStatus) {
     initWidget(binder.createAndBindUi(this));
+    ObserverManager.getCollectionObserver().addObserver(this);
     this.database = database;
     this.collectionStatus = collectionStatus;
     updateStatusPanel(database);
@@ -327,5 +329,14 @@ public class TextExtractionPanel extends StatusAwareContentPanel {
 
     ProcessingState state = colStatus.getLobTextExtractionStatus().getProcessingState();
     return state != null && !ProcessingState.TO_REMOVE.equals(state);
+  }
+
+  @Override
+  public void updateCollection(CollectionStatus newStatus) {
+    if (this.collectionStatus != null && this.collectionStatus.getDatabaseUUID().equals(newStatus.getDatabaseUUID())) {
+      if (this.collectionStatus != newStatus) {
+        this.collectionStatus = newStatus;
+      }
+    }
   }
 }
