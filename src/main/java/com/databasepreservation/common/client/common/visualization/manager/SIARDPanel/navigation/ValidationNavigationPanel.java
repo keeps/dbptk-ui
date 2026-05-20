@@ -116,7 +116,8 @@ public class ValidationNavigationPanel {
     btnValidate.addStyleName("btn btn-outline-primary btn-play");
 
     btnValidate.addClickHandler(event -> {
-      if (database.getVersion().equals(ViewerConstants.SIARD_V21)) {
+      if (database.getVersion().equals(ViewerConstants.SIARD_V21)
+        || database.getVersion().equals(ViewerConstants.SIARD_V22)) {
         if (database.getPath() != null && !database.getPath().isEmpty()) {
           if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
             Dialogs.showValidatorSettings(messages.SIARDValidatorSettings(), messages.basicActionCancel(),
