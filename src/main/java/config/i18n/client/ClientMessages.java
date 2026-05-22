@@ -1576,6 +1576,8 @@ public interface ClientMessages extends Messages {
 
   SafeHtml advancedConfigurationTextForTextExtraction();
 
+  SafeHtml advancedConfigurationTextForTextExtractionDesktop();
+
   String advancedConfigurationBtnForTextExtraction();
 
   String advancedConfigurationBtnForResetConfiguration();

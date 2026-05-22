@@ -126,11 +126,20 @@ public class AdvancedConfiguration extends StatusAwareContentPanel {
     NavigationPanel textExtraction = NavigationPanel
       .createInstance(messages.advancedConfigurationLabelForTextExtraction());
     Button btnTextExtraction = new Button(messages.advancedConfigurationBtnForTextExtraction());
-    btnTextExtraction.setStyleName("btn btn-outline-primary btn-play btn-block");
-    btnTextExtraction.addClickHandler(event -> {
-      HistoryManager.gotoTextExtraction(database.getUuid());
-    });
-    textExtraction.addToDescriptionPanel(messages.advancedConfigurationTextForTextExtraction());
+
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+      messageDescription = messages.advancedConfigurationTextForTextExtraction();
+      btnTextExtraction.setStyleName("btn btn-outline-primary btn-play btn-block");
+      btnTextExtraction.addClickHandler(event -> {
+        HistoryManager.gotoTextExtraction(database.getUuid());
+      });
+    } else {
+      messageDescription = messages.advancedConfigurationTextForTextExtractionDesktop();
+      btnTextExtraction.setStyleName("btn btn-play btn-block");
+      btnTextExtraction.setEnabled(false);
+    }
+
+    textExtraction.addToDescriptionPanel(messageDescription);
     textExtraction.addButton(btnTextExtraction);
     content.add(textExtraction);
 
