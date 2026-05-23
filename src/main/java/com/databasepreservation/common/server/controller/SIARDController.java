@@ -348,6 +348,7 @@ public class SIARDController {
     try {
       SiardControllerHelper.setupPathToDriver(connectionParameters);
     } catch (Exception e) {
+      LOGGER.warn(e.getMessage(), e);
       throw new GenericException("Could not load the driver", e);
     }
 
@@ -1303,6 +1304,7 @@ public class SIARDController {
       try {
         SiardControllerHelper.setupPathToDriver(parameters);
       } catch (Exception e) {
+        LOGGER.warn(e.getMessage(), e);
         throw new GenericException("Could not load the driver", e);
       }
 
