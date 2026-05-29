@@ -429,6 +429,7 @@ public class Dialogs {
 
   public static void showServerFilePathDialog(String title, String message, String cancelButtonText,
     String confirmButtonText, final AsyncCallback<String> callback) {
+
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
 
@@ -445,20 +446,31 @@ public class Dialogs {
     footer.add(cancelButton);
     footer.add(confirmButton);
 
-    pathInput.getElement().setAttribute("placeholder", "/siard/");
+    pathInput.getElement().setAttribute("placeholder", "");
 
     dialogBox.setWidget(layout);
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
 
-    cancelButton.addClickHandler(event -> dialogBox.hide());
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+    });
+
+    pathInput.addKeyUpHandler(event -> {
+      if (!pathInput.getText().trim().isEmpty()) {
+        pathInput.removeStyleName("error");
+      }
+    });
 
     confirmButton.addClickHandler(event -> {
-      if (pathInput.getValue().isEmpty()) {
+      String path = pathInput.getValue().trim();
+
+      if (path.isEmpty()) {
         pathInput.getElement().setAttribute("Required", "Required");
+        pathInput.addStyleName("error");
       } else {
         dialogBox.hide();
-        callback.onSuccess(pathInput.getValue());
+        callback.onSuccess(path);
       }
     });
 
@@ -472,6 +484,7 @@ public class Dialogs {
     dialogBox.center();
     dialogBox.show();
 
+    pathInput.setFocus(true);
   }
 
   public static void showConfirmDialog(String title, String message, String cancelButtonText, String cancelButtonStyle,
