@@ -14,11 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.fields.ComboBoxField;
 import com.databasepreservation.common.client.common.fields.FileUploadField;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.common.utils.ApplicationTypeOperations;
 import com.databasepreservation.common.client.models.JSO.ExtensionFilter;
 import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
@@ -91,12 +92,44 @@ public class SIARDExportOptionsCurrent extends Composite {
     for (PreservationParameter p : module.getParameters()) {
       if (p.getExportOption() != null) {
         if (p.getExportOption().equals(ViewerConstants.SIARD_EXPORT_OPTIONS)) {
-          buildGenericWidget(p);
+          // Only build if appropriate for the environment
+          if (shouldRenderField(p)) {
+            buildGenericWidget(p);
+          }
         } else if (p.getExportOption().equals(ViewerConstants.EXTERNAL_LOBS_EXPORT_OPTIONS)) {
           buildExternalLobs(p, panel);
         }
       }
     }
+  }
+
+  private boolean isSIARDDKVariant() {
+    if (version == null)
+      return false;
+
+    return version.equals(ViewerConstants.SIARDDK) || version.equals(ViewerConstants.SIARD_DK)
+      || version.equals(ViewerConstants.SIARD_DK_1007) || version.equals(ViewerConstants.SIARD_DK_1007_EXT)
+      || version.equals(ViewerConstants.SIARD_DK_128) || version.equals(ViewerConstants.SIARD_DK_128_EXT)
+      || version.contains("-dk");
+  }
+
+  /**
+   * Centralized logic to determine if a specific parameter should be shown based
+   * on the current environment (Desktop vs Web) and version.
+   */
+  private boolean shouldRenderField(PreservationParameter parameter) {
+    if (!ApplicationType.isDesktop() && isSIARDDKVariant()) {
+      // In Web mode for SIARD DK, hide non-required file/folder paths.
+      // The backend will generate this structure.
+      boolean isFileOrFolder = ViewerConstants.INPUT_TYPE_FOLDER.equals(parameter.getInputType())
+        || ViewerConstants.INPUT_TYPE_FILE_OPEN.equals(parameter.getInputType())
+        || ViewerConstants.INPUT_TYPE_FILE_SAVE.equals(parameter.getInputType());
+
+      if (isFileOrFolder && !parameter.isRequired()) {
+        return false; // Do not render
+      }
+    }
+    return true; // Render normally
   }
 
   public ExportOptionsParameters getValues() {
@@ -105,6 +138,10 @@ public class SIARDExportOptionsCurrent extends Composite {
     HashMap<String, String> exportParameters = new HashMap<>();
 
     for (PreservationParameter parameter : module.getParameters()) {
+      // Skip harvesting values for fields we didn't render
+      if (!shouldRenderField(parameter))
+        continue;
+
       switch (parameter.getInputType()) {
         case ViewerConstants.INPUT_TYPE_CHECKBOX:
           if (checkBoxInputs.get(parameter.getName()) != null) {
@@ -118,8 +155,10 @@ public class SIARDExportOptionsCurrent extends Composite {
             exportParameters.put(parameter.getName(), text);
           }
           if (ViewerConstants.SIARDDK.equals(version)) {
-            final String text = externalLobsInputs.get(parameter.getName()).getText();
-            exportParameters.put(parameter.getName(), text);
+            if (externalLobsInputs.get(parameter.getName()) != null) {
+              final String text = externalLobsInputs.get(parameter.getName()).getText();
+              exportParameters.put(parameter.getName(), text);
+            }
           } else {
             if (externalLobCheckbox != null && externalLobCheckbox.getValue()) {
               if (externalLobsInputs.get(parameter.getName()) != null) {
@@ -169,6 +208,10 @@ public class SIARDExportOptionsCurrent extends Composite {
     final List<PreservationParameter> requiredParameters = module.getRequiredParameters();
 
     for (PreservationParameter parameter : requiredParameters) {
+      // DO NOT validate fields we explicitly hid in this environment.
+      if (!shouldRenderField(parameter))
+        continue;
+
       switch (parameter.getInputType()) {
         case ViewerConstants.INPUT_TYPE_TEXT:
           if (textBoxInputs.get(parameter.getName()) != null) {
@@ -176,10 +219,10 @@ public class SIARDExportOptionsCurrent extends Composite {
             if (ViewerStringUtils.isBlank(textBox.getText())) {
               validationError = SIARDExportOptions.MISSING_FIELD;
               return SIARDExportOptions.MISSING_FIELD;
-            } else {
-              validationError = SIARDExportOptions.MISSING_FIELD;
-              return SIARDExportOptions.MISSING_FIELD;
             }
+          } else {
+            validationError = SIARDExportOptions.MISSING_FIELD;
+            return SIARDExportOptions.MISSING_FIELD;
           }
           break;
         case ViewerConstants.INPUT_TYPE_FOLDER:
@@ -321,8 +364,10 @@ public class SIARDExportOptionsCurrent extends Composite {
 
     switch (parameter.getInputType()) {
       case ViewerConstants.INPUT_TYPE_COMBOBOX:
-        ComboBoxField comboBoxField = ComboBoxField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()));
-        parameter.getPossibleValues().forEach(key -> comboBoxField.setComboBoxValue(messages.wizardExportOptionsForPossibleValues(key), key));
+        ComboBoxField comboBoxField = ComboBoxField
+          .createInstance(messages.wizardExportOptionsLabels(parameter.getName()));
+        parameter.getPossibleValues()
+          .forEach(key -> comboBoxField.setComboBoxValue(messages.wizardExportOptionsForPossibleValues(key), key));
         comboBoxField.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
         comboBoxField.select(parameter.getDefaultIndex());
         comboBoxInputs.put(parameter.getName(), comboBoxField);
@@ -345,33 +390,42 @@ public class SIARDExportOptionsCurrent extends Composite {
         fileUploadField.setLabelCSS("form-label-spaced");
         fileUploadField.setButtonCSS("btn btn-link form-button");
         fileUploadField.setRequired(parameter.isRequired());
+
         fileUploadField.buttonAction(() -> {
-          if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
-            JavaScriptObject.createArray();
-            ExtensionFilter extensionFilter = new ExtensionFilter()
-              .createFilterTypeFromDBPTK(parameter.getFileFilter());
-            JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.emptyList(),
-              Collections.singletonList(extensionFilter));
-            String path = null;
-            if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_FILE_SAVE)) {
-              path = JavascriptUtils.saveFileDialog(options);
-            }
-            if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_FILE_OPEN)) {
-              path = JavascriptUtils.openFileDialog(options);
-            }
-            if (path != null) {
+          JavaScriptObject.createArray();
+          ExtensionFilter extensionFilter = new ExtensionFilter().createFilterTypeFromDBPTK(parameter.getFileFilter());
+          JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.emptyList(),
+            Collections.singletonList(extensionFilter));
+
+          DefaultAsyncCallback<String> callback = new DefaultAsyncCallback<String>() {
+            @Override
+            public void onSuccess(String path) {
               fileInputs.put(parameter.getName(), path);
               fileUploadField.setPathLocation(path, path);
               fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
             }
+          };
+
+          if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_FILE_SAVE)) {
+            ApplicationTypeOperations.choosePathToSaveAsync(options,
+              messages.wizardExportOptionsLabels(parameter.getName()),
+              messages.wizardExportOptionsHelperText(parameter.getName()), messages.basicActionCancel(),
+              messages.basicActionSave(), callback);
+          } else if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_FILE_OPEN)) {
+            ApplicationTypeOperations.choosePathToOpenAsync(options,
+              messages.wizardExportOptionsLabels(parameter.getName()),
+              messages.wizardExportOptionsHelperText(parameter.getName()), messages.basicActionCancel(),
+              messages.basicActionOpen(), callback);
           }
         });
+
         if (!version.equals(ViewerConstants.SIARDDK)) {
           if (defaultPath != null) {
             fileInputs.put(parameter.getName(), defaultPath);
             fileUploadField.setPathLocation(defaultPath, defaultPath);
           }
         }
+
         FlowPanel helper = new FlowPanel();
         helper.addStyleName("form-helper");
         InlineHTML span = new InlineHTML();
@@ -388,18 +442,24 @@ public class SIARDExportOptionsCurrent extends Composite {
         folder.setLabelCSS("form-label-spaced");
         folder.setButtonCSS("btn btn-link form-button");
         folder.setRequired(parameter.isRequired());
+
         folder.buttonAction(() -> {
-          if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
-            JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
-              Collections.emptyList());
-            String path = JavascriptUtils.openFileDialog(options);
-            if (path != null) {
-              fileInputs.put(parameter.getName(), path);
-              folder.setPathLocation(path, path);
-              folder.setInformationPathCSS("gwt-Label-disabled information-path");
-            }
-          }
+          JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
+            Collections.emptyList());
+
+          ApplicationTypeOperations.choosePathToOpenAsync(options,
+            messages.wizardExportOptionsLabels(parameter.getName()),
+            messages.wizardExportOptionsHelperText(parameter.getName()), messages.basicActionCancel(),
+            messages.basicActionOpen(), new DefaultAsyncCallback<String>() {
+              @Override
+              public void onSuccess(String path) {
+                fileInputs.put(parameter.getName(), path);
+                folder.setPathLocation(path, path);
+                folder.setInformationPathCSS("gwt-Label-disabled information-path");
+              }
+            });
         });
+
         FlowPanel helperFolder = new FlowPanel();
         helperFolder.addStyleName("form-helper");
         InlineHTML spanFolder = new InlineHTML();

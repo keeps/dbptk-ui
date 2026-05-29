@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
-import com.databasepreservation.common.utils.SiardUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -95,6 +94,7 @@ import com.databasepreservation.common.server.index.schema.SolrDefaultCollection
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
+import com.databasepreservation.common.utils.SiardUtils;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
 import com.databasepreservation.model.exception.UnsupportedModuleException;
@@ -642,8 +642,15 @@ public class SIARDController {
 
   private static String loadMetadataFromLocal(String databaseUUID, String localPath,
     ViewerConstants.SiardVersion siardVersion) throws GenericException {
-    Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
-      ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
+    Path basePath;
+    if (ViewerFactory.getViewerConfiguration().isDesktopEnvironmentWithWebSupport()) {
+      basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerFactory.getViewerConfiguration().getSIARDFilesPath().toString(),
+        ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
+    } else {
+      basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
+        ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
+    }
     Path siardPath = basePath.resolve(localPath);
     convertSIARDMetadataToSolr(siardPath, databaseUUID, siardVersion);
     return databaseUUID;
@@ -745,7 +752,8 @@ public class SIARDController {
 
   private static void validateSIARDLocation(Path siardPath) throws GenericException {
     if (ViewerFactory.getViewerConfiguration().getApplicationEnvironment()
-      .equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+      .equals(ViewerConstants.APPLICATION_ENV_SERVER)
+      || ViewerFactory.getViewerConfiguration().isDesktopEnvironmentWithWebSupport()) {
       LOGGER.info("starting to check if path: {} is valid", siardPath.toAbsolutePath());
       // Checks if path is within the internal SIARD file path
       final boolean internal = ViewerConfiguration.checkPathIsWithin(siardPath,
@@ -1201,7 +1209,8 @@ public class SIARDController {
     Path siardPath = Paths.get(databaseStatus.getSiardStatus().getLocation());
     viewerDatabase.setUuid(databaseStatus.getId());
     viewerDatabase.setPath(siardPath.toString());
-    // Workaround because the siard size was always 0 on the database file on previous versions
+    // Workaround because the siard size was always 0 on the database file on
+    // previous versions
     if (databaseStatus.getSiardStatus().getSize() != 0) {
       viewerDatabase.setSize(databaseStatus.getSiardStatus().getSize());
     } else {
@@ -1322,7 +1331,16 @@ public class SIARDController {
     for (Map.Entry<String, String> entry : exportOptionsParameters.getParameters().entrySet()) {
       if (!entry.getValue().equals("false")) {
         LOGGER.info("Export Options - {} -> {}", entry.getKey(), entry.getValue());
-        databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+        if (ViewerConfiguration.getInstance().isDesktopEnvironmentWithWebSupport()) {
+          if (entry.getKey().equals("folder")) {
+            LOGGER.info("Export Options - {} is a folder, resolving path for desktop environment with web support",
+              entry.getKey());
+            Path siardPath = ViewerConfiguration.getInstance().getSIARDFilesPath().resolve(entry.getValue());
+            databaseMigration.exportModuleParameter(entry.getKey(), siardPath.toString());
+          }
+        } else {
+          databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+        }
       }
     }
 

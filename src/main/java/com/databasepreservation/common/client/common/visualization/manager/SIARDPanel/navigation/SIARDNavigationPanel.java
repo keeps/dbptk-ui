@@ -19,8 +19,8 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.ApplicationTypeOperations;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -29,10 +29,7 @@ import com.databasepreservation.common.client.services.SiardService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.PathUtils;
-import com.databasepreservation.common.client.tools.RestUtils;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 
 import config.i18n.client.ClientMessages;
@@ -100,17 +97,11 @@ public class SIARDNavigationPanel {
     // Show SIARD file button
     btnShowFiles = new Button(PathUtils.getFileName(database.getPath()));
     btnShowFiles.addStyleName("btn btn-link-info");
+
     if (database.getPath() != null && !database.getPath().isEmpty()) {
-      if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
-        btnShowFiles.addClickHandler(clickEvent -> {
-          JavascriptUtils.showItemInFolder(database.getPath());
-        });
-      } else {
-        btnShowFiles.addClickHandler(clickEvent -> {
-          SafeUri downloadUri = RestUtils.createFileResourceDownloadSIARDUri(database.getPath());
-          Window.Location.assign(downloadUri.asString());
-        });
-      }
+      btnShowFiles.addClickHandler(clickEvent -> {
+        ApplicationTypeOperations.showSIARDInFolderOrDownload(database.getPath());
+      });
     }
 
     // Delete SIARD file button
