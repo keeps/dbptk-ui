@@ -910,4 +910,9 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public String getApplicationEnvironment() {
     return applicationEnvironment;
   }
+
+  public Boolean isDesktopEnvironmentWithWebSupport() {
+    return getApplicationEnvironment().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)
+      && getViewerConfigurationAsBoolean(ViewerConstants.ENABLE_DESKTOP_IN_BROWSER_ENVIRONMENT);
+  }
 }
