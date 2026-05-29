@@ -571,6 +571,7 @@ public class ViewerConstants {
   public static final String APPLICATION_ENV_KEY = "env";
   public static final String APPLICATION_ENV_DESKTOP = "desktop";
   public static final String APPLICATION_ENV_SERVER = "server";
+  public static final String ENABLE_DESKTOP_IN_BROWSER_ENVIRONMENT = "ui.features.enable.desktopInBrowserEnvironment";
 
   /*
    * DBPTK Parameters
