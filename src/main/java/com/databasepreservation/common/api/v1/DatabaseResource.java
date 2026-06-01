@@ -104,7 +104,7 @@ public class DatabaseResource implements DatabaseService {
       } else {
         List<String> fieldsToReturn = new ArrayList<>();
         fieldsToReturn.add(ViewerConstants.INDEX_ID);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA); //deprecated
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA); // deprecated
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_NAME);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_DESCRIPTION);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVER);
@@ -119,7 +119,9 @@ public class DatabaseResource implements DatabaseService {
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
 
         FindRequest userFindRequest = new FindRequest(findRequest.classToReturn, findRequest.filter, findRequest.sorter,
-          findRequest.sublist, findRequest.facets, findRequest.exportFacets, fieldsToReturn);
+          findRequest.sublist, findRequest.facets, findRequest.exportFacets, fieldsToReturn,
+          findRequest.extraParameters, findRequest.defType, new Filter(), findRequest.queryFields,
+          findRequest.highlighting, List.of());
         return getViewerDatabaseIndexResult(userFindRequest, fieldsToReturn, controllerAssistant, user, state);
       }
     } else {
@@ -203,7 +205,8 @@ public class DatabaseResource implements DatabaseService {
         filterQueries.addAll(getDatabaseFindUserPermissionsFilterQueries(user));
       }
       final IndexResult<ViewerDatabase> result = ViewerFactory.getSolrManager().find(ViewerDatabase.class,
-        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, fieldsToReturn, filterQueries);
+        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, fieldsToReturn,
+        findRequest.defType, filterQueries, findRequest.queryFields);
       count = result.getTotalCount();
       return result;
     } catch (GenericException | RequestNotValidException e) {
@@ -235,7 +238,7 @@ public class DatabaseResource implements DatabaseService {
         List<String> fieldsToReturn = new ArrayList<>();
         fieldsToReturn.add(ViewerConstants.INDEX_ID);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA); //deprecated
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA); // deprecated
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_NAME);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_DESCRIPTION);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_DATA_OWNER);
