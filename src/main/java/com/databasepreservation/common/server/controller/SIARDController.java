@@ -1343,6 +1343,8 @@ public class SIARDController {
               entry.getKey());
             Path siardPath = ViewerConfiguration.getInstance().getSIARDFilesPath().resolve(entry.getValue());
             databaseMigration.exportModuleParameter(entry.getKey(), siardPath.toString());
+          } else {
+            databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
           }
         } else {
           databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
