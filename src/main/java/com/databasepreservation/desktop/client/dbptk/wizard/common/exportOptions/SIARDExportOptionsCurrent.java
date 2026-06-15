@@ -98,6 +98,8 @@ public class SIARDExportOptionsCurrent extends Composite {
           }
         } else if (p.getExportOption().equals(ViewerConstants.EXTERNAL_LOBS_EXPORT_OPTIONS)) {
           buildExternalLobs(p, panel);
+        } else if (p.getExportOption().equals(ViewerConstants.CONVERSION_SERVICE_OPTIONS)) {
+          buildConversionServiceOptions(p, panel);
         }
       }
     }
@@ -118,17 +120,17 @@ public class SIARDExportOptionsCurrent extends Composite {
    * on the current environment (Desktop vs Web) and version.
    */
   private boolean shouldRenderField(PreservationParameter parameter) {
-    if (!ApplicationType.isDesktop() && isSIARDDKVariant()) {
-      // In Web mode for SIARD DK, hide non-required file/folder paths.
-      // The backend will generate this structure.
-      boolean isFileOrFolder = ViewerConstants.INPUT_TYPE_FOLDER.equals(parameter.getInputType())
-        || ViewerConstants.INPUT_TYPE_FILE_OPEN.equals(parameter.getInputType())
-        || ViewerConstants.INPUT_TYPE_FILE_SAVE.equals(parameter.getInputType());
-
-      if (isFileOrFolder && !parameter.isRequired()) {
-        return false; // Do not render
-      }
-    }
+//    if (!ApplicationType.isDesktop() && isSIARDDKVariant()) {
+//      // In Web mode for SIARD DK, hide non-required file/folder paths.
+//      // The backend will generate this structure.
+//      boolean isFileOrFolder = ViewerConstants.INPUT_TYPE_FOLDER.equals(parameter.getInputType())
+//        || ViewerConstants.INPUT_TYPE_FILE_OPEN.equals(parameter.getInputType())
+//        || ViewerConstants.INPUT_TYPE_FILE_SAVE.equals(parameter.getInputType());
+//
+//      if (isFileOrFolder && !parameter.isRequired()) {
+//        return false; // Do not render
+//      }
+//    }
     return true; // Render normally
   }
 
@@ -302,6 +304,62 @@ public class SIARDExportOptionsCurrent extends Composite {
   }
 
   private void buildExternalLobs(PreservationParameter parameter, FlowPanel panel) {
+    GenericField genericField;
+
+    switch (parameter.getInputType()) {
+      case ViewerConstants.INPUT_TYPE_CHECKBOX:
+        externalLobCheckbox = new CheckBox();
+        externalLobCheckbox.setText(messages.wizardExportOptionsLabels(parameter.getName()));
+        externalLobCheckbox.addStyleName("form-checkbox");
+        externalLobCheckbox.addValueChangeHandler(event -> {
+          updateCheckboxExternalLobs(event.getValue());
+        });
+        genericField = GenericField.createInstance(externalLobCheckbox);
+        genericField.setRequired(parameter.isRequired());
+        genericField.setCSSMetadata("form-row", "form-label-spaced");
+        content.add(genericField);
+        break;
+      case ViewerConstants.INPUT_TYPE_TEXT:
+        Label label = new Label();
+        label.setText(messages.wizardExportOptionsLabels(parameter.getName()));
+        externalLobsLabels.add(label);
+        TextBox defaultTextBox = new TextBox();
+        defaultTextBox.addStyleName("form-textbox-external-lobs");
+        defaultTextBox.setText(parameter.getDefaultValue());
+        externalLobsInputs.put(parameter.getName(), defaultTextBox);
+        Label labelEnd = new Label();
+        labelEnd.setText(messages.wizardExportOptionsLabels(parameter.getName() + "-end"));
+        externalLobsLabels.add(labelEnd);
+        if (version.equals(ViewerConstants.SIARDDK)) {
+          label.addStyleName("form-label");
+          labelEnd.addStyleName("form-label");
+        } else {
+          label.addStyleName("form-label gwt-Label-disabled");
+          labelEnd.addStyleName("form-label gwt-Label-disabled");
+          defaultTextBox.setEnabled(false);
+        }
+        FlowPanel formHelper = new FlowPanel();
+        formHelper.addStyleName("form-helper");
+        FlowPanel formRow = new FlowPanel();
+        formRow.addStyleName("form-row");
+        formRow.add(label);
+        formRow.add(defaultTextBox);
+        formRow.add(labelEnd);
+        InlineHTML span = new InlineHTML();
+        span.addStyleName("form-text-helper text-muted");
+        span.setText(messages.wizardExportOptionsHelperText(parameter.getName()));
+        formHelper.add(formRow);
+        formHelper.add(span);
+        panel.add(formHelper);
+        panel.addStyleName("form-lobs");
+        content.add(panel);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private void buildConversionServiceOptions(PreservationParameter parameter, FlowPanel panel) {
     GenericField genericField;
 
     switch (parameter.getInputType()) {
