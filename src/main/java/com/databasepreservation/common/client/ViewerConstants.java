@@ -579,6 +579,7 @@ public class ViewerConstants {
   public static final String SIARD_EXPORT_OPTIONS = "SIARD_EXPORT_OPTIONS";
   public static final String METADATA_EXPORT_OPTIONS = "METADATA_EXPORT_OPTIONS";
   public static final String EXTERNAL_LOBS_EXPORT_OPTIONS = "EXTERNAL_LOBS";
+  public static final String CONVERSION_SERVICE_OPTIONS = "CONVERSION_SERVICE_OPTIONS";
   public static final String EXPORT_FORMAT_SIARD = "SIARD";
   public static final String EXPORT_FORMAT_DBMS = "DBMS";
 
