@@ -628,6 +628,12 @@ public class ViewerConstants {
   public static final String UPLOAD_WIZARD_MANAGER = "upload-wizard-manager";
   public static final String DOWNLOAD_WIZARD_MANAGER = "download-wizard-manager";
 
+  /**
+   * WIZARD properties
+   */
+
+  public static final String PROPERTY_WIZARD_DEFAULT_SIARD_EXPORT_OPTION = "ui.wizard.default.siard.export.option";
+
   /*
    * LINKS
    */
