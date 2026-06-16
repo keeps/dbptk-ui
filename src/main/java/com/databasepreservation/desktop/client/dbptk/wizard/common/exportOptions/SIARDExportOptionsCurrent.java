@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.fields.ComboBoxField;
@@ -66,6 +67,10 @@ public class SIARDExportOptionsCurrent extends Composite {
   private final List<Label> externalLobsLabels = new ArrayList<>();
   private final Map<String, TextBox> externalLobsInputs = new HashMap<>();
   private CheckBox externalLobCheckbox;
+  private String conversionLobServiceOption;
+  private CheckBox conversionLobServiceCheckbox;
+  private final List<Label> conversionLobServiceLabels = new ArrayList<>();
+  private final Map<String, TextBox> conversionLobServiceInputs = new HashMap<>();
   private int validationError = -1;
   private final String version;
   private final String defaultPath;
@@ -88,18 +93,17 @@ public class SIARDExportOptionsCurrent extends Composite {
     this.defaultPath = defaultPath;
 
     FlowPanel panel = new FlowPanel();
+    FlowPanel conversionLobServicePanel = new FlowPanel();
 
     for (PreservationParameter p : module.getParameters()) {
-      if (p.getExportOption() != null) {
+      if (p.getExportOption() != null && shouldRenderField(p)) {
         if (p.getExportOption().equals(ViewerConstants.SIARD_EXPORT_OPTIONS)) {
           // Only build if appropriate for the environment
-          if (shouldRenderField(p)) {
-            buildGenericWidget(p);
-          }
+          buildGenericWidget(p);
         } else if (p.getExportOption().equals(ViewerConstants.EXTERNAL_LOBS_EXPORT_OPTIONS)) {
           buildExternalLobs(p, panel);
         } else if (p.getExportOption().equals(ViewerConstants.CONVERSION_SERVICE_OPTIONS)) {
-          buildConversionServiceOptions(p, panel);
+          buildConversionServiceOptions(p, conversionLobServicePanel);
         }
       }
     }
@@ -120,17 +124,14 @@ public class SIARDExportOptionsCurrent extends Composite {
    * on the current environment (Desktop vs Web) and version.
    */
   private boolean shouldRenderField(PreservationParameter parameter) {
-//    if (!ApplicationType.isDesktop() && isSIARDDKVariant()) {
-//      // In Web mode for SIARD DK, hide non-required file/folder paths.
-//      // The backend will generate this structure.
-//      boolean isFileOrFolder = ViewerConstants.INPUT_TYPE_FOLDER.equals(parameter.getInputType())
-//        || ViewerConstants.INPUT_TYPE_FILE_OPEN.equals(parameter.getInputType())
-//        || ViewerConstants.INPUT_TYPE_FILE_SAVE.equals(parameter.getInputType());
-//
-//      if (isFileOrFolder && !parameter.isRequired()) {
-//        return false; // Do not render
-//      }
-//    }
+    if (ApplicationType.isDesktopForWeb() && isSIARDDKVariant()) {
+      // These fields are not relevant for SIARD-DK in Desktop for Web environment, so
+      // we hide them to avoid confusion.
+      return !parameter.getName().equals("archiveIndex") && !parameter.getName().equals("contextDocumentationIndex")
+        && !parameter.getName().equals("contextDocumentationFolder") && !parameter.getName().equals("lobs-per-folder")
+        && !parameter.getName().equals("lobs-folder-size");
+    }
+
     return true; // Render normally
   }
 
@@ -150,15 +151,25 @@ public class SIARDExportOptionsCurrent extends Composite {
             final boolean value = checkBoxInputs.get(parameter.getName()).getValue();
             exportParameters.put(parameter.getName(), String.valueOf(value));
           }
+          if (isSIARDDKVariant()) {
+            if (conversionLobServiceCheckbox != null && conversionLobServiceOption != null) {
+              final boolean value = conversionLobServiceCheckbox.getValue();
+              exportParameters.put(conversionLobServiceOption, String.valueOf(value));
+            }
+          }
           break;
         case ViewerConstants.INPUT_TYPE_TEXT:
           if (textBoxInputs.get(parameter.getName()) != null) {
             final String text = textBoxInputs.get(parameter.getName()).getText();
             exportParameters.put(parameter.getName(), text);
           }
-          if (ViewerConstants.SIARDDK.equals(version)) {
+          if (isSIARDDKVariant()) {
             if (externalLobsInputs.get(parameter.getName()) != null) {
               final String text = externalLobsInputs.get(parameter.getName()).getText();
+              exportParameters.put(parameter.getName(), text);
+            }
+            if (conversionLobServiceInputs.get(parameter.getName()) != null) {
+              final String text = conversionLobServiceInputs.get(parameter.getName()).getText();
               exportParameters.put(parameter.getName(), text);
             }
           } else {
@@ -303,6 +314,28 @@ public class SIARDExportOptionsCurrent extends Composite {
     }
   }
 
+  private void updateCheckboxConversionLobService(boolean value) {
+    if (value) { // selected
+      for (Label label : conversionLobServiceLabels) {
+        label.addStyleName("gwt-Label");
+        label.removeStyleName("gwt-Label-disabled");
+      }
+
+      for (TextBox textBox : conversionLobServiceInputs.values()) {
+        textBox.setEnabled(true);
+      }
+    } else {
+      for (Label label : conversionLobServiceLabels) {
+        label.removeStyleName("gwt-Label");
+        label.addStyleName("gwt-Label-disabled");
+      }
+
+      for (TextBox textBox : conversionLobServiceInputs.values()) {
+        textBox.setEnabled(false);
+      }
+    }
+  }
+
   private void buildExternalLobs(PreservationParameter parameter, FlowPanel panel) {
     GenericField genericField;
 
@@ -364,13 +397,19 @@ public class SIARDExportOptionsCurrent extends Composite {
 
     switch (parameter.getInputType()) {
       case ViewerConstants.INPUT_TYPE_CHECKBOX:
-        externalLobCheckbox = new CheckBox();
-        externalLobCheckbox.setText(messages.wizardExportOptionsLabels(parameter.getName()));
-        externalLobCheckbox.addStyleName("form-checkbox");
-        externalLobCheckbox.addValueChangeHandler(event -> {
-          updateCheckboxExternalLobs(event.getValue());
+        conversionLobServiceOption = parameter.getName();
+        conversionLobServiceCheckbox = new CheckBox();
+        conversionLobServiceCheckbox.setText(messages.wizardExportOptionsLabels(parameter.getName()));
+        conversionLobServiceCheckbox.addStyleName("form-checkbox");
+
+        boolean defaultCheck = ClientConfigurationManager.getBoolean(false,
+          ViewerConstants.PROPERTY_WIZARD_DEFAULT_SIARD_EXPORT_OPTION, parameter.getName());
+        conversionLobServiceCheckbox.setValue(defaultCheck);
+
+        conversionLobServiceCheckbox.addValueChangeHandler(event -> {
+          updateCheckboxConversionLobService(event.getValue());
         });
-        genericField = GenericField.createInstance(externalLobCheckbox);
+        genericField = GenericField.createInstance(conversionLobServiceCheckbox);
         genericField.setRequired(parameter.isRequired());
         genericField.setCSSMetadata("form-row", "form-label-spaced");
         content.add(genericField);
@@ -378,21 +417,33 @@ public class SIARDExportOptionsCurrent extends Composite {
       case ViewerConstants.INPUT_TYPE_TEXT:
         Label label = new Label();
         label.setText(messages.wizardExportOptionsLabels(parameter.getName()));
-        externalLobsLabels.add(label);
+        conversionLobServiceLabels.add(label);
         TextBox defaultTextBox = new TextBox();
         defaultTextBox.addStyleName("form-textbox-external-lobs");
-        defaultTextBox.setText(parameter.getDefaultValue());
-        externalLobsInputs.put(parameter.getName(), defaultTextBox);
+
+        String defaultText = ClientConfigurationManager.getStringWithDefault(parameter.getDefaultValue(),
+          ViewerConstants.PROPERTY_WIZARD_DEFAULT_SIARD_EXPORT_OPTION, parameter.getName());
+        defaultTextBox.setText(defaultText);
+
+        defaultTextBox.setText(defaultText);
+        conversionLobServiceInputs.put(parameter.getName(), defaultTextBox);
         Label labelEnd = new Label();
         labelEnd.setText(messages.wizardExportOptionsLabels(parameter.getName() + "-end"));
-        externalLobsLabels.add(labelEnd);
+        conversionLobServiceLabels.add(labelEnd);
         if (version.equals(ViewerConstants.SIARDDK)) {
           label.addStyleName("form-label");
           labelEnd.addStyleName("form-label");
         } else {
-          label.addStyleName("form-label gwt-Label-disabled");
-          labelEnd.addStyleName("form-label gwt-Label-disabled");
-          defaultTextBox.setEnabled(false);
+          boolean isChecked = conversionLobServiceCheckbox != null && conversionLobServiceCheckbox.getValue();
+          if (!isChecked) {
+            label.addStyleName("form-label gwt-Label-disabled");
+            labelEnd.addStyleName("form-label gwt-Label-disabled");
+            defaultTextBox.setEnabled(false);
+          } else {
+            label.addStyleName("form-label");
+            labelEnd.addStyleName("form-label");
+            defaultTextBox.setEnabled(true);
+          }
         }
         FlowPanel formHelper = new FlowPanel();
         formHelper.addStyleName("form-helper");
@@ -407,7 +458,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         formHelper.add(formRow);
         formHelper.add(span);
         panel.add(formHelper);
-        panel.addStyleName("form-lobs");
+        panel.addStyleName("form-conversion-lobs");
         content.add(panel);
         break;
       default:
@@ -501,14 +552,21 @@ public class SIARDExportOptionsCurrent extends Composite {
         folder.setButtonCSS("btn btn-link form-button");
         folder.setRequired(parameter.isRequired());
 
+        String defaultHelperText = messages.wizardExportOptionsHelperText(parameter.getName());
+        String desktopForWebHelperText = messages.wizardExportOptionsHelperTextDesktopForWeb(parameter.getName());
+
+        String helperText = (ApplicationType.isDesktopForWeb() && desktopForWebHelperText != null
+          && !desktopForWebHelperText.trim().isEmpty()) ? desktopForWebHelperText : defaultHelperText;
+
+        String actionBtn = ApplicationType.isDesktopForWeb() ? messages.basicActionSave() : messages.basicActionOpen();
+
         folder.buttonAction(() -> {
           JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
             Collections.emptyList());
 
           ApplicationTypeOperations.choosePathToOpenAsync(options,
-            messages.wizardExportOptionsLabels(parameter.getName()),
-            messages.wizardExportOptionsHelperText(parameter.getName()), messages.basicActionCancel(),
-            messages.basicActionOpen(), new DefaultAsyncCallback<String>() {
+            messages.wizardExportOptionsLabels(parameter.getName()), helperText, messages.basicActionCancel(),
+            actionBtn, new DefaultAsyncCallback<String>() {
               @Override
               public void onSuccess(String path) {
                 fileInputs.put(parameter.getName(), path);
@@ -522,7 +580,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         helperFolder.addStyleName("form-helper");
         InlineHTML spanFolder = new InlineHTML();
         spanFolder.addStyleName("form-text-helper text-muted");
-        spanFolder.setText(messages.wizardExportOptionsHelperText(parameter.getName()));
+        spanFolder.setText(helperText);
         helperFolder.add(folder);
         helperFolder.add(spanFolder);
         content.add(helperFolder);
