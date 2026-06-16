@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.fields.ComboBoxField;
 import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
@@ -86,8 +88,17 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
         modulesMap.put(module.getModuleName(), module.getParameters());
       });
 
+      String configDefaultVersion = ClientConfigurationManager.getStringWithDefault(null,
+        ViewerConstants.PROPERTY_WIZARD_DEFAULT_SIARD_EXPORT_OPTION, "version");
+      int defaultIndex = 1;
+      int currentIndex = 0;
+
       for (String moduleName : modulesMap.keySet()) {
         comboBoxField.setComboBoxValue(ToolkitModuleName2ViewerModuleName.transform(moduleName), moduleName);
+        if (moduleName.equals(configDefaultVersion)) {
+          defaultIndex = currentIndex;
+        }
+        currentIndex++;
       }
       comboBoxField.addChangeHandler(() -> {
         version = comboBoxField.getSelectedValue();
@@ -97,7 +108,7 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
         content.add(instance);
       });
       comboBoxField.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
-      comboBoxField.select(1);
+      comboBoxField.select(defaultIndex);
 
       listBox.add(comboBoxField);
     }).getSiardModules("export", null);
