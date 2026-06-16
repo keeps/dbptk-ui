@@ -58,7 +58,7 @@ public class DatabaseSelectList extends DatabaseList {
     Column<ViewerDatabase, SafeHtml> description = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getDescription() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDescription())
           : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }
@@ -76,7 +76,7 @@ public class DatabaseSelectList extends DatabaseList {
     Column<ViewerDatabase, SafeHtml> dataOwnerColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null
+        return database != null && database.getMetadata() != null && database.getMetadata().getDataOwner() != null
           ? SafeHtmlUtils.fromString(database.getMetadata().getDataOwner())
           : SafeHtmlUtils.fromString(ViewerConstants.UNKNOWN);
       }

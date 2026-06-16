@@ -1157,6 +1157,8 @@ public interface ClientMessages extends Messages {
 
   String wizardExportOptionsHelperText(@Select String fieldName);
 
+  String wizardExportOptionsHelperTextDesktopForWeb(@Select String fieldName);
+
   String errorMessagesExportOptionsTitle();
 
   String errorMessagesExportOptions(@Select int error);
