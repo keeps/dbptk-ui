@@ -34,6 +34,7 @@ import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.TableRowListWrapper;
+import com.databasepreservation.common.client.common.utils.UriQueryUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.preferences.LocalColumnPreferences;
 import com.databasepreservation.common.client.common.visualization.preferences.LocalPreferencesManager;
@@ -65,6 +66,7 @@ import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
+import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.cell.client.Cell;
@@ -80,7 +82,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -928,9 +929,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
             if (helperExportTableData.isZipHelper()) {
               boolean exportLOBs = helperExportTableData.exportLobs();
               String zipFilename = helperExportTableData.getZipFileName();
-              Window.Location.assign(getExportURL(zipFilename, filename, exportAll, exportDescription, exportLOBs));
+              String findRequestJson = getExportFindRequestJson(exportAll);
+              String fieldsToHeader = getExportFieldsToHeader();
+              JavascriptUtils.exportToCSVPostRequest(getExportURL(zipFilename, filename, exportDescription, exportLOBs),
+                findRequestJson, fieldsToHeader);
             } else {
-              Window.Location.assign(getExportURL(filename, exportAll, exportDescription));
+              String findRequestJson = getExportFindRequestJson(exportAll);
+              String fieldsToHeader = getExportFieldsToHeader();
+              JavascriptUtils.exportToCSVPostRequest(getExportURL(filename, exportAll, exportDescription), findRequestJson,
+                fieldsToHeader);
             }
           }
         }
@@ -954,15 +961,16 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     CollectionStatus status = wrapper.getStatus();
     Map<String, String> extraParameters = new HashMap<>();
     List<String> fieldsToReturn = new ArrayList<>();
-    fieldsToReturn.add(ViewerConstants.INDEX_ID);
+    List<String> queryFields = new ArrayList<>();
+
+    createFieldLists(fieldsToReturn, queryFields, new ArrayList<>());
 
     boolean hasNested = false;
 
     for (ColumnStatus column : status.getTableStatus(table.getUuid()).getVisibleColumnsList()) {
       if (column.getNestedColumns() != null) {
         hasNested = true;
-      } else {
-        fieldsToReturn.add(column.getId());
+        break;
       }
     }
 
@@ -980,7 +988,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), rowsFilter, currentSorter, sublist,
       getFacets(), false, fieldsToReturn, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery,
-      fieldsToReturn, false, List.of());
+      queryFields, false, List.of());
 
     CollectionService.Util.call(new MethodCallback<IndexResult<ViewerRow>>() {
       @Override
@@ -1156,10 +1164,9 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     }
   }
 
-  private String getExportURL(String zipFilename, String filename, boolean exportAll, boolean description,
-    boolean exportLobs) {
+  private String getExportFindRequestJson(boolean exportAll) {
+
     TableRowListWrapper wrapper = getObject();
-    ViewerDatabase database = wrapper.getDatabase();
     ViewerTable table = wrapper.getTable();
     CollectionStatus status = wrapper.getStatus();
 
@@ -1224,12 +1231,36 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
       Facets.NONE, false, fieldsToSolr, extraParameters, defType, tableFilterQuery, fieldsToSolr, false, List.of());
 
-    return RestUtils.createExportTableUri(database.getUuid(), table.getSchemaName(), table.getName(), findRequest,
-      zipFilename, filename, description, exportLobs, fieldsToHeader);
+    return ViewerJsonUtils.getFindRequestMapper().write(findRequest);
+  }
+
+  private String getExportFieldsToHeader() {
+    List<String> fieldsToHeader = new ArrayList<>();
+
+    TableRowListWrapper wrapper = getObject();
+    ViewerTable table = wrapper.getTable();
+    CollectionStatus status = wrapper.getStatus();
+    final List<ColumnStatus> visibleColumnsList = status.getTableStatusByTableId(table.getId()).getVisibleColumnsList();
+
+    for (ColumnStatus configColumn : visibleColumnsList) {
+      if (isColumnVisible(configColumn.getId())) {
+        fieldsToHeader.add(configColumn.getId());
+      }
+    }
+    return UriQueryUtils.encodeQuery(String.join(",", fieldsToHeader));
+  }
+
+  private String getExportURL(String zipFilename, String filename, boolean description, boolean exportLobs) {
+    TableRowListWrapper wrapper = getObject();
+    ViewerDatabase database = wrapper.getDatabase();
+    ViewerTable table = wrapper.getTable();
+
+    return RestUtils.createExportTableUri(database.getUuid(), table.getSchemaName(), table.getName(), zipFilename,
+      filename, description, exportLobs);
   }
 
   private String getExportURL(String filename, boolean exportAll, boolean description) {
-    return getExportURL(null, filename, exportAll, description, false);
+    return getExportURL(null, filename, description, false);
   }
 
   private String getBlobKey(String input) {

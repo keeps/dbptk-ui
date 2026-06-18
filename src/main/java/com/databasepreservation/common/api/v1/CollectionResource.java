@@ -44,7 +44,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -982,20 +984,21 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find/export", method = RequestMethod.POST, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @Operation(summary = "Export the rows as CSV")
   public ResponseEntity<StreamingResponseBody> exportFindToCSV(
     @Parameter(name = "The database unique identifier", required = true) @PathVariable(name = "databaseUUID") String databaseUUID,
     @Parameter(name = "The collection unique identifier", required = true) @PathVariable(name = "collectionUUID") String collectionUUID,
     @Parameter(name = "The schema name", required = true) @PathVariable(name = "schema") String schema,
     @Parameter(name = "The table name", required = true) @PathVariable(name = "table") String table,
-    @Parameter(name = "Find request to filter/limit the search") @RequestParam(name = "f") String findRequestJson,
+    @RequestBody MultiValueMap<String, String> formData,
     @Parameter(name = "The CSV filename") @RequestParam(name = "filename") String filename,
     @Parameter(name = "The Zip filename") @RequestParam(name = "zipFilename", required = false) String zipFilename,
     @Parameter(name = "Export description", schema = @Schema(allowableValues = "true, false")) @RequestParam(name = "descriptions") boolean exportDescription,
-    @Parameter(name = "Export LOBs", schema = @Schema(allowableValues = "true, false")) @RequestParam(name = "lobs") boolean exportLobs,
-    @Parameter(name = "Fields to export", required = true) @RequestParam(name = "fl") String fieldsToHeader) {
+    @Parameter(name = "Export LOBs", schema = @Schema(allowableValues = "true, false")) @RequestParam(name = "lobs") boolean exportLobs) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    String fieldsToHeader = formData.get("fields").get(0);
+    String findRequestJson = formData.get("findRequest").get(0);
 
     LogEntryState state = LogEntryState.SUCCESS;
     User user = new User();

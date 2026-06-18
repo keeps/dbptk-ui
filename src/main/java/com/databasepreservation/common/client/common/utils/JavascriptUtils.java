@@ -389,4 +389,24 @@ public class JavascriptUtils {
                                                                                     $wnd.console.error("Exception in clipboard logic: ", e);
                                                                                 }
                                                                                 }-*/;
+
+  public static native void exportToCSVPostRequest(String url, String findRequestJson, String fieldsToHeader) /*-{
+    var form = document.createElement("form");
+    form.method = "POST";
+    form.action = url;
+
+    var findRequestField = document.createElement("input");
+    var fieldsToHeaderField = document.createElement("input");
+
+    findRequestField.name="findRequest";
+    findRequestField.value=findRequestJson;
+    form.appendChild(findRequestField);
+
+    fieldsToHeaderField.name="fields";
+    fieldsToHeaderField.value=fieldsToHeader;
+    form.appendChild(fieldsToHeaderField);
+
+    document.body.appendChild(form);
+    form.submit();
+  }-*/;
 }

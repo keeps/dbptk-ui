@@ -69,14 +69,10 @@ public class RestUtils {
       + "/manifest?downloadLink=";
   }
 
-
-
   public static String createExportTableUri(String databaseUUID, String schemaName, String tableName,
-    FindRequest findRequest, String zipFilename, String filename, boolean descriptions, boolean lobs,
-    List<String> fieldsToHeader) {
+    String zipFilename, String filename, boolean descriptions, boolean lobs) {
     // api/v1/database/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find/export
-    return exportMultiRowCSV(databaseUUID, schemaName, tableName, findRequest, zipFilename, filename, descriptions,
-      lobs, fieldsToHeader);
+    return exportMultiRowCSV(databaseUUID, schemaName, tableName, zipFilename, filename, descriptions, lobs);
   }
 
   public static String createExportRowUri(String databaseUUID, String schemaName, String tableName, String rowIndex,
@@ -98,17 +94,15 @@ public class RestUtils {
       new ArrayList<>());
   }
 
-  private static String exportMultiRowCSV(String databaseUUID, String schemaName, String tableName,
-    FindRequest findRequest, String zipFilename, String filename, boolean descriptions, boolean lobs,
-    List<String> fieldsToHeader) {
+  private static String exportMultiRowCSV(String databaseUUID, String schemaName, String tableName, String zipFilename,
+    String filename, boolean descriptions, boolean lobs) {
     StringBuilder urlBuilder = new StringBuilder();
 
     urlBuilder.append(GWT.getHostPageBaseURL()).append(ViewerConstants.API_SERVLET)
       .append(ViewerConstants.API_V1_DATABASE_RESOURCE).append("/").append(databaseUUID).append("/collection/")
       .append(databaseUUID).append("/data/").append(schemaName).append("/").append(tableName).append("/find/export");
 
-    return getCollectionResourceExportCSVUri(urlBuilder, findRequest, zipFilename, filename, descriptions, lobs,
-      fieldsToHeader);
+    return getCollectionResourceExportCSVUri(urlBuilder, null, zipFilename, filename, descriptions, lobs, null);
   }
 
   private static String getCollectionResourceExportCSVUri(StringBuilder header, FindRequest findRequest,
@@ -133,7 +127,7 @@ public class RestUtils {
     header.append("descriptions").append(API_QUERY_ASSIGN_SYMBOL).append(descriptions).append(API_QUERY_SEP);
     header.append("lobs").append(API_QUERY_ASSIGN_SYMBOL).append(lobs).append(API_QUERY_SEP);
 
-    if (!fieldsToHeader.isEmpty()) {
+    if (fieldsToHeader != null && !fieldsToHeader.isEmpty()) {
       header.append("fl").append(API_QUERY_ASSIGN_SYMBOL)
         .append(UriQueryUtils.encodeQuery(String.join(",", fieldsToHeader)));
     }
