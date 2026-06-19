@@ -34,7 +34,6 @@ import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.TableRowListWrapper;
-import com.databasepreservation.common.client.common.utils.UriQueryUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.preferences.LocalColumnPreferences;
 import com.databasepreservation.common.client.common.visualization.preferences.LocalPreferencesManager;
@@ -1247,7 +1246,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         fieldsToHeader.add(configColumn.getId());
       }
     }
-    return UriQueryUtils.encodeQuery(String.join(",", fieldsToHeader));
+    return String.join(",", fieldsToHeader);
   }
 
   private String getExportURL(String zipFilename, String filename, boolean description, boolean exportLobs) {
