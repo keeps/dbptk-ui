@@ -1332,9 +1332,8 @@ public class SIARDController {
       if (!entry.getValue().equals("false")) {
         LOGGER.info("Export Options - {} -> {}", entry.getKey(), entry.getValue());
         if (ViewerConfiguration.getInstance().isDesktopEnvironmentWithWebSupport()) {
-          if (entry.getKey().equals("folder")) {
-            LOGGER.info("Export Options - {} is a folder, resolving path for desktop environment with web support",
-              entry.getKey());
+          if (entry.getKey().equals("folder") || entry.getKey().equals("file")) {
+            LOGGER.info("Export Options - {}, resolving path for desktop environment with web support", entry.getKey());
             Path siardPath = ViewerConfiguration.getInstance().getSIARDFilesPath().resolve(entry.getValue());
             databaseMigration.exportModuleParameter(entry.getKey(), siardPath.toString());
           } else {
