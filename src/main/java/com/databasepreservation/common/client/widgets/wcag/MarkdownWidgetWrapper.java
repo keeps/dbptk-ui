@@ -29,8 +29,8 @@ public class MarkdownWidgetWrapper extends HTML {
 
   private ClientLogger logger = new ClientLogger(getClass().getName());
 
-  public MarkdownWidgetWrapper(String resourceId) {
-    this(resourceId, new AsyncCallback<Void>() {
+  public MarkdownWidgetWrapper(String resourceId, String reportType) {
+    this(resourceId, reportType, new AsyncCallback<Void>() {
 
       @Override
       public void onFailure(Throwable caught) {
@@ -44,9 +44,9 @@ public class MarkdownWidgetWrapper extends HTML {
     });
   }
 
-  public MarkdownWidgetWrapper(String databaseUUID, final AsyncCallback<Void> callback) {
+  public MarkdownWidgetWrapper(String databaseUUID, String reportType, final AsyncCallback<Void> callback) {
     RequestBuilder request = new RequestBuilder(RequestBuilder.GET,
-      RestUtils.createReportResourceUri(databaseUUID).asString());
+      RestUtils.createReportResourceUri(databaseUUID, reportType).asString());
 
     try {
       request.sendRequest(null, new RequestCallback() {
