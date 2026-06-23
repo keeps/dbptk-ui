@@ -87,14 +87,19 @@ public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
         rowNestedUUIDs.get(nestedRow.getNestedUUID()).add(nestedRow.getNestedOriginalUUID());
       }
 
-      Map<String, IterableIndexResult> nestedOriginalRowsForThisRow = new HashMap<>();
+      Map<String, List<ViewerRow>> nestedOriginalRowsForThisRow = new HashMap<>();
       for (Map.Entry<String, List<String>> entry : rowNestedUUIDs.entrySet()) {
         List<String> fieldsToReturn = new ArrayList<>();
         fieldsToReturn.add("tableId");
         fieldsToReturn.addAll(rowNestedFields.get(entry.getKey()));
-        final IterableIndexResult nestedRows = ViewerFactory.getSolrManager().findAllRows(databaseUUID,
-          new Filter(new OneOfManyFilterParameter("uuid", entry.getValue())), new Sorter(), fieldsToReturn);
-        nestedOriginalRowsForThisRow.put(entry.getKey(), nestedRows);
+        try (final IterableIndexResult nestedRows = ViewerFactory.getSolrManager().findAllRows(databaseUUID,
+          new Filter(new OneOfManyFilterParameter("uuid", entry.getValue())), new Sorter(), fieldsToReturn)) {
+          List<ViewerRow> nestedRowsList = new ArrayList<>();
+          for (ViewerRow nestedRow : nestedRows) {
+            nestedRowsList.add(nestedRow);
+          }
+          nestedOriginalRowsForThisRow.put(entry.getKey(), nestedRowsList);
+        }
       }
 
       printer

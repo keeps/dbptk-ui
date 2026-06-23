@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +29,6 @@ import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.utils.FilenameUtils;
 import com.databasepreservation.common.utils.LobManagerUtils;
 import com.github.jknack.handlebars.Handlebars;
@@ -45,7 +43,7 @@ public class HandlebarsUtils {
 
   private static final Handlebars handlebars = new Handlebars();
 
-  public static List<String> getCellValues(ViewerRow row, Map<String, IterableIndexResult> nestedRows,
+  public static List<String> getCellValues(ViewerRow row, Map<String, List<ViewerRow>> nestedRows,
     TableStatus configTable, List<String> fieldsToReturn) {
     List<String> values = new ArrayList<>();
     fieldsToReturn.remove(ViewerConstants.SOLR_ROWS_TABLE_ID);
@@ -61,10 +59,7 @@ public class HandlebarsUtils {
           String template = columnConfig.getExportStatus().getTemplateStatus().getTemplate();
           StringBuilder stringBuilder = new StringBuilder();
           boolean first = true;
-          Iterator<ViewerRow> iterator = nestedRows.get(columnConfig.getNestedColumns().getReferenceUuid()).iterator();
-          ViewerRow r;
-          while (iterator.hasNext()) {
-            r = iterator.next();
+          for (ViewerRow r : nestedRows.get(columnConfig.getNestedColumns().getReferenceUuid())) {
             if (template != null && !template.isEmpty()) {
               final Map<String, String> map = cellsToJson(r.getCells(), columnConfig.getNestedColumns());
               try {
