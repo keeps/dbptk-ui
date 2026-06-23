@@ -137,7 +137,8 @@ public class CollectionResource implements CollectionService {
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/report", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @Operation(summary = "Downloads the migration report for a specific database")
   public ResponseEntity<Resource> getReport(@PathVariable(name = "databaseUUID") String databaseUUID,
-    @PathVariable(name = "collectionUUID") String collectionUUID) {
+    @PathVariable(name = "collectionUUID") String collectionUUID,
+    @RequestParam(name = "reportType", required = false, defaultValue = "BROWSE") String reportTypeParam) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -146,7 +147,10 @@ public class CollectionResource implements CollectionService {
     try {
       user = controllerAssistant.checkRoles(request);
       ParameterSanitization.sanitizePath(databaseUUID, "Invalid databaseUUID");
-      Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID, ReporterType.BROWSE);
+
+      ReporterType reportType = ReporterType.valueOf(reportTypeParam.toUpperCase());
+
+      Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID, reportType);
       String filename = reportPath.getFileName().toString();
       if (!Files.exists(reportPath)) {
         throw new NotFoundException("Missing report file: " + filename);
