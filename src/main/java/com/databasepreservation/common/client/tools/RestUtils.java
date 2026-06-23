@@ -27,11 +27,12 @@ public class RestUtils {
     // do nothing
   }
 
-  public static SafeUri createReportResourceUri(String databaseUUID) {
+  public static SafeUri createReportResourceUri(String databaseUUID, String reportType) {
     // api/v1/database/{databaseUUID}/collection/{collectionUUID}/report
     String b = ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE + ViewerConstants.API_SEP
       + databaseUUID + ViewerConstants.API_SEP + ViewerConstants.API_PATH_PARAM_SOLR_COLLECTION
-      + ViewerConstants.API_SEP + databaseUUID + ViewerConstants.API_SEP + ViewerConstants.API_PATH_PARAM_REPORT;
+      + ViewerConstants.API_SEP + databaseUUID + ViewerConstants.API_SEP + ViewerConstants.API_PATH_PARAM_REPORT
+      + "?reportType=" + reportType;
     return UriUtils.fromSafeConstant(b);
   }
 
@@ -68,8 +69,6 @@ public class RestUtils {
         "presentation", ViewerConstants.PRESENTATION_EXTERNAL_SERVICE_NAME)
       + "/manifest?downloadLink=";
   }
-
-
 
   public static String createExportTableUri(String databaseUUID, String schemaName, String tableName,
     FindRequest findRequest, String zipFilename, String filename, boolean descriptions, boolean lobs,
