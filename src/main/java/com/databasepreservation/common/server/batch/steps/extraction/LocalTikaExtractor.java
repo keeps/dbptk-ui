@@ -12,7 +12,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 
+import org.slf4j.LoggerFactory;
+
 import com.databasepreservation.common.client.ViewerConstants;
+
+import dev.failsafe.Failsafe;
+import dev.failsafe.RetryPolicy;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -22,8 +27,11 @@ public class LocalTikaExtractor implements LobTextExtractor {
   private final String tikaURL;
   private final String tikaVolumePathConfig;
   private final long timeoutSeconds;
+  private final int tikaRetries;
+  private final long tikaRetryDelay;
 
-  public LocalTikaExtractor(HttpClient httpClient, String tikaURL, String tikaVolumePathConfig, long timeoutSeconds) {
+  public LocalTikaExtractor(HttpClient httpClient, String tikaURL, String tikaVolumePathConfig, long timeoutSeconds,
+    int tikaRetries, long tikaRetryDelay) {
     if (tikaURL == null || tikaURL.isBlank()) {
       throw new IllegalStateException("Tika server URL is not configured.");
     }
@@ -31,6 +39,8 @@ public class LocalTikaExtractor implements LobTextExtractor {
     this.tikaURL = tikaURL;
     this.tikaVolumePathConfig = tikaVolumePathConfig;
     this.timeoutSeconds = timeoutSeconds;
+    this.tikaRetries = tikaRetries;
+    this.tikaRetryDelay = tikaRetryDelay;
   }
 
   @Override
@@ -53,8 +63,14 @@ public class LocalTikaExtractor implements LobTextExtractor {
       }));
     }
 
-    HttpResponse<String> response = httpClient.send(requestBuilder.build(),
-      HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+    RetryPolicy<Object> retryPolicy = RetryPolicy.builder().handle(IOException.class)
+      .withDelay(Duration.ofSeconds(tikaRetryDelay)).withMaxRetries(tikaRetries)
+      .onFailedAttempt(e -> LoggerFactory.getLogger(LocalTikaExtractor.class)
+        .warn("({}/10): Tika extraction request failed, retrying.", e.getAttemptCount()))
+      .build();
+    HttpResponse<String> response = Failsafe.with(retryPolicy)
+      .get(() -> httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)));
+
     return response.body();
   }
 }
