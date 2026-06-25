@@ -786,6 +786,14 @@
         </dependency>
         <!-- / Mime Type detection -->
 
+        <!-- Retry Policies -->
+        <dependency>
+            <groupId>dev.failsafe</groupId>
+            <artifactId>failsafe</artifactId>
+            <version>3.3.2</version>
+        </dependency>
+        <!-- / Retry Policies -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

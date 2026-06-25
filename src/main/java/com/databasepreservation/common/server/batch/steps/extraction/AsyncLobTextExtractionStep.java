@@ -119,7 +119,10 @@ public class AsyncLobTextExtractionStep extends AbstractIndexingStepDefinition<V
     String tikaUrl = config.getViewerConfigurationAsString(null, ViewerConstants.PROPERTY_OCR_TIKA_URL);
     String volumePath = config.getViewerConfigurationAsString(null, ViewerConstants.PROPERTY_OCR_TIKA_VOLUME_PATH);
     long localTimeout = config.getViewerConfigurationAsLong(300L, ViewerConstants.PROPERTY_OCR_TIKA_TIMEOUT);
-    LobTextExtractor localExtractor = new LocalTikaExtractor(httpClient, tikaUrl, volumePath, localTimeout);
+    int tikaRetries = config.getViewerConfigurationAsInt(10, ViewerConstants.PROPERTY_OCR_TIKA_RETRIES);
+    long tikaRetryDelay = config.getViewerConfigurationAsLong(5L, ViewerConstants.PROPERTY_OCR_TIKA_RETRY_DELAY);
+    LobTextExtractor localExtractor = new LocalTikaExtractor(httpClient, tikaUrl, volumePath, localTimeout, tikaRetries,
+      tikaRetryDelay);
 
     // 3. Build External Strategy (If configured)
     String externalUrl = config.getViewerConfigurationAsString(null, ViewerConstants.PROPERTY_OCR_EXTERNAL_SERVICE_URL);
