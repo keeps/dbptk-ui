@@ -13,8 +13,10 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -135,15 +137,16 @@ public class ResultsCSVOutputStream extends CSVOutputStream {
     boolean isFirst = true;
     for (final ViewerRow row : this.results.getResults()) {
       Map<String, List<String>> rowNestedUUIDs = new HashMap<>();
-      Map<String, List<String>> rowNestedFields = new HashMap<>();
+      Map<String, Set<String>> rowNestedFields = new HashMap<>();
 
       for (ViewerRow nestedRow : row.getNestedRowList()) {
         if (!rowNestedUUIDs.containsKey(nestedRow.getNestedUUID())) {
           rowNestedUUIDs.put(nestedRow.getNestedUUID(), new ArrayList<>());
-          rowNestedFields.put(nestedRow.getNestedUUID(),
-            nestedRow.getCells().keySet().stream().map(k -> k.substring(4)).toList());
+          rowNestedFields.put(nestedRow.getNestedUUID(), new HashSet<>());
         }
         rowNestedUUIDs.get(nestedRow.getNestedUUID()).add(nestedRow.getNestedOriginalUUID());
+        rowNestedFields.get(nestedRow.getNestedUUID())
+          .addAll(nestedRow.getCells().keySet().stream().map(k -> k.substring(4)).toList());
       }
 
       Map<String, List<ViewerRow>> nestedOriginalRowsForThisRow = new HashMap<>();

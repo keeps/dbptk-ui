@@ -1228,7 +1228,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     }
 
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
-      Facets.NONE, false, fieldsToSolr, extraParameters, defType, tableFilterQuery, fieldsToSolr, false, List.of());
+      Facets.NONE, false, fieldsToSolr, extraParameters, defType, tableFilterQuery, queryFields, false, List.of());
 
     return ViewerJsonUtils.getFindRequestMapper().write(findRequest);
   }

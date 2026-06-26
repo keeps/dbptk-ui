@@ -193,7 +193,11 @@ public class HandlebarsUtils {
     if (cells != null && !cells.isEmpty()) {
       for (String nestedField : nestedFields) {
         final String solrName = nestedSolrNames.get(index++);
-        nestedValues.put(nestedField, cells.get(solrName).getValue());
+        if (cells.containsKey(solrName)) {
+          nestedValues.put(nestedField, cells.get(solrName).getValue());
+        } else {
+          nestedValues.put(nestedField, "");
+        }
       }
     }
 
