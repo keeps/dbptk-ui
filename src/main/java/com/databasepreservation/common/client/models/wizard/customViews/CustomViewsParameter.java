@@ -8,7 +8,11 @@
 package com.databasepreservation.common.client.models.wizard.customViews;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import com.databasepreservation.common.client.models.wizard.table.ExternalLobParameter;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -19,8 +23,10 @@ public class CustomViewsParameter implements Serializable {
   private String customViewName;
   private String customViewDescription;
   private String customViewQuery;
+  private Map<String, ExternalLobParameter> externalLobsParameters;
 
   public CustomViewsParameter() {
+    this.externalLobsParameters = new HashMap<>();
   }
 
   public CustomViewsParameter(String schemaName, Integer customViewID, String customViewName,
@@ -30,6 +36,7 @@ public class CustomViewsParameter implements Serializable {
     this.customViewName = customViewName;
     this.customViewDescription = customViewDescription;
     this.customViewQuery = customViewQuery;
+    this.externalLobsParameters = new HashMap<>();
   }
 
   public String getSchemaName() {
@@ -72,6 +79,14 @@ public class CustomViewsParameter implements Serializable {
     this.customViewQuery = customViewQuery;
   }
 
+  public Map<String, ExternalLobParameter> getExternalLobsParameters() {
+    return externalLobsParameters;
+  }
+
+  public void setExternalLobsParameters(Map<String, ExternalLobParameter> externalLobsParameters) {
+    this.externalLobsParameters = externalLobsParameters;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o)
@@ -82,11 +97,13 @@ public class CustomViewsParameter implements Serializable {
     return Objects.equals(schemaName, parameter.schemaName)
       && Objects.equals(getCustomViewName(), parameter.getCustomViewName())
       && Objects.equals(getCustomViewDescription(), parameter.getCustomViewDescription())
-      && Objects.equals(getCustomViewQuery(), parameter.getCustomViewQuery());
+      && Objects.equals(getCustomViewQuery(), parameter.getCustomViewQuery())
+      && Objects.equals(getExternalLobsParameters(), parameter.getExternalLobsParameters());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(schemaName, getCustomViewName(), getCustomViewDescription(), getCustomViewQuery());
+    return Objects.hash(schemaName, getCustomViewName(), getCustomViewDescription(), getCustomViewQuery(),
+      getExternalLobsParameters());
   }
 }
