@@ -161,14 +161,20 @@ public class DatabaseInformationPanel extends StatusAwareRightPanel {
 
   private void initDataContent() {
     if (database.getMetadata().getSchemas().size() == 1) {
-      if (dataContentCard.getWidgetCount() == 1) {
-        FlowPanel cardTitlePanel = CommonClientUtils.getCardTitle(messages.schema());
-        cardTitlePanel.addStyleName("card-header");
-        dataContentCard.insert(cardTitlePanel, 0);
-      }
       final DataPanel instance = DataPanel.getInstance(database, database.getMetadata().getSchemas().get(0).getUuid(),
         status);
       instance.reload(advancedMode);
+
+      if (dataContentCard.getWidgetCount() == 1) {
+        FlowPanel cardTitlePanel = CommonClientUtils.getCardTitle(messages.schema());
+        cardTitlePanel.addStyleName("card-header");
+        ViewerSchema schema = database.getMetadata().getSchemas().get(0);
+        ErDiagram erDiagram = ErDiagram.getInstance(database, schema,
+          HistoryManager.getCurrentHistoryPath().get(0), status);
+        cardTitlePanel.add(erDiagram.getLayoutConfigButton());
+        dataContentCard.insert(cardTitlePanel, 0);
+      }
+
       dataContent.add(instance);
     } else {
       dataContentCard.addStyleName("card-diagram");
