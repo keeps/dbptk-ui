@@ -398,13 +398,125 @@ public class DataTransformation extends StatusAwareRightPanel implements ICollec
     return panel;
   }
 
+  private List<FlowPanel> createSelfChildTableCards(TableNode childNode) {
+    FlowPanel relatedToPanel = new FlowPanel();
+    FlowPanel referencedByPanel = new FlowPanel();
+    relatedToPanel.addStyleName("data-transformation-wrapper");
+    referencedByPanel.addStyleName("data-transformation-wrapper");
+
+    FlowPanel grandChildForRelatedToPanel = new FlowPanel();
+    FlowPanel grandChildForReferencedByPanel = new FlowPanel();
+    grandChildForRelatedToPanel.addStyleName("data-transformation-child");
+    grandChildForReferencedByPanel.addStyleName("data-transformation-child");
+
+    ViewerTable childTable = childNode.getTable();
+    BootstrapCard cardForRelatedToPanel = new BootstrapCard();
+    BootstrapCard cardForReferencedByPanel = new BootstrapCard();
+
+    cardForRelatedToPanel.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
+    cardForReferencedByPanel.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
+
+    String cardTitle = childTable.getName();
+    if (collectionStatus.getTableStatusByTableId(childTable.getId()) != null) {
+      String customName = collectionStatus.getTableStatusByTableId(childTable.getId()).getCustomName();
+      if (customName != null && !customName.trim().isEmpty())
+        cardTitle = customName;
+    }
+    cardForRelatedToPanel.setTitle(cardTitle);
+    cardForRelatedToPanel.setDescription(childTable.getDescription());
+    cardForRelatedToPanel.addStyleName("card-disabled");
+    cardForRelatedToPanel.addExtraContent(getInformationAboutSelfRelatedToRelationship(childNode));
+    cardForRelatedToPanel.getElement().setId(childNode.getUuid());
+    cardForReferencedByPanel.setTitle(cardTitle);
+    cardForReferencedByPanel.setDescription(childTable.getDescription());
+    cardForReferencedByPanel.addStyleName("card-disabled");
+    cardForReferencedByPanel.addExtraContent(getInformationAboutSelfReferencedByRelationship(childNode));
+    cardForReferencedByPanel.getElement().setId(childNode.getUuid());
+
+    if (childNode.getIsVirtual()) {
+      cardForRelatedToPanel.addStyleName("card-virtual");
+      cardForReferencedByPanel.addStyleName("card-virtual");
+    }
+
+    FlowPanel containerForRelatedToPanel = new FlowPanel();
+    FlowPanel containerForReferencedByPanel = new FlowPanel();
+    TransformationChildTables tableInstanceForRelatedToPanel = TransformationChildTables.createInstance(childNode,
+        denormalizeConfiguration, rootTable, buttons);
+    TransformationChildTables tableInstanceForReferencedByPanel = TransformationChildTables.createInstance(childNode,
+      denormalizeConfiguration, rootTable, buttons);
+    MultipleSelectionTablePanel<ViewerColumn> selectTableForRelatedToPanel = tableInstanceForReferencedByPanel.createTable();
+    MultipleSelectionTablePanel<ViewerColumn> selectTableForReferencedByPanel = tableInstanceForReferencedByPanel.createTable();
+
+    SwitchBtn switchBtnForRelatedToSwitchPanel = new SwitchBtn("Enable", false);
+    switchBtnForRelatedToSwitchPanel.setClickHandler(event -> {
+      switchBtnForRelatedToSwitchPanel.getButton().setValue(!switchBtnForRelatedToSwitchPanel.getButton().getValue(), true);
+      if (switchBtnForRelatedToSwitchPanel.getButton().getValue()) {
+        cardForRelatedToPanel.removeStyleName("card-disabled");
+        grandChildForRelatedToPanel.add(expandLevel(childNode));
+        DataTransformationUtils.includeRelatedTable(childNode, denormalizeConfiguration, collectionStatus);
+        containerForRelatedToPanel.add(selectTableForRelatedToPanel);
+      } else {
+        DataTransformationUtils.removeRelatedTable(childNode, denormalizeConfiguration);
+        cardForReferencedByPanel.addStyleName("card-disabled");
+        grandChildForReferencedByPanel.clear();
+        containerForReferencedByPanel.clear();
+        selectTableForReferencedByPanel.getSelectionModel().clear();
+        rootTable.redrawTable(denormalizeConfiguration);
+        buttons.forEach(button -> button.setEnabled(true));
+      }
+    });
+    SwitchBtn switchBtnForReferencedBySwitchPanel = new SwitchBtn("Enable", false);
+    switchBtnForReferencedBySwitchPanel.setClickHandler(event -> {
+      switchBtnForReferencedBySwitchPanel.getButton().setValue(!switchBtnForReferencedBySwitchPanel.getButton().getValue(), true);
+      if (switchBtnForReferencedBySwitchPanel.getButton().getValue()) {
+        cardForReferencedByPanel.removeStyleName("card-disabled");
+        grandChildForReferencedByPanel.add(expandLevel(childNode));
+        DataTransformationUtils.includeRelatedTable(childNode, denormalizeConfiguration, collectionStatus);
+        containerForReferencedByPanel.add(selectTableForReferencedByPanel);
+      } else {
+        DataTransformationUtils.removeRelatedTable(childNode, denormalizeConfiguration);
+        cardForReferencedByPanel.addStyleName("card-disabled");
+        grandChildForReferencedByPanel.clear();
+        containerForReferencedByPanel.clear();
+        selectTableForReferencedByPanel.getSelectionModel().clear();
+        rootTable.redrawTable(denormalizeConfiguration);
+        buttons.forEach(button -> button.setEnabled(true));
+      }
+    });
+
+    FlowPanel switchPanel = new FlowPanel();
+    switchPanel.add(switchBtnForReferencedBySwitchPanel);
+    cardForReferencedByPanel.addHideContent(containerForReferencedByPanel, switchPanel);
+
+    referencedByPanel.add(cardForReferencedByPanel);
+    referencedByPanel.add(grandChildForReferencedByPanel);
+
+    if (denormalizeConfiguration != null) {
+      RelatedTablesConfiguration targetTable = denormalizeConfiguration.getRelatedTable(childNode.getUuid());
+      if (targetTable != null) {
+        switchBtnForReferencedBySwitchPanel.getButton().setValue(true, false);
+        grandChildForReferencedByPanel.add(expandLevel(childNode));
+        cardForReferencedByPanel.setHideContentVisible(true);
+        cardForReferencedByPanel.removeStyleName("card-disabled");
+        containerForReferencedByPanel.add(selectTableForReferencedByPanel);
+      }
+    }
+
+    return referencedByPanel;
+  }
+
   private FlowPanel expandLevel(TableNode node) {
     FlowPanel relationShipList = new FlowPanel();
     for (Map.Entry<ViewerForeignKey, TableNode> entry : node.getChildren().entrySet()) {
       TableNode childNode = entry.getValue();
       childNode.setParentNode(node, entry.getKey());
       childNode.setupChildren();
-      relationShipList.add(createChildTableCard(childNode));
+      // Table references itself, special case
+      if (entry.getValue().getTable().getUuid().equals(node.getTable().getUuid())) {
+        relationShipList.addAll(createSelfChildTableCards(childNode));
+      } else {
+        relationShipList.add(createChildTableCard(childNode));
+      }
     }
     return relationShipList;
   }
@@ -430,6 +542,42 @@ public class DataTransformation extends StatusAwareRightPanel implements ICollec
           messages.dataTransformationTextForIsReferencedBy(referencedTable.getId(), column.getDisplayName()),
           isVirtual));
       }
+    }
+
+    return information;
+  }
+
+  private FlowPanel getInformationAboutSelfRelatedToRelationship(TableNode node) {
+    FlowPanel information = new FlowPanel();
+    ViewerForeignKey foreignKey = node.getForeignKey();
+    ViewerTable referencedTable = node.getParentNode().getTable();
+    ViewerTable sourceTable = node.getTable();
+
+    for (ViewerReference reference : foreignKey.getReferences()) {
+      boolean isVirtual = ViewerSourceType.VIRTUAL.equals(foreignKey.getSourceType());
+
+      ViewerColumn column = DataTransformationUtils.getColumnByIndex(sourceTable.getColumns(),
+        reference.getSourceColumnIndex());
+      information.add(buildReferenceInformation(
+        messages.dataTransformationTextForIsRelatedTo(referencedTable.getId(), column.getDisplayName()), isVirtual));
+    }
+
+    return information;
+  }
+
+  private FlowPanel getInformationAboutSelfReferencedByRelationship(TableNode node) {
+    FlowPanel information = new FlowPanel();
+    ViewerForeignKey foreignKey = node.getForeignKey();
+    ViewerTable referencedTable = node.getParentNode().getTable();
+    ViewerTable sourceTable = node.getTable();
+
+    for (ViewerReference reference : foreignKey.getReferences()) {
+      boolean isVirtual = ViewerSourceType.VIRTUAL.equals(foreignKey.getSourceType());
+
+      ViewerColumn column = DataTransformationUtils.getColumnByIndex(sourceTable.getColumns(),
+        reference.getReferencedColumnIndex());
+      information.add(buildReferenceInformation(
+        messages.dataTransformationTextForIsReferencedBy(referencedTable.getId(), column.getDisplayName()), isVirtual));
     }
 
     return information;
