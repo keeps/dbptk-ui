@@ -840,7 +840,7 @@ public class SolrUtils {
       CrossCollectionInnerJoinFilterParameter param = (CrossCollectionInnerJoinFilterParameter) parameter;
       ret.append(
         "{!join method=crossCollection fromIndex=" + param.getFromIndex() + " from=nestedOriginalUUID to=uuid }_root_:"
-          + param.getRowUUID() + " AND nestedUUID:" + param.getNestedOriginalUUID());
+          + param.getRowUUID() + " AND nestedUUID:" + param.getNestedUUID());
     } else if (parameter instanceof BlockJoinParentFilterParameter) {
       BlockJoinParentFilterParameter param = (BlockJoinParentFilterParameter) parameter;
       ret.append("+({!parent which='tableId:" + param.getParentTableId() + "' filters='nestedUUID:"

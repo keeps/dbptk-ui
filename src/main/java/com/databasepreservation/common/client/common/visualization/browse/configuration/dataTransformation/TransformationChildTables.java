@@ -59,7 +59,7 @@ public class TransformationChildTables {
     this.denormalizeConfiguration = denormalizeConfiguration;
     this.rootTable = rootTable;
     this.childTable = childTable.getTable();
-    this.uuid = childTable.getUuid();
+    this.uuid = childTable.getDenormalizationUUID();
     this.buttons = buttons;
     preset();
   }

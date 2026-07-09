@@ -134,6 +134,18 @@ public class CollectionResource implements CollectionService {
   @Autowired
   private DataTransformationJob dataTransformationJob;
 
+  @NotNull
+  private static String handleMimeType(TableStatus tableConfiguration, ViewerRow row, int columnIndex) {
+    String configurationApplicationType = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
+    if (configurationApplicationType.equals(ViewerCelllUtils.getAutoDetectMimeTypeTemplate())) {
+      String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
+      return ViewerStringUtils.isNotBlank(handlebarsMimeType) ? handlebarsMimeType
+        : MediaType.APPLICATION_OCTET_STREAM.getType();
+    } else {
+      return configurationApplicationType;
+    }
+  }
+
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/report", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @Operation(summary = "Downloads the migration report for a specific database")
   public ResponseEntity<Resource> getReport(@PathVariable(name = "databaseUUID") String databaseUUID,
@@ -972,18 +984,6 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  @NotNull
-  private static String handleMimeType(TableStatus tableConfiguration, ViewerRow row, int columnIndex) {
-    String configurationApplicationType = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
-    if (configurationApplicationType.equals(ViewerCelllUtils.getAutoDetectMimeTypeTemplate())) {
-      String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
-      return ViewerStringUtils.isNotBlank(handlebarsMimeType) ? handlebarsMimeType
-        : MediaType.APPLICATION_OCTET_STREAM.getType();
-    } else {
-      return configurationApplicationType;
-    }
-  }
-
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find/export", method = RequestMethod.POST, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @Operation(summary = "Export the rows as CSV")
   public ResponseEntity<StreamingResponseBody> exportFindToCSV(
@@ -1105,8 +1105,9 @@ public class CollectionResource implements CollectionService {
       .getConfigurationCollection(databaseUUID, databaseUUID);
 
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
-    return ApiUtils.okResponse(new ViewerStreamingOutput(new ResultsCSVOutputStream(row, configTable, filename,
-      exportDescriptions, ',', String.join(",", fieldsToReturn), databaseUUID)).toStreamResponse());
+    return ApiUtils.okResponse(new ViewerStreamingOutput(
+      new ResultsCSVOutputStream(row, configTable, filename, exportDescriptions, ',', String.join(",", fieldsToReturn)))
+      .toStreamResponse());
   }
 
   private ResponseEntity<StreamingResponseBody> handleSingleCSVExportWithLOBs(CollectionStatus configurationCollection,
@@ -1125,14 +1126,14 @@ public class CollectionResource implements CollectionService {
         findRequest.fieldsToReturn, findRequest.extraParameters, findRequest.filterQuery, findRequest.queryFields,
         findRequest.defType);
       return ApiUtils.okResponse(new ViewerStreamingOutput(new IterableIndexResultsCSVOutputStream(allRows, configTable,
-        filename, exportDescriptions, ',', fieldsToHeader, databaseUUID)).toStreamResponse());
+        filename, exportDescriptions, ',', fieldsToHeader)).toStreamResponse());
     } else {
       final IndexResult<ViewerRow> rows = solrManager.findRows(databaseUUID, findRequest.filter, findRequest.sorter,
         findRequest.sublist, null, findRequest.fieldsToReturn, findRequest.extraParameters, findRequest.defType,
         findRequest.filterQuery, findRequest.queryFields, false, List.of());
 
       return ApiUtils.okResponse(new ViewerStreamingOutput(
-        new ResultsCSVOutputStream(rows, configTable, filename, exportDescriptions, ',', fieldsToHeader, databaseUUID))
+        new ResultsCSVOutputStream(rows, configTable, filename, exportDescriptions, ',', fieldsToHeader))
         .toStreamResponse());
     }
   }

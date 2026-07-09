@@ -1593,9 +1593,9 @@ public interface ClientMessages extends Messages {
    *******************************************/
   String dataTransformationTextForAlertColumnsOrder();
 
-  SafeHtml dataTransformationTextForIsReferencedBy(String table, String column);
+  SafeHtml dataTransformationTextForSourceToTarget(String table, String column);
 
-  SafeHtml dataTransformationTextForIsRelatedTo(String table, String column);
+  SafeHtml dataTransformationTextForTargetToSource(String table, String column);
 
   String dataTransformationTableRowList(@PluralCount List<String> columns);
 

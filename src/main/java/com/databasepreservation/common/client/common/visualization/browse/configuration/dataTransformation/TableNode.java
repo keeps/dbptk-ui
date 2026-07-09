@@ -8,12 +8,13 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerCandidateKey;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
@@ -25,46 +26,75 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
+ * 
+ *         <p>
+ *         A TableNode, representing a table that relates to other tables via
+ *         denormalizations. It can be both a target node, if it is the target
+ *         TableNode of another source TableNode's denormalization, or it can be
+ *         a source node for any of its possible denormalization targets. At the
+ *         top of a hierarchy of TableNodes is a root node with no source nodes.
+ *         </p>
+ *
  */
 public class TableNode {
-  private String uuid;
-  private TableNode parentNode;
+  // General properties
+  private final ViewerDatabase database;
+  private final ViewerMetadata metadata;
+  private final ViewerTable table;
+  private final CollectionStatus collectionStatus;
+  // Source Node properties
+  private List<TableNode> possibleTargetTables;
+
+  // Target Node properties
+  private String denormalizationUUID;
+  /**
+   * If this node is a target node for a denormalization, this is that
+   * denormalization's relevant foreign key. Null otherwise.
+   */
   private ViewerForeignKey foreignKey;
-  private Map<ViewerForeignKey, TableNode> children;
-  private ViewerDatabase database;
-  private ViewerMetadata metadata;
-  private ViewerTable table;
+  /**
+   * If this node is a target node for a denormalization, this is that
+   * denormalization's source node. Null otherwise.
+   */
+  private TableNode sourceNode;
+  /**
+   * If this node is a target node for a denormalization, this is that
+   * denormalization's reference direction.
+   */
+  private String sourceDenormalizationDirection;
   private Boolean multiValue = false;
-  private CollectionStatus collectionStatus;
   private Boolean isVirtual = false;
 
+
   public TableNode(ViewerDatabase database, ViewerTable table, CollectionStatus collectionStatus) {
-    this.children = new HashMap<>();
+    this.possibleTargetTables = new ArrayList<>();
     this.database = database;
     this.metadata = database.getMetadata();
     this.table = table;
     this.collectionStatus = collectionStatus;
   }
 
-  public void setupChildren() {
-    processDirectForeignKeys();
-    processInverseForeignKeys();
+  public void setupPossibleTargets(List<RelatedTablesConfiguration> alreadyIncludedSourceRelatedTables) {
+    processDirectForeignKeys(alreadyIncludedSourceRelatedTables);
+    processInverseForeignKeys(alreadyIncludedSourceRelatedTables);
   }
 
-  private void processDirectForeignKeys() {
+  private void processDirectForeignKeys(List<RelatedTablesConfiguration> alreadyIncludedSourceRelatedTables) {
     if (table.getForeignKeys() != null) {
       for (ViewerForeignKey fk : table.getForeignKeys()) {
-        processDirectForeignKeyIfValid(fk);
+        processDirectForeignKeyIfValid(fk, alreadyIncludedSourceRelatedTables);
       }
     }
   }
 
-  private void processDirectForeignKeyIfValid(ViewerForeignKey fk) {
+  private void processDirectForeignKeyIfValid(ViewerForeignKey fk,
+    List<RelatedTablesConfiguration> alreadyIncludedSourceRelatedTables) {
     ViewerTable referencedTable = metadata.getTable(fk.getReferencedTableUUID());
 
     if (referencedTable != null && this.searchTop(referencedTable) == null) {
       boolean isMultiValue = this.parentIsMultiValue(this) || !isTargetUnique(fk, referencedTable);
-      addChildNode(fk, referencedTable, isMultiValue);
+      addPossibleTargetTable(fk, alreadyIncludedSourceRelatedTables, referencedTable, isMultiValue,
+        ViewerConstants.DENORMALIZATION_DIRECTION_SOURCE_TO_TARGET);
     }
   }
 
@@ -113,65 +143,74 @@ public class TableNode {
     return keyIndexes.size() == referencedIndexes.size() && keyIndexes.containsAll(referencedIndexes);
   }
 
-  private void processInverseForeignKeys() {
+  private void processInverseForeignKeys(List<RelatedTablesConfiguration> alreadyIncludedSourceRelatedTables) {
     if (metadata.getSchemas() != null) {
       for (ViewerSchema schema : metadata.getSchemas()) {
-        processSchemaTablesForInverseKeys(schema);
+        processSchemaTablesForInverseKeys(schema, alreadyIncludedSourceRelatedTables);
       }
     }
   }
 
-  private void processSchemaTablesForInverseKeys(ViewerSchema schema) {
+  private void processSchemaTablesForInverseKeys(ViewerSchema schema,
+    List<RelatedTablesConfiguration> alreadyIncludedSourceRelatedTables) {
     if (schema.getTables() != null) {
       for (ViewerTable otherTable : schema.getTables()) {
-        processOtherTableForeignKeys(otherTable);
+        processOtherTableForeignKeys(otherTable, alreadyIncludedSourceRelatedTables);
       }
     }
   }
 
-  private void processOtherTableForeignKeys(ViewerTable otherTable) {
+  private void processOtherTableForeignKeys(ViewerTable otherTable,
+    List<RelatedTablesConfiguration> alreadyIncludedSourceRelatedTables) {
     if (otherTable.getForeignKeys() != null) {
       for (ViewerForeignKey fk : otherTable.getForeignKeys()) {
-        processInverseForeignKeyIfValid(fk, otherTable);
+        processInverseForeignKeyIfValid(fk, alreadyIncludedSourceRelatedTables, otherTable);
       }
     }
   }
 
-  private void processInverseForeignKeyIfValid(ViewerForeignKey fk, ViewerTable otherTable) {
+  private void processInverseForeignKeyIfValid(ViewerForeignKey fk,
+    List<RelatedTablesConfiguration> alreadyIncludedSourceRelatedTables, ViewerTable otherTable) {
     if (table.getUuid().equals(fk.getReferencedTableUUID()) && this.searchTop(otherTable) == null) {
-      addChildNode(fk, otherTable, true);
+      addPossibleTargetTable(fk, alreadyIncludedSourceRelatedTables, otherTable, true,
+        ViewerConstants.DENORMALIZATION_DIRECTION_TARGET_TO_SOURCE);
     }
   }
 
-  private void addChildNode(ViewerForeignKey fk, ViewerTable targetTable, Boolean multiValue) {
+  private void addPossibleTargetTable(ViewerForeignKey fk,
+    List<RelatedTablesConfiguration> alreadyIncludedSourceRelatedTables, ViewerTable targetTable, Boolean multiValue,
+    String sourceDenormalizationDirection) {
     TableNode childNode = new TableNode(database, targetTable, collectionStatus);
-    childNode.uuid = generateUUID(fk, targetTable);
+
+    RelatedTablesConfiguration relatedTableConfiguration = DataTransformationUtils.getRelatedTableConfiguration(
+      alreadyIncludedSourceRelatedTables, targetTable.getUuid(), sourceDenormalizationDirection);
+    if (relatedTableConfiguration == null) {
+      childNode.denormalizationUUID = UUID.randomUUID().toString();
+    } else {
+      childNode.denormalizationUUID = relatedTableConfiguration.getUuid();
+    }
     childNode.multiValue = multiValue;
     childNode.isVirtual = ViewerSourceType.VIRTUAL.equals(fk.getSourceType());
-    children.put(fk, childNode);
+    childNode.sourceNode = this;
+    childNode.foreignKey = fk;
+    childNode.sourceDenormalizationDirection = sourceDenormalizationDirection;
+    possibleTargetTables.add(childNode);
   }
 
-  private String generateUUID(ViewerForeignKey foreignKey, ViewerTable viewerTable) {
-    StringBuilder uuidBuilder = new StringBuilder();
-    uuidBuilder.append(this.uuid).append(ViewerConstants.API_SEP).append(viewerTable.getUuid());
-    if (foreignKey.getReferences() != null) {
-      for (ViewerReference reference : foreignKey.getReferences()) {
-        uuidBuilder.append(ViewerConstants.API_SEP).append(reference.getSourceColumnIndex());
-      }
-    }
-    return uuidBuilder.toString();
+  public List<TableNode> getPossibleTargetTables() {
+    return possibleTargetTables;
   }
 
-  public void setChildren(Map<ViewerForeignKey, TableNode> children) {
-    this.children = children;
+  public void setPossibleTargetTables(List<TableNode> possibleTargetTables) {
+    this.possibleTargetTables = possibleTargetTables;
   }
 
   public TableNode searchTop(ViewerTable table) {
-    if (this.getParentNode() == null)
+    if (this.getSourceNode() == null)
       return null;
-    if (this.getParentNode().table.equals(table))
-      return this.getParentNode();
-    return this.getParentNode().searchTop(table);
+    if (this.getSourceNode().table.equals(table))
+      return this.getSourceNode();
+    return this.getSourceNode().searchTop(table);
   }
 
   public Boolean parentIsMultiValue(TableNode table) {
@@ -179,36 +218,35 @@ public class TableNode {
       return false;
     if (table.multiValue)
       return true;
-    return parentIsMultiValue(table.getParentNode());
+    return parentIsMultiValue(table.getSourceNode());
   }
 
   public Boolean getIsVirtual() {
     return isVirtual;
   }
 
-  public TableNode getParentNode() {
-    return parentNode;
-  }
-
-  public void setParentNode(TableNode parentNode, ViewerForeignKey foreignKey) {
-    this.parentNode = parentNode;
-    this.foreignKey = foreignKey;
+  public TableNode getSourceNode() {
+    return sourceNode;
   }
 
   public ViewerTable getTable() {
     return table;
   }
 
-  public Map<ViewerForeignKey, TableNode> getChildren() {
-    return children;
+  public String getSourceDenormalizationDirection() {
+    return sourceDenormalizationDirection;
   }
 
-  public String getUuid() {
-    return uuid;
+  public void setSourceDenormalizationDirection(String sourceDenormalizationDirection) {
+    this.sourceDenormalizationDirection = sourceDenormalizationDirection;
   }
 
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
+  public String getDenormalizationUUID() {
+    return denormalizationUUID;
+  }
+
+  public void setDenormalizationUUID(String denormalizationUUID) {
+    this.denormalizationUUID = denormalizationUUID;
   }
 
   public ViewerForeignKey getForeignKey() {

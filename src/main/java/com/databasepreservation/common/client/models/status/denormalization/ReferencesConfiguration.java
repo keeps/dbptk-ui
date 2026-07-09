@@ -11,24 +11,27 @@ import java.io.Serializable;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
+ * @TODO: Review nomenclatures
  */
 public class ReferencesConfiguration implements Serializable {
-    private RelatedColumnConfiguration sourceTable;
-    private RelatedColumnConfiguration referencedTable;
+  /** The target of the denormalization */
+  private RelatedColumnConfiguration sourceTable;
+  /** The source of the denormalization */
+  private RelatedColumnConfiguration referencedTable;
 
-    public RelatedColumnConfiguration getSourceTable() {
-        return sourceTable;
-    }
+  public RelatedColumnConfiguration getSourceTable() {
+    return sourceTable;
+  }
 
-    public void setSourceTable(RelatedColumnConfiguration sourceTable) {
-        this.sourceTable = sourceTable;
-    }
+  public void setSourceTable(RelatedColumnConfiguration sourceTable) {
+    this.sourceTable = sourceTable;
+  }
 
-    public RelatedColumnConfiguration getReferencedTable() {
-        return referencedTable;
-    }
+  public RelatedColumnConfiguration getReferencedTable() {
+    return referencedTable;
+  }
 
-    public void setReferencedTable(RelatedColumnConfiguration referencedTable) {
-        this.referencedTable = referencedTable;
-    }
+  public void setReferencedTable(RelatedColumnConfiguration referencedTable) {
+    this.referencedTable = referencedTable;
+  }
 }

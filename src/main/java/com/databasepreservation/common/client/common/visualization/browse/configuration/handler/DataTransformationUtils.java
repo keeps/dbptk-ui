@@ -36,40 +36,43 @@ public class DataTransformationUtils {
   private DataTransformationUtils() {
   }
 
-  public static void includeRelatedTable(TableNode childNode, DenormalizeConfiguration denormalizeConfiguration,
-    CollectionStatus collectionStatus) {
-    TableNode parentNode = childNode.getParentNode();
-    ViewerTable sourceTable = childNode.getTable();
-    ViewerTable referencedTable = parentNode.getTable();
-    ViewerForeignKey foreignKey = childNode.getForeignKey();
+  public static void includeRelatedTable(TableNode targetTableNode, DenormalizeConfiguration denormalizeConfiguration) {
+    TableNode sourceTableNode = targetTableNode.getSourceNode();
+    ViewerTable targetTable = targetTableNode.getTable();
+    ViewerTable sourceTable = sourceTableNode.getTable();
+    ViewerForeignKey foreignKey = targetTableNode.getForeignKey();
     ViewerColumn sourceColumn;
     ViewerColumn referencedColumn;
 
-    RelatedTablesConfiguration relatedTable = new RelatedTablesConfiguration();
-    relatedTable.setUuid(childNode.getUuid());
-    relatedTable.setMultiValue(childNode.getMultiValue());
-    relatedTable.setTableUUID(sourceTable.getUuid());
-    relatedTable.setTableID(sourceTable.getId());
-    relatedTable.setReferencedTableUUID(referencedTable.getUuid());
-    relatedTable.setReferencedTableID(referencedTable.getId());
+    RelatedTablesConfiguration targetTableConfiguration = new RelatedTablesConfiguration();
+    targetTableConfiguration.setUuid(targetTableNode.getDenormalizationUUID());
+    targetTableConfiguration.setMultiValue(targetTableNode.getMultiValue());
+    targetTableConfiguration.setTableUUID(targetTable.getUuid());
+    targetTableConfiguration.setTableID(targetTable.getId());
+    targetTableConfiguration.setReferencedTableUUID(sourceTable.getUuid());
+    targetTableConfiguration.setReferencedTableID(sourceTable.getId());
+    targetTableConfiguration.setDenormalizationDirection(targetTableNode.getSourceDenormalizationDirection());
 
     for (ViewerReference reference : foreignKey.getReferences()) {
-      if (foreignKey.getReferencedTableUUID().equals(referencedTable.getUuid())) {
-        sourceColumn = getColumnByIndex(sourceTable.getColumns(), reference.getSourceColumnIndex());
-        referencedColumn = getColumnByIndex(referencedTable.getColumns(), reference.getReferencedColumnIndex());
+      if (targetTableNode.getSourceDenormalizationDirection()
+        .equals(ViewerConstants.DENORMALIZATION_DIRECTION_TARGET_TO_SOURCE)) {
+        sourceColumn = getColumnByIndex(targetTable.getColumns(), reference.getSourceColumnIndex());
+        referencedColumn = getColumnByIndex(sourceTable.getColumns(), reference.getReferencedColumnIndex());
       } else {
-        sourceColumn = getColumnByIndex(sourceTable.getColumns(), reference.getReferencedColumnIndex());
-        referencedColumn = getColumnByIndex(referencedTable.getColumns(), reference.getSourceColumnIndex());
+        sourceColumn = getColumnByIndex(targetTable.getColumns(), reference.getReferencedColumnIndex());
+        referencedColumn = getColumnByIndex(sourceTable.getColumns(), reference.getSourceColumnIndex());
       }
-      relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
+      if (sourceColumn != null && referencedColumn != null) {
+        targetTableConfiguration.getReferences().add(createReference(sourceColumn, referencedColumn));
+      }
     }
 
     RelatedTablesConfiguration returnedRelatedTable = denormalizeConfiguration
-      .getRelatedTable(childNode.getParentNode().getUuid());
+      .getRelatedTable(targetTableNode.getSourceNode().getDenormalizationUUID());
     if (returnedRelatedTable == null) {
-      denormalizeConfiguration.addRelatedTable(relatedTable);
+      denormalizeConfiguration.addRelatedTable(targetTableConfiguration);
     } else {
-      returnedRelatedTable.addRelatedTable(relatedTable);
+      returnedRelatedTable.addRelatedTable(targetTableConfiguration);
     }
   }
 
@@ -92,16 +95,18 @@ public class DataTransformationUtils {
     return references;
   }
 
-  public static void removeRelatedTable(TableNode childNode, DenormalizeConfiguration denormalizeConfiguration) {
+  public static void removeRelatedTable(TableNode targetRelatedTableNode,
+    DenormalizeConfiguration denormalizeConfiguration) {
     denormalizeConfiguration.setState(ViewerJobStatus.NEW);
-    Map<ViewerForeignKey, TableNode> children = childNode.getChildren();
-    denormalizeConfiguration.getRelatedTables().removeIf(t -> t.getUuid().equals(childNode.getUuid()));
-    if (children == null || children.isEmpty()) {
+    List<TableNode> subtargetNodes = targetRelatedTableNode.getPossibleTargetTables();
+    denormalizeConfiguration.getRelatedTables()
+      .removeIf(t -> t.getUuid().equals(targetRelatedTableNode.getDenormalizationUUID()));
+    if (subtargetNodes == null || subtargetNodes.isEmpty()) {
       return;
     }
 
-    for (Map.Entry<ViewerForeignKey, TableNode> entry : children.entrySet()) {
-      removeRelatedTable(entry.getValue(), denormalizeConfiguration);
+    for (TableNode subtargetNode : subtargetNodes) {
+      removeRelatedTable(subtargetNode, denormalizeConfiguration);
     }
   }
 
@@ -243,5 +248,11 @@ public class DataTransformationUtils {
         return column;
     }
     return null;
+  }
+
+  public static RelatedTablesConfiguration getRelatedTableConfiguration(
+    List<RelatedTablesConfiguration> sourceRelatedTables, String targetTableUUID, String denormalizationDirection) {
+    return sourceRelatedTables.stream().filter(rt -> rt.getTableUUID().equals(targetTableUUID)
+      && rt.getDenormalizationDirection().equals(denormalizationDirection)).findFirst().orElse(null);
   }
 }

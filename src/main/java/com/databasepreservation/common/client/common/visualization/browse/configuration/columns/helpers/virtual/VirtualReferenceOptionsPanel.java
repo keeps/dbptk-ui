@@ -237,7 +237,7 @@ public class VirtualReferenceOptionsPanel extends ColumnOptionsPanel
         }
       }
 
-      SafeHtml message = messages.dataTransformationTextForIsRelatedTo(targetTableName, targetCols.toString());
+      SafeHtml message = messages.dataTransformationTextForTargetToSource(targetTableName, targetCols.toString());
       fkVisualPathContainer.add(new HTML(message));
     }
   }

@@ -843,4 +843,16 @@ public class ViewerConstants {
    */
 
   public static final String REINDEX_BATCH_SIZE = "reindex.batch.size";
+
+  // Denormalization configs
+  /**
+   * The native direction; the source's foreign key is used to refer to the target
+   * table.
+   */
+  public static final String DENORMALIZATION_DIRECTION_SOURCE_TO_TARGET = "sourceToTarget";
+  /**
+   * The inverse direction; the target's foreign key is used to refer to the
+   * source table.
+   */
+  public static final String DENORMALIZATION_DIRECTION_TARGET_TO_SOURCE = "targetToSource";
 }

@@ -13,20 +13,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
+ * @TODO: Review nomenclatures
  */
 public class RelatedTablesConfiguration implements Serializable {
   @Serial
   private static final long serialVersionUID = 4872925326093374795L;
+  /** The UUID of this denormalization */
   private String uuid;
+  /** The target table of this denormalization */
   private String tableUUID;
   private String tableID;
+  /** The source table of this denormalization */
   private String referencedTableUUID;
   private String referencedTableID;
   private String path;
   private Boolean multiValue = false;
+  private String denormalizationDirection;
   private List<ReferencesConfiguration> references;
   private List<RelatedColumnConfiguration> columnsIncluded;
   private List<RelatedTablesConfiguration> relatedTables;
@@ -138,5 +144,13 @@ public class RelatedTablesConfiguration implements Serializable {
 
   public void setMultiValue(Boolean multiValue) {
     this.multiValue = multiValue;
+  }
+
+  public String getDenormalizationDirection() {
+    return denormalizationDirection;
+  }
+
+  public void setDenormalizationDirection(String denormalizationDirection) {
+    this.denormalizationDirection = denormalizationDirection;
   }
 }

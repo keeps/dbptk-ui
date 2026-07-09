@@ -16,7 +16,7 @@ public class CrossCollectionInnerJoinFilterParameter extends FilterParameter {
   @Serial
   private static final long serialVersionUID = 7316041677163297711L;
   private String rowUUID;
-  private String nestedOriginalUUID;
+  private String nestedUUID;
   private String fromIndex;
 
   /**
@@ -29,13 +29,13 @@ public class CrossCollectionInnerJoinFilterParameter extends FilterParameter {
   public CrossCollectionInnerJoinFilterParameter(
     CrossCollectionInnerJoinFilterParameter crossCollectionInnerJoinFilterParameter) {
     this(crossCollectionInnerJoinFilterParameter.getRowUUID(),
-      crossCollectionInnerJoinFilterParameter.getNestedOriginalUUID(),
+      crossCollectionInnerJoinFilterParameter.getNestedUUID(),
       crossCollectionInnerJoinFilterParameter.getFromIndex());
   }
 
   public CrossCollectionInnerJoinFilterParameter(String rowUUID, String nestedTableId, String fromIndex) {
     setRowUUID(rowUUID);
-    setNestedOriginalUUID(nestedTableId);
+    setNestedUUID(nestedTableId);
     setFromIndex(fromIndex);
   }
 
@@ -47,12 +47,12 @@ public class CrossCollectionInnerJoinFilterParameter extends FilterParameter {
     this.rowUUID = rowUUID;
   }
 
-  public String getNestedOriginalUUID() {
-    return nestedOriginalUUID;
+  public String getNestedUUID() {
+    return nestedUUID;
   }
 
-  public void setNestedOriginalUUID(String nestedOriginalUUID) {
-    this.nestedOriginalUUID = nestedOriginalUUID;
+  public void setNestedUUID(String nestedUUID) {
+    this.nestedUUID = nestedUUID;
   }
 
   public String getFromIndex() {
@@ -66,6 +66,6 @@ public class CrossCollectionInnerJoinFilterParameter extends FilterParameter {
   @Override
   public String toString() {
     return "CrossCollectionInnerJoinFilterParameter({!join method=crossCollection fromIndex=" + fromIndex
-      + " from=nestedOriginalUUID to=uuid }_root_:" + getRowUUID() + " AND nestedUUID:" + getNestedOriginalUUID() + ")";
+      + " from=nestedOriginalUUID to=uuid }_root_:" + getRowUUID() + " AND nestedUUID:" + getNestedUUID() + ")";
   }
 }

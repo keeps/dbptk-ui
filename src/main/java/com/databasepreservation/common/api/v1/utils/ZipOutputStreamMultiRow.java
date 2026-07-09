@@ -156,35 +156,8 @@ public class ZipOutputStreamMultiRow extends ZipOutputStream {
               getConfigTable().getCSVHeaders(getFieldsToReturn(), isExportDescriptions()).toArray(new String[0])));
             isFirst = false;
           }
-
-          Map<String, List<String>> rowNestedUUIDs = new HashMap<>();
-          Map<String, List<String>> rowNestedFields = new HashMap<>();
-
-          for (ViewerRow nestedRow : row.getNestedRowList()) {
-            if (!rowNestedUUIDs.containsKey(nestedRow.getNestedUUID())) {
-              rowNestedUUIDs.put(nestedRow.getNestedUUID(), new ArrayList<>());
-              rowNestedFields.put(nestedRow.getNestedUUID(),
-                nestedRow.getCells().keySet().stream().map(k -> k.substring(4)).toList());
-            }
-            rowNestedUUIDs.get(nestedRow.getNestedUUID()).add(nestedRow.getNestedOriginalUUID());
-          }
-
-          Map<String, List<ViewerRow>> nestedOriginalRowsForThisRow = new HashMap<>();
-          for (Map.Entry<String, List<String>> entry : rowNestedUUIDs.entrySet()) {
-            List<String> fieldsToReturn = new ArrayList<>();
-            fieldsToReturn.add("tableId");
-            fieldsToReturn.addAll(rowNestedFields.get(entry.getKey()));
-            try (final IterableIndexResult nestedRows = ViewerFactory.getSolrManager().findAllRows(databaseUUID,
-              new Filter(new OneOfManyFilterParameter("uuid", entry.getValue())), new Sorter(), fieldsToReturn)) {
-              List<ViewerRow> nestedRowsList = new ArrayList<>();
-              for (ViewerRow nestedRow : nestedRows) {
-                nestedRowsList.add(nestedRow);
-              }
-              nestedOriginalRowsForThisRow.put(entry.getKey(), nestedRowsList);
-            }
-          }
           printer.printRecord(
-            HandlebarsUtils.getCellValues(row, nestedOriginalRowsForThisRow, getConfigTable(), getFieldsToReturn()));
+            HandlebarsUtils.getRowValues(row, getConfigTable(), getFieldsToReturn()));
         }
         nIndex++;
       }

@@ -43,80 +43,95 @@ public class HandlebarsUtils {
 
   private static final Handlebars handlebars = new Handlebars();
 
-  public static List<String> getCellValues(ViewerRow row, Map<String, List<ViewerRow>> nestedRows,
+  public static List<String> getRowValues(ViewerRow row,
     TableStatus configTable, List<String> fieldsToReturn) {
     List<String> values = new ArrayList<>();
     fieldsToReturn.remove(ViewerConstants.SOLR_ROWS_TABLE_ID);
     fieldsToReturn.remove(ViewerConstants.SOLR_ROWS_TABLE_UUID);
 
     for (String solrColumnName : fieldsToReturn) {
-      final ColumnStatus columnConfig = configTable.getColumnById(solrColumnName);
+      ColumnStatus columnConfig = configTable.getColumnById(solrColumnName);
+      values.addAll(getColumnValues(row, configTable, solrColumnName, columnConfig));
+    }
 
-      if (columnConfig != null && ViewerType.dbTypes.NESTED.equals(columnConfig.getType())
-        && columnConfig.getNestedColumns() != null) {
-        // treat nested
-        if (!row.getNestedRowList().isEmpty()) {
-          String template = columnConfig.getExportStatus().getTemplateStatus().getTemplate();
-          StringBuilder stringBuilder = new StringBuilder();
-          boolean first = true;
-          for (ViewerRow r : nestedRows.get(columnConfig.getNestedColumns().getReferenceUuid())) {
-            if (template != null && !template.isEmpty()) {
-              final Map<String, String> map = cellsToJson(r.getCells(), columnConfig.getNestedColumns());
-              try {
-                Template handlebarTemplate = handlebars.compileInline(template);
-                if (!first) {
-                  stringBuilder.append(", ");
-                } else {
-                  first = false;
-                }
-                stringBuilder.append(handlebarTemplate.apply(map));
-              } catch (IOException e) {
-                e.printStackTrace();
-              }
-            }
+    return values;
+  }
+
+  private static List<String> getColumnValues(ViewerRow row, TableStatus tableStatus, String solrColumnName,
+    ColumnStatus columnStatus) {
+    List<String> values = new ArrayList<>();
+
+    if (columnStatus != null && ViewerType.dbTypes.NESTED.equals(columnStatus.getType())
+      && columnStatus.getNestedColumns() != null) {
+      values.addAll(getNestedColumnValues(row, columnStatus));
+    } else {
+      values.addAll(getNativeColumnValues(row, tableStatus, solrColumnName, columnStatus));
+    }
+
+    return values;
+  }
+
+  private static List<String> getNativeColumnValues(ViewerRow row, TableStatus tableStatus, String solrColumnName,
+    ColumnStatus columnStatus) {
+    ArrayList<String> values = new ArrayList<>();
+
+    // treat non-nested
+    if (row.getCells().get(solrColumnName) == null) {
+      values.add("");
+    } else {
+      if (columnStatus != null) {
+        final String applied = applyExportTemplate(row, tableStatus, columnStatus.getColumnIndex());
+        if (StringUtils.isNotBlank(applied)) {
+          if (columnStatus.getType().equals(ViewerType.dbTypes.BINARY)) {
+            values.add(FilenameUtils.sanitizeFilename(applied));
+          } else if (columnStatus.getSearchStatus().getList().isShowContent()) {
+            values.add(row.getCells().get(solrColumnName).getValue());
+          } else {
+            values.add(applied);
           }
-          /*
-           * row.getNestedRowList().forEach(nestedRow -> { if
-           * (nestedRow.getNestedUUID().equals(solrColumnName)) { if (template != null &&
-           * !template.isEmpty()) { final Map<String, String> map =
-           * cellsToJson(nestedRow.getCells(), columnConfig.getNestedColumns());
-           * Handlebars handlebars = new Handlebars(); try { Template handlebarTemplate =
-           * handlebars.compileInline(template);
-           * stringBuilder.append(handlebarTemplate.apply(map)); } catch (IOException e) {
-           * e.printStackTrace(); } } } });
-           */
-          values.add(stringBuilder.toString());
-        }
-      } else {
-        // treat non-nested
-        if (row.getCells().get(solrColumnName) == null) {
-          values.add("");
         } else {
-          if (columnConfig != null) {
-            final String applied = applyExportTemplate(row, configTable, columnConfig.getColumnIndex());
-            if (StringUtils.isNotBlank(applied)) {
-              if (columnConfig.getType().equals(ViewerType.dbTypes.BINARY)) {
-                values.add(FilenameUtils.sanitizeFilename(applied));
-              } else if (columnConfig.getSearchStatus().getList().isShowContent()) {
-                values.add(row.getCells().get(solrColumnName).getValue());
-              } else {
-                values.add(applied);
-              }
+          if (columnStatus.getType().equals(ViewerType.dbTypes.BINARY)) {
+            values.add(LobManagerUtils.getDefaultFilename(row.getUuid()));
+          } else {
+            if (columnStatus.getType().equals(ViewerType.dbTypes.NUMERIC_FLOATING_POINT)) {
+              values.add(new BigDecimal(row.getCells().get(solrColumnName).getValue()).toPlainString());
             } else {
-              if (columnConfig.getType().equals(ViewerType.dbTypes.BINARY)) {
-                values.add(LobManagerUtils.getDefaultFilename(row.getUuid()));
-              } else {
-                if (columnConfig.getType().equals(ViewerType.dbTypes.NUMERIC_FLOATING_POINT)) {
-                  values.add(new BigDecimal(row.getCells().get(solrColumnName).getValue()).toPlainString());
-                } else {
-                  values.add(row.getCells().get(solrColumnName).getValue());
-                }
-              }
+              values.add(row.getCells().get(solrColumnName).getValue());
             }
           }
         }
       }
     }
+
+    return values;
+  }
+
+  private static List<String> getNestedColumnValues(ViewerRow row, ColumnStatus columnStatus) {
+
+    ArrayList<String> values = new ArrayList<>();
+    StringBuilder stringBuilder = new StringBuilder();
+
+    String template = columnStatus.getExportStatus().getTemplateStatus().getTemplate();
+    if (template != null && !template.isEmpty()) {
+      boolean first = true;
+      for (ViewerRow nestedRow : row.getNestedRowList()) {
+        if (nestedRow.getNestedUUID().equals(columnStatus.getNestedColumns().getReferenceUuid())) {
+          final Map<String, String> map = cellsToJson(nestedRow.getCells(), columnStatus.getNestedColumns());
+          try {
+            Template handlebarTemplate = handlebars.compileInline(template);
+            if (!first) {
+              stringBuilder.append(", ");
+            } else {
+              first = false;
+            }
+            stringBuilder.append(handlebarTemplate.apply(map));
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+    values.add(stringBuilder.toString());
 
     return values;
   }
@@ -183,18 +198,19 @@ public class HandlebarsUtils {
     return map;
   }
 
-  private static Map<String, String> cellsToJson(Map<String, ViewerCell> cells, NestedColumnStatus nestedConfig) {
-    final List<String> nestedFields = nestedConfig.getNestedFields();
-    final List<String> nestedSolrNames = nestedConfig.getNestedSolrNames();
+  private static Map<String, String> cellsToJson(Map<String, ViewerCell> nestedRowCells,
+    NestedColumnStatus nestedColumnStatus) {
+    final List<String> columnFields = nestedColumnStatus.getNestedFields();
+    final List<String> columnSolrNames = nestedColumnStatus.getNestedSolrNames();
     int index = 0;
 
     Map<String, String> nestedValues = new HashMap<>();
 
-    if (cells != null && !cells.isEmpty()) {
-      for (String nestedField : nestedFields) {
-        final String solrName = nestedSolrNames.get(index++);
-        if (cells.containsKey(solrName)) {
-          nestedValues.put(nestedField, cells.get(solrName).getValue());
+    if (nestedRowCells != null && !nestedRowCells.isEmpty()) {
+      for (String nestedField : columnFields) {
+        final String nestedRowSolrName = "nst_" + columnSolrNames.get(index++);
+        if (nestedRowCells.containsKey(nestedRowSolrName)) {
+          nestedValues.put(nestedField, nestedRowCells.get(nestedRowSolrName).getValue());
         } else {
           nestedValues.put(nestedField, "");
         }
