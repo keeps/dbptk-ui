@@ -18,11 +18,17 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
  */
 public class CopyUtils {
   private static final String HTML_OPEN_TABLE = "<table>";
+  private static final String HTML_CLOSE_TABLE = "</table>";
   private static final String HTML_OPEN_ROW = "<tr>";
   private static final String HTML_CLOSE_ROW = "</tr>";
   private static final String HTML_OPEN_HEADER = "<th>";
   private static final String HTML_CLOSE_HEADER = "</th>";
+  private static final String HTML_OPEN_CELL = "<td>";
+  private static final String HTML_CLOSE_CELL = "</td>";
   private static final String TAB = "\t";
+  private static final String NEW_LINE = "\n";
+  private static final String NESTED_CELL_FIELDS_SEPARATOR = " , ";
+  private static final String NESTED_CELL_ROWS_SEPARATOR = " ; ";
 
   public static void copyTableSearchResults(IndexResult<ViewerRow> results, List<ColumnStatus> columnsToCopy) {
     StringBuilder htmlSB = new StringBuilder();
@@ -32,7 +38,7 @@ public class CopyUtils {
     for (ViewerRow row : results.getResults()) {
       appendTableRow(htmlSB, textSB, row, columnsToCopy);
     }
-    htmlSB.append("</table>");
+    htmlSB.append(HTML_CLOSE_TABLE);
     JavascriptUtils.copyHTMLToClipboard(htmlSB.toString(), textSB.toString());
   }
 
@@ -60,61 +66,71 @@ public class CopyUtils {
 
   private static void appendTableRow(StringBuilder htmlSB, StringBuilder textSB, ViewerRow row,
     List<ColumnStatus> columnsToCopy) {
-    textSB.append("\n");
-    htmlSB.append("<tr>");
+    textSB.append(NEW_LINE);
+    htmlSB.append(HTML_OPEN_ROW);
     boolean isFirstRowColumn = true;
-    for (ColumnStatus configColumn : columnsToCopy) {
-      if (!NESTED.equals(configColumn.getType())) {
-        // Treat as non nested
-        if (!BINARY.equals(configColumn.getType()) && !CLOB.equals(configColumn.getType())) {
+    for (ColumnStatus columnStatus : columnsToCopy) {
+      if (!NESTED.equals(columnStatus.getType())) {
+        if (!BINARY.equals(columnStatus.getType()) && !CLOB.equals(columnStatus.getType())) {
           if (!isFirstRowColumn) {
-            textSB.append("\t");
+            textSB.append(TAB);
           } else {
             isFirstRowColumn = false;
           }
-          htmlSB.append("<td>");
-          if (row.getCells().containsKey(configColumn.getId())) {
-            htmlSB.append(SafeHtmlUtils.htmlEscape(row.getCells().get(configColumn.getId()).getValue()));
-            textSB.append(row.getCells().get(configColumn.getId()).getValue());
-          }
-          htmlSB.append("</td>");
+          appendNativeColumn(htmlSB, textSB, row, columnStatus);
         }
       } else {
-        if (!configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
+        if (!columnStatus.getTypeName().contains("BINARY LARGE OBJECT")) {
           if (!isFirstRowColumn) {
-            textSB.append("\t");
+            textSB.append(TAB);
           } else {
             isFirstRowColumn = false;
           }
-          htmlSB.append("<td>");
-          boolean isFirstNestedName = true;
-          for (String nestedSolrName : configColumn.getNestedColumns().getNestedSolrNames()) {
-            String nestedKey = "nst_" + nestedSolrName;
-            String nestedTable = configColumn.getNestedColumns().getOriginalTable();
-            if (!isFirstNestedName) {
-              htmlSB.append(", ");
-              textSB.append(", ");
-            } else {
-              isFirstNestedName = false;
-            }
-            boolean isFirstNestedRow = true;
-            for (ViewerRow nestedRow : row.getNestedRowList()) {
-              if (nestedRow.getCells().containsKey(nestedKey) && nestedRow.getNestedTableId().equals(nestedTable)) {
-                if (!isFirstNestedRow) {
-                  htmlSB.append(" ");
-                  textSB.append(" ");
-                } else {
-                  isFirstNestedRow = false;
-                }
-                htmlSB.append(nestedRow.getCells().get(nestedKey).getValue());
-                textSB.append(nestedRow.getCells().get(nestedKey).getValue());
-              }
-            }
-          }
-          htmlSB.append("</td>");
+          appendNestedColumn(htmlSB, textSB, row, columnStatus);
         }
       }
     }
-    htmlSB.append("</tr>");
+    htmlSB.append(HTML_CLOSE_ROW);
+  }
+
+  private static void appendNativeColumn(StringBuilder htmlSB, StringBuilder textSB, ViewerRow row,
+    ColumnStatus columnStatus) {
+    htmlSB.append(HTML_OPEN_CELL);
+    if (row.getCells().containsKey(columnStatus.getId())) {
+      htmlSB.append(SafeHtmlUtils.htmlEscape(row.getCells().get(columnStatus.getId()).getValue()));
+      textSB.append(row.getCells().get(columnStatus.getId()).getValue());
+    }
+    htmlSB.append(HTML_CLOSE_CELL);
+  }
+
+  private static void appendNestedColumn(StringBuilder htmlSB, StringBuilder textSB, ViewerRow row,
+    ColumnStatus columnStatus) {
+    htmlSB.append(HTML_OPEN_CELL);
+    boolean isFirstNestedRow = true;
+    for (ViewerRow nestedRow : row.getNestedRowList()) {
+      if (nestedRow.getNestedUUID().equals(columnStatus.getNestedColumns().getReferenceUuid())) {
+        if (!isFirstNestedRow) {
+          htmlSB.append(NESTED_CELL_ROWS_SEPARATOR);
+          textSB.append(NESTED_CELL_ROWS_SEPARATOR);
+        } else {
+          isFirstNestedRow = false;
+        }
+        boolean isFirstNestedField = true;
+        for (String nestedSolrName : columnStatus.getNestedColumns().getNestedSolrNames()) {
+          String nestedKey = "nst_" + nestedSolrName;
+          if (!isFirstNestedField) {
+            htmlSB.append(NESTED_CELL_FIELDS_SEPARATOR);
+            textSB.append(NESTED_CELL_FIELDS_SEPARATOR);
+          } else {
+            isFirstNestedField = false;
+          }
+          if (nestedRow.getCells().containsKey(nestedKey)) {
+            htmlSB.append(nestedRow.getCells().get(nestedKey).getValue());
+            textSB.append(nestedRow.getCells().get(nestedKey).getValue());
+          }
+        }
+      }
+    }
+    htmlSB.append(HTML_CLOSE_CELL);
   }
 }

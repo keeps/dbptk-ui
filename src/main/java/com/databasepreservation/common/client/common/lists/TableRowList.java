@@ -24,6 +24,7 @@ import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
+import com.databasepreservation.common.api.utils.CopyUtils;
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -935,8 +936,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
             } else {
               String findRequestJson = getExportFindRequestJson(exportAll);
               String fieldsToHeader = getExportFieldsToHeader();
-              JavascriptUtils.exportToCSVPostRequest(getExportURL(filename, exportAll, exportDescription), findRequestJson,
-                fieldsToHeader);
+              JavascriptUtils.exportToCSVPostRequest(getExportURL(filename, exportAll, exportDescription),
+                findRequestJson, fieldsToHeader);
             }
           }
         }
@@ -986,8 +987,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     }
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), rowsFilter, currentSorter, sublist,
-      getFacets(), false, fieldsToReturn, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery,
-      queryFields, false, List.of());
+      getFacets(), false, fieldsToReturn, extraParameters, ViewerConstants.SOLR_EDISMAX, tableFilterQuery, queryFields,
+      false, List.of());
 
     CollectionService.Util.call(new MethodCallback<IndexResult<ViewerRow>>() {
       @Override
@@ -997,95 +998,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
       @Override
       public void onSuccess(Method method, IndexResult<ViewerRow> o) {
-        TableStatus tableStatus = status.getTableStatus(table.getUuid());
-        StringBuilder htmlSB = new StringBuilder();
-        StringBuilder textSB = new StringBuilder();
-        htmlSB.append("<table>");
-        boolean isFirstRow = true;
-        for (ViewerRow row : o.getResults()) {
-          if (isFirstRow) {
-            // header
-            htmlSB.append("<tr>");
-            boolean isFirstHeaderColumn = true;
-            for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
-              if ((!NESTED.equals(configColumn.getType()) && !BINARY.equals(configColumn.getType())
-                && !CLOB.equals(configColumn.getType()))
-                || (NESTED.equals(configColumn.getType())
-                  && !configColumn.getTypeName().contains("BINARY LARGE OBJECT"))) {
-                htmlSB.append("<th>");
-                if (!isFirstHeaderColumn) {
-                  textSB.append("\t");
-                } else {
-                  isFirstHeaderColumn = false;
-                }
-                htmlSB.append(SafeHtmlUtils.htmlEscape(configColumn.getCustomName()));
-                textSB.append(configColumn.getCustomName());
-                htmlSB.append("</th>");
-              }
-            }
-            htmlSB.append("</tr>");
-            isFirstRow = false;
-          }
-          textSB.append("\n");
-          htmlSB.append("<tr>");
-          boolean isFirstRowColumn = true;
-          for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
-            if (!NESTED.equals(configColumn.getType())) {
-              // Treat as non nested
-              if (!BINARY.equals(configColumn.getType()) && !CLOB.equals(configColumn.getType())) {
-                if (!isFirstRowColumn) {
-                  textSB.append("\t");
-                } else {
-                  isFirstRowColumn = false;
-                }
-                htmlSB.append("<td>");
-                if (row.getCells().containsKey(configColumn.getId())) {
-                  htmlSB.append(SafeHtmlUtils.htmlEscape(row.getCells().get(configColumn.getId()).getValue()));
-                  textSB.append(row.getCells().get(configColumn.getId()).getValue());
-                }
-                htmlSB.append("</td>");
-              }
-            } else {
-              if (!configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
-                if (!isFirstRowColumn) {
-                  textSB.append("\t");
-                } else {
-                  isFirstRowColumn = false;
-                }
-                htmlSB.append("<td>");
-                boolean isFirstNestedName = true;
-                for (String nestedSolrName : configColumn.getNestedColumns().getNestedSolrNames()) {
-                  String nestedKey = "nst_" + nestedSolrName;
-                  String nestedTable = configColumn.getNestedColumns().getOriginalTable();
-                  if (!isFirstNestedName) {
-                    htmlSB.append(", ");
-                    textSB.append(", ");
-                  } else {
-                    isFirstNestedName = false;
-                  }
-                  boolean isFirstNestedRow = true;
-                  for (ViewerRow nestedRow : row.getNestedRowList()) {
-                    if (nestedRow.getCells().containsKey(nestedKey)
-                      && nestedRow.getNestedTableId().equals(nestedTable)) {
-                      if (!isFirstNestedRow) {
-                        htmlSB.append(" ");
-                        textSB.append(" ");
-                      } else {
-                        isFirstNestedRow = false;
-                      }
-                      htmlSB.append(nestedRow.getCells().get(nestedKey).getValue());
-                      textSB.append(nestedRow.getCells().get(nestedKey).getValue());
-                    }
-                  }
-                }
-                htmlSB.append("</td>");
-              }
-            }
-          }
-          htmlSB.append("</tr>");
-        }
-        htmlSB.append("</table>");
-        JavascriptUtils.copyHTMLToClipboard(htmlSB.toString(), textSB.toString());
+        CopyUtils.copyTableSearchResults(o, status.getTableStatus(table.getUuid()).getVisibleColumnsList());
       }
     }).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(), table.getSchemaName(),
       table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
