@@ -53,6 +53,7 @@
                             </g:InlineHTML>
                         </g:FlowPanel>
                         <g:FlowPanel ui:field="customViewsButtons" addStyleNames="custom-views-buttons"/>
+                        <g:FlowPanel ui:field="queryColumnsContainer" addStyleNames="form-helper" />
                     </g:FlowPanel>
                 </g:FlowPanel>
             </g:FlowPanel>
