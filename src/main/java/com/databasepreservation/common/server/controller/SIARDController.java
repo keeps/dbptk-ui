@@ -322,8 +322,8 @@ public class SIARDController {
         filterFactories.add(factory);
       }
 
-      if (tableAndColumnsParameters.isExternalLobConfigurationSet()
-        && factory.getFilterName().equals("external-lobs")) {
+      if ((tableAndColumnsParameters.isExternalLobConfigurationSet()
+        || customViewsParameters.isExternalLobConfigurationSet()) && factory.getFilterName().equals("external-lobs")) {
         filterFactories.add(factory);
       }
     }

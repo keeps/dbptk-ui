@@ -7,6 +7,9 @@
  */
 package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,23 +17,35 @@ import java.util.Map;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.ComboBoxField;
+import com.databasepreservation.common.client.common.fields.FileUploadField;
+import com.databasepreservation.common.client.common.fields.GenericField;
+import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
 import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameter;
 import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameters;
+import com.databasepreservation.common.client.models.wizard.table.ExternalLobParameter;
+import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.client.services.MigrationService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.databasepreservation.desktop.client.common.sidebar.CustomViewsSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
+import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
@@ -84,6 +99,9 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   @UiField
   Label customViewQueryLabel;
 
+  @UiField
+  FlowPanel queryColumnsContainer;
+
   private static CustomViews instance = null;
   private CustomViewsSidebar customViewsSidebar;
   private Map<String, CustomViewsParameter> customViewsParameters = new HashMap<>();
@@ -93,15 +111,23 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private final Button btnNext;
   private final ConnectionParameters connectionParameters;
   private boolean isSelectionEmpty;
+  private MultipleSelectionTablePanel<ViewerColumn> queryColumnsTable;
+  private final List<ViewerColumn> currentQueryColumns = new ArrayList<>();
+  private final Map<String, ExternalLobParameter> externalLOBsParameters = new HashMap<>();
+  private String currentBasePath = null;
+  private boolean externalLOBsDelete = false;
+  private String externalLOBsBtnText = messages.basicActionAdd();
 
-  public static CustomViews getInstance(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters, boolean isSelectionEmpty) {
+  public static CustomViews getInstance(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters,
+    boolean isSelectionEmpty) {
     if (instance == null) {
       instance = new CustomViews(schemas, btnNext, connectionParameters, isSelectionEmpty);
     }
     return instance;
   }
 
-  private CustomViews(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters, boolean isSelectionEmpty) {
+  private CustomViews(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters,
+    boolean isSelectionEmpty) {
     initWidget(binder.createAndBindUi(this));
 
     this.btnNext = btnNext;
@@ -146,6 +172,14 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     if (customViewsParameters != null && !customViewsParameters.isEmpty()) {
       customViewsParameters.clear();
     }
+
+    if (queryColumnsContainer != null) {
+      queryColumnsContainer.clear();
+    }
+    if (currentQueryColumns != null) {
+      currentQueryColumns.clear();
+    }
+
     customViewsParameters = new HashMap<>();
     if (customViewsSidebar != null) {
       customViewsSidebar.selectNone();
@@ -169,6 +203,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
     CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter,
       customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+    parameter.setColumnParametersFromExternalLobs(externalLOBsParameters);
 
     toSave = !customViewsParameters.containsValue(parameter);
 
@@ -181,10 +216,11 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     if (toSave) {
       CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter,
         customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+      parameter.setColumnParametersFromExternalLobs(externalLOBsParameters);
       customViewsParameters.put(parameter.getSchemaName(), parameter);
     }
-
     parameters.setCustomViewsParameter(customViewsParameters);
+    parameters.setExternalLobConfigurationSet(!externalLOBsParameters.isEmpty());
 
     return parameters;
   }
@@ -274,6 +310,212 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     }
   }
 
+  private void populateQueryColumnsTable(List<List<String>> result) {
+    if (result == null || result.isEmpty()) {
+      return;
+    }
+
+    List<String> headerRow = result.get(0);
+    for (String columnName : headerRow) {
+      ViewerColumn column = new ViewerColumn();
+      column.setDisplayName(columnName);
+      currentQueryColumns.add(column);
+    }
+
+    queryColumnsTable = new MultipleSelectionTablePanel<>(GWT.create(ConfigurationCellTableResources.class));
+    queryColumnsTable.setHeight("35vh");
+
+    Button btnSelectToggle = new Button(messages.basicActionSelectNone());
+    btnSelectToggle.addStyleName("btn btn-primary btn-select-none");
+    final boolean[] isAllSelected = {true};
+
+    btnSelectToggle.addClickHandler(event -> {
+      isAllSelected[0] = !isAllSelected[0];
+      if (isAllSelected[0]) {
+        btnSelectToggle.setText(messages.basicActionSelectNone());
+        btnSelectToggle.removeStyleName("btn-select-all");
+        btnSelectToggle.addStyleName("btn-select-none");
+      } else {
+        btnSelectToggle.setText(messages.basicActionSelectAll());
+        btnSelectToggle.removeStyleName("btn-select-none");
+        btnSelectToggle.addStyleName("btn-select-all");
+      }
+      for (ViewerColumn col : currentQueryColumns) {
+        queryColumnsTable.getSelectionModel().setSelected(col, isAllSelected[0]);
+      }
+    });
+
+    FlowPanel selectPanel = new FlowPanel();
+    selectPanel.addStyleName("select-buttons-container");
+    selectPanel.add(btnSelectToggle);
+
+    final ButtonDatabaseColumn buttonDatabaseColumn = new ButtonDatabaseColumn() {
+      @Override
+      public String getValue(ViewerColumn viewerColumn) {
+        return messages.tableAndColumnsPageTextForExternalLOBConfigure();
+      }
+    };
+
+    buttonDatabaseColumn.setFieldUpdater((index, object, value) -> {
+      try {
+        String id = object.getDisplayName();
+
+        externalLOBsDelete = false;
+        externalLOBsBtnText = messages.basicActionAdd();
+
+        final ComboBoxField referenceType = ComboBoxField
+          .createInstance(messages.tableAndColumnsPageLabelForReferenceType());
+        referenceType.setComboBoxValue("File System", "file-system");
+
+        if (connectionParameters != null && connectionParameters.doSSH()) {
+          referenceType.setComboBoxValue("Remote File System", "remote-file-system");
+        }
+        referenceType.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
+
+        FlowPanel helperReferenceType = new FlowPanel();
+        helperReferenceType.addStyleName("form-helper");
+        InlineHTML spanReferenceType = new InlineHTML();
+        spanReferenceType.addStyleName("form-text-helper text-muted");
+        spanReferenceType.setText(messages.tableAndColumnsPageDescriptionForExternalLOBReferenceType());
+        referenceType.addHelperText(spanReferenceType);
+        helperReferenceType.add(referenceType);
+        helperReferenceType.add(spanReferenceType);
+
+        if (com.databasepreservation.common.client.common.utils.ApplicationType.getType()
+          .equals(com.databasepreservation.common.client.ViewerConstants.APPLICATION_ENV_DESKTOP)) {
+          FileUploadField fileUploadField = FileUploadField.createInstance(
+            messages.tableAndColumnsPageLabelForBasePath(), messages.tableAndColumnsPageTableHeaderTextForSelect());
+          fileUploadField.setParentCSS("form-row");
+          fileUploadField.setLabelCSS("form-label-spaced");
+          fileUploadField.setButtonCSS("btn btn-link form-button");
+
+          FlowPanel helperFileUploadField = new FlowPanel();
+          helperFileUploadField.addStyleName("form-helper");
+          InlineHTML spanFileUploadField = new InlineHTML();
+          spanFileUploadField.addStyleName("form-text-helper text-muted");
+          spanFileUploadField.setText(messages.tableAndColumnsPageDescriptionForExternalLOBBasePath());
+          fileUploadField.addHelperText(spanFileUploadField);
+          helperFileUploadField.add(fileUploadField);
+          helperFileUploadField.add(spanFileUploadField);
+
+          if (externalLOBsParameters.get(id) != null) {
+            if (externalLOBsParameters.get(id).getBasePath() != null) {
+              String displayPath = com.databasepreservation.common.client.tools.PathUtils
+                .getFileName(externalLOBsParameters.get(id).getBasePath());
+              fileUploadField.setPathLocation(displayPath, externalLOBsParameters.get(id).getBasePath());
+            }
+            externalLOBsDelete = true;
+            externalLOBsBtnText = messages.basicActionUpdate();
+          }
+
+          fileUploadField.buttonAction(() -> {
+            JavaScriptObject options = com.databasepreservation.common.client.tools.JSOUtils
+              .getOpenDialogOptions(Collections.singletonList("openDirectory"), Collections.emptyList());
+            String path = com.databasepreservation.common.client.common.utils.JavascriptUtils.openFileDialog(options);
+            if (path != null) {
+              currentBasePath = path;
+              String displayPath = com.databasepreservation.common.client.tools.PathUtils.getFileName(path);
+              fileUploadField.setPathLocation(displayPath, path);
+              fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
+            }
+          });
+
+          Dialogs.showExternalLobsSetupDialog(messages.tableAndColumnsPageDialogTitleForExternalLOBDialog(),
+            helperReferenceType, helperFileUploadField, messages.basicActionCancel(), externalLOBsBtnText,
+            externalLOBsDelete, new DefaultAsyncCallback<ExternalLobsDialogBoxResult>() {
+              @Override
+              public void onSuccess(ExternalLobsDialogBoxResult result) {
+                if (result.getOption().equals("add") && result.isResult()) {
+                  ExternalLobParameter externalLobParameter = new ExternalLobParameter();
+                  externalLobParameter.setBasePath(currentBasePath);
+                  externalLobParameter.setReferenceType(referenceType.getSelectedValue());
+                  externalLOBsParameters.put(id, externalLobParameter);
+                }
+                if (result.getOption().equals("delete") && result.isResult()) {
+                  externalLOBsDelete = false;
+                  externalLOBsParameters.remove(id);
+                  externalLOBsBtnText = messages.basicActionAdd();
+                }
+                queryColumnsTable.getDisplay().redrawRow(index);
+              }
+            });
+        } else {
+          TextBox textBox = new TextBox();
+          textBox.addStyleName("form-textbox");
+          if (externalLOBsParameters.get(id) != null) {
+            textBox.setText(externalLOBsParameters.get(id).getBasePath());
+            externalLOBsDelete = true;
+            externalLOBsBtnText = messages.basicActionUpdate();
+          }
+          GenericField genericField = GenericField.createInstance(messages.tableAndColumnsPageLabelForBasePath(),
+            textBox);
+          genericField.setCSSMetadata("form-row", "form-label-spaced");
+
+          Dialogs.showExternalLobsSetupDialog(messages.tableAndColumnsPageDialogTitleForExternalLOBDialog(),
+            helperReferenceType, genericField, messages.basicActionCancel(), externalLOBsBtnText, externalLOBsDelete,
+            new DefaultAsyncCallback<ExternalLobsDialogBoxResult>() {
+              @Override
+              public void onSuccess(ExternalLobsDialogBoxResult result) {
+                if (result.getOption().equals("add") && result.isResult()) {
+                  ExternalLobParameter externalLOBsParameter = new ExternalLobParameter();
+                  externalLOBsParameter.setBasePath(textBox.getText());
+                  externalLOBsParameter.setReferenceType(referenceType.getSelectedValue());
+                  externalLOBsParameters.put(id, externalLOBsParameter);
+                }
+                if (result.getOption().equals("delete") && result.isResult()) {
+                  externalLOBsParameters.remove(id);
+                }
+                queryColumnsTable.getDisplay().redrawRow(index);
+              }
+            });
+        }
+      } catch (Exception e) {
+        GWT.log("Runtime exception within external LOB configuration field updater: ", e);
+      }
+    });
+
+    queryColumnsTable.createTable(selectPanel, Arrays.asList(1, 2), currentQueryColumns.iterator(),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForSelect(), 4,
+        new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
+          @Override
+          public Boolean getValue(ViewerColumn viewerColumn) {
+            return queryColumnsTable.getSelectionModel().isSelected(viewerColumn);
+          }
+        }),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForColumnName(), 15,
+        new TextColumn<ViewerColumn>() {
+          @Override
+          public String getValue(ViewerColumn column) {
+            return column.getDisplayName();
+          }
+        }),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForOptions(), 10,
+        buttonDatabaseColumn));
+
+    for (ViewerColumn col : currentQueryColumns) {
+      queryColumnsTable.getSelectionModel().setSelected(col, true);
+    }
+
+    queryColumnsContainer.add(queryColumnsTable);
+  }
+
+  private abstract static class ButtonDatabaseColumn extends Column<ViewerColumn, String> {
+    public ButtonDatabaseColumn() {
+      super(new com.google.gwt.cell.client.ButtonCell());
+    }
+
+    @Override
+    public void render(com.google.gwt.cell.client.Cell.Context context, ViewerColumn object,
+      com.google.gwt.safehtml.shared.SafeHtmlBuilder sb) {
+      String value = getValue(object);
+      sb.appendHtmlConstant("<button class=\"btn btn-link-info\" type=\"button\" tabindex=\"-1\">");
+      if (value != null) {
+        sb.append(com.google.gwt.safehtml.shared.SafeHtmlUtils.fromString(value));
+      }
+      sb.appendHtmlConstant("</button>");
+    }
+  }
+
   void refreshCustomButtons(boolean isSelectionEmpty) {
     customViewsButtons.clear();
     customViewsButtons.add(createCustomViewButton());
@@ -293,7 +535,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
     boolean sameName = false;
     for (CustomViewsParameter p : customViewsParameters.values()) {
-      if (p.getCustomViewName().toLowerCase().equals(viewNameText.toLowerCase())) {
+      if (p.getCustomViewName().equalsIgnoreCase(viewNameText)) {
         sameName = true;
       }
     }
@@ -345,6 +587,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     parameter.setCustomViewName(customViewNameText);
     parameter.setCustomViewDescription(customViewDescriptionText);
     parameter.setCustomViewQuery(customViewQueryText);
+    parameter.setColumnParametersFromExternalLobs(externalLOBsParameters);
 
     customViewsParameters.put(customViewUUID, parameter);
     customViewsSidebar.updateSidebarHyperLink(customViewUUID, customViewNameText);
@@ -378,6 +621,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
           CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter,
             customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+          parameter.setColumnParametersFromExternalLobs(externalLOBsParameters);
           customViewsParameters.put(String.valueOf(counter), parameter);
           counter++;
           setTextboxText("", "", "", "");
@@ -462,6 +706,8 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
           content.remove(spinner);
           Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(), messages.basicActionClose(),
             result);
+
+          populateQueryColumnsTable(result);
         }, (String errorMessage) -> {
           content.remove(spinner);
           Dialogs.showErrors(messages.customViewsPageTitle(), errorMessage, messages.basicActionClose());
