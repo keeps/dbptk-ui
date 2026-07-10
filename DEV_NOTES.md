@@ -21,6 +21,9 @@ mvn -am gwt:compile -Pdebug-server -Dscope.gwt-dev=compile
 # Codeserver needs some dependencies installed to start
 mvn install -Pdebug-server -DskipTests
 
+# Essential folder for Tika
+mkdir -p ~/.dbvtk/SIARD-files/
+
 # Start up dependencies (Solr, Zookeeper)
 docker compose -f deploys/docker-compose-dev.yml up -d
 
