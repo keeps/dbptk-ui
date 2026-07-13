@@ -471,7 +471,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
             });
         }
       } catch (Exception e) {
-        GWT.log("Runtime exception within external LOB configuration field updater: ", e);
+        Dialogs.showErrors(messages.customViewsPageTitle(), e.getMessage(), messages.basicActionClose());
       }
     });
 
