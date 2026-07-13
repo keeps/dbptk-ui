@@ -1090,6 +1090,10 @@ public interface ClientMessages extends Messages {
 
   String tableAndColumnsPageDescriptionForExternalLOBBasePath();
 
+  String tableAndColumnsFileSystemOption();
+
+  String tableAndColumnsRemoteFileSystem();
+
   /********************************************
    * Create Wizard: Custom Views
    ********************************************/

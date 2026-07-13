@@ -672,9 +672,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
       final ComboBoxField referenceType = ComboBoxField
         .createInstance(messages.tableAndColumnsPageLabelForReferenceType());
-      referenceType.setComboBoxValue("File System", "file-system");
+      referenceType.setComboBoxValue(messages.tableAndColumnsFileSystemOption(), "file-system");
       if (doSSH) {
-        referenceType.setComboBoxValue("Remote File System", "remote-file-system");
+        referenceType.setComboBoxValue(messages.tableAndColumnsRemoteFileSystem(), "remote-file-system");
       }
       referenceType.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
 
