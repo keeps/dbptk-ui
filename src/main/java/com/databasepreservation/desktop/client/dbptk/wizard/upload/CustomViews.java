@@ -14,12 +14,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.ComboBoxField;
 import com.databasepreservation.common.client.common.fields.FileUploadField;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
+import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
 import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameter;
@@ -381,8 +383,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         helperReferenceType.add(referenceType);
         helperReferenceType.add(spanReferenceType);
 
-        if (com.databasepreservation.common.client.common.utils.ApplicationType.getType()
-          .equals(com.databasepreservation.common.client.ViewerConstants.APPLICATION_ENV_DESKTOP)) {
+        if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
           FileUploadField fileUploadField = FileUploadField.createInstance(
             messages.tableAndColumnsPageLabelForBasePath(), messages.tableAndColumnsPageTableHeaderTextForSelect());
           fileUploadField.setParentCSS("form-row");
