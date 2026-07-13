@@ -35,10 +35,13 @@ import com.databasepreservation.common.client.widgets.ConfigurationCellTableReso
 import com.databasepreservation.common.client.widgets.Toast;
 import com.databasepreservation.desktop.client.common.sidebar.CustomViewsSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
+import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -260,6 +263,13 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       setTextboxText(parameter.getSchemaName(), parameter.getCustomViewName(), parameter.getCustomViewDescription(),
         parameter.getCustomViewQuery());
 
+      if (validateCustomViewQueryText()) {
+
+        MigrationService.Util.call(this::populateQueryColumnsTable, (String errorMessage) -> {
+          Dialogs.showErrors(messages.customViewsPageTitle(), errorMessage, messages.basicActionClose());
+        }).testQuery(connectionParameters, parameter.getCustomViewQuery());
+      }
+
       Button btnNew = new Button();
       btnNew.setText(messages.basicActionNew());
       btnNew.addStyleName("btn btn-primary btn-plus");
@@ -300,7 +310,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
       SimplePanel simplePanelForTestButton = new SimplePanel();
       simplePanelForTestButton.addStyleName("btn-item");
-      simplePanelForTestButton.add(getButtonTestQuery());
+      simplePanelForTestButton.add(getButtonTestQuery(btnUpdate));
       customViewsButtons.add(simplePanelForTestButton);
 
       SimplePanel simplePanelForNewButton = new SimplePanel();
@@ -315,6 +325,13 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private void populateQueryColumnsTable(List<List<String>> result) {
     if (result == null || result.isEmpty()) {
       return;
+    }
+
+    if (queryColumnsContainer != null) {
+      queryColumnsContainer.clear();
+    }
+    if (currentQueryColumns != null) {
+      currentQueryColumns.clear();
     }
 
     List<String> headerRow = result.get(0);
@@ -502,12 +519,11 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
   private abstract static class ButtonDatabaseColumn extends Column<ViewerColumn, String> {
     public ButtonDatabaseColumn() {
-      super(new com.google.gwt.cell.client.ButtonCell());
+      super(new ButtonCell());
     }
 
     @Override
-    public void render(com.google.gwt.cell.client.Cell.Context context, ViewerColumn object,
-      com.google.gwt.safehtml.shared.SafeHtmlBuilder sb) {
+    public void render(Cell.Context context, ViewerColumn object, SafeHtmlBuilder sb) {
       String value = getValue(object);
       sb.appendHtmlConstant("<button class=\"btn btn-link-info\" type=\"button\" tabindex=\"-1\">");
       if (value != null) {
@@ -612,6 +628,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     Button btnSave = new Button();
     btnSave.setText(messages.basicActionSave());
     btnSave.addStyleName("btn btn-primary btn-save");
+    btnSave.setEnabled(false);
 
     btnSave.addClickHandler(event -> {
       final int valid = customViewFormValidator();
@@ -630,6 +647,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
           customViewQuery.getElement().removeAttribute("required");
           customViewSchemaName.getElement().removeAttribute("required");
           customViewsSidebar.selectNone();
+          queryColumnsContainer.clear();
 
           checkIfHaveCustomViews();
         }, (String errorMessage) -> {
@@ -649,7 +667,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
     FlowPanel FlowPanelForTestButton = new FlowPanel();
     FlowPanelForTestButton.addStyleName("btn-item");
-    FlowPanelForTestButton.add(getButtonTestQuery());
+    FlowPanelForTestButton.add(getButtonTestQuery(btnSave));
 
     FlowPanel FlowPanelForOptionsButtons = new FlowPanel();
     FlowPanelForOptionsButtons.add(FlowPanelForSaveButton);
@@ -692,7 +710,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       customViewDescription.getText(), customViewQuery.getText());
   }
 
-  private Button getButtonTestQuery() {
+  private Button getButtonTestQuery(Button btnSave) {
     Button btnTest = new Button();
     btnTest.setText(messages.basicActionTest());
     btnTest.addStyleName("btn btn-primary btn-run");
@@ -709,6 +727,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
             result);
 
           populateQueryColumnsTable(result);
+          btnSave.setEnabled(true);
         }, (String errorMessage) -> {
           content.remove(spinner);
           Dialogs.showErrors(messages.customViewsPageTitle(), errorMessage, messages.basicActionClose());
