@@ -1056,6 +1056,8 @@ public interface ClientMessages extends Messages {
 
   String tableAndColumnsPageLabelForBasePath();
 
+  String tableAndColumnsPageDescriptionForBasePath();
+
   String tableAndColumnsPageTableHeaderTextForColumnFilters();
 
   String tableAndColumnsPageTableHeaderTextForColumnName();
@@ -1089,6 +1091,10 @@ public interface ClientMessages extends Messages {
   String tableAndColumnsPageDescriptionForExternalLOBReferenceType();
 
   String tableAndColumnsPageDescriptionForExternalLOBBasePath();
+
+  String tableAndColumnsFileSystemOption();
+
+  String tableAndColumnsRemoteFileSystem();
 
   /********************************************
    * Create Wizard: Custom Views
