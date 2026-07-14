@@ -690,7 +690,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       helperReferenceType.add(spanReferenceType);
 
       GenericField genericField;
-      if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
+      if (ApplicationType.isDesktop()) {
         FileUploadField fileUploadField = FileUploadField.createInstance(messages.tableAndColumnsPageLabelForBasePath(),
           messages.tableAndColumnsPageTableHeaderTextForSelect());
         fileUploadField.setParentCSS("form-row");

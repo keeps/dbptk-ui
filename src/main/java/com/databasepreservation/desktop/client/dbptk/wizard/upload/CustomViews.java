@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.ComboBoxField;
@@ -405,7 +404,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         helperReferenceType.add(referenceType);
         helperReferenceType.add(spanReferenceType);
 
-        if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
+        if (ApplicationType.isDesktop()) {
           FileUploadField fileUploadField = FileUploadField.createInstance(
             messages.tableAndColumnsPageLabelForBasePath(), messages.tableAndColumnsPageTableHeaderTextForSelect());
           fileUploadField.setParentCSS("form-row");
