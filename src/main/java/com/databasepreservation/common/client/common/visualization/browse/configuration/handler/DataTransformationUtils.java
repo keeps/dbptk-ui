@@ -252,7 +252,10 @@ public class DataTransformationUtils {
 
   public static RelatedTablesConfiguration getRelatedTableConfiguration(
     List<RelatedTablesConfiguration> sourceRelatedTables, String targetTableUUID, String denormalizationDirection) {
-    return sourceRelatedTables.stream().filter(rt -> rt.getTableUUID().equals(targetTableUUID)
-      && rt.getDenormalizationDirection().equals(denormalizationDirection)).findFirst().orElse(null);
+    return sourceRelatedTables.stream()
+      .filter(rt -> rt.getTableUUID().equals(targetTableUUID)
+        && (rt.getDenormalizationDirection().equals(denormalizationDirection)
+          || rt.getDenormalizationDirection().isEmpty()))
+      .findFirst().orElse(null);
   }
 }

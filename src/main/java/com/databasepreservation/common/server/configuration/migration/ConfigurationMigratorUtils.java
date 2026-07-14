@@ -32,7 +32,18 @@ public class ConfigurationMigratorUtils {
     JsonNode versionNode = rootNode.get(VERSION_KEY);
     String currentVersion = (versionNode != null && !versionNode.isNull()) ? versionNode.asText() : FALLBACK_VERSION;
 
-    return isOlderThan(currentVersion, targetSystemVersion);
+    return isBehindMajor(currentVersion, targetSystemVersion);
+  }
+
+  public static boolean isBehindMajor(String currentVersion, String targetVersion) {
+    try {
+      String currentMajor = currentVersion.substring(0, currentVersion.indexOf("."));
+      String targetMajor = targetVersion.substring(0, targetVersion.indexOf("."));
+      return currentMajor.compareTo(targetMajor) < 0;
+    } catch (Exception e) {
+      LOGGER.warn("Invalid version format: '{}'. Assuming it's older than '{}'.", currentVersion, targetVersion);
+      return true;
+    }
   }
 
   public static boolean isOlderThan(String currentVersion, String targetVersion) {

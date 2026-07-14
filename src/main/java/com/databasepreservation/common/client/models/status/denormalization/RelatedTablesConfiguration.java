@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -32,7 +31,7 @@ public class RelatedTablesConfiguration implements Serializable {
   private String referencedTableID;
   private String path;
   private Boolean multiValue = false;
-  private String denormalizationDirection;
+  private String denormalizationDirection = "";
   private List<ReferencesConfiguration> references;
   private List<RelatedColumnConfiguration> columnsIncluded;
   private List<RelatedTablesConfiguration> relatedTables;
