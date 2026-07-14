@@ -249,6 +249,7 @@ public class SiardControllerHelper {
     customViewConfiguration.setName(customViewsParameter.getCustomViewName());
     customViewConfiguration.setDescription(customViewsParameter.getCustomViewDescription());
     customViewConfiguration.setQuery(customViewsParameter.getCustomViewQuery());
+    customViewConfiguration.setColumns(getColumnConfiguration(customViewsParameter.getColumnParameters()));
 
     return customViewConfiguration;
   }
