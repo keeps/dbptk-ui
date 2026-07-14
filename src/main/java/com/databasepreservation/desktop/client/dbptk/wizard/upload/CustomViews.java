@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -22,7 +23,7 @@ import com.databasepreservation.common.client.common.fields.FileUploadField;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.common.utils.ApplicationTypeOperations;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
 import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameter;
@@ -122,7 +123,6 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private MultipleSelectionTablePanel<ViewerColumn> queryColumnsTable;
   private final List<ViewerColumn> currentQueryColumns = new ArrayList<>();
   private final Map<String, ExternalLobParameter> externalLOBsParameters = new HashMap<>();
-  private String currentBasePath = null;
   private boolean externalLOBsDelete = false;
   private String externalLOBsBtnText = messages.basicActionAdd();
 
@@ -385,6 +385,8 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         externalLOBsDelete = false;
         externalLOBsBtnText = messages.basicActionAdd();
 
+        final AtomicReference<String> columnBasePath = new AtomicReference<>(null);
+
         final ComboBoxField referenceType = ComboBoxField
           .createInstance(messages.tableAndColumnsPageLabelForReferenceType());
         referenceType.setComboBoxValue(messages.tableAndColumnsFileSystemOption(), "file-system");
@@ -431,13 +433,17 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
           fileUploadField.buttonAction(() -> {
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
               Collections.emptyList());
-            String path = JavascriptUtils.openFileDialog(options);
-            if (path != null) {
-              currentBasePath = path;
-              String displayPath = PathUtils.getFileName(path);
-              fileUploadField.setPathLocation(displayPath, path);
-              fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
-            }
+            ApplicationTypeOperations.choosePathToSaveAsync(options, messages.tableAndColumnsPageLabelForBasePath(),
+              messages.tableAndColumnsPageDescriptionForBasePath(), messages.basicActionCancel(),
+              messages.basicActionSave(), new DefaultAsyncCallback<String>() {
+                @Override
+                public void onSuccess(String path) {
+                  columnBasePath.set(path);
+                  String displayPath = PathUtils.getFileName(path);
+                  fileUploadField.setPathLocation(displayPath, path);
+                  fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
+                }
+              });
           });
 
           Dialogs.showExternalLobsSetupDialog(messages.tableAndColumnsPageDialogTitleForExternalLOBDialog(),
@@ -447,7 +453,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
               public void onSuccess(ExternalLobsDialogBoxResult result) {
                 if (result.getOption().equals("add") && result.isResult()) {
                   ExternalLobParameter externalLobParameter = new ExternalLobParameter();
-                  externalLobParameter.setBasePath(currentBasePath);
+                  externalLobParameter.setBasePath(columnBasePath.get());
                   externalLobParameter.setReferenceType(referenceType.getSelectedValue());
                   externalLOBsParameters.put(id, externalLobParameter);
                 }

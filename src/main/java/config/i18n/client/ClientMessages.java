@@ -1056,6 +1056,8 @@ public interface ClientMessages extends Messages {
 
   String tableAndColumnsPageLabelForBasePath();
 
+  String tableAndColumnsPageDescriptionForBasePath();
+
   String tableAndColumnsPageTableHeaderTextForColumnFilters();
 
   String tableAndColumnsPageTableHeaderTextForColumnName();
