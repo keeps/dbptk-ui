@@ -22,6 +22,7 @@ import com.databasepreservation.common.client.common.fields.FileUploadField;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
 import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameter;
@@ -30,6 +31,8 @@ import com.databasepreservation.common.client.models.wizard.table.ExternalLobPar
 import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.client.services.MigrationService;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.JSOUtils;
+import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
 import com.databasepreservation.common.client.widgets.Toast;
@@ -418,8 +421,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
           if (externalLOBsParameters.get(id) != null) {
             if (externalLOBsParameters.get(id).getBasePath() != null) {
-              String displayPath = com.databasepreservation.common.client.tools.PathUtils
-                .getFileName(externalLOBsParameters.get(id).getBasePath());
+              String displayPath = PathUtils.getFileName(externalLOBsParameters.get(id).getBasePath());
               fileUploadField.setPathLocation(displayPath, externalLOBsParameters.get(id).getBasePath());
             }
             externalLOBsDelete = true;
@@ -427,12 +429,12 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
           }
 
           fileUploadField.buttonAction(() -> {
-            JavaScriptObject options = com.databasepreservation.common.client.tools.JSOUtils
-              .getOpenDialogOptions(Collections.singletonList("openDirectory"), Collections.emptyList());
-            String path = com.databasepreservation.common.client.common.utils.JavascriptUtils.openFileDialog(options);
+            JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
+              Collections.emptyList());
+            String path = JavascriptUtils.openFileDialog(options);
             if (path != null) {
               currentBasePath = path;
-              String displayPath = com.databasepreservation.common.client.tools.PathUtils.getFileName(path);
+              String displayPath = PathUtils.getFileName(path);
               fileUploadField.setPathLocation(displayPath, path);
               fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
             }
@@ -527,7 +529,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       String value = getValue(object);
       sb.appendHtmlConstant("<button class=\"btn btn-link-info\" type=\"button\" tabindex=\"-1\">");
       if (value != null) {
-        sb.append(com.google.gwt.safehtml.shared.SafeHtmlUtils.fromString(value));
+        sb.append(SafeHtmlUtils.fromString(value));
       }
       sb.appendHtmlConstant("</button>");
     }
