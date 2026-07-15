@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
@@ -25,8 +27,6 @@ import com.databasepreservation.common.client.models.status.denormalization.Deno
 import com.databasepreservation.common.exceptions.DependencyViolationException;
 import com.databasepreservation.common.server.ConfigurationManager;
 import com.databasepreservation.common.server.configuration.validation.ConfigurationIntegrityValidator;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -87,8 +87,8 @@ public class ConfigurationIntegrityValidatorTest {
     });
 
     // Assert
-    assertTrue("Error message should contain details about the blocked deletion",
-      exception.getMessage().contains("Cannot be <b>deleted</b>: Virtual Column 'Virtual_Col' is required by [fk_1]"));
+    assertTrue("Error message should contain details about the blocked deletion", exception.getMessage().contains(
+      "cannot be deleted because it is currently being used by:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Virtual Relation 'Virtual_FK' (Table: 'table_1')"));
   }
 
   @Test
@@ -113,8 +113,8 @@ public class ConfigurationIntegrityValidatorTest {
     });
 
     // Assert
-    assertTrue("Error message should block modification due to dependency",
-      exception.getMessage().contains("Cannot be <b>modified</b>: Virtual Column 'Virtual_Col' is required by [fk_1]"));
+    assertTrue("Error message should block modification due to dependency", exception.getMessage().contains(
+      "<b>Virtual Column 'Virtual_Col'</b> cannot be modified because it is currently being used by:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Virtual Relation 'Virtual_FK' (Table: 'table_1')"));
   }
 
   @Test
@@ -151,8 +151,8 @@ public class ConfigurationIntegrityValidatorTest {
     });
 
     // Assert
-    assertTrue("Error message should block table deletion", exception.getMessage()
-      .contains("Cannot be <b>deleted</b>: Virtual Table 'Virtual_Table' is required by [denorm_1]"));
+    assertTrue("Error message should block table deletion", exception.getMessage().contains(
+      "<b>Virtual Table 'Virtual_Table'</b> cannot be deleted because it is currently being used by:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Denormalization on table 'Virtual_Table'"));
   }
 
   @Test
