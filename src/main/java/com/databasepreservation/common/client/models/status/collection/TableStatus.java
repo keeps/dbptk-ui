@@ -188,6 +188,15 @@ public class TableStatus implements Serializable {
     }
   }
 
+  public boolean isNotOrdered() {
+    if (columns == null || columns.isEmpty()) {
+      return false;
+    }
+
+    return columns.stream().anyMatch(col -> col.getOrder() > columns.size());
+
+  }
+
   @JsonIgnore
   public List<ColumnStatus> getVisibleColumnsList() {
     return columns.stream().filter(c -> c.getSearchStatus().getList().isShow()).sorted().collect(Collectors.toList());

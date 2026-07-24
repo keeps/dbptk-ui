@@ -417,6 +417,7 @@ public class ConfigurationManager {
           "Failed to validate the collection status update due to integrity violation: " + e.getMessage(), e);
       }
 
+      healCollectionStatus(updatedStatus);
       JsonTransformer.writeObjectToFile(updatedStatus, statusFile);
 
       if (updatedStatus.isNeedsToBeProcessed()) {
@@ -427,6 +428,18 @@ public class ConfigurationManager {
           ViewerDatabaseConfigurationStatus.UP_TO_DATE);
       }
     }
+  }
+
+  public void healCollectionStatus(CollectionStatus collectionStatus) {
+    // Ensure valid column orders for the tables
+    List<TableStatus> tables = collectionStatus.getTables();
+    tables.forEach(tableStatus -> {
+      if (tableStatus.isNotOrdered()) {
+        LOGGER.warn("{} needs to be reordered", tableStatus.getName());
+        tableStatus.reorderColumns();
+      }
+    });
+    collectionStatus.setTables(tables);
   }
 
   /**
