@@ -7,12 +7,9 @@
  */
 package com.databasepreservation.common.client.services;
 
-import java.util.Date;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 
-import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -28,6 +25,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.google.gwt.core.client.GWT;
 
@@ -100,8 +98,13 @@ public interface DatabaseService extends DirectRestService {
     @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody Map<String, AuthorizationDetails> permissions);
 
   @RequestMapping(path = "/{databaseUUID}/searchable", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "Updates database permissions")
+  @Operation(summary = "Updates database search-all availability")
   boolean updateDatabaseSearchAllAvailability(@PathVariable(name = "databaseUUID") String databaseUUID);
+
+  @RequestMapping(path = "/{databaseUUID}/location", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Updates database location in its configuration with no path validation")
+  boolean updateDatabaseLocation(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @Parameter(name = "path") @RequestParam(name = "path") String path);
 
   @RequestMapping(path = "/reindex", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Reindexes all databases")

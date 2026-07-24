@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
-import com.databasepreservation.common.utils.SiardUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -95,6 +94,7 @@ import com.databasepreservation.common.server.index.schema.SolrDefaultCollection
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
+import com.databasepreservation.common.utils.SiardUtils;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
 import com.databasepreservation.model.exception.UnsupportedModuleException;
@@ -1114,6 +1114,12 @@ public class SIARDController {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
     return solrManager.updateDatabaseSearchAllAvailability(databaseUUID, !database.isAvailableToSearchAll());
+  }
+
+  public static boolean updateDatabaseLocation(String databaseUUID, String path)
+    throws GenericException, ViewerException {
+    final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    return solrManager.updateDatabaseLocation(databaseUUID, path);
   }
 
   public static StringResponse reindex() throws GenericException, ModuleException, NotFoundException {

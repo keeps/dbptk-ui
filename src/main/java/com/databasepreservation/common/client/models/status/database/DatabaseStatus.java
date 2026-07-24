@@ -143,6 +143,11 @@ public class DatabaseStatus implements Serializable {
     this.siardStatus = siardStatus;
   }
 
+  @JsonIgnore
+  public void setSiardLocation(String path) {
+    this.siardStatus.setLocation(path);
+  }
+
   @JsonProperty("validation")
   public ValidationStatus getValidationStatus() {
     return validationStatus;

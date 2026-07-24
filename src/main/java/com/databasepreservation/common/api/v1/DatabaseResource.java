@@ -500,6 +500,29 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
+  public boolean updateDatabaseLocation(String databaseUUID, String path) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+
+    try {
+      user = controllerAssistant.checkRoles(request);
+      ParameterSanitization.sanitizePath(databaseUUID, "Invalid database UUID");
+      UserUtility.checkDatabasePermission(user, databaseUUID);
+      return SIARDController.updateDatabaseLocation(databaseUUID, path);
+    } catch (GenericException | ViewerException | AuthorizationException | IllegalArgumentException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID);
+    }
+
+  }
+
+  @Override
   public StringResponse reindex() {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 

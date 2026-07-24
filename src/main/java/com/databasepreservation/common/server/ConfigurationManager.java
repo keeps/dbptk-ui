@@ -366,6 +366,30 @@ public class ConfigurationManager {
     }
   }
 
+  public void updateDatabaseLocation(String databaseId, String path) throws GenericException, ViewerException {
+    synchronized (databaseStatusFileLock) {
+      try {
+        final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+        final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseId);
+
+        Path databaseFile = databaseDirectoryPath
+          .resolve(ViewerConstants.DATABASE_STATUS_PREFIX + databaseId + ViewerConstants.JSON_EXTENSION);
+
+        // verify if file exists
+        if (FSUtils.exists(databaseFile)) {
+          final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
+          databaseStatus.setSiardLocation(path);
+
+          // update database file
+          JsonTransformer.writeObjectToFile(databaseStatus, databaseFile);
+        }
+      } catch (GenericException | ViewerException e) {
+        LOGGER.debug(e.getMessage(), e);
+        throw e;
+      }
+    }
+  }
+
   public void updateDatabaseMetadata(String databaseId, ViewerMetadata viewerMetadata)
     throws GenericException, ViewerException {
     synchronized (databaseStatusFileLock) {

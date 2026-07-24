@@ -672,6 +672,24 @@ public class DatabaseRowsSolrManager {
     return true;
   }
 
+  public boolean updateDatabaseLocation(String databaseUUID, String path) throws GenericException, ViewerException {
+    LOGGER.debug("Starting to update database location ({})", databaseUUID);
+    // create document to update this DB
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
+
+    try {
+      doc.addField(ViewerConstants.SOLR_DATABASES_SIARD_PATH, SolrUtils.asValueUpdate(path));
+      insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Could not update database location ({})", databaseUUID, e);
+    }
+
+    ViewerFactory.getConfigurationManager().updateDatabaseLocation(databaseUUID, path);
+    LOGGER.debug("Finish updating database location ({})", databaseUUID);
+    return true;
+  }
+
   public void updateDatabaseMetadata(String databaseUUID, ViewerMetadata metadata) throws GenericException {
     LOGGER.debug("Starting to update database metadata ({})", databaseUUID);
 
