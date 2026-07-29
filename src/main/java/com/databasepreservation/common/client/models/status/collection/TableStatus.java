@@ -188,6 +188,7 @@ public class TableStatus implements Serializable {
     }
   }
 
+  @JsonIgnore
   public boolean isNotOrdered() {
     if (columns == null || columns.isEmpty()) {
       return false;
