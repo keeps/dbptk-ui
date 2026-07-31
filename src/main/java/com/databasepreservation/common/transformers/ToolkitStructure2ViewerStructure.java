@@ -776,8 +776,15 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
+  /**
+   * @param sharedZipFile
+   *          an already open ZipFile for databasePath, reused across rows/cells
+   *          to avoid re-reading the ZIP central directory for every LOB (may be
+   *          null, in which case a ZipFile is opened and closed per LOB as
+   *          needed)
+   */
   public static ViewerRow getRow(CollectionStatus collectionConfiguration, ViewerTable table, Row row, long rowIndex,
-    String databasePath, String siardVersion) {
+    String databasePath, String siardVersion, ZipFile sharedZipFile) {
     setCurrentTable(table);
 
     ViewerRow result = new ViewerRow();
@@ -787,7 +794,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setTableId(table.getId());
     result.setTableUUID(table.getUuid());
     result.setUuid(rowUUID);
-    result.setCells(getCells(collectionConfiguration, table, row, databasePath, result, siardVersion));
+    result.setCells(getCells(collectionConfiguration, table, row, databasePath, result, siardVersion, sharedZipFile));
     return result;
   }
 
@@ -798,7 +805,7 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   private static Map<String, ViewerCell> getCells(CollectionStatus collectionConfiguration, ViewerTable table, Row row,
-    String databasePath, ViewerRow actualViewerRow, String siardVersion) {
+    String databasePath, ViewerRow actualViewerRow, String siardVersion, ZipFile sharedZipFile) {
     Map<String, ViewerCell> result = new LinkedHashMap<>();
 
     int colIndex = 0;
@@ -807,7 +814,7 @@ public class ToolkitStructure2ViewerStructure {
       String solrColumnName = viewerColumn.getSolrName();
       try {
         result.put(solrColumnName, getCell(collectionConfiguration, table, toolkitCells.get(colIndex), colIndex++,
-          databasePath, actualViewerRow, siardVersion));
+          databasePath, actualViewerRow, siardVersion, sharedZipFile));
       } catch (ViewerException e) {
         LOGGER.error("Problem converting cell, omitted it (as if it were NULL)", e);
       }
@@ -817,7 +824,8 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   private static ViewerCell getCell(CollectionStatus collectionConfiguration, ViewerTable table, Cell cell,
-    int colIndex, String databasePath, ViewerRow actualViewerRow, String siardVersion) throws ViewerException {
+    int colIndex, String databasePath, ViewerRow actualViewerRow, String siardVersion, ZipFile sharedZipFile)
+    throws ViewerException {
     ViewerCell result = new ViewerCell();
 
     ViewerType columnType = table.getColumns().get(colIndex).getType();
@@ -846,7 +854,7 @@ public class ToolkitStructure2ViewerStructure {
 
           if (!mimeTypeAutoDetectDisable) {
             detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
-              true);
+              true, sharedZipFile);
           }
 
         } catch (ModuleException e) {
@@ -870,7 +878,7 @@ public class ToolkitStructure2ViewerStructure {
 
         if (!mimeTypeAutoDetectDisable) {
           detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
-            false);
+            false, sharedZipFile);
         }
 
       } else {
@@ -889,18 +897,18 @@ public class ToolkitStructure2ViewerStructure {
           result.setValue(lobName);
           if (!mimeTypeAutoDetectDisable) {
             detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
-              true, true);
+              true, true, sharedZipFile);
           }
         } else {
           // Check if LOB is a CLOB
           if (columnType.getDbType().equals(ViewerType.dbTypes.CLOB)) {
-            getCLOBValue(databasePath, binaryCell.getFile()).ifPresent(result::setValue);
+            getCLOBValue(databasePath, binaryCell.getFile(), sharedZipFile).ifPresent(result::setValue);
           } else {
             lobName = Paths.get(binaryCell.getFile()).getFileName().toString();
             result.setValue(lobName);
             if (!mimeTypeAutoDetectDisable) {
               detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
-                true);
+                true, sharedZipFile);
             }
           }
         }
@@ -941,36 +949,51 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static Optional<String> getCLOBValue(String databasePath, String lobName) {
-
-    try (ZipFile zipFile = new ZipFile(databasePath)) {
+  private static Optional<String> getCLOBValue(String databasePath, String lobName, ZipFile sharedZipFile) {
+    ZipFile zipFile = sharedZipFile;
+    boolean ownsZipFile = false;
+    try {
+      if (zipFile == null) {
+        zipFile = new ZipFile(databasePath);
+        ownsZipFile = true;
+      }
       ZipEntry entry = zipFile.getEntry(lobName);
-      InputStream inputStream = zipFile.getInputStream(entry);
-      return Optional.of(IOUtils.toString(inputStream, StandardCharsets.UTF_8));
+      try (InputStream inputStream = zipFile.getInputStream(entry)) {
+        return Optional.of(IOUtils.toString(inputStream, StandardCharsets.UTF_8));
+      }
     } catch (IOException e) {
       LOGGER.error("Failed to obtain CLOB value", e);
+    } finally {
+      if (ownsZipFile) {
+        try {
+          zipFile.close();
+        } catch (IOException e) {
+          LOGGER.error("Failed to close ZIP file", e);
+        }
+      }
     }
     return Optional.empty();
   }
 
   private static void detectMimeType(ViewerRow row, ViewerCell cell, String databasePath,
     CollectionStatus collectionConfiguration, ViewerTable table, int colIndex, String lobName,
-    boolean blobIsInsideSiard) {
+    boolean blobIsInsideSiard, ZipFile sharedZipFile) {
     detectMimeType(row, cell, databasePath, collectionConfiguration, table, colIndex, lobName, blobIsInsideSiard,
-      false);
+      false, sharedZipFile);
   }
 
   private static void detectMimeType(ViewerRow row, ViewerCell cell, String databasePath,
     CollectionStatus collectionConfiguration, ViewerTable table, int colIndex, String lobName,
-    boolean blobIsInsideSiard, boolean isSiardDK) {
+    boolean blobIsInsideSiard, boolean isSiardDK, ZipFile sharedZipFile) {
+    ZipFile zipFile = sharedZipFile;
+    boolean ownsZipFile = false;
+    InputStream inputStream = null;
     try {
       String mimeType;
       String fileExtension;
-      InputStream inputStream;
 
       TableStatus tableStatus = collectionConfiguration.getTableStatusByTableId(table.getId());
 
-      ZipFile zipFile = null;
       ZipEntry entry = null;
       String siardLobPath;
 
@@ -983,7 +1006,10 @@ public class ToolkitStructure2ViewerStructure {
 
         if (!isSiardDK) {
           siardLobPath = LobManagerUtils.getZipFilePath(tableStatus, colIndex, lobName);
-          zipFile = new ZipFile(databasePath);
+          if (zipFile == null) {
+            zipFile = new ZipFile(databasePath);
+            ownsZipFile = true;
+          }
           entry = zipFile.getEntry(siardLobPath);
 
           if (entry != null && blobIsInsideSiard) {
@@ -1006,6 +1032,7 @@ public class ToolkitStructure2ViewerStructure {
 
         if (StringUtils.isAllBlank(fileExtension)) {
           try {
+            IOUtils.closeQuietly(inputStream);
             if (blobIsInsideSiard) {
               if (entry != null) {
                 inputStream = zipFile.getInputStream(entry);
@@ -1036,12 +1063,6 @@ public class ToolkitStructure2ViewerStructure {
             LOGGER.error("Could not calculate mimeType for special extensions in the cell: [{}]", cell.getValue(), e);
           }
         }
-
-        inputStream.close();
-
-        if (zipFile != null) {
-          zipFile.close();
-        }
       }
 
       cell.setMimeType(mimeType);
@@ -1057,6 +1078,15 @@ public class ToolkitStructure2ViewerStructure {
 
     } catch (IOException | MimeTypeException e) {
       LOGGER.error("Could not calculate mimeType for cell: [{}]", cell.getValue(), e);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+      if (ownsZipFile) {
+        try {
+          zipFile.close();
+        } catch (IOException e) {
+          LOGGER.error("Failed to close ZIP file", e);
+        }
+      }
     }
   }
 
