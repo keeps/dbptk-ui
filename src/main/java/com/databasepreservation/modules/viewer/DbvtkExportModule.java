@@ -26,6 +26,8 @@ import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
+import com.databasepreservation.model.data.BinaryCell;
+import com.databasepreservation.model.data.Cell;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.UnknownTypeException;
@@ -144,6 +146,12 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   public void handleDataRow(Row row) throws ModuleException {
     solrManager.addRow(collectionConfiguration, ToolkitStructure2ViewerStructure.getRow(collectionConfiguration,
       currentTable, row, rowIndex++, retrieved.getPath(), retrieved.getVersion()));
+
+    for (Cell cell : row.getCells()) {
+      if (cell instanceof BinaryCell) {
+        ((BinaryCell) cell).cleanResources();
+      }
+    }
 
     rowsProcessedByTableCounter++;
     rowCounter++;
