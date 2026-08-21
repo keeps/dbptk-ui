@@ -116,7 +116,7 @@ public class ContextResource implements ContextService {
       AuthorizationGroupsList authorizationGroupsList = ViewerConfiguration.getInstance()
         .getCollectionsAuthorizationGroupsWithDefault();
       findRequest = new FindRequest(ViewerDatabase.class.getName(), new Filter(), new Sorter(), null, null, false,
-        List.of(ViewerConstants.SOLR_DATABASES_METADATA, "uuid"));
+        List.of(ViewerConstants.SOLR_DATABASES_METADATA_NAME, "uuid"));
       try (IterableDatabaseResult<ViewerDatabase> allDatabases = solrManager.findAll(ViewerDatabase.class,
         findRequest.filter, findRequest.sorter, findRequest.fieldsToReturn,
         DatabaseResource.getDatabaseFindContentTypeFilterQueries())) {
