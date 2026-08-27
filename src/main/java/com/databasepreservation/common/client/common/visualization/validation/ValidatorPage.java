@@ -67,7 +67,7 @@ public class ValidatorPage extends ContentPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDValidatorPage(database.getUuid(),
-        database.getMetadata().getName());
+      database.getMetadata().getName());
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
@@ -359,7 +359,10 @@ public class ValidatorPage extends ContentPanel {
     }
 
     // SIARD specification link
-    Button SIARDSpecification = new Button(ViewerConstants.SIARD2_1);
+    String siardVersion = (database.getMetadata() != null && database.getVersion() != null) ? database.getVersion()
+      : ViewerConstants.SIARD2_1;
+
+    Button SIARDSpecification = new Button(siardVersion);
     SIARDSpecification.addClickHandler(
       event -> Window.open(ViewerConstants.SIARD_SPECIFICATION_LINK, ViewerConstants.BLANK_LINK, null));
 
