@@ -10,6 +10,7 @@ package com.databasepreservation.modules.viewer;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipFile;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
@@ -49,6 +50,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   private ViewerTable currentTable;
   private String databaseUUID;
   private long rowIndex = 1;
+  private ZipFile databaseZipFile;
   private static final Logger LOGGER = LoggerFactory.getLogger(DbvtkExportModule.class);
 
   public DbvtkExportModule(String databaseUUID) {
@@ -72,6 +74,21 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   public void initDatabase() throws ModuleException {
     LOGGER.info("Starting to process database {}", databaseUUID);
     // setup is done when DBVTK starts
+
+    // Open the SIARD file once and reuse it for LOB access/mime-type detection
+    // across all rows and tables, instead of re-opening it (and re-reading its
+    // whole ZIP central directory) for every LOB cell. Not all SIARD variants
+    // (e.g. SIARD-DK) are ZIP files, so failing to open it here is expected and
+    // simply falls back to opening a ZipFile per LOB access.
+    if (retrieved != null && retrieved.getPath() != null) {
+      try {
+        databaseZipFile = new ZipFile(retrieved.getPath());
+      } catch (IOException e) {
+        LOGGER.debug("Database at {} could not be opened as a ZIP file, LOB access will open it on demand instead",
+          retrieved.getPath(), e);
+        databaseZipFile = null;
+      }
+    }
   }
 
   /**
@@ -145,7 +162,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   @Override
   public void handleDataRow(Row row) throws ModuleException {
     solrManager.addRow(collectionConfiguration, ToolkitStructure2ViewerStructure.getRow(collectionConfiguration,
-      currentTable, row, rowIndex++, retrieved.getPath(), retrieved.getVersion()));
+      currentTable, row, rowIndex++, retrieved.getPath(), retrieved.getVersion(), databaseZipFile));
 
     for (Cell cell : row.getCells()) {
       if (cell instanceof BinaryCell) {
@@ -225,6 +242,16 @@ public class DbvtkExportModule implements DatabaseFilterModule {
     } catch (IllegalAccessException e) {
       throw new ModuleException().withMessage("Error updating collection status").withCause(e);
     }
+
+    if (databaseZipFile != null) {
+      try {
+        databaseZipFile.close();
+      } catch (IOException e) {
+        LOGGER.warn("Could not close database ZIP file", e);
+      }
+      databaseZipFile = null;
+    }
+
     LOGGER.info("Finished processing database {}", databaseUUID);
   }
 
