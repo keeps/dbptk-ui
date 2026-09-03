@@ -136,6 +136,7 @@ public class ActivityLogUtils {
         return panel;
       case "findRows":
         handleDatabaseInfo(panel, wrapper);
+        handleTableIdInfo(panel, wrapper);
         handleFilterInfo(panel, wrapper);
         handleSublistInfo(panel, wrapper);
         return panel;
@@ -253,7 +254,7 @@ public class ActivityLogUtils {
     if (wrapper.getFilterPresence().equals(PresenceState.YES)) {
       final HTML html = new HTML(FilterHtmlUtils.getFilterHTML(wrapper.getFilter()));
       html.addStyleName("display-inline-grid metadata-information-element-value");
-      final GenericField field = GenericField.createInstance("Search parameters", html);
+      final GenericField field = GenericField.createInstance(messages.activityLogSearchParameters(), html);
       field.setCSSMetadata("row-field", "metadata-information-element-label");
       panel.add(field);
     }
@@ -353,6 +354,20 @@ public class ActivityLogUtils {
     if (wrapper.getColumnPresence().equals(PresenceState.YES)) {
       panel.add(RowField.createInstance(messages.columnName(),
         new HTML(SafeHtmlUtils.fromSafeConstant(wrapper.getColumnName()))));
+    }
+  }
+
+  /**
+   * Shows the table the action was applied to, taken directly from the logged
+   * parameters. The database in the wrapper is loaded without schemas, so the
+   * table cannot be resolved from the metadata.
+   */
+  private static void handleTableIdInfo(FlowPanel panel, ActivityLogWrapper wrapper) {
+    final String tableId = wrapper.getActivityLogEntry().getParameters()
+      .get(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
+    if (tableId != null) {
+      panel.add(RowField.createInstance(messages.activityLogTableRelated(),
+        new HTML(SafeHtmlUtils.fromString(tableId))));
     }
   }
 

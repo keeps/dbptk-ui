@@ -32,28 +32,28 @@ public class SublistHtmlUtils {
     int page = firstElementIndex + maximumElementCount;
 
     if (totalCount == 0) {
-      return RowField.createInstance("Sublist",
+      return RowField.createInstance(messages.activityLogSublist(),
         new HTML(sublistHTML.append(SafeHtmlUtils.fromSafeConstant(messages.sublistNoElements())).toSafeHtml()));
       // return
       // sublistHTML.append(SafeHtmlUtils.fromSafeConstant(messages.sublistNoElements())).toSafeHtml();
     }
 
     if (totalCount == 1) {
-      return RowField.createInstance("Sublist",
+      return RowField.createInstance(messages.activityLogSublist(),
         new HTML(sublistHTML.append(SafeHtmlUtils.fromSafeConstant(messages.sublistSingleElement())).toSafeHtml()));
       // return
       // sublistHTML.append(SafeHtmlUtils.fromSafeConstant(messages.sublistSingleElement())).toSafeHtml();
     }
 
     if (totalCount < page) {
-      return RowField.createInstance("Sublist", new HTML(sublistHTML
+      return RowField.createInstance(messages.activityLogSublist(), new HTML(sublistHTML
         .append(SafeHtmlUtils.fromSafeConstant(messages.sublist(firstElementIndex + 1, totalCount))).toSafeHtml()));
       // return
       // sublistHTML.append(SafeHtmlUtils.fromSafeConstant(messages.sublist(firstElementIndex+1,
       // totalCount))).toSafeHtml();
     }
 
-    return RowField.createInstance("Sublist", new HTML(
+    return RowField.createInstance(messages.activityLogSublist(), new HTML(
       sublistHTML.append(SafeHtmlUtils.fromSafeConstant(messages.sublist(firstElementIndex + 1, page))).toSafeHtml()));
     // sublistHTML.append(SafeHtmlUtils.fromSafeConstant(messages.sublist(firstElementIndex+1,
     // page)));
