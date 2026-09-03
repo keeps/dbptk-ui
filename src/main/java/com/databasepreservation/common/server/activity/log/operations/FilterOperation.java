@@ -11,21 +11,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
-import com.databasepreservation.common.client.models.activity.logs.PresenceState;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.utils.JsonUtils;
-import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.index.filter.FilterParameter;
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogWrapper;
+import com.databasepreservation.common.client.models.activity.logs.PresenceState;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -57,15 +57,15 @@ public class FilterOperation implements Operation {
   }
 
   private Filter replaceColumnSolrName(ViewerMetadata metadata, Map<String, String> parameters)
-      throws GenericException {
+    throws GenericException {
 
     final String jsonFilter = parameters.get(ViewerConstants.CONTROLLER_FILTER_PARAM);
     final Filter filter = JsonUtils.getObjectFromJson(jsonFilter, Filter.class);
 
-    final Map<String, String> mapperSolrToDisplayName = getDisplayNameColumn(metadata, filter);
+    final Map<String, String> mapperSolrToDisplayName = getDisplayNameColumn(metadata, parameters, filter);
 
     for (FilterParameter filterParameter : filter.getParameters()) {
-      if (filterParameter.getName().startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
+      if (isColumnFilterParameter(filterParameter)) {
         filterParameter.setName(mapperSolrToDisplayName.get(filterParameter.getName()));
       }
     }
@@ -73,25 +73,50 @@ public class FilterOperation implements Operation {
     return filter;
   }
 
+  // check if filter parameter is not scoped to a column
+  // ex EDismaxSimplerQueryFilterParameter type filters
+  private boolean isColumnFilterParameter(FilterParameter filterParameter) {
+    final String name = filterParameter.getName();
+    return name != null && name.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX);
+  }
+
   private String getTableIdFromFilter(Filter filter) {
     for (FilterParameter filterParameter : filter.getParameters()) {
-      if (filterParameter.getName().equals(ViewerConstants.SOLR_ROWS_TABLE_ID)
-          && filterParameter instanceof SimpleFilterParameter) {
+      if (filterParameter instanceof SimpleFilterParameter
+        && ViewerConstants.SOLR_ROWS_TABLE_ID.equals(filterParameter.getName())) {
         return ((SimpleFilterParameter) filterParameter).getValue();
       }
     }
     return null;
   }
 
-  private Map<String, String> getDisplayNameColumn(ViewerMetadata metadata, Filter filter) {
+  private ViewerTable getTable(ViewerMetadata metadata, Map<String, String> parameters, Filter filter) {
+    String tableId = parameters.get(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
+    if (tableId == null) {
+      tableId = getTableIdFromFilter(filter);
+    }
+
+    if (tableId == null) {
+      LOGGER.debug("Unable to determine the table for this activity log entry, "
+        + "Solr column names will not be replaced by their display names");
+      return null;
+    }
+
+    return metadata.getTableById(tableId);
+  }
+
+  private Map<String, String> getDisplayNameColumn(ViewerMetadata metadata, Map<String, String> parameters,
+    Filter filter) {
     Map<String, String> solrNameToDisplayName = new HashMap<>();
 
-    String tableId = getTableIdFromFilter(filter);
+    final ViewerTable table = getTable(metadata, parameters, filter);
+    if (table == null) {
+      return solrNameToDisplayName;
+    }
 
     for (FilterParameter filterParameter : filter.getParameters()) {
-      if (filterParameter.getName().startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
-        final List<ViewerColumn> columns = metadata.getTableById(tableId).getColumns();
-
+      if (isColumnFilterParameter(filterParameter)) {
+        final List<ViewerColumn> columns = table.getColumns();
         for (ViewerColumn column : columns) {
           if (column.getSolrName().equals(filterParameter.getName())) {
             solrNameToDisplayName.put(column.getSolrName(), column.getDisplayName());

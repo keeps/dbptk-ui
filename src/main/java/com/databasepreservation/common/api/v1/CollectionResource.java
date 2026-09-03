@@ -768,7 +768,8 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID, ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest.filter),
+        databaseUUID, ViewerConstants.CONTROLLER_TABLE_ID_PARAM, schema + "." + table,
+        ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest.filter),
         ViewerConstants.CONTROLLER_SUBLIST_PARAM, JsonUtils.getJsonFromObject(findRequest.sublist),
         ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
     }
