@@ -16,8 +16,7 @@ import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.client.common.utils.ApplicationType;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.common.utils.ApplicationTypeOperations;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
@@ -48,29 +47,32 @@ public class HelperUploadSIARDFile {
     "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
   public void openFile(FlowPanel panel) {
-    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
+    ExtensionFilter siard = new ExtensionFilter("SIARD", Collections.singletonList("siard"));
+    JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
+      Collections.singletonList(siard));
 
-      ExtensionFilter siard = new ExtensionFilter("SIARD", Collections.singletonList("siard"));
-
-      JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
-        Collections.singletonList(siard));
-
-      openSIARDPath(panel, JavascriptUtils.openFileDialog(options));
-    } else {
-      Dialogs.showServerFilePathDialog(messages.managePageButtonTextForOpenSIARD(), messages.dialogOpenSIARDMessage(),
-        messages.basicActionCancel(), messages.basicActionOpen(), new DefaultAsyncCallback<String>() {
-          @Override
-          public void onSuccess(String path) {
-            openSIARDPath(panel, path);
-          }
-        });
-    }
+    ApplicationTypeOperations.choosePathToOpenAsync(options, messages.managePageButtonTextForOpenSIARD(),
+      messages.dialogOpenSIARDMessage(), messages.basicActionCancel(), messages.basicActionOpen(),
+      new DefaultAsyncCallback<String>() {
+        @Override
+        public void onSuccess(String path) {
+          openSIARDPath(panel, path);
+        }
+      });
   }
 
   public void openDirectory(FlowPanel panel) {
     JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
       new ArrayList<>());
-    openSIARDPath(panel, JavascriptUtils.openFileDialog(options));
+
+    ApplicationTypeOperations.choosePathToOpenAsync(options, messages.managePageButtonTextForOpenSIARD(),
+      messages.dialogOpenSIARDMessage(), messages.basicActionCancel(), messages.basicActionOpen(),
+      new DefaultAsyncCallback<String>() {
+        @Override
+        public void onSuccess(String path) {
+          openSIARDPath(panel, path);
+        }
+      });
   }
 
   private void openSIARDPath(FlowPanel panel, String path) {
@@ -79,29 +81,21 @@ public class HelperUploadSIARDFile {
       FindRequest request = new FindRequest(ViewerDatabase.class.getName(),
         new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_SIARD_PATH, path)), Sorter.NONE,
         new Sublist(), Facets.NONE, false, Collections.singletonList(ViewerConstants.INDEX_ID));
+
       DatabaseService.Util.call((IndexResult<ViewerDatabase> result) -> {
         if (result.getTotalCount() == 1) {
-          if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
-            JavascriptUtils.confirmationDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
-              messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
-                @Override
-                public void onSuccess(Boolean confirm) {
-                  successHandler(confirm, panel, result.getResults().get(0).getUuid(), path);
-                }
-              });
-          } else {
-            Dialogs.showConfirmDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
-              messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
-                @Override
-                public void onSuccess(Boolean confirm) {
-                  successHandler(confirm, panel, result.getResults().get(0).getUuid(), path);
-                }
-              });
-          }
+          ApplicationTypeOperations.requestConfirmation(messages.dialogReimportSIARDTitle(),
+            messages.dialogReimportSIARD(), messages.basicActionCancel(), messages.basicActionConfirm(),
+            new DefaultAsyncCallback<Boolean>() {
+              @Override
+              public void onSuccess(Boolean confirm) {
+                successHandler(confirm, panel, result.getResults().get(0).getUuid(), path);
+              }
+            });
         } else if (result.getTotalCount() == 0) {
           uploadMetadataSIARD(path, panel);
         } else {
-
+          // TODO: handle other cases
         }
       }).find(request, LocaleInfo.getCurrentLocale().getLocaleName());
     }

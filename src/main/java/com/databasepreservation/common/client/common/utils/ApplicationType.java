@@ -7,6 +7,9 @@
  */
 package com.databasepreservation.common.client.common.utils;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
+import com.databasepreservation.common.client.ViewerConstants;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
@@ -20,5 +23,17 @@ public class ApplicationType {
 
   public static void setType(String type) {
     ApplicationType.type = type;
+  }
+
+  public static boolean isDesktopForWeb() {
+    return ClientConfigurationManager.getBoolean(false, ViewerConstants.ENABLE_DESKTOP_IN_BROWSER_ENVIRONMENT);
+  }
+
+  public static boolean isDesktop() {
+    return getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP) && !isDesktopForWeb();
+  }
+
+  public static boolean isServer() {
+    return !isDesktop() && !isDesktopForWeb();
   }
 }

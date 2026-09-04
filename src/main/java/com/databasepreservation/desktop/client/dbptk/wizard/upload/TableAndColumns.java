@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -23,7 +24,7 @@ import com.databasepreservation.common.client.common.lists.cells.DisableableChec
 import com.databasepreservation.common.client.common.lists.cells.helper.CheckboxData;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.common.utils.ApplicationTypeOperations;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -113,7 +114,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private Map<String, Boolean> viewMaterializationStatus = new HashMap<>();
   private Map<String, Boolean> merkleColumnStatus = new HashMap<>();
   private Map<String, ExternalLobParameter> externalLOBsParameters = new HashMap<>();
-  private String currentBasePath = null;
   private String databaseUUID;
   // false: "SELECT ALL"; true: "SELECT NONE";
   private Map<String, Boolean> toggleSelectionTablesMap = new HashMap<>();
@@ -670,11 +670,13 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     buttonDatabaseColumn.setFieldUpdater((index, object, value) -> {
       String id = object.getDisplayName() + "_" + viewerTable.getUuid();
 
+      final AtomicReference<String> columnBasePath = new AtomicReference<>(null);
+
       final ComboBoxField referenceType = ComboBoxField
         .createInstance(messages.tableAndColumnsPageLabelForReferenceType());
-      referenceType.setComboBoxValue("File System", "file-system");
+      referenceType.setComboBoxValue(messages.tableAndColumnsFileSystemOption(), "file-system");
       if (doSSH) {
-        referenceType.setComboBoxValue("Remote File System", "remote-file-system");
+        referenceType.setComboBoxValue(messages.tableAndColumnsRemoteFileSystem(), "remote-file-system");
       }
       referenceType.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
 
@@ -688,7 +690,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       helperReferenceType.add(spanReferenceType);
 
       GenericField genericField;
-      if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
+      if (ApplicationType.isDesktop()) {
         FileUploadField fileUploadField = FileUploadField.createInstance(messages.tableAndColumnsPageLabelForBasePath(),
           messages.tableAndColumnsPageTableHeaderTextForSelect());
         fileUploadField.setParentCSS("form-row");
@@ -718,13 +720,17 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
               Collections.emptyList());
 
-            String path = JavascriptUtils.openFileDialog(options);
-            if (path != null) {
-              currentBasePath = path;
-              String displayPath = PathUtils.getFileName(path);
-              fileUploadField.setPathLocation(displayPath, path);
-              fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
-            }
+            ApplicationTypeOperations.choosePathToSaveAsync(options, messages.tableAndColumnsPageLabelForBasePath(),
+              messages.tableAndColumnsPageDescriptionForBasePath(), messages.basicActionCancel(),
+              messages.basicActionSave(), new DefaultAsyncCallback<String>() {
+                @Override
+                public void onSuccess(String path) {
+                  columnBasePath.set(path);
+                  String displayPath = PathUtils.getFileName(path);
+                  fileUploadField.setPathLocation(displayPath, path);
+                  fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
+                }
+              });
           }
         });
 
@@ -735,7 +741,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             public void onSuccess(ExternalLobsDialogBoxResult result) {
               if (result.getOption().equals("add") && result.isResult()) {
                 ExternalLobParameter externalLobParameter = new ExternalLobParameter();
-                externalLobParameter.setBasePath(currentBasePath);
+                externalLobParameter.setBasePath(columnBasePath.get());
                 externalLobParameter.setReferenceType(referenceType.getSelectedValue());
 
                 MultipleSelectionTablePanel<ViewerColumn> viewerColumnMultipleSelectionTablePanel = getColumns(
