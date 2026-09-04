@@ -642,8 +642,6 @@ public class SIARDController {
 
   private static String loadMetadataFromLocal(String databaseUUID, String localPath,
     ViewerConstants.SiardVersion siardVersion) throws GenericException {
-    System.setProperty("dbptk.memory.dir",
-      ViewerConfiguration.getInstance().getMapDBPath().toAbsolutePath().toString());
     Path basePath;
     if (ViewerFactory.getViewerConfiguration().isDesktopEnvironmentWithWebSupport()) {
       basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString(
@@ -786,8 +784,6 @@ public class SIARDController {
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
       ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     try {
-      System.setProperty("dbptk.memory.dir",
-        ViewerConfiguration.getInstance().getMapDBPath().toAbsolutePath().toString());
       Path siardPath = basePath.resolve(localPath);
       convertSIARDtoSolr(siardPath, databaseUUID, siardVersion);
       LOGGER.info("Conversion to SIARD successful, database: {}", databaseUUID);
@@ -1064,9 +1060,6 @@ public class SIARDController {
         final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
         solrManager.updateSIARDValidationInformation(databaseUUID, ViewerDatabaseValidationStatus.VALIDATION_RUNNING,
           validationReportPath, dbptkVersion, new DateTime().toString());
-
-        System.setProperty("dbptk.memory.dir",
-          ViewerConfiguration.getInstance().getMapDBPath().toAbsolutePath().toString());
 
         valid = siardValidation.validate();
 
