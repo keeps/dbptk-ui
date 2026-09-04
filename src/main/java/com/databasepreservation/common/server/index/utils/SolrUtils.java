@@ -1048,7 +1048,7 @@ public class SolrUtils {
     if (appendDoubleQuotes) {
       ret.append("\"");
     }
-    ret.append(value.replaceAll("(\")", "\\\\$1"));
+    ret.append(sanitizeValue(value));
     if (appendDoubleQuotes) {
       ret.append("\"");
     }
@@ -1128,7 +1128,8 @@ public class SolrUtils {
       ret.append("(");
     }
 
-    String[] split = value.trim().split("\\s+");
+    String sanitizedValue = sanitizeValue(value);
+    String[] split = sanitizedValue.trim().split("\\s+");
     for (int i = 0; i < split.length; i++) {
       if (i != 0 && operator != null) {
         ret.append(" ").append(operator).append(" ");
@@ -2159,5 +2160,17 @@ public class SolrUtils {
       }
     }
     return filterField;
+  }
+
+  public static String sanitizeValue(String value) {
+    String ret = value;
+
+    // Escape backslashes
+    ret = ret.replace("\\", "\\\\");
+
+    // Escape quotes
+    ret = ret.replaceAll("(\")", "\\\\$1");
+
+    return ret;
   }
 }
