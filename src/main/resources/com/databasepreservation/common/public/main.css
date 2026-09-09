@@ -1142,6 +1142,16 @@ p[data-value]:after {
     white-space: nowrap;
 }
 
+.column-description-wrap {
+    vertical-align: top;
+}
+
+.column-description-wrap .column-description{
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+
 .structure-header .h1 {
     margin: 0;
     flex-grow: 1;

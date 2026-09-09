@@ -91,6 +91,7 @@ public class RowField extends Composite {
   public void addColumnDescription(String text) {
     SimplePanel description = new SimplePanel();
     description.addStyleName("metadata-information-element-value text-muted");
+    description.addStyleName("column-description-wrap");
     final HTML html = new HTML(text);
     html.addStyleName("column-description");
     description.setWidget(html);
