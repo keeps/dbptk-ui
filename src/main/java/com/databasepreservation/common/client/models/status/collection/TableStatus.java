@@ -251,8 +251,9 @@ public class TableStatus implements Serializable {
   @JsonIgnore
   public List<String> getCSVHeaders(List<String> fieldsToReturn, boolean exportDescriptions) {
     List<String> values = new ArrayList<>();
-    for (ColumnStatus column : columns) {
-      if (fieldsToReturn.contains(column.getId())) {
+    for (String columnId : fieldsToReturn) {
+      ColumnStatus column = getColumnById(columnId);
+      if (column != null) {
         if (exportDescriptions) {
           if (ViewerStringUtils.isBlank(column.getCustomDescription())) {
             values.add(column.getCustomName());
