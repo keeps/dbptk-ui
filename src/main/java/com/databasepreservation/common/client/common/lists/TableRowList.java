@@ -977,6 +977,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     if (hasNested) {
       DataTransformationUtils.buildNestedFieldsToReturn(wrapper.getTable(), wrapper.getStatus(), extraParameters,
         fieldsToReturn);
+      queryFields.add("token_nst");
     }
 
     Filter tableFilterQuery;
@@ -1109,6 +1110,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     if (nested) {
       DataTransformationUtils.buildNestedFieldsToReturn(wrapper.getTable(), wrapper.getStatus(), extraParameters,
         fieldsToSolr);
+      queryFields.add("token_nst");
     }
 
     // if all columns are hidden, export all
