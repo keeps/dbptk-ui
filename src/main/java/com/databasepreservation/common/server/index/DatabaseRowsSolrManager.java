@@ -169,7 +169,14 @@ public class DatabaseRowsSolrManager {
 
     try {
       insertDocument(collection.getIndexName(), collection.toSolrDocument(row));
-    } catch (RequestNotValidException | GenericException | NotFoundException | AuthorizationDeniedException e) {
+    } catch (RequestNotValidException | GenericException | NotFoundException | AuthorizationDeniedException
+      | NullPointerException e) {
+      if (collection == null) {
+        LOGGER.error("Error adding row to collection {} - Solr registry doesn't contain that collection UUID.",
+          collectionStatus.getDatabaseUUID());
+      } else {
+        LOGGER.error("Error adding row to collection {}", collectionStatus.getDatabaseUUID());
+      }
       throw new ViewerException(e);
     }
   }
