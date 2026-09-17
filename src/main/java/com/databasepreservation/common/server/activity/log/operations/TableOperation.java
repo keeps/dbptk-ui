@@ -28,7 +28,7 @@ public class TableOperation implements Operation {
           table = wrapper.getDatabase().getMetadata().getTable(tableUUID);
         }
         wrapper.setTable(table);
-        wrapper.setTablePresence(PresenceState.YES);
+        wrapper.setTablePresence(table != null ? PresenceState.YES : PresenceState.NO);
       } else {
         wrapper.setTablePresence(PresenceState.NO);
       }

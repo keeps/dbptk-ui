@@ -1436,6 +1436,10 @@ public interface ClientMessages extends Messages {
 
   String activityLogRecordRelated();
 
+  String activityLogSearchParameters();
+
+  String activityLogSublist();
+
   String activityLogSavedSearchRelated();
 
   String activityLogPathRelated();
