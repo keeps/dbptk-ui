@@ -357,11 +357,7 @@ public class ActivityLogUtils {
     }
   }
 
-  /**
-   * Shows the table the action was applied to, taken directly from the logged
-   * parameters. The database in the wrapper is loaded without schemas, so the
-   * table cannot be resolved from the metadata.
-   */
+  // Shows the table the action was applied to, taken directly from the logged parameters. 
   private static void handleTableIdInfo(FlowPanel panel, ActivityLogWrapper wrapper) {
     final String tableId = wrapper.getActivityLogEntry().getParameters()
       .get(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
