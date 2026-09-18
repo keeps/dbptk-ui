@@ -322,8 +322,8 @@ public class SIARDController {
         filterFactories.add(factory);
       }
 
-      if (tableAndColumnsParameters.isExternalLobConfigurationSet()
-        && factory.getFilterName().equals("external-lobs")) {
+      if ((tableAndColumnsParameters.isExternalLobConfigurationSet()
+        || customViewsParameters.isExternalLobConfigurationSet()) && factory.getFilterName().equals("external-lobs")) {
         filterFactories.add(factory);
       }
     }
@@ -642,8 +642,15 @@ public class SIARDController {
 
   private static String loadMetadataFromLocal(String databaseUUID, String localPath,
     ViewerConstants.SiardVersion siardVersion) throws GenericException {
-    Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
-      ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
+    Path basePath;
+    if (ViewerFactory.getViewerConfiguration().isDesktopEnvironmentWithWebSupport()) {
+      basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerFactory.getViewerConfiguration().getSIARDFilesPath().toString(),
+        ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
+    } else {
+      basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
+        ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
+    }
     Path siardPath = basePath.resolve(localPath);
     convertSIARDMetadataToSolr(siardPath, databaseUUID, siardVersion);
     return databaseUUID;
@@ -745,7 +752,8 @@ public class SIARDController {
 
   private static void validateSIARDLocation(Path siardPath) throws GenericException {
     if (ViewerFactory.getViewerConfiguration().getApplicationEnvironment()
-      .equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+      .equals(ViewerConstants.APPLICATION_ENV_SERVER)
+      || ViewerFactory.getViewerConfiguration().isDesktopEnvironmentWithWebSupport()) {
       LOGGER.info("starting to check if path: {} is valid", siardPath.toAbsolutePath());
       // Checks if path is within the internal SIARD file path
       final boolean internal = ViewerConfiguration.checkPathIsWithin(siardPath,
@@ -1053,9 +1061,6 @@ public class SIARDController {
         solrManager.updateSIARDValidationInformation(databaseUUID, ViewerDatabaseValidationStatus.VALIDATION_RUNNING,
           validationReportPath, dbptkVersion, new DateTime().toString());
 
-        System.setProperty("dbptk.memory.dir",
-          ViewerConfiguration.getInstance().getMapDBPath().toAbsolutePath().toString());
-
         valid = siardValidation.validate();
 
         ViewerDatabaseValidationStatus status;
@@ -1207,7 +1212,8 @@ public class SIARDController {
     Path siardPath = Paths.get(databaseStatus.getSiardStatus().getLocation());
     viewerDatabase.setUuid(databaseStatus.getId());
     viewerDatabase.setPath(siardPath.toString());
-    // Workaround because the siard size was always 0 on the database file on previous versions
+    // Workaround because the siard size was always 0 on the database file on
+    // previous versions
     if (databaseStatus.getSiardStatus().getSize() != 0) {
       viewerDatabase.setSize(databaseStatus.getSiardStatus().getSize());
     } else {
@@ -1328,7 +1334,17 @@ public class SIARDController {
     for (Map.Entry<String, String> entry : exportOptionsParameters.getParameters().entrySet()) {
       if (!entry.getValue().equals("false")) {
         LOGGER.info("Export Options - {} -> {}", entry.getKey(), entry.getValue());
-        databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+        if (ViewerConfiguration.getInstance().isDesktopEnvironmentWithWebSupport()) {
+          if (entry.getKey().equals("folder") || entry.getKey().equals("file")) {
+            LOGGER.info("Export Options - {}, resolving path for desktop environment with web support", entry.getKey());
+            Path siardPath = ViewerConfiguration.getInstance().getSIARDFilesPath().resolve(entry.getValue());
+            databaseMigration.exportModuleParameter(entry.getKey(), siardPath.toString());
+          } else {
+            databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+          }
+        } else {
+          databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+        }
       }
     }
 

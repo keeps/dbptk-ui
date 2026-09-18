@@ -18,6 +18,7 @@ import java.util.Objects;
 public class CustomViewsParameters implements Serializable {
 
   private Map<String, CustomViewsParameter> customViewsParameterMap;
+  private boolean externalLobConfigurationSet;
 
   public CustomViewsParameters() {
     this.customViewsParameterMap = new HashMap<>();
@@ -48,5 +49,13 @@ public class CustomViewsParameters implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hash(getCustomViewsParameter());
+  }
+
+  public boolean isExternalLobConfigurationSet() {
+    return externalLobConfigurationSet;
+  }
+
+  public void setExternalLobConfigurationSet(boolean externalLobConfigurationSet) {
+    this.externalLobConfigurationSet = externalLobConfigurationSet;
   }
 }

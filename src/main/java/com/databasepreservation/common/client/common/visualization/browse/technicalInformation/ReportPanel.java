@@ -59,7 +59,7 @@ public class ReportPanel extends StatusAwareRightPanel {
     this.database = database;
     updateStatusPanel(database);
 
-    content.add(new MarkdownWidgetWrapper(database.getUuid()));
+    content.add(new MarkdownWidgetWrapper(database.getUuid(), "CREATE"));
     configureHeader();
   }
 

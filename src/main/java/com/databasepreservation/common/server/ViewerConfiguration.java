@@ -668,6 +668,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     SIARDFilesPath = viewerHomePath.resolve(ViewerConstants.VIEWER_SIARD_FILES_FOLDER);
     SIARDReportValidationPath = viewerHomePath.resolve(ViewerConstants.VIEWER_VALIDATIONS_REPORTS_FOLDER);
     mapDBPath = viewerHomePath.resolve(ViewerConstants.VIEWER_MAPDB_FOLDER);
+    System.setProperty(ViewerConstants.DBPTK_MEMORY_DIR_SYSTEM_PROPERTY, mapDBPath.toAbsolutePath().toString());
     activityLogsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_ACTIVITY_LOG_FOLDER);
     databasesPath = viewerHomePath.resolve(ViewerConstants.VIEWER_DATABASES_FOLDER);
 
@@ -909,5 +910,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public String getApplicationEnvironment() {
     return applicationEnvironment;
+  }
+
+  public Boolean isDesktopEnvironmentWithWebSupport() {
+    return getApplicationEnvironment().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)
+      && getViewerConfigurationAsBoolean(ViewerConstants.ENABLE_DESKTOP_IN_BROWSER_ENVIRONMENT);
   }
 }

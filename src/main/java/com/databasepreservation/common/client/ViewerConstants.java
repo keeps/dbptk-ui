@@ -63,6 +63,8 @@ public class ViewerConstants {
   public static final String LOGGER_DEFAULT_METHOD = "FILEOUT";
   public static final String LOGGER_DOCKER_METHOD = "CONSOLE";
 
+  public static final String DBPTK_MEMORY_DIR_SYSTEM_PROPERTY = "dbptk.memory.dir";
+
   public static final String DEFAULT_ENCODING = "UTF-8";
   public static final String VIEWER_CONFIG_FOLDER = "config";
   public static final String VIEWER_I18N_CLIENT_FOLDER = "client";
@@ -571,6 +573,7 @@ public class ViewerConstants {
   public static final String APPLICATION_ENV_KEY = "env";
   public static final String APPLICATION_ENV_DESKTOP = "desktop";
   public static final String APPLICATION_ENV_SERVER = "server";
+  public static final String ENABLE_DESKTOP_IN_BROWSER_ENVIRONMENT = "ui.features.enable.desktopInBrowserEnvironment";
 
   /*
    * DBPTK Parameters
@@ -578,6 +581,7 @@ public class ViewerConstants {
   public static final String SIARD_EXPORT_OPTIONS = "SIARD_EXPORT_OPTIONS";
   public static final String METADATA_EXPORT_OPTIONS = "METADATA_EXPORT_OPTIONS";
   public static final String EXTERNAL_LOBS_EXPORT_OPTIONS = "EXTERNAL_LOBS";
+  public static final String CONVERSION_SERVICE_OPTIONS = "CONVERSION_SERVICE_OPTIONS";
   public static final String EXPORT_FORMAT_SIARD = "SIARD";
   public static final String EXPORT_FORMAT_DBMS = "DBMS";
 
@@ -625,6 +629,12 @@ public class ViewerConstants {
   public static final String SIARD_METADATA_CLIENT_MACHINE = SIARD2ModuleFactory.PARAMETER_META_CLIENT_MACHINE;
   public static final String UPLOAD_WIZARD_MANAGER = "upload-wizard-manager";
   public static final String DOWNLOAD_WIZARD_MANAGER = "download-wizard-manager";
+
+  /**
+   * WIZARD properties
+   */
+
+  public static final String PROPERTY_WIZARD_DEFAULT_SIARD_EXPORT_OPTION = "ui.wizard.default.siard.export.option";
 
   /*
    * LINKS
