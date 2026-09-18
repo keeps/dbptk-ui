@@ -911,6 +911,32 @@ p[data-value]:after {
     margin-top: 10%;
 }
 
+.layoutDropdownPopup {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    padding: 4px 0;
+}
+
+.layoutDropdownMenu {
+    min-width: 160px;
+}
+
+.layoutDropdownItem {
+    padding: 4px 16px;
+    line-height: 2.5rem;
+    height: 2.5rem;
+    cursor: pointer;
+    font-size: 1.3rem;
+    white-space: nowrap;
+    color: #222;
+}
+
+.layoutDropdownItem:hover {
+    background-color: #f5f5f5;
+}
+
 /**********************************************
 	       DATABASE SEARCH PAGE
 ************************************************/
@@ -2844,8 +2870,18 @@ html, body {
     font-weight: 500;
     font-size: 1.1em;
     margin-bottom: 10px;
-    display: inline-block;
+    display: block;
+    width: 100%;
+    overflow: hidden;
     line-height: 1em;
+}
+
+.card-header > div:first-child {
+    float: left;
+}
+
+.card-header .btn-pull-right {
+    float: right;
 }
 
 .card-diagram {
