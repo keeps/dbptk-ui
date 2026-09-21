@@ -21,7 +21,10 @@ import com.databasepreservation.common.client.models.status.collection.LobTextEx
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
+import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.google.gwt.core.client.GWT;
@@ -84,6 +87,7 @@ public class AdvancedSearchUtils {
             Collections.singletonList(column.getId()), column.getCustomName(),
             viewerTypeToSearchFieldType(column.getType()));
           searchField.setFixed(column.getSearchStatus().getAdvanced().isFixed());
+          searchField.setKeyColumn(isKeyColumn(viewerTable, column.getColumnIndex()));
           updateSearchFieldMap(map, configTable.getCustomName(), searchField);
         }
       } else {
@@ -129,6 +133,7 @@ public class AdvancedSearchUtils {
         status.getTableStatusByTableId(viewerTable.getId()).getColumnById(viewerColumn.getSolrName()).getCustomName(),
         viewerTypeToSearchFieldType(viewerColumn.getType()));
       searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), viewerColumn.getSolrName()));
+      searchField.setKeyColumn(isKeyColumn(viewerTable, viewerColumn.getColumnIndexInEnclosingTable()));
       searchFields.add(searchField);
     }
 
@@ -159,6 +164,24 @@ public class AdvancedSearchUtils {
     }
 
     return searchFields;
+  }
+
+  private static boolean isKeyColumn(ViewerTable viewerTable, int columnIndex) {
+    ViewerPrimaryKey primaryKey = viewerTable.getPrimaryKey();
+    if (primaryKey != null && primaryKey.getColumnIndexesInViewerTable() != null
+      && primaryKey.getColumnIndexesInViewerTable().contains(columnIndex)) {
+      return true;
+    }
+
+    for (ViewerForeignKey foreignKey : viewerTable.getForeignKeys()) {
+      for (ViewerReference reference : foreignKey.getReferences()) {
+        if (reference.getSourceColumnIndex() != null && reference.getSourceColumnIndex() == columnIndex) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   private static void updateSearchFieldMap(Map<String, List<SearchField>> map, String table, SearchField searchField) {
