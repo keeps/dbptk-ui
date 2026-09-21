@@ -16,6 +16,10 @@ import com.databasepreservation.common.client.common.search.SearchField;
 public class SearchFieldPanelFactory {
 
   public static SearchFieldPanel getSearchFieldPanel(SearchField searchField) {
+    if (searchField.isKeyColumn()) {
+      return new TextSearchFieldPanel(searchField);
+    }
+
     switch (searchField.getType()) {
       case ViewerConstants.SEARCH_FIELD_TYPE_DATE:
         return new DateSearchFieldPanel(searchField);

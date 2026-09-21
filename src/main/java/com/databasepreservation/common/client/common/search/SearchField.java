@@ -20,6 +20,7 @@ public class SearchField implements Serializable {
   private String label;
   private String type;
   private boolean fixed;
+  private boolean keyColumn;
 
   public SearchField() {
     super();
@@ -73,9 +74,17 @@ public class SearchField implements Serializable {
     this.fixed = fixed;
   }
 
+  public boolean isKeyColumn() {
+    return keyColumn;
+  }
+
+  public void setKeyColumn(boolean keyColumn) {
+    this.keyColumn = keyColumn;
+  }
+
   @Override
   public String toString() {
     return "SearchField [id=" + id + ", searchFields=" + searchFields + ", label=" + label + ", type=" + type
-      + ", fixed=" + fixed + "]";
+      + ", fixed=" + fixed + ", keyColumn=" + keyColumn + "]";
   }
 }
