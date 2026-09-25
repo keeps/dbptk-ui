@@ -27,13 +27,16 @@ import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -55,6 +58,8 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
   AccessibleFocusPanel searchButton;
   @UiField
   AccessibleFocusPanel clearCrossButton;
+  private AccessibleFocusPanel layoutConfigButton;
+  private PopupPanel layoutDropdown;
 
   @UiField
   FlowPanel contentItems;
@@ -164,6 +169,55 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
       resetDiagramFocus(schema.getUuid());
       searchBox.setFocus(true);
     });
+
+    layoutConfigButton = new AccessibleFocusPanel();
+    layoutConfigButton.addStyleName("btn btn-link btn-pull-right");
+    layoutConfigButton.add(new HTML("Configuration <i class=\"fa fa-caret-down\"></i>"));
+    layoutDropdown = buildLayoutDropdown();
+    layoutConfigButton.addClickHandler(event -> {
+      if (layoutDropdown.isShowing()) {
+        layoutDropdown.hide();
+      } else {
+        layoutDropdown.showRelativeTo(layoutConfigButton);
+      }
+    });
+  }
+
+  private PopupPanel buildLayoutDropdown() {
+    PopupPanel popup = new PopupPanel(true);
+    popup.addStyleName("layoutDropdownPopup");
+
+    FlowPanel menu = new FlowPanel();
+    menu.addStyleName("layoutDropdownMenu");
+    menu.add(dropdownItem("fa-upload", "Upload layout",
+      () -> uploadPositions(databaseUUID, schema.getUuid())));
+    menu.add(dropdownItem("fa-download", "Download layout",
+      () -> downloadPositions(schema.getUuid())));
+    menu.add(dropdownItem("fa-undo", "Reset layout", this::resetLayout));
+
+    popup.setWidget(menu);
+    return popup;
+  }
+
+  private FlowPanel dropdownItem(String iconClass, String label, Runnable action) {
+    FlowPanel item = new FlowPanel();
+    item.addStyleName("layoutDropdownItem");
+    item.add(new HTML("<i class=\"fa " + iconClass + "\"></i> " + label));
+    item.addDomHandler(event -> {
+      layoutDropdown.hide();
+      action.run();
+    }, ClickEvent.getType());
+    return item;
+  }
+
+  public AccessibleFocusPanel getLayoutConfigButton() {
+    return layoutConfigButton;
+  }
+
+  private void resetLayout() {
+    clearSavedPositions(databaseUUID, schema.getUuid());
+    isInitialized = false;
+    renderDiagram();
   }
 
   /**
@@ -729,27 +783,64 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     (function erdiagramload(){
         // network container
         var container = $wnd.document.getElementById('erdiagram-' + schemaUUID);
-        
+
         // Destroy the previous graph instance to avoid overlap
         if (container && container.network) {
             container.network.destroy();
             container.network = null;
         }
-  
+
         // create an array with nodes
         var rawNodes = eval(nodesJson);
-  
+
         var rawNodesLen = rawNodes.length;
         for(var i=0; i<rawNodesLen; i+=1){
             if(rawNodes[i].title == null || rawNodes[i].title.length === 0){
                 delete rawNodes[i].title;
             }
         }
+
+        // Load saved positions from localStorage
+        var storageKey = 'erdiagram-positions-' + dbuuid + '-' + schemaUUID;
+        var savedPositions = null;
+        try {
+            var savedJson = $wnd.localStorage.getItem(storageKey);
+            if (savedJson) {
+                savedPositions = JSON.parse(savedJson);
+            }
+        } catch(e) {}
+
+        // Apply saved positions; nodes without a saved position cause physics to run
+        var allPositioned = false;
+        if (savedPositions) {
+            allPositioned = true;
+            for (var ni = 0; ni < rawNodesLen; ni++) {
+                var nodePos = savedPositions[rawNodes[ni].id];
+                if (nodePos) {
+                    rawNodes[ni].x = nodePos.x;
+                    rawNodes[ni].y = nodePos.y;
+                } else {
+                    allPositioned = false;
+                }
+            }
+            // Only fix positioned nodes when physics must run for new ones — this
+            // prevents physics from displacing the saved layout while new nodes settle.
+            // When all nodes are positioned, physics is disabled entirely so fixed is
+            // not needed and would prevent the user from dragging nodes.
+            if (!allPositioned) {
+                for (var ni2 = 0; ni2 < rawNodesLen; ni2++) {
+                    if (savedPositions[rawNodes[ni2].id]) {
+                        rawNodes[ni2].fixed = {x: true, y: true};
+                    }
+                }
+            }
+        }
+
         var nodes = new $wnd.vis.DataSet(rawNodes);
-  
+
         // create an array with edges
         var edges = new $wnd.vis.DataSet(eval(edgesJson));
-  
+
         // provide the data in the vis format
         var data = {
           nodes: nodes,
@@ -812,26 +903,30 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
                     "updateInterval":25
                 },
             },
-  //            "configure": {
-  //                "enabled": true,
-  //                "showButton": true,
-  //                "filter" : "physics",
-  //                "container": $wnd.document.getElementById('erconfig')
-  //            }
         };
-  
+
+        // Skip physics entirely when all nodes have a saved position
+        if (allPositioned) {
+            options.physics.enabled = false;
+        }
+
+        // Persists current node positions to localStorage
+        function savePositions() {
+            var positions = container.network.getPositions();
+            try {
+                $wnd.localStorage.setItem(storageKey, JSON.stringify(positions));
+            } catch(e) {}
+        }
+
         // initialize your network!
         var network = new $wnd.vis.Network(container, data, options);
-  
+
         // for search functionality
         container.network = network;
-  
+
         network.on("selectNode", function (params) {
-            //params.event = "[original event]";
             if(params.nodes.length === 1) {
-  //                console.log("go to db" + dbuuid + " and table " + params.nodes[0] + " and path " + path);
                 var tableId = params.nodes[0];
-  
                 network.unselectAll();
                 if(path === "data-transformation"){
                     @com.databasepreservation.common.client.tools.HistoryManager::gotoDataTransformation(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableId);
@@ -840,16 +935,31 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
                 }
             }
         });
-  
+
         network.on("stabilized", function (params) {
             if(params.iterations > 1){
                 options.physics.enabled = false;
                 network.setOptions(options);
+
+                // When some nodes had saved positions and others did not, physics settled
+                // the new nodes around the fixed ones — now unfix all and persist the full layout.
+                if (savedPositions && !allPositioned) {
+                    var nodeIds = network.body.data.nodes.getIds();
+                    var updates = [];
+                    for (var ui = 0; ui < nodeIds.length; ui++) {
+                        updates.push({id: nodeIds[ui], fixed: {x: false, y: false}});
+                    }
+                    network.body.data.nodes.update(updates);
+                    savePositions();
+                }
             }
-  //            network.fit();
         });
-  
+
         network.on("dragEnd", function (params) {
+            // Save positions only after physics is off and the user actually moved a node
+            if (!options.physics.enabled && params.nodes && params.nodes.length > 0) {
+                savePositions();
+            }
             network.unselectAll();
         });
     })();
@@ -935,4 +1045,69 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
         });
     }
 }-*/;
+
+  private static native void uploadPositions(String dbuuid, String schemaUUID) /*-{
+    var storageKey = 'erdiagram-positions-' + dbuuid + '-' + schemaUUID;
+    var container = $wnd.document.getElementById('erdiagram-' + schemaUUID);
+
+    var input = $wnd.document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.style.display = 'none';
+
+    input.onchange = function(event) {
+        var file = event.target.files[0];
+        if (!file) return;
+        var reader = new $wnd.FileReader();
+        reader.onload = function(e) {
+            try {
+                var positions = JSON.parse(e.target.result);
+                $wnd.localStorage.setItem(storageKey, JSON.stringify(positions));
+
+                if (container && container.network) {
+                    var network = container.network;
+                    var updates = [];
+                    for (var nodeId in positions) {
+                        if (positions.hasOwnProperty(nodeId)) {
+                            updates.push({id: nodeId, x: positions[nodeId].x, y: positions[nodeId].y, fixed: {x: false, y: false}});
+                        }
+                    }
+                    network.body.data.nodes.update(updates);
+                    network.setOptions({physics: {enabled: false}});
+                    network.fit({animation: {duration: 500, easingFunction: "easeInOutQuad"}});
+                }
+            } catch(err) {
+                $wnd.alert('Invalid layout file: ' + err.message);
+            }
+            if (input.parentNode) input.parentNode.removeChild(input);
+        };
+        reader.readAsText(file);
+    };
+
+    $wnd.document.body.appendChild(input);
+    input.click();
+  }-*/;
+
+  private static native void downloadPositions(String schemaUUID) /*-{
+    var container = $wnd.document.getElementById('erdiagram-' + schemaUUID);
+    if (!container || !container.network) return;
+    var positions = container.network.getPositions();
+    var json = JSON.stringify(positions, null, 2);
+    var blob = new Blob([json], {type: 'application/json'});
+    var url = $wnd.URL.createObjectURL(blob);
+    var a = $wnd.document.createElement('a');
+    a.href = url;
+    a.download = 'erdiagram-layout.json';
+    $wnd.document.body.appendChild(a);
+    a.click();
+    $wnd.document.body.removeChild(a);
+    $wnd.URL.revokeObjectURL(url);
+  }-*/;
+
+  private static native void clearSavedPositions(String dbuuid, String schemaUUID) /*-{
+    var storageKey = 'erdiagram-positions-' + dbuuid + '-' + schemaUUID;
+    try {
+        $wnd.localStorage.removeItem(storageKey);
+    } catch(e) {}
+  }-*/;
 }
