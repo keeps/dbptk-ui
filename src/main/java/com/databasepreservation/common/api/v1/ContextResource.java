@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +84,29 @@ public class ContextResource implements ContextService {
   public Map<String, List<String>> getSharedProperties(String localeString) {
     Locale locale = ServerTools.parseLocale(localeString);
     return ViewerConfiguration.getSharedProperties(locale);
+  }
+
+  @Override
+  public StringResponse reloadSharedProperties() {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = new User();
+    try {
+      user = controllerAssistant.checkRoles(request);
+
+      ViewerConfiguration.getInstance().safeReloadCombinedConfiguration();
+
+      return new StringResponse("Properties reloaded.");
+    } catch (AuthorizationException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } catch (ConfigurationException e) {
+      state = LogEntryState.FAILURE;
+      return new StringResponse("Could not reload properties: " + e.getMessage());
+    } finally {
+      controllerAssistant.registerAction(user, state);
+    }
   }
 
   @Override

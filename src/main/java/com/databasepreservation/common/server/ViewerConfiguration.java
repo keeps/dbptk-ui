@@ -51,10 +51,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.authorization.AuthorizationDetails;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.server.controller.ReporterType;
+import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.factory.SolrClientFactory;
+import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
 import com.databasepreservation.common.utils.FilenameUtils;
 import com.databasepreservation.common.utils.ViewerAbstractConfiguration;
 import com.databasepreservation.utils.FileUtils;
@@ -326,7 +334,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
         long reloadPeriod = getViewerConfigurationAsInt(86400000, RELOAD_DBPTK_VIEWER_PROPERTIES_PERIOD);
         scheduler.scheduleAtFixedRate(() -> {
           try {
-            reloadCombinedConfiguration();
+            safeReloadCombinedConfiguration();
           } catch (ConfigurationException e) {
             LOGGER.error("Error reloading combined configuration", e);
           }
@@ -745,6 +753,35 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       combinedConfiguration.addConfiguration((PropertiesConfiguration) configuration);
     }
     viewerConfiguration.addConfiguration(combinedConfiguration);
+  }
+
+  /**
+   * Calls {@link reloadCombinedConfiguration} <b>only if</b> there are currently
+   * no databases with the {@link ViewerDatabaseStatus#INGESTING} status in the
+   * index.
+   *
+   * @throws ConfigurationException
+   *           If there is at least one database with the
+   *           {@link ViewerDatabaseStatus#INGESTING} status in the index.
+   */
+  public void safeReloadCombinedConfiguration() throws ConfigurationException {
+    DatabaseRowsSolrManager solrManager = new DatabaseRowsSolrManager(SolrClientFactory.get().getSolrClient());
+    Filter ingestingFilter = new Filter(
+      new BasicSearchFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.INGESTING.toString()));
+    try (IterableDatabaseResult<ViewerDatabase> ingestingDatabases = solrManager.findAll(ViewerDatabase.class,
+      ingestingFilter, Sorter.NONE, new ArrayList<>())) {
+      if (ingestingDatabases.getTotalCount() > 0) {
+        StringBuilder databaseUUIDs = new StringBuilder("{");
+        ingestingDatabases.forEach(d -> databaseUUIDs.append(d.getUuid() + ";"));
+        databaseUUIDs.append("}");
+        throw new ConfigurationException(
+          "Stopping reload of shared properties because databases are currently being ingested: " + databaseUUIDs);
+      } else {
+        reloadCombinedConfiguration();
+      }
+    } catch (IOException e) {
+      LOGGER.warn("Error closing index results.");
+    }
   }
 
   private void reloadCombinedConfiguration() throws ConfigurationException {

@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import com.databasepreservation.common.api.v1.utils.StringResponse;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
@@ -66,6 +66,10 @@ public interface ContextService extends DirectRestService {
   @Operation(summary = "Retrieves the shared properties", hidden = true)
   Map<String, List<String>> getSharedProperties(
     @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE, defaultValue = "en", required = false) String localeString);
+
+  @RequestMapping(path = "/shared/properties/reload", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Safely reloads the shared DBPTK UI properties")
+  StringResponse reloadSharedProperties();
 
   @RequestMapping(path = "/authorizations", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Gets the authorizations group list")
