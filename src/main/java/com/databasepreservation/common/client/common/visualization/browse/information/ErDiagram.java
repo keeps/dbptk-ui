@@ -172,7 +172,8 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
     layoutConfigButton = new AccessibleFocusPanel();
     layoutConfigButton.addStyleName("btn btn-link btn-pull-right");
-    layoutConfigButton.add(new HTML("Configuration <i class=\"fa fa-caret-down\"></i>"));
+    String configurationMessage = messages.databaseInformationERConfiguration();
+    layoutConfigButton.add(new HTML(configurationMessage + " <i class=\"fa fa-caret-down\"></i>"));
     layoutDropdown = buildLayoutDropdown();
     layoutConfigButton.addClickHandler(event -> {
       if (layoutDropdown.isShowing()) {
@@ -189,11 +190,11 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
     FlowPanel menu = new FlowPanel();
     menu.addStyleName("layoutDropdownMenu");
-    menu.add(dropdownItem("fa-upload", "Upload layout",
+    menu.add(dropdownItem("fa-upload", messages.databaseInformationERUpload(),
       () -> uploadPositions(databaseUUID, schema.getUuid())));
-    menu.add(dropdownItem("fa-download", "Download layout",
+    menu.add(dropdownItem("fa-download", messages.databaseInformationERDownload(),
       () -> downloadPositions(schema.getUuid())));
-    menu.add(dropdownItem("fa-undo", "Reset layout", this::resetLayout));
+    menu.add(dropdownItem("fa-undo", messages.databaseInformationERReset(), this::resetLayout));
 
     popup.setWidget(menu);
     return popup;
