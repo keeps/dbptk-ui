@@ -1296,6 +1296,10 @@ public interface ClientMessages extends Messages {
    * Database Information Panel
    ********************************************/
   String databaseInformationTextForTitle();
+  String databaseInformationERConfiguration();
+  String databaseInformationERUpload();
+  String databaseInformationERDownload();
+  String databaseInformationERReset();
 
   /********************************************
    * Upload SIARD
