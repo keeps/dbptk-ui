@@ -740,6 +740,8 @@ public interface ClientMessages extends Messages {
 
   String managePageTableHeaderTextForSearchHits();
 
+  String searchContentTimeoutReached();
+
   String manageDatabasePageDescription();
 
   String manageDatabaseSearchAllResults();

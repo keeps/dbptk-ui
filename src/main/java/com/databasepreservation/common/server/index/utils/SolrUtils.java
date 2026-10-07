@@ -331,6 +331,36 @@ public class SolrUtils {
     return ret;
   }
 
+  public static long countHits(SolrClient index, String collectionName, Filter filter, List<Filter> filterQueries,
+    String defType, List<String> queryFields, int timeAllowedMillis) throws GenericException, RequestNotValidException {
+    SolrQuery query = new SolrQuery();
+
+    applyFiltersToQuery(query, filter, filterQueries);
+
+    query.setRows(0);
+    query.setParam("defType", defType);
+    query.setParam("qf", String.join(" ", queryFields));
+    query.setTimeAllowed(timeAllowedMillis);
+
+    try {
+      QueryRequest request = new QueryRequest(query);
+      request.setMethod(SolrRequest.METHOD.POST);
+
+      NamedList<Object> namedList = index.request(request, collectionName);
+      QueryResponse response = new QueryResponse();
+      response.setResponse(namedList);
+
+      if (response.getHeader() != null && Boolean.TRUE.equals(response.getHeader().get("partialResults"))) {
+        LOGGER.warn("Query on collection {} exceeded the time allowed ({} ms), the hit count may be partial",
+          collectionName, timeAllowedMillis);
+      }
+
+      return response.getResults().getNumFound();
+    } catch (SolrException | SolrServerException | IOException e) {
+      throw buildGenericException(e);
+    }
+  }
+
   public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
     Sublist sublist) throws GenericException, RequestNotValidException {
     return findRows(index, databaseUUID, filter, sorter, sublist, Facets.NONE);
