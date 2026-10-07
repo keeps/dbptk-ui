@@ -144,6 +144,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_BATCH_JOBS_MAX_POOL_SIZE = "batch.jobs.maxPoolSize";
   public static final String PROPERTY_BATCH_JOBS_QUEUE_SIZE = "batch.jobs.queueSize";
 
+  public static final String PROPERTY_SEARCH_ALL_POOL_SIZE = "ui.search.content.poolSize";
+  public static final String PROPERTY_SEARCH_ALL_COLLECTION_TIMEOUT = "ui.search.content.collectionTimeAllowedMillis";
+  public static final String PROPERTY_SEARCH_ALL_TIMEOUT = "ui.search.content.timeoutMillis";
+
   public static final String PROPERTY_BLOB_PREFIX_NAME = "ui.blob.prefix.name";
 
   public static final String SIARD_AVAILABLE_TO_SEARCH_ALL = "ui.siard.available.search.all";

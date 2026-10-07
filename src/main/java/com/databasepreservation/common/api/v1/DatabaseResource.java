@@ -13,13 +13,18 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -27,7 +32,9 @@ import org.roda.core.data.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,11 +50,6 @@ import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.index.facets.FacetFieldResult;
-import com.databasepreservation.common.client.index.facets.FacetParameter;
-import com.databasepreservation.common.client.index.facets.FacetValue;
-import com.databasepreservation.common.client.index.facets.Facets;
-import com.databasepreservation.common.client.index.facets.SimpleFacetParameter;
 import com.databasepreservation.common.client.index.filter.BlockJoinAnyParentExpiryFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
@@ -66,6 +68,7 @@ import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.config.SearchContentConfig;
 import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.utils.ControllerAssistant;
@@ -84,6 +87,13 @@ public class DatabaseResource implements DatabaseService {
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseResource.class);
   @Autowired
   private HttpServletRequest request;
+
+  @Autowired
+  @Qualifier(SearchContentConfig.SEARCH_CONTENT_EXECUTOR_BEAN_NAME)
+  private ThreadPoolTaskExecutor searchAllExecutor;
+
+  @Autowired
+  private SearchContentConfig searchContentConfig;
 
   @Override
   public IndexResult<ViewerDatabase> find(FindRequest findRequest, String localeString) {
@@ -223,10 +233,8 @@ public class DatabaseResource implements DatabaseService {
   private IndexResult<ViewerDatabase> getCrossViewerDatabaseIndexResult(FindRequest findRequest,
     ControllerAssistant controllerAssistant, User user, LogEntryState state) {
     long count = 0;
-    String collectionAlias = "";
     Filter filter = SolrUtils.removeIndexIdFromSearch(findRequest.filter);
     try {
-      IterableDatabaseResult<ViewerDatabase> databases;
       ArrayList<Filter> filterQueries = new ArrayList<>();
       filterQueries.addAll(getDatabaseFindContentTypeFilterQueries());
       filterQueries.addAll(getDatabaseFindAllFilterQueries());
@@ -234,8 +242,9 @@ public class DatabaseResource implements DatabaseService {
         filterQueries.addAll(getDatabaseFindStatusFilterQueries(filter));
         filterQueries.addAll(getDatabaseFindUserPermissionsFilterQueries(user));
       }
+      List<String> fieldsToReturn = findRequest.fieldsToReturn;
       if (filter != null) {
-        List<String> fieldsToReturn = new ArrayList<>();
+        fieldsToReturn = new ArrayList<>();
         fieldsToReturn.add(ViewerConstants.INDEX_ID);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA); // deprecated
@@ -245,91 +254,110 @@ public class DatabaseResource implements DatabaseService {
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_ARCHIVAL_DATE);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA_DATABASE_PRODUCT);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
-        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class, new Filter(), Sorter.NONE,
-          fieldsToReturn, filterQueries);
-      } else {
-        databases = ViewerFactory.getSolrManager().findAll(ViewerDatabase.class, new Filter(), Sorter.NONE,
-          findRequest.fieldsToReturn, filterQueries);
       }
 
-      if (databases.getTotalCount() == 0) {
-        return new IndexResult<>();
-      }
-
-      // Search on all collections
-      List<String> collections = new ArrayList<>();
+      // only search on the available databases
       Map<String, ViewerDatabase> databaseMap = new HashMap<>();
-      for (ViewerDatabase database : databases) {
-        databaseMap.put(database.getUuid(), database);
-        // only add the available collections
-        if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
-          String collectionName = ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid();
-          collections.add(collectionName);
+      try (IterableDatabaseResult<ViewerDatabase> databases = ViewerFactory.getSolrManager()
+        .findAll(ViewerDatabase.class, new Filter(), Sorter.NONE, fieldsToReturn, filterQueries)) {
+        for (ViewerDatabase database : databases) {
+          if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
+            databaseMap.put(database.getUuid(), database);
+          }
         }
       }
 
-      if (collections.isEmpty()) {
+      if (databaseMap.isEmpty()) {
         return new IndexResult<>();
       }
 
-      collectionAlias = SolrUtils.createSearchAllAlias(ViewerFactory.getSolrClient(),
-        ViewerConstants.ALIAS_PREFIX + UUID.randomUUID(), collections);
+      Map<String, Long> hitsPerDatabase = countHitsPerDatabase(databaseMap.keySet(), filter, findRequest.defType,
+        findRequest.queryFields);
 
-      SimpleFacetParameter simpleFacetParameter = new SimpleFacetParameter(ViewerConstants.SOLR_ROWS_DATABASE_UUID,
-        FacetParameter.SORT.COUNT);
-      simpleFacetParameter.setMinCount(1);
-      simpleFacetParameter.setLimit(findRequest.sublist.getMaximumElementCount());
-      simpleFacetParameter.setOffset(findRequest.sublist.getFirstElementIndex());
+      // most hits first, as the previous facet sorting by count
+      List<ViewerDatabase> databasesWithHits = new ArrayList<>();
+      for (Map.Entry<String, Long> entry : hitsPerDatabase.entrySet()) {
+        if (entry.getValue() > 0) {
+          ViewerDatabase database = databaseMap.get(entry.getKey());
+          database.setSearchHits(entry.getValue());
+          databasesWithHits.add(database);
+          count += entry.getValue();
+        }
+      }
+      databasesWithHits.sort(
+        Comparator.comparingLong(ViewerDatabase::getSearchHits).reversed().thenComparing(ViewerDatabase::getUuid));
 
-      final IndexResult<ViewerDatabase> facetsSearch = ViewerFactory.getSolrManager().findHits(ViewerDatabase.class,
-        collectionAlias, filter, findRequest.sorter, findRequest.sublist, new Facets(simpleFacetParameter),
-        findRequest.defType, findRequest.queryFields);
-
-      count = facetsSearch.getTotalCount();
-      FacetFieldResult facetResults = facetsSearch.getFacetResults().get(0);
+      int offset = findRequest.sublist.getFirstElementIndex();
+      int limit = findRequest.sublist.getMaximumElementCount();
+      int fromIndex = Math.min(offset, databasesWithHits.size());
+      int toIndex = Math.min(fromIndex + limit, databasesWithHits.size());
 
       IndexResult<ViewerDatabase> searchHitsResult = new IndexResult<>();
-      if (facetResults.getValues().size() < findRequest.sublist.getMaximumElementCount()
-        && findRequest.sublist.getFirstElementIndex() == 0) {
-        searchHitsResult.setTotalCount(facetResults.getValues().size());
-      } else {
-        searchHitsResult.setTotalCount(-1);
-      }
-      searchHitsResult.setLimit(findRequest.sublist.getMaximumElementCount());
-      searchHitsResult.setOffset(findRequest.sublist.getFirstElementIndex());
-      List<ViewerDatabase> resultsFromFacet = new ArrayList<>();
-
-      // Retrieve the databases HITs
-      for (FacetValue value : facetResults.getValues()) {
-        String databaseUUID = value.getValue();
-        long searchHits = value.getCount();
-
-        ViewerDatabase vd = databaseMap.get(databaseUUID);
-        vd.setSearchHits(searchHits);
-        resultsFromFacet.add(vd);
-      }
-
-      searchHitsResult.setResults(resultsFromFacet);
-
-      databases.close();
+      searchHitsResult.setTotalCount(databasesWithHits.size());
+      searchHitsResult.setLimit(limit);
+      searchHitsResult.setOffset(offset);
+      searchHitsResult.setResults(new ArrayList<>(databasesWithHits.subList(fromIndex, toIndex)));
 
       return searchHitsResult;
-
-    } catch (GenericException | RequestNotValidException | SolrServerException | IOException e) {
+    } catch (GenericException | IOException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
+    } catch (RuntimeException e) {
+      state = LogEntryState.FAILURE;
+      throw e;
     } finally {
-      try {
-        SolrUtils.deleteSearchAllAlias(ViewerFactory.getSolrClient(), collectionAlias);
-      } catch (SolrServerException | IOException e) {
-        state = LogEntryState.FAILURE;
-        throw new RESTException(e);
-      } finally {
-        controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILTER_PARAM,
-          JsonUtils.getJsonFromObject(filter), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
-          JsonUtils.getJsonFromObject(findRequest.sublist), ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
-      }
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILTER_PARAM,
+        JsonUtils.getJsonFromObject(filter), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
+        JsonUtils.getJsonFromObject(findRequest.sublist), ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
     }
+  }
+
+  private Map<String, Long> countHitsPerDatabase(Collection<String> databaseUUIDs, Filter filter, String defType,
+    List<String> queryFields) throws GenericException {
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+
+    Map<String, Future<Long>> futures = new LinkedHashMap<>();
+    for (String databaseUUID : databaseUUIDs) {
+      futures.put(databaseUUID, searchAllExecutor.submit(() -> solrManager.countHits(databaseUUID, filter, defType,
+        queryFields, searchContentConfig.getCollectionTimeAllowedMillis())));
+    }
+
+    Map<String, Long> hitsPerDatabase = new HashMap<>();
+    int failed = 0;
+    int timedOut = 0;
+    Exception lastFailure = null;
+    long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(searchContentConfig.getSearchTimeoutMillis());
+    try {
+      for (Map.Entry<String, Future<Long>> entry : futures.entrySet()) {
+        try {
+          long remaining = Math.max(0, deadline - System.nanoTime());
+          hitsPerDatabase.put(entry.getKey(), entry.getValue().get(remaining, TimeUnit.NANOSECONDS));
+        } catch (ExecutionException e) {
+          failed++;
+          lastFailure = e;
+          LOGGER.warn("Search all failed on database {}: {}", entry.getKey(),
+            e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
+        } catch (TimeoutException e) {
+          timedOut++;
+          entry.getValue().cancel(true);
+        }
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new GenericException("Search on all databases was interrupted", e);
+    } finally {
+      // do not leave queued queries running for a search that already ended
+      futures.values().forEach(future -> future.cancel(true));
+    }
+
+    if (failed > 0 || timedOut > 0) {
+      LOGGER.warn("Search all incomplete: {} of {} databases failed and {} did not finish within {} ms", failed,
+        databaseUUIDs.size(), timedOut, searchContentConfig.getSearchTimeoutMillis());
+    }
+    if (hitsPerDatabase.isEmpty() && failed > 0) {
+      throw new GenericException("Search failed on all " + failed + " databases", lastFailure);
+    }
+    return hitsPerDatabase;
   }
 
   private List<Filter> getDatabaseFindStatusFilterQueries(Filter searchFilter) {
