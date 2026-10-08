@@ -233,6 +233,15 @@ public class DatabaseRowsSolrManager {
       facets, defType, queryFields);
   }
 
+  public long countHits(String databaseUUID, Filter filter, String defType, List<String> queryFields,
+    int timeAllowedMillis) throws GenericException, RequestNotValidException {
+    String collectionName = ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
+    List<Filter> filterQueries = List
+      .of(new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_DATABASE_UUID, databaseUUID)));
+    return SolrUtils.countHits(client, collectionName, filter, filterQueries, defType, queryFields,
+      timeAllowedMillis);
+  }
+
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
     return find(classToReturn, filter, sorter, sublist, facets, new ArrayList<>());
