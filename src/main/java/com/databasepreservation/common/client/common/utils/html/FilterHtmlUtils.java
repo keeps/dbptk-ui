@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
+import com.databasepreservation.common.client.index.filter.EDismaxSimplerQueryFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.LongRangeFilterParameter;
@@ -33,26 +34,23 @@ public class FilterHtmlUtils {
   public static SafeHtml getFilterHTML(Filter filter) {
     List<FilterParameter> parameterValues = filter.getParameters();
 
-    if (parameterValues.isEmpty()) {
+    SafeHtmlBuilder preFilterTranslations = new SafeHtmlBuilder();
+    boolean hasDescribedParameter = false;
+
+    for (FilterParameter parameterValue : parameterValues) {
+      final SafeHtml filterParameterHTML = getFilterParameterHTML(parameterValue);
+      if (filterParameterHTML != null) {
+        preFilterTranslations.append(SafeHtmlUtils.fromSafeConstant("<div>"));
+        preFilterTranslations.append(filterParameterHTML);
+        preFilterTranslations.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+        hasDescribedParameter = true;
+      }
+    }
+
+    if (!hasDescribedParameter) {
       return SafeHtmlUtils.fromTrustedString(messages.filterParameterEmpty());
     }
 
-    SafeHtmlBuilder preFilterTranslations = new SafeHtmlBuilder();
-    preFilterTranslations.append(SafeHtmlUtils.fromSafeConstant("<ul><li>"));
-
-    for (int i = 0; i < parameterValues.size(); i++) {
-      final SafeHtml filterParameterHTML = getFilterParameterHTML(parameterValues.get(i));
-      if (filterParameterHTML != null) {
-        preFilterTranslations.append(filterParameterHTML);
-      }
-
-      preFilterTranslations.append(SafeHtmlUtils.fromSafeConstant("</li>"));
-      if (i != parameterValues.size() - 1) {
-        preFilterTranslations.append(SafeHtmlUtils.fromSafeConstant("<li>"));
-      }
-    }
-
-    preFilterTranslations.append(SafeHtmlUtils.fromSafeConstant("</ul>"));
     return preFilterTranslations.toSafeHtml();
   }
 
@@ -66,6 +64,9 @@ public class FilterHtmlUtils {
       if (!"*".equals(p.getValue())) {
         return messages.basicFilterParameter(messages.activityLogFilterName(p.getName()), p.getValue());
       }
+    } else if (parameter instanceof EDismaxSimplerQueryFilterParameter) {
+      EDismaxSimplerQueryFilterParameter p = (EDismaxSimplerQueryFilterParameter) parameter;
+      return messages.searchTermFilterParameter(p.getValue());
     } else if (parameter instanceof LongRangeFilterParameter) {
       LongRangeFilterParameter p = (LongRangeFilterParameter) parameter;
       if (p.getFromValue() == null) {
