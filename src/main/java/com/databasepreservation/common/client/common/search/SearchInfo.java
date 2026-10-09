@@ -66,25 +66,27 @@ public class SearchInfo implements Serializable {
 
       String value = solrColumnAndValue.get(solrColumnName);
       if (ViewerStringUtils.isNotBlank(value)) {
-        // try to handle different types in different ways
-        if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)) {
-          try {
-            Long parsedValue = Double.valueOf(value).longValue();
-            fieldParameter = new LongRangeFilterParameter(solrColumnName, parsedValue, parsedValue);
-          } catch (NumberFormatException e) {
-            // if the value cannot be parsed as a number, we can ignore it and set it as a
-            // BasicSearchFilterParameter
+        if (!field.isKeyColumn()) {
+          // try to handle different types in different ways
+          if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)) {
+            try {
+              Long parsedValue = Double.valueOf(value).longValue();
+              fieldParameter = new LongRangeFilterParameter(solrColumnName, parsedValue, parsedValue);
+            } catch (NumberFormatException e) {
+              // if the value cannot be parsed as a number, we can ignore it and set it as a
+              // BasicSearchFilterParameter
+            }
+          } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_DATETIME)) {
+            // TODO: handle DATETIME keys
+          } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_DATE)) {
+            // TODO: handle DATE keys
+          } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_TIME)) {
+            // TODO: handle TIME keys
+          } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)) {
+            // TODO: handle DATE INTERVAL keys
+          } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_BOOLEAN)) {
+            // TODO: handle BOOLEAN keys
           }
-        } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_DATETIME)) {
-          // TODO: handle DATETIME keys
-        } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_DATE)) {
-          // TODO: handle DATE keys
-        } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_TIME)) {
-          // TODO: handle TIME keys
-        } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)) {
-          // TODO: handle DATE INTERVAL keys
-        } else if (field.getType().equals(ViewerConstants.SEARCH_FIELD_TYPE_BOOLEAN)) {
-          // TODO: handle BOOLEAN keys
         }
 
         // default: set is as a BasicSearchFilterParameter
