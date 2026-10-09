@@ -1485,6 +1485,8 @@ public interface ClientMessages extends Messages {
 
   SafeHtml basicFilterParameter(String name, String value);
 
+  SafeHtml searchTermFilterParameter(String value);
+
   SafeHtml longRangeFilterParameter(String name, long fromValue, long toValue);
 
   SafeHtml longRangeFilterParameterOnlyFrom(String name, long fromValue);
