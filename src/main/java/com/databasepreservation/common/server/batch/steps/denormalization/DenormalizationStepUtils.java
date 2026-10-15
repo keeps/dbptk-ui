@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -156,7 +157,7 @@ public class DenormalizationStepUtils {
 
     StringBuilder sb = new StringBuilder();
     for (String name : names) {
-      sb.append(ViewerConstants.OPEN_TEMPLATE_ENGINE).append(name).append(ViewerConstants.CLOSE_TEMPLATE_ENGINE);
+      sb.append(HandlebarsUtils.getFieldTemplate(name));
     }
     String template = sb.toString();
 

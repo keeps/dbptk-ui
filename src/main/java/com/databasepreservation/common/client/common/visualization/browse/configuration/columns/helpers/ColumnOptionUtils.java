@@ -7,10 +7,10 @@
  */
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers;
 
-import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DETAILED_VIEWER_LABEL_TEMPLATE;
+import static com.databasepreservation.common.client.ViewerConstants.CLOSE_TEMPLATE_ENGINE;
 import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE;
+import static com.databasepreservation.common.client.ViewerConstants.OPEN_TEMPLATE_ENGINE;
 
-import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -109,5 +109,17 @@ public class ColumnOptionUtils {
     }
 
     return hintPanel;
+  }
+
+  public static String getFieldTemplate(String fieldName) {
+    StringBuilder templateString = new StringBuilder();
+    templateString.append(OPEN_TEMPLATE_ENGINE);
+    if (fieldName.startsWith("\"")) {
+      templateString.append("[").append(fieldName).append("]");
+    } else {
+      templateString.append(fieldName);
+    }
+    templateString.append(CLOSE_TEMPLATE_ENGINE);
+    return templateString.toString();
   }
 }
