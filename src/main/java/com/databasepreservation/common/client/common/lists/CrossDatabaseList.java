@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -35,6 +36,7 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.widgets.Alert;
+import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -251,7 +253,20 @@ public class CrossDatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       false, List.of(), new HashMap<>(), ViewerConstants.SOLR_EDISMAX, new Filter(), queryFields, false, List.of());
 
     if (getDataTrigger) {
-      DatabaseService.Util.call(callback).findAll(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+      DatabaseService.Util.call(new MethodCallback<IndexResult<ViewerDatabase>>() {
+        @Override
+        public void onFailure(Method method, Throwable throwable) {
+          callback.onFailure(method, throwable);
+        }
+
+        @Override
+        public void onSuccess(Method method, IndexResult<ViewerDatabase> result) {
+          if (result.isTimeoutReached()) {
+            Toast.showError(messages.searchContentTimeoutReached());
+          }
+          callback.onSuccess(method, result);
+        }
+      }).findAll(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
     } else {
       getDataTrigger = true;
     }
