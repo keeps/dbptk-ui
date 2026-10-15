@@ -146,8 +146,7 @@ public class NestedColumnOptionsPanel extends ColumnOptionsPanel implements Sava
       Button btnField = new Button(nestedField);
       btnField.setStyleName("btn btn-primary btn-small");
       btnField.addClickHandler(click -> {
-        target.setText(target.getText() + ViewerConstants.OPEN_TEMPLATE_ENGINE + btnField.getText()
-          + ViewerConstants.CLOSE_TEMPLATE_ENGINE);
+        target.setText(target.getText() + ColumnOptionUtils.getFieldTemplate(btnField.getText()));
       });
 
       hintPanel.add(btnField);

@@ -7,6 +7,9 @@
  */
 package com.databasepreservation.common.api.utils;
 
+import static com.databasepreservation.common.client.ViewerConstants.CLOSE_TEMPLATE_ENGINE;
+import static com.databasepreservation.common.client.ViewerConstants.OPEN_TEMPLATE_ENGINE;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -271,5 +274,17 @@ public class HandlebarsUtils {
         e.getMessage());
       return null;
     }
+  }
+
+  public static String getFieldTemplate(String fieldName) {
+    StringBuilder templateString = new StringBuilder();
+    templateString.append(OPEN_TEMPLATE_ENGINE);
+    if (fieldName.startsWith("\"")) {
+      templateString.append("[").append(fieldName).append("]");
+    } else {
+      templateString.append(fieldName);
+    }
+    templateString.append(CLOSE_TEMPLATE_ENGINE);
+    return templateString.toString();
   }
 }
