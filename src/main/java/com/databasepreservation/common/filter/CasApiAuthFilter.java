@@ -22,7 +22,7 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.client.util.AbstractCasFilter;
 import org.apereo.cas.client.validation.Assertion;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;

@@ -35,6 +35,7 @@ public class IndexResult<T extends Serializable> implements Serializable {
   private List<FacetFieldResult> facetResults;
   private Date date;
   private Map<String, Map<String, List<String>>> highlightingInfo;
+  private boolean timeoutReached;
 
   public IndexResult() {
     super();
@@ -122,6 +123,14 @@ public class IndexResult<T extends Serializable> implements Serializable {
 
   public void setHighlightingInfo(Map<String, Map<String, List<String>>> highlightingInfo) {
     this.highlightingInfo = highlightingInfo;
+  }
+
+  public boolean isTimeoutReached() {
+    return timeoutReached;
+  }
+
+  public void setTimeoutReached(boolean timeoutReached) {
+    this.timeoutReached = timeoutReached;
   }
 
   @Override

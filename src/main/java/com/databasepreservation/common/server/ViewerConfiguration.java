@@ -30,17 +30,23 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.configuration.CombinedConfiguration;
-import org.apache.commons.configuration.CompositeConfiguration;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.CompositeConfiguration;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.BuilderConfigurationWrapperFactory;
+import org.apache.commons.configuration2.builder.ConfigurationBuilderEvent;
+import org.apache.commons.configuration2.builder.DefaultReloadingDetectorFactory;
+import org.apache.commons.configuration2.builder.ReloadingDetectorFactory;
+import org.apache.commons.configuration2.builder.ReloadingFileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.io.FileHandler;
+import org.apache.commons.configuration2.reloading.PeriodicReloadingTrigger;
+import org.apache.commons.configuration2.reloading.ReloadingEvent;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
@@ -144,6 +150,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_BATCH_JOBS_MAX_POOL_SIZE = "batch.jobs.maxPoolSize";
   public static final String PROPERTY_BATCH_JOBS_QUEUE_SIZE = "batch.jobs.queueSize";
 
+  public static final String PROPERTY_SEARCH_ALL_POOL_SIZE = "ui.search.content.poolSize";
+  public static final String PROPERTY_SEARCH_ALL_COLLECTION_TIMEOUT = "ui.search.content.collectionTimeAllowedMillis";
+  public static final String PROPERTY_SEARCH_ALL_TIMEOUT = "ui.search.content.timeoutMillis";
+
   public static final String PROPERTY_BLOB_PREFIX_NAME = "ui.blob.prefix.name";
 
   public static final String SIARD_AVAILABLE_TO_SEARCH_ALL = "ui.siard.available.search.all";
@@ -174,11 +184,13 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Path h2Path;
 
   // Configuration related objects
+  private static final String VIEWER_PROPERTIES_FILE = "dbvtk-viewer.properties";
+  private static final String USERS_GROUPS_PROPERTIES_FILE = "users-groups.properties";
+  private static final String ROLES_PROPERTIES_FILE = "dbvtk-roles.properties";
+  private static final long DEFAULT_RELOAD_PERIOD_MS = 86400000;
+  private static final List<ReloadingFileBasedConfigurationBuilder<PropertiesConfiguration>> reloadingBuilders = new ArrayList<>();
   private static CompositeConfiguration viewerConfiguration = null;
-  private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-  private static CombinedConfiguration combinedConfiguration = new CombinedConfiguration();
   private static List<String> configurationFiles = null;
-  private static List<String> commonConfigurationFiles = null;
 
   private List<String> cachedWhitelistedIPs = null;
   private List<String> cachedWhiteListedUsername = null;
@@ -307,31 +319,15 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
       // load core configurations
       configurationFiles = new ArrayList<>();
-      commonConfigurationFiles = new ArrayList<>();
-
-      commonConfigurationFiles.add("dbvtk-viewer.properties");
-      commonConfigurationFiles.add("users-groups.properties");
-      addCommonConfiguration();
-      LOGGER.debug("Finished loading " + String.join(" , ", commonConfigurationFiles));
-
-      addConfiguration("dbvtk-roles.properties");
-      LOGGER.debug("Finished loading dbvtk-roles.properties");
+      addConfiguration(VIEWER_PROPERTIES_FILE, ReloadPolicy.GUARDED);
+      addConfiguration(USERS_GROUPS_PROPERTIES_FILE, ReloadPolicy.UNGUARDED);
+      addConfiguration(ROLES_PROPERTIES_FILE, ReloadPolicy.GUARDED);
+      LOGGER.debug("Finished loading {}", String.join(" , ", configurationFiles));
 
       applicationEnvironment = System.getProperty(ViewerConstants.APPLICATION_ENV_KEY,
         ViewerConstants.APPLICATION_ENV_SERVER);
 
-      boolean reloadViewerConfiguration = getViewerConfigurationAsBoolean(false, RELOAD_DBPTK_VIEWER_PROPERTIES);
-
-      if (reloadViewerConfiguration) {
-        long reloadPeriod = getViewerConfigurationAsInt(86400000, RELOAD_DBPTK_VIEWER_PROPERTIES_PERIOD);
-        scheduler.scheduleAtFixedRate(() -> {
-          try {
-            reloadCombinedConfiguration();
-          } catch (ConfigurationException e) {
-            LOGGER.error("Error reloading combined configuration", e);
-          }
-        }, 0, reloadPeriod, TimeUnit.MILLISECONDS);
-      }
+      startReloadingTriggers();
 
     } catch (ConfigurationException e) {
       LOGGER.error("Error loading dbvtk properties", e);
@@ -344,6 +340,22 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     // last log message that state if system was loaded without errors or not
     LOGGER.info("DBVTK loading completed {}", instantiatedWithoutErrors ? "with success!"
       : "with some errors!!! See logs because these errors might cause instability in the system.");
+  }
+
+  private static Configuration loadClasspathConfiguration(String configurationFile) throws ConfigurationException {
+    PropertiesConfiguration propertiesConfiguration = new PropertiesConfiguration();
+    FileHandler fileHandler = new FileHandler(propertiesConfiguration);
+    fileHandler.setEncoding(ViewerConstants.DEFAULT_ENCODING);
+
+    InputStream inputStream = ViewerFactory.class
+      .getResourceAsStream("/" + ViewerConstants.VIEWER_CONFIG_FOLDER + "/" + configurationFile);
+    if (inputStream != null) {
+      LOGGER.trace("Loading configuration from classpath {}", configurationFile);
+      fileHandler.load(inputStream);
+    } else {
+      LOGGER.trace("Configuration {} doesn't exist", configurationFile);
+    }
+    return propertiesConfiguration;
   }
 
   private void instantiateSolr() {
@@ -376,7 +388,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     cachedWhiteListedUsername = null;
     cachedWhiteListedRoles = null;
     sharedConfigurationPropertiesCache = null;
-    LOGGER.info("Reloaded dbvtk configurations after file change!");
+    LOGGER.info("DBPTK Configuration cache reset.");
   }
 
   @Override
@@ -732,52 +744,86 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   /*
    * Configuration related functionalities
    */
-  private static void addConfiguration(String configurationFile) throws ConfigurationException {
-    Configuration configuration = getConfiguration(configurationFile);
+  /**
+   * Adds a configuration file to the composite viewer configuration.
+   * <p>
+   * If the file exists in the config folder, it is loaded through a reloading
+   * builder and added as a wrapper that always delegates to the builder's current
+   * configuration, so reloads become visible without touching the composite. If
+   * it only exists in the classpath, it is loaded once and never reloaded.
+   */
+  private void addConfiguration(String configurationFile, ReloadPolicy reloadPolicy) throws ConfigurationException {
+    Path config = configPath.resolve(configurationFile);
+    Configuration configuration;
+
+    if (Files.exists(config)) {
+      LOGGER.trace("Loading configuration from file {}", config);
+      ReloadingFileBasedConfigurationBuilder<PropertiesConfiguration> builder = createReloadingBuilder(config,
+        reloadPolicy);
+      builder.getConfiguration();
+      configuration = BuilderConfigurationWrapperFactory.createBuilderConfigurationWrapper(Configuration.class, builder,
+        BuilderConfigurationWrapperFactory.EventSourceSupport.BUILDER);
+
+      reloadingBuilders.add(builder);
+    } else {
+      configuration = loadClasspathConfiguration(configurationFile);
+    }
 
     viewerConfiguration.addConfiguration(configuration);
     configurationFiles.add(configurationFile);
   }
 
-  private static void addCommonConfiguration() throws ConfigurationException {
-    for (String configurationFile : commonConfigurationFiles) {
-      Configuration configuration = getConfiguration(configurationFile);
-      combinedConfiguration.addConfiguration((PropertiesConfiguration) configuration);
-    }
-    viewerConfiguration.addConfiguration(combinedConfiguration);
+  private ReloadingFileBasedConfigurationBuilder<PropertiesConfiguration> createReloadingBuilder(Path config,
+    ReloadPolicy reloadPolicy) {
+    ReloadingDetectorFactory detectorFactory = reloadPolicy == ReloadPolicy.GUARDED
+      ? new IngestionGuardedReloadingDetectorFactory()
+      : new DefaultReloadingDetectorFactory();
+
+    ReloadingFileBasedConfigurationBuilder<PropertiesConfiguration> builder = new ReloadingFileBasedConfigurationBuilder<>(
+      PropertiesConfiguration.class)
+      .configure(new Parameters().properties().setFile(config.toFile()).setEncoding(ViewerConstants.DEFAULT_ENCODING)
+        .setReloadingDetectorFactory(detectorFactory).setReloadingRefreshDelay(0L));
+
+    builder.getReloadingController().addEventListener(ReloadingEvent.ANY,
+      event -> LOGGER.info("Reloading configuration from file {}", config));
+    builder.addEventListener(ConfigurationBuilderEvent.RESET,
+      event -> clearViewerCachableObjectsAfterConfigurationChange());
+    return builder;
   }
 
-  private void reloadCombinedConfiguration() throws ConfigurationException {
-    viewerConfiguration.removeConfiguration(combinedConfiguration);
-    combinedConfiguration.clear();
-    addCommonConfiguration();
-    clearViewerCachableObjectsAfterConfigurationChange();
-  }
-
-  private static Configuration getConfiguration(String configurationFile) throws ConfigurationException {
-    Path config = configPath.resolve(configurationFile);
-    PropertiesConfiguration propertiesConfiguration = new PropertiesConfiguration();
-    propertiesConfiguration.setDelimiterParsingDisabled(true);
-    propertiesConfiguration.setEncoding(ViewerConstants.DEFAULT_ENCODING);
-
-    if (Files.exists(config)) {
-      LOGGER.trace("Loading configuration from file {}", config);
-      propertiesConfiguration.load(config.toFile());
-      ViewerPropertiesReloadStrategy rodaPropertiesReloadStrategy = new ViewerPropertiesReloadStrategy();
-      rodaPropertiesReloadStrategy.setRefreshDelay(5000);
-      propertiesConfiguration.setReloadingStrategy(rodaPropertiesReloadStrategy);
-    } else {
-      InputStream inputStream = ViewerFactory.class
-        .getResourceAsStream("/" + ViewerConstants.VIEWER_CONFIG_FOLDER + "/" + configurationFile);
-      if (inputStream != null) {
-        LOGGER.trace("Loading configuration from classpath {}", configurationFile);
-        propertiesConfiguration.load(inputStream);
-      } else {
-        LOGGER.trace("Configuration {} doesn't exist", configurationFile);
-      }
+  /**
+   * Starts a {@link PeriodicReloadingTrigger} for each configuration file loaded
+   * from the config folder, if {@link #RELOAD_DBPTK_VIEWER_PROPERTIES} is
+   * enabled. Must be called after all configuration files are loaded, as the
+   * reloading properties are defined in them.
+   */
+  private void startReloadingTriggers() {
+    if (!getViewerConfigurationAsBoolean(false, RELOAD_DBPTK_VIEWER_PROPERTIES)) {
+      LOGGER.debug("Configuration reloading is disabled");
+      return;
     }
 
-    return propertiesConfiguration.interpolatedConfiguration();
+    long reloadPeriod = getViewerConfigurationAsLong(DEFAULT_RELOAD_PERIOD_MS, RELOAD_DBPTK_VIEWER_PROPERTIES_PERIOD);
+    for (ReloadingFileBasedConfigurationBuilder<PropertiesConfiguration> builder : reloadingBuilders) {
+      new PeriodicReloadingTrigger(builder.getReloadingController(), null, reloadPeriod, TimeUnit.MILLISECONDS).start();
+    }
+    LOGGER.debug("Checking configuration files for changes every {} ms", reloadPeriod);
+  }
+
+  /**
+   * How a configuration file loaded from the config folder is reloaded after it
+   * changes on disk. Reloading only happens if
+   * {@link #RELOAD_DBPTK_VIEWER_PROPERTIES} is enabled, and files are checked for
+   * changes every {@link #RELOAD_DBPTK_VIEWER_PROPERTIES_PERIOD} milliseconds.
+   */
+  private enum ReloadPolicy {
+    /**
+     * A detected change is only applied when no database is being ingested,
+     * otherwise it is postponed to a later check.
+     */
+    GUARDED,
+    /** A detected change is applied unconditionally. */
+    UNGUARDED
   }
 
   public static URL getConfigurationFile(String configurationFile) {

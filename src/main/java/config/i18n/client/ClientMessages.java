@@ -740,6 +740,8 @@ public interface ClientMessages extends Messages {
 
   String managePageTableHeaderTextForSearchHits();
 
+  String searchContentTimeoutReached();
+
   String manageDatabasePageDescription();
 
   String manageDatabaseSearchAllResults();
@@ -1165,6 +1167,10 @@ public interface ClientMessages extends Messages {
 
   String wizardExportOptionsHelperTextDesktopForWeb(@Select String fieldName);
 
+  String wizardExportOptionsLobConversionNormalizerReferenceText();
+
+  String wizardExportOptionsLobConversionNormalizerReferenceLink();
+
   String errorMessagesExportOptionsTitle();
 
   String errorMessagesExportOptions(@Select int error);
@@ -1296,6 +1302,10 @@ public interface ClientMessages extends Messages {
    * Database Information Panel
    ********************************************/
   String databaseInformationTextForTitle();
+  String databaseInformationERConfiguration();
+  String databaseInformationERUpload();
+  String databaseInformationERDownload();
+  String databaseInformationERReset();
 
   /********************************************
    * Upload SIARD
