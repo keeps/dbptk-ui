@@ -19,6 +19,7 @@ import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.fields.ComboBoxField;
 import com.databasepreservation.common.client.common.fields.FileUploadField;
 import com.databasepreservation.common.client.common.fields.GenericField;
+import com.databasepreservation.common.client.common.fields.TextWithLinkField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.ApplicationTypeOperations;
 import com.databasepreservation.common.client.models.JSO.ExtensionFilter;
@@ -71,6 +72,7 @@ public class SIARDExportOptionsCurrent extends Composite {
   private CheckBox conversionLobServiceCheckbox;
   private final List<Label> conversionLobServiceLabels = new ArrayList<>();
   private final Map<String, TextBox> conversionLobServiceInputs = new HashMap<>();
+  private final FlowPanel conversionLobServicePanel = new FlowPanel();
   private int validationError = -1;
   private final String version;
   private final String defaultPath;
@@ -93,7 +95,6 @@ public class SIARDExportOptionsCurrent extends Composite {
     this.defaultPath = defaultPath;
 
     FlowPanel panel = new FlowPanel();
-    FlowPanel conversionLobServicePanel = new FlowPanel();
 
     for (PreservationParameter p : module.getParameters()) {
       if (p.getExportOption() != null && shouldRenderField(p)) {
@@ -106,6 +107,10 @@ public class SIARDExportOptionsCurrent extends Composite {
           buildConversionServiceOptions(p, conversionLobServicePanel);
         }
       }
+    }
+
+    if (conversionLobServiceCheckbox != null) {
+      updateCheckboxConversionLobService(conversionLobServiceCheckbox.getValue());
     }
   }
 
@@ -315,6 +320,8 @@ public class SIARDExportOptionsCurrent extends Composite {
   }
 
   private void updateCheckboxConversionLobService(boolean value) {
+    conversionLobServicePanel.setVisible(value);
+
     if (value) { // selected
       for (Label label : conversionLobServiceLabels) {
         label.addStyleName("gwt-Label");
@@ -399,7 +406,6 @@ public class SIARDExportOptionsCurrent extends Composite {
       case ViewerConstants.INPUT_TYPE_CHECKBOX:
         conversionLobServiceOption = parameter.getName();
         conversionLobServiceCheckbox = new CheckBox();
-        conversionLobServiceCheckbox.setText(messages.wizardExportOptionsLabels(parameter.getName()));
         conversionLobServiceCheckbox.addStyleName("form-checkbox");
 
         boolean defaultCheck = ClientConfigurationManager.getBoolean(false,
@@ -409,10 +415,25 @@ public class SIARDExportOptionsCurrent extends Composite {
         conversionLobServiceCheckbox.addValueChangeHandler(event -> {
           updateCheckboxConversionLobService(event.getValue());
         });
-        genericField = GenericField.createInstance(conversionLobServiceCheckbox);
+        genericField = GenericField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()),
+          conversionLobServiceCheckbox);
         genericField.setRequired(parameter.isRequired());
         genericField.setCSSMetadata("form-row", "form-label-spaced");
-        content.add(genericField);
+
+        FlowPanel checkboxHelper = new FlowPanel();
+        checkboxHelper.addStyleName("form-helper");
+        checkboxHelper.add(genericField);
+
+        String normalizerReference = ClientConfigurationManager
+          .getString(ViewerConstants.PROPERTY_WIZARD_LOB_CONVERSION_NORMALIZER_REFERENCE);
+        if (ViewerStringUtils.isNotBlank(normalizerReference)) {
+          TextWithLinkField normalizerReferenceField = TextWithLinkField.createInstance(
+            messages.wizardExportOptionsLobConversionNormalizerReferenceText(),
+            messages.wizardExportOptionsLobConversionNormalizerReferenceLink(), normalizerReference);
+          normalizerReferenceField.addStyleName("form-text-helper text-muted");
+          checkboxHelper.add(normalizerReferenceField);
+        }
+        content.add(checkboxHelper);
         break;
       case ViewerConstants.INPUT_TYPE_TEXT:
         Label label = new Label();
@@ -458,7 +479,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         formHelper.add(formRow);
         formHelper.add(span);
         panel.add(formHelper);
-        panel.addStyleName("form-conversion-lobs");
+        panel.addStyleName("form-lobs form-conversion-lobs");
         content.add(panel);
         break;
       default:
