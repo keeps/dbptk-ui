@@ -635,6 +635,7 @@ public class ViewerConstants {
    */
 
   public static final String PROPERTY_WIZARD_DEFAULT_SIARD_EXPORT_OPTION = "ui.wizard.default.siard.export.option";
+  public static final String PROPERTY_WIZARD_LOB_CONVERSION_NORMALIZER_REFERENCE = "ui.wizard.siard.export.lob-conversion.normalizer.reference";
 
   /*
    * LINKS

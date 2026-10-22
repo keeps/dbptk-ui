@@ -1167,6 +1167,10 @@ public interface ClientMessages extends Messages {
 
   String wizardExportOptionsHelperTextDesktopForWeb(@Select String fieldName);
 
+  String wizardExportOptionsLobConversionNormalizerReferenceText();
+
+  String wizardExportOptionsLobConversionNormalizerReferenceLink();
+
   String errorMessagesExportOptionsTitle();
 
   String errorMessagesExportOptions(@Select int error);
