@@ -48,11 +48,15 @@ import com.databasepreservation.utils.ModuleConfigurationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class SiardControllerHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SiardControllerHelper.class);
+
   public static String buildModuleConfigurationForSIARD(String siardVersion, String siardPath,
     TableAndColumnsParameters tableAndColumnsParameters) throws GenericException {
     try {
@@ -124,6 +128,7 @@ public class SiardControllerHelper {
     try {
       setupPathToDriver(connectionParameters);
     } catch (Exception e) {
+      LOGGER.warn(e.getMessage(), e);
       throw new GenericException("Could not load the driver", e);
     }
   }
