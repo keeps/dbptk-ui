@@ -13,7 +13,6 @@ import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.common.search.SearchField;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -34,9 +33,8 @@ public abstract class SearchFieldPanel extends Composite {
   protected static final String FORM_TEXTBOX_FORM_TEXTBOX_SMALL = "form-textbox form-textbox-small";
   protected static final String TRUE = "true";
   protected static final String FALSE = "false";
-
-  protected FlowPanel inputPanel;
   private final SearchField searchField;
+  protected FlowPanel inputPanel;
 
   public SearchFieldPanel(SearchField searchField) {
     this.searchField = searchField;
@@ -74,11 +72,12 @@ public abstract class SearchFieldPanel extends Composite {
 
   protected Date getDateFromInput(UTCDateBox dateBox, UTCTimeBox timeBox) {
     boolean isUTC = ClientConfigurationManager.getBoolean(false, "ui.interface.show.datetime.utc");
+    long utcDateTime = dateBox.getValue() + timeBox.getValue();
     if (isUTC) {
-      return new Date(dateBox.getValue() + timeBox.getValue());
+      return new Date(utcDateTime);
     } else {
-      DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-ddTHH:mm:ss");
-      return format.parse(dateBox.getText() + "T" + timeBox.getText());
+      // interpret the selected date and time as local time
+      return UTCDateBox.utc2date(utcDateTime);
     }
   }
 
