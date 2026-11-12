@@ -20,7 +20,6 @@ import java.util.TreeSet;
 
 import org.jetbrains.annotations.Nullable;
 import org.roda.core.data.v2.index.sublist.Sublist;
-
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -80,7 +79,6 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-
 import config.i18n.client.ClientMessages;
 
 /**
@@ -222,13 +220,16 @@ public class RowPanel extends RightPanel {
     if (!recordRelatedTo.isEmpty() || !recordReferencedBy.isEmpty()) {
       b.appendHtmlConstant("<div class=\"field\">");
       if (!recordRelatedTo.isEmpty()) {
-        b.append(getForeignKeyHTML(messages.references_thisRecordIsRelatedTo(), recordRelatedTo, row));
+        b.append(getCompositForeignKeyHTML(messages.references_thisRecordIsRelatedToPrefix(), recordRelatedTo, row));
       }
       if (!recordReferencedBy.isEmpty()) {
-        b.append(getForeignKeyHTML(messages.references_thisRecordIsReferencedBy(), recordReferencedBy, row));
+        b.append(
+          getCompositForeignKeyHTML(messages.references_thisRecordIsReferencedByPrefix(), recordReferencedBy, row));
       }
       b.appendHtmlConstant("</div>");
     }
+
+    content.add(new HTML(b.toSafeHtml()));
 
     Set<String> processedMultiValueTables = new HashSet<>();
 
@@ -315,6 +316,72 @@ public class RowPanel extends RightPanel {
         hyperlink.setTitle(ref.getTableDescription());
         hyperlink.addStyleName("related-records-link");
         b.appendHtmlConstant(hyperlink.toString());
+        firstRef = false;
+        nonNullReferenceCounter++;
+      }
+    }
+    b.appendHtmlConstant("</div>");
+
+    if (nonNullReferenceCounter > 0) {
+      return b.toSafeHtml();
+    } else {
+      return SafeHtmlUtils.EMPTY_SAFE_HTML;
+    }
+  }
+
+  private SafeHtml getCompositForeignKeyHTML(String prefix, Set<Ref> refs, ViewerRow row) {
+    boolean firstRef = true;
+    int nonNullReferenceCounter = 0;
+
+    SafeHtmlBuilder b = new SafeHtmlBuilder();
+    b.appendHtmlConstant("<div class=\"composite-key related-records\">");
+    b.appendEscaped(prefix);
+    b.appendEscaped(" ");
+
+    for (Ref ref : refs) {
+      List<String> columnNamesAndValues = ref.getColumnNamesAndValues(row);
+
+      if (!columnNamesAndValues.isEmpty()) {
+        if (!firstRef) {
+          b.appendHtmlConstant(", ");
+        }
+
+        String refName;
+        TableStatus refTableStatus = status.getTableStatus(ref.refTable.getUuid());
+
+        boolean showSchema = ClientConfigurationManager.getBoolean(true,
+          ViewerConstants.PROPERTY_REFERENCE_TABLE_SHOW_SCHEMA_NAME);
+        boolean hasCustomName = refTableStatus != null && ViewerStringUtils.isNotBlank(refTableStatus.getCustomName());
+
+        if (showSchema) {
+          if (hasCustomName) {
+            refName = ref.refTable.getSchemaName() + "." + refTableStatus.getCustomName();
+          } else {
+            refName = ref.getSchemaAndTableName();
+          }
+        } else {
+          if (hasCustomName) {
+            refName = refTableStatus.getCustomName();
+          } else {
+            refName = ref.refTable.getName();
+          }
+        }
+
+        Hyperlink hyperlink = new Hyperlink(refName,
+          URL.decode(HistoryManager.linkToForeignKey(database.getUuid(), ref.refTable.getId(), columnNamesAndValues)));
+        hyperlink.setTitle(ref.getTableDescription());
+        hyperlink.addStyleName("related-records-link");
+        b.appendHtmlConstant(hyperlink.toString());
+        b.appendEscaped(" ");
+        b.appendEscaped(messages.references_referenceViaCompositeKey());
+        b.appendEscaped(" (");
+        List<String> fkNativeColumnCustomNames = new ArrayList<>();
+        for (String nativeColumnId : ref.foreignSolrColumnToRowSolrColumn.values()) {
+          String customName = status.getTableStatus(table.getUuid()).getColumnById(nativeColumnId).getCustomName();
+          fkNativeColumnCustomNames.add(customName);
+        }
+        b.appendEscaped(String.join(", ", fkNativeColumnCustomNames));
+        b.appendEscaped(")");
         firstRef = false;
         nonNullReferenceCounter++;
       }
@@ -716,15 +783,14 @@ public class RowPanel extends RightPanel {
 
     public List<String> getColumnNamesAndValues(ViewerRow row) {
       List<String> params = new ArrayList<>();
-      foreignSolrColumnToRowSolrColumn.keySet().forEach(colName -> {
-        String rowColName = foreignSolrColumnToRowSolrColumn.get(colName);
-        ViewerCell viewerCell = row.getCells().get(rowColName);
-        if (viewerCell != null) {
-          String value = viewerCell.getValue();
-          params.add(colName);
-          params.add(value);
+      for (Map.Entry<String, String> entry : foreignSolrColumnToRowSolrColumn.entrySet()) {
+        ViewerCell viewerCell = row.getCells().get(entry.getValue());
+        if (viewerCell == null || viewerCell.getValue() == null) {
+          return new ArrayList<>();
         }
-      });
+        params.add(entry.getKey());
+        params.add(viewerCell.getValue());
+      }
       return params;
     }
 
@@ -757,11 +823,14 @@ public class RowPanel extends RightPanel {
         return 0;
       }
       int schemaCompare = refTable.getSchemaName().compareTo(o.refTable.getSchemaName());
-      if (schemaCompare == 0) {
-        return refTable.getName().compareTo(o.refTable.getName());
-      } else {
+      if (schemaCompare != 0) {
         return schemaCompare;
       }
+      int tableCompare = refTable.getName().compareTo(o.refTable.getName());
+      if (tableCompare != 0) {
+        return tableCompare;
+      }
+      return foreignSolrColumnToRowSolrColumn.toString().compareTo(o.foreignSolrColumnToRowSolrColumn.toString());
     }
 
     @Override
