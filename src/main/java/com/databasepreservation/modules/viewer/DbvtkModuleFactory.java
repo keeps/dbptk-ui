@@ -7,17 +7,12 @@
  */
 package com.databasepreservation.modules.viewer;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.model.exception.ModuleException;
 import org.apache.commons.lang3.StringUtils;
-
-import com.databasepreservation.model.exception.LicenseNotAcceptedException;
+import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.UnsupportedModuleException;
 import com.databasepreservation.model.modules.DatabaseImportModule;
 import com.databasepreservation.model.modules.DatabaseModuleFactory;
@@ -31,9 +26,14 @@ import com.databasepreservation.model.reporters.Reporter;
  */
 public class DbvtkModuleFactory implements DatabaseModuleFactory {
   public static final String PARAMETER_DATABASE_UUID = "database-id";
+  public static final String PARAMETER_ATTEMPT_TO_MATCH_COLUMN_NAMES = "attempt-to-match-column-names";
 
   private static final Parameter databaseUUID = new Parameter().longName(PARAMETER_DATABASE_UUID).shortName("dbid")
     .description("Database UUID to use in Solr").required(false).hasArgument(true).setOptionalArgument(false);
+  private static final Parameter attemptToMatchColumnNames = new Parameter()
+    .longName(PARAMETER_ATTEMPT_TO_MATCH_COLUMN_NAMES).shortName("amcn")
+    .description("Match the imported cells to the existing table columns by column name instead of by position")
+    .required(false).hasArgument(false).valueIfSet("true").setOptionalArgument(false);
 
   @Override
   public boolean producesImportModules() {
@@ -59,6 +59,7 @@ public class DbvtkModuleFactory implements DatabaseModuleFactory {
   public Map<String, Parameter> getAllParameters() {
     HashMap<String, Parameter> parameterHashMap = new HashMap<>();
     parameterHashMap.put(databaseUUID.longName(), databaseUUID);
+    parameterHashMap.put(attemptToMatchColumnNames.longName(), attemptToMatchColumnNames);
     return parameterHashMap;
   }
 
@@ -86,13 +87,15 @@ public class DbvtkModuleFactory implements DatabaseModuleFactory {
   @Override
   public DatabaseFilterModule buildExportModule(Map<Parameter, String> parameters, Reporter reporter) throws ModuleException{
     String pDatabaseUUID = parameters.get(databaseUUID);
+    boolean attemptToMatchColumnNamesFlag = Boolean.parseBoolean(parameters.get(attemptToMatchColumnNames));
 
-    reporter.exportModuleParameters(getModuleName(), PARAMETER_DATABASE_UUID, pDatabaseUUID);
+    reporter.exportModuleParameters(getModuleName(), PARAMETER_DATABASE_UUID, pDatabaseUUID,
+      PARAMETER_ATTEMPT_TO_MATCH_COLUMN_NAMES, String.valueOf(attemptToMatchColumnNamesFlag));
 
     if (StringUtils.isBlank(pDatabaseUUID)) {
       throw new ModuleException().withMessage("Unable to obtain the database to ingest the data");
     } else {
-      return new DbvtkExportModule(pDatabaseUUID);
+      return new DbvtkExportModule(pDatabaseUUID, attemptToMatchColumnNamesFlag);
     }
   }
 }

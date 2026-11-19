@@ -43,7 +43,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
 import com.databasepreservation.SIARDValidation;
@@ -778,14 +777,15 @@ public class SIARDController {
     }
   }
 
-  public static String loadFromLocal(String localPath, String databaseUUID, String siardVersion)
+  public static String loadFromLocal(String localPath, String databaseUUID, String siardVersion,
+    Map<String, String> importModuleParameters, Map<String, String> exportModuleParameters)
     throws GenericException {
     LOGGER.info("Preparing the SIARD to be browsable ({})", databaseUUID);
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
       ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     try {
       Path siardPath = basePath.resolve(localPath);
-      convertSIARDtoSolr(siardPath, databaseUUID, siardVersion);
+      convertSIARDtoSolr(siardPath, databaseUUID, siardVersion, importModuleParameters, exportModuleParameters);
       LOGGER.info("Conversion to SIARD successful, database: {}", databaseUUID);
     } catch (GenericException e) {
       LOGGER.error("Conversion to SIARD failed for database {}", databaseUUID, e);
@@ -794,7 +794,8 @@ public class SIARDController {
     return databaseUUID;
   }
 
-  private static void convertSIARDtoSolr(Path siardPath, String databaseUUID, String siardVersion)
+  private static void convertSIARDtoSolr(Path siardPath, String databaseUUID, String siardVersion,
+    Map<String, String> importModuleParameters, Map<String, String> exportModuleParameters)
     throws GenericException {
     validateSIARDLocation(siardPath);
 
@@ -840,6 +841,14 @@ public class SIARDController {
 
       databaseMigration.exportModule(new DbvtkModuleFactory())
         .exportModuleParameter(DbvtkModuleFactory.PARAMETER_DATABASE_UUID, databaseUUID);
+
+      for (Map.Entry<String, String> importModuleParameter : importModuleParameters.entrySet()) {
+        databaseMigration.importModuleParameter(importModuleParameter.getKey(), importModuleParameter.getValue());
+      }
+
+      for (Map.Entry<String, String> exportModuleParameter : exportModuleParameters.entrySet()) {
+        databaseMigration.exportModuleParameter(exportModuleParameter.getKey(), exportModuleParameter.getValue());
+      }
 
       databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(databaseUUID)));
 
