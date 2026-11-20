@@ -432,7 +432,7 @@ public class RowPanel extends RightPanel {
           && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
           rowField = RowField.createInstance(label, new HTML(messages.rowPanelTextForLobUnavailable()));
         } else {
-          if (cell.getMimeType().equals("application/pdf") || value.endsWith(".pdf") || value.endsWith(".PDF")) {
+          if ("application/pdf".equals(cell.getMimeType()) || value.endsWith(".pdf") || value.endsWith(".PDF")) {
             String exportLobUri = RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(),
               table.getName(), row.getUuid(), columnStatus.getColumnIndex());
             String viewerPdf = GWT.getHostPageBaseURL() + "webjars/pdf-js/web/viewer.html?file=" + exportLobUri;
@@ -695,7 +695,7 @@ public class RowPanel extends RightPanel {
     String exportLobUri = RestUtils.createExportLobUri(database.getUuid(), nestedTable.getSchemaName(),
       nestedTable.getName(), viewerRow.getUuid(), originalColumnIndex);
 
-    if (originalCell.getValue().getMimeType().equals("application/pdf")
+    if ("application/pdf".equals(originalCell.getValue().getMimeType())
       || originalCell.getValue().getValue().toLowerCase().endsWith(".pdf")) {
       String viewerPdf = GWT.getHostPageBaseURL() + "webjars/pdf-js/web/viewer.html?file=" + exportLobUri;
       Frame frame = new Frame(viewerPdf);
