@@ -6,7 +6,7 @@
     <groupId>com.databasepreservation.visualization</groupId>
     <artifactId>dbvtk</artifactId>
     <packaging>war</packaging>
-    <version>4.3.0</version>
+    <version>4.4.0-SNAPSHOT</version>
     <name>Database Visualization Toolkit</name>
 
     <description>A viewer and explorer for preserved databases</description>
@@ -35,6 +35,9 @@
         <version.solr>10.0.0</version.solr>
         <version.springboot>3.4.10</version.springboot>
         <version.logback>1.5.19</version.logback>
+
+        <!-- Security: pin transitive deps flagged by Trivy to the latest release within the same major -->
+        <spring-framework.version>6.2.19</spring-framework.version>
 
         <desktop>com.databasepreservation.desktop.Desktop</desktop>
         <server>com.databasepreservation.server.Server</server>
@@ -457,6 +460,28 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-tomcat</artifactId>
                 <scope>provided</scope>
+            </dependency>
+
+            <!-- Security: Trivy-flagged transitive deps, bumped to latest release within the same major -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-handler</artifactId>
+                <version>4.2.21.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>1.15.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>10.1.62</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>1.87</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
