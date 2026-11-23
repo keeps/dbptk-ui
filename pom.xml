@@ -6,7 +6,7 @@
     <groupId>com.databasepreservation.visualization</groupId>
     <artifactId>dbvtk</artifactId>
     <packaging>war</packaging>
-    <version>4.4.0-SNAPSHOT</version>
+    <version>4.3.1</version>
     <name>Database Visualization Toolkit</name>
 
     <description>A viewer and explorer for preserved databases</description>
@@ -584,10 +584,11 @@
             <version>${version.roda}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.github.jknack/handlebars -->
+        <!-- Security: 4.3.0 shaded an old commons-text (1.9, CVE-2022-42889); 4.5.8 dropped the shading -->
         <dependency>
             <groupId>com.github.jknack</groupId>
             <artifactId>handlebars</artifactId>
-            <version>4.3.0</version>
+            <version>4.5.8</version>
         </dependency>
 
         <!-- gwt -->
