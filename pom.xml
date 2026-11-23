@@ -34,7 +34,7 @@
         <version.cas-client>4.0.4</version.cas-client>
         <version.solr>10.0.0</version.solr>
         <version.springboot>3.4.10</version.springboot>
-        <version.logback>1.5.19</version.logback>
+        <version.logback>1.5.25</version.logback>
 
         <!-- Security: pin transitive deps flagged by Trivy to the latest release within the same major -->
         <spring-framework.version>6.2.19</spring-framework.version>
