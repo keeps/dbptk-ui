@@ -36,7 +36,6 @@
         <version.springboot>3.4.10</version.springboot>
         <version.logback>1.5.19</version.logback>
 
-        <!-- Security: pin transitive deps flagged by Trivy to the latest release within the same major -->
         <spring-framework.version>6.2.19</spring-framework.version>
 
         <desktop>com.databasepreservation.desktop.Desktop</desktop>
@@ -462,7 +461,6 @@
                 <scope>provided</scope>
             </dependency>
 
-            <!-- Security: Trivy-flagged transitive deps, bumped to latest release within the same major -->
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
