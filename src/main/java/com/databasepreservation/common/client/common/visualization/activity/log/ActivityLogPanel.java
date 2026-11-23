@@ -40,33 +40,16 @@ import config.i18n.client.ClientMessages;
  */
 public class ActivityLogPanel extends ContentPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-
-  public static ActivityLogPanel getInstance() {
-    if (instance == null) {
-      instance = new ActivityLogPanel();
-    }
-    return instance;
-  }
-
-  interface ActivityLogPanelUiBinder extends UiBinder<Widget, ActivityLogPanel> {
-  }
-
   private static ActivityLogPanelUiBinder uiBinder = GWT.create(ActivityLogPanelUiBinder.class);
-
+  private static ActivityLogPanel instance = null;
   @UiField
   SimplePanel advancedSearch;
-
   @UiField
   FlowPanel mainHeader;
-
   @UiField
   SimplePanel description;
-
   @UiField(provided = true)
   ActivityLogList activityLogList;
-
-  private static ActivityLogPanel instance = null;
-
   private SearchPanel searchPanel;
   private FlowPanel itemsSearchAdvancedFieldsPanel;
 
@@ -93,10 +76,18 @@ public class ActivityLogPanel extends ContentPanel {
       messages.searchPlaceholder(), false, true);
     searchPanel.setList(activityLogList);
     searchPanel.setDefaultFilterIncremental(false);
+    searchPanel.setEdismaxBasicSearchEnabled(false);
     advancedSearch.add(searchPanel);
 
     initAdvancedSearch();
     showSearchAdvancedFieldsPanel();
+  }
+
+  public static ActivityLogPanel getInstance() {
+    if (instance == null) {
+      instance = new ActivityLogPanel();
+    }
+    return instance;
   }
 
   private void initHeader() {
@@ -137,5 +128,8 @@ public class ActivityLogPanel extends ContentPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forActivityLog());
+  }
+
+  interface ActivityLogPanelUiBinder extends UiBinder<Widget, ActivityLogPanel> {
   }
 }

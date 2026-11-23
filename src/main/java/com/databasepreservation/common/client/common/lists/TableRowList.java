@@ -999,7 +999,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
       @Override
       public void onSuccess(Method method, IndexResult<ViewerRow> o) {
-        CopyUtils.copyTableSearchResults(o, status.getTableStatus(table.getUuid()).getVisibleColumnsList());
+        CopyUtils.copyTableSearchResults(o, status.getTableStatus(table.getUuid()));
       }
     }).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(), table.getSchemaName(),
       table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());

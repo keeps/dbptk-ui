@@ -784,7 +784,7 @@ public class ToolkitStructure2ViewerStructure {
    *          needed)
    */
   public static ViewerRow getRow(CollectionStatus collectionConfiguration, ViewerTable table, Row row, long rowIndex,
-    String databasePath, String siardVersion, ZipFile sharedZipFile) {
+    String databasePath, String siardVersion, ZipFile sharedZipFile, boolean attemptToMatchColumnDisplayNames) {
     setCurrentTable(table);
 
     ViewerRow result = new ViewerRow();
@@ -794,7 +794,8 @@ public class ToolkitStructure2ViewerStructure {
     result.setTableId(table.getId());
     result.setTableUUID(table.getUuid());
     result.setUuid(rowUUID);
-    result.setCells(getCells(collectionConfiguration, table, row, databasePath, result, siardVersion, sharedZipFile));
+    result.setCells(getCells(collectionConfiguration, table, row, databasePath, result, siardVersion, sharedZipFile,
+      attemptToMatchColumnDisplayNames));
     return result;
   }
 
@@ -805,22 +806,88 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   private static Map<String, ViewerCell> getCells(CollectionStatus collectionConfiguration, ViewerTable table, Row row,
-    String databasePath, ViewerRow actualViewerRow, String siardVersion, ZipFile sharedZipFile) {
+    String databasePath, ViewerRow actualViewerRow, String siardVersion, ZipFile sharedZipFile,
+    boolean attemptToMatchColumnDisplayNames) {
     Map<String, ViewerCell> result = new LinkedHashMap<>();
 
-    int colIndex = 0;
-    List<Cell> toolkitCells = row.getCells();
-    for (ViewerColumn viewerColumn : table.getColumns()) {
-      String solrColumnName = viewerColumn.getSolrName();
-      try {
-        result.put(solrColumnName, getCell(collectionConfiguration, table, toolkitCells.get(colIndex), colIndex++,
-          databasePath, actualViewerRow, siardVersion, sharedZipFile));
-      } catch (ViewerException e) {
-        LOGGER.error("Problem converting cell, omitted it (as if it were NULL)", e);
+    Map<String, Cell> cellsByViewerColumnName = null;
+    boolean matchByColumnName = false;
+    if (attemptToMatchColumnDisplayNames) {
+      cellsByViewerColumnName = mapCellsByColumnName(table, row);
+      matchByColumnName = anyColumnNameMatches(table, cellsByViewerColumnName);
+      if (!matchByColumnName) {
+        LOGGER.info("No column of table '{}' matched a cell by name in row {}, matching cells by position",
+          table.getId(), actualViewerRow.getUuid());
       }
     }
 
+    int colIndex = 0;
+    for (ViewerColumn viewerColumn : table.getColumns()) {
+      String solrColumnName = viewerColumn.getSolrName();
+      Cell columnCell;
+      if (matchByColumnName) {
+        columnCell = cellsByViewerColumnName.get(viewerColumn.getDisplayName());
+      } else {
+        columnCell = row.getCells().get(colIndex);
+      }
+
+      if (columnCell != null) {
+        try {
+          result.put(solrColumnName, getCell(collectionConfiguration, table, columnCell, colIndex,
+            databasePath, actualViewerRow, siardVersion, sharedZipFile));
+        } catch (ViewerException e) {
+          LOGGER.error("Problem converting cell, omitted it (as if it were NULL)", e);
+        }
+      } else {
+        LOGGER.warn("No cell found for column '{}' of table '{}' in row {}, skipped", viewerColumn.getDisplayName(),
+          table.getId(), actualViewerRow.getUuid());
+      }
+      colIndex++;
+    }
+
     return result;
+  }
+
+  /**
+   * Whether at least one column of the table has a cell matched by name. When
+   * none does, matching by name gives nothing, so the cells are matched by
+   * position instead (the behaviour without name matching).
+   */
+  private static boolean anyColumnNameMatches(ViewerTable table, Map<String, Cell> cellsByColumnName) {
+    if (cellsByColumnName.isEmpty()) {
+      return false;
+    }
+    for (ViewerColumn viewerColumn : table.getColumns()) {
+      if (cellsByColumnName.containsKey(viewerColumn.getDisplayName())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Maps the cells of a toolkit row by their column name. Toolkit cell ids
+   * usually have the format 'tableId.columnName.rowIndex', but some (e.g. SIARD
+   * DK virtual tables) come as just 'columnName.rowIndex', so the column name is
+   * taken as the second to last '.' separated element of the cell id, ignoring
+   * any table id prefix.
+   */
+  private static Map<String, Cell> mapCellsByColumnName(ViewerTable table, Row row) {
+    Map<String, Cell> cellsByColumnName = new HashMap<>();
+    for (Cell cell : row.getCells()) {
+      String cellId = cell.getId();
+      int rowIndexSeparator = cellId != null ? cellId.lastIndexOf('.') : -1;
+      // -1 when the id is just 'columnName.rowIndex'
+      int columnNameSeparator = rowIndexSeparator > 0 ? cellId.lastIndexOf('.', rowIndexSeparator - 1) : -1;
+      if (rowIndexSeparator <= columnNameSeparator + 1) {
+        LOGGER.warn("Cell id '{}' of table '{}' does not match the expected format '[...].<column>.<row>', ignoring it",
+          cellId, table.getId());
+        continue;
+      }
+      String columnName = cellId.substring(columnNameSeparator + 1, rowIndexSeparator);
+      cellsByColumnName.put(columnName, cell);
+    }
+    return cellsByColumnName;
   }
 
   private static ViewerCell getCell(CollectionStatus collectionConfiguration, ViewerTable table, Cell cell,

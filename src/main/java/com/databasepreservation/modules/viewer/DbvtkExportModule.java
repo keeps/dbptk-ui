@@ -51,10 +51,12 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   private String databaseUUID;
   private long rowIndex = 1;
   private ZipFile databaseZipFile;
+  private boolean attemptToMatchColumnDisplayNames;
   private static final Logger LOGGER = LoggerFactory.getLogger(DbvtkExportModule.class);
 
-  public DbvtkExportModule(String databaseUUID) {
+  public DbvtkExportModule(String databaseUUID, boolean attemptToMatchColumnDisplayNames) {
     solrManager = ViewerFactory.getSolrManager();
+    this.attemptToMatchColumnDisplayNames = attemptToMatchColumnDisplayNames;
     try {
       retrieved = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       collectionConfiguration = ViewerFactory.getConfigurationManager().getConfigurationCollection(databaseUUID,
@@ -162,7 +164,8 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   @Override
   public void handleDataRow(Row row) throws ModuleException {
     solrManager.addRow(collectionConfiguration, ToolkitStructure2ViewerStructure.getRow(collectionConfiguration,
-      currentTable, row, rowIndex++, retrieved.getPath(), retrieved.getVersion(), databaseZipFile));
+      currentTable, row, rowIndex++, retrieved.getPath(), retrieved.getVersion(), databaseZipFile,
+      attemptToMatchColumnDisplayNames));
 
     for (Cell cell : row.getCells()) {
       if (cell instanceof BinaryCell) {

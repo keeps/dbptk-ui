@@ -168,9 +168,11 @@ public interface ClientMessages extends Messages {
 
   String references_foreignKeyDescription();
 
-  String references_thisRecordIsRelatedTo();
+  String references_thisRecordIsRelatedToPrefix();
 
-  String references_thisRecordIsReferencedBy();
+  String references_thisRecordIsReferencedByPrefix();
+
+  String references_referenceViaCompositeKey();
 
   String row_downloadLOB();
 

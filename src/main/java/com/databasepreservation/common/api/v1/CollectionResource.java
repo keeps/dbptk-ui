@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -53,7 +54,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-
 import com.databasepreservation.common.api.exceptions.IllegalAccessException;
 import com.databasepreservation.common.api.exceptions.RESTException;
 import com.databasepreservation.common.api.utils.ApiUtils;
@@ -113,7 +113,7 @@ import com.databasepreservation.common.server.storage.BinaryConsumesOutputStream
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.LobManagerUtils;
 import com.databasepreservation.common.utils.UserUtility;
-
+import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -212,7 +212,8 @@ public class CollectionResource implements CollectionService {
         return new StringResponse(databaseUUID);
       } else {
         return new StringResponse(
-          SIARDController.loadFromLocal(database.getPath(), databaseUUID, database.getVersion()));
+          SIARDController.loadFromLocal(database.getPath(), databaseUUID, database.getVersion(), new HashMap<>(),
+            new HashMap<>()));
       }
 
     } catch (GenericException | AuthorizationDeniedException | NotFoundException | AuthorizationException e) {
@@ -307,7 +308,8 @@ public class CollectionResource implements CollectionService {
         return new StringResponse(databaseUUID);
       }
 
-      String resultUUID = SIARDController.loadFromLocal(database.getPath(), databaseUUID, database.getVersion());
+      String resultUUID = SIARDController.loadFromLocal(database.getPath(), databaseUUID, database.getVersion(),
+        new HashMap<>(), Map.of(DbvtkModuleFactory.PARAMETER_ATTEMPT_TO_MATCH_COLUMN_NAMES, "true"));
 
       if (collectionStatus != null && collectionStatus.getSavedSearches() != null) {
         for (SavedSearch savedSearch : collectionStatus.getSavedSearches()) {

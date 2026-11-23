@@ -22,7 +22,7 @@
     font-weight: 400;
 }
 
-.value {
+.value, .composite-key {
     font-size: 1.4rem;
     color: rgb(88, 89, 91);
 }
@@ -849,11 +849,13 @@ p[data-value]:after {
 	       SINGLE RECORD PAGE
 ************************************************/
 
-.field .value.related-records .related-records-link {
+.field .value.related-records .related-records-link,
+.field .composite-key.related-records .related-records-link{
     display: inline;
 }
 
-.field .value.related-records {
+.field .value.related-records,
+.field .composite-key.related-records{
     font-size: 75%; /*equivalent to .small*/
 }
 

@@ -12,11 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.search.panel.SearchFieldPanel;
 import com.databasepreservation.common.client.index.filter.EDismaxSimplerQueryFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -48,60 +50,47 @@ import config.i18n.client.ClientMessages;
 public abstract class SearchPanelAbstract extends Composite implements HasValueChangeHandlers<String> {
   protected static final ClientMessages messages = GWT.create(ClientMessages.class);
   protected static final String FILTER_ICON = "<i class='fa fa-filter' aria-hidden='true'></i>";
-
-  @UiField
-  FlowPanel searchPanel;
-
-  @UiField
-  FlowPanel searchContextPanel;
-
-  @UiField
-  Dropdown searchInputListBox;
-
-  @UiField
-  TextBox searchInputBox;
-
-  @UiField
-  AccessibleFocusPanel searchInputButton;
-
-  @UiField
-  AccessibleFocusPanel clearCrossButton;
-
-  @UiField
-  AccessibleFocusPanel searchAdvancedDisclosureButton;
-
-  @UiField
-  FlowPanel searchAdvancedPanel;
-
-  @UiField
-  FlowPanel searchAdvancedPanelButtons;
-
-  @UiField
-  Button searchAdvancedGo;
-
-  @UiField
-  Button clearSearchButton;
-
-  @UiField
-  Button saveSearchButton;
-
-  @UiField
-  FlowPanel searchPreFilters;
-
-  @UiField
-  SimplePanel searchPanelSelectionDropdownWrapper;
-
   protected Filter defaultFilter;
+  protected boolean edismaxBasicSearchEnabled;
   protected String metadataCopyField;
   protected String extractedTextCopyField;
   protected boolean defaultFilterIncremental = false;
   protected AsyncCallback<Void> saveQueryCallback;
   protected FlowPanel fieldsPanel;
   protected AsyncTableCell<?, ?> list;
+  @UiField
+  FlowPanel searchPanel;
+  @UiField
+  FlowPanel searchContextPanel;
+  @UiField
+  Dropdown searchInputListBox;
+  @UiField
+  TextBox searchInputBox;
+  @UiField
+  AccessibleFocusPanel searchInputButton;
+  @UiField
+  AccessibleFocusPanel clearCrossButton;
+  @UiField
+  AccessibleFocusPanel searchAdvancedDisclosureButton;
+  @UiField
+  FlowPanel searchAdvancedPanel;
+  @UiField
+  FlowPanel searchAdvancedPanelButtons;
+  @UiField
+  Button searchAdvancedGo;
+  @UiField
+  Button clearSearchButton;
+  @UiField
+  Button saveSearchButton;
+  @UiField
+  FlowPanel searchPreFilters;
+  @UiField
+  SimplePanel searchPanelSelectionDropdownWrapper;
 
   protected SearchPanelAbstract(Filter defaultFilter, String metadataCopyField, String extractedTextCopyField,
     String placeholder, boolean showSearchInputListBox, boolean showSearchAdvancedDisclosureButton) {
     this.defaultFilter = defaultFilter;
+    this.edismaxBasicSearchEnabled = true;
     this.metadataCopyField = metadataCopyField;
     this.extractedTextCopyField = extractedTextCopyField;
 
@@ -156,6 +145,7 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     final AsyncCallback<Void> saveQueryCallback) {
     this.saveQueryCallback = saveQueryCallback;
     this.defaultFilter = defaultFilter;
+    this.edismaxBasicSearchEnabled = true;
     this.metadataCopyField = metadataCopyField;
     this.extractedTextCopyField = extractedTextCopyField;
 
@@ -224,10 +214,13 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     if (!searchAdvancedPanel.isVisible()) {
       String basicQuery = searchInputBox.getText();
       if (basicQuery != null && !basicQuery.trim().isEmpty()) {
-        parameters.add(new EDismaxSimplerQueryFilterParameter(basicQuery));
+        if (edismaxBasicSearchEnabled) {
+          parameters.add(new EDismaxSimplerQueryFilterParameter(basicQuery));
+        } else {
+          parameters.add(new SimpleFilterParameter(ViewerConstants.INDEX_SEARCH, basicQuery));
+        }
       }
-    }
-    else if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
+    } else if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
         if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
           SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
@@ -305,13 +298,17 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
     this.list = list;
   }
 
-  public void setDefaultFilter(Filter defaultFilter) {
-    this.defaultFilter = defaultFilter;
-  }
-
   public void setDefaultFilter(Filter defaultFilter, boolean defaultFilterIncremental) {
     this.defaultFilter = defaultFilter;
     this.defaultFilterIncremental = defaultFilterIncremental;
+  }
+
+  public boolean isEdismaxBasicSearchEnabled() {
+    return this.edismaxBasicSearchEnabled;
+  }
+
+  public void setEdismaxBasicSearchEnabled(boolean edismaxBasicSearchEnabled) {
+    this.edismaxBasicSearchEnabled = edismaxBasicSearchEnabled;
   }
 
   public void setMetadataCopyField(String metadataCopyField) {
@@ -443,6 +440,10 @@ public abstract class SearchPanelAbstract extends Composite implements HasValueC
 
   public Filter getDefaultFilter() {
     return defaultFilter;
+  }
+
+  public void setDefaultFilter(Filter defaultFilter) {
+    this.defaultFilter = defaultFilter;
   }
 
   public String getCurrentFilter() {
